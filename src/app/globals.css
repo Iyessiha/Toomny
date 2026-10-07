@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Toomny — jetons de thème.
+   Mobile d'abord et réseau lent d'abord : pas de police distante, pas
+   d'image décorative. Plus de 90 % du trafic viendra d'un téléphone, souvent
+   en 3G.
+   --------------------------------------------------------------------------- */
+
+@theme {
+  --color-brand-50: #eef7f3;
+  --color-brand-500: #0f8f5f;
+  --color-brand-600: #0b7a50;
+  --color-brand-700: #075f3e;
+  --color-ink: #10231c;
+  --color-muted: #5d7068;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: var(--color-ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1512;
+    --foreground: #e8f1ed;
+  }
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  min-width: 0;
+}
