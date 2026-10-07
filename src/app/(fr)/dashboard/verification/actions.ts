@@ -27,10 +27,13 @@ export async function submitVerification(formData: FormData) {
 
   const documentType = formData.get("documentType") as string;
   const documentCountry = formData.get("documentCountry") as string;
+  const declaredFirstName = (formData.get("declared_first_name") as string ?? "").trim();
+  const declaredLastName = (formData.get("declared_last_name") as string ?? "").trim();
+  const declaredDob = (formData.get("declared_dob") as string ?? "").trim();
   const front = formData.get("front") as File | null;
   const selfie = formData.get("selfie") as File | null;
 
-  if (!documentType || !documentCountry || !front || !selfie) {
+  if (!documentType || !documentCountry || !declaredFirstName || !declaredLastName || !declaredDob || !front || !selfie) {
     return { error: "Tous les champs sont obligatoires." };
   }
 
@@ -82,6 +85,9 @@ export async function submitVerification(formData: FormData) {
     document_type: documentType,
     document_country: documentCountry,
     storage_path: storagePaths,
+    declared_first_name: declaredFirstName,
+    declared_last_name: declaredLastName,
+    declared_dob: declaredDob,
     status: "pending",
   });
   if (insertErr) return { error: `Erreur enregistrement : ${insertErr.message}` };

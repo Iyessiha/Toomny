@@ -127,7 +127,10 @@ export default async function VerificationPage() {
               </div>
             </div>
 
-            <KycForm />
+            <KycForm
+              defaultFirstName={user.firstName}
+              defaultLastName={user.lastName}
+            />
           </>
         )}
 

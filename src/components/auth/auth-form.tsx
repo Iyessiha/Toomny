@@ -22,10 +22,20 @@ const COUNTRIES = [
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
 
-function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
+function Field({
+  label,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="text-sm font-medium">{label}</label>
+      <label htmlFor={htmlFor} className="text-sm font-medium">
+        {label}
+      </label>
       {children}
     </div>
   );
@@ -58,15 +68,28 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
         return;
       }
 
+      const firstName = String(form.get("first_name") ?? "").trim();
+      const lastName = String(form.get("last_name") ?? "").trim();
+      const phone = String(form.get("phone") ?? "").trim();
+      const city = String(form.get("city") ?? "").trim();
+      const countryCode = String(form.get("country_code") ?? "CI");
+
+      if (!firstName || !lastName) throw new Error("Le prénom et le nom sont obligatoires.");
+
+      const displayName = `${firstName} ${lastName}`;
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
-          // Repris à la création du profil côté serveur.
           data: {
-            display_name: String(form.get("display_name") ?? "").trim(),
-            country_code: String(form.get("country_code") ?? "CI"),
+            first_name: firstName,
+            last_name: lastName,
+            display_name: displayName,
+            phone,
+            city,
+            country_code: countryCode,
             role,
           },
         },
@@ -106,12 +129,16 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-7 shadow-[0_18px_44px_-24px_rgba(10,23,16,0.18)] sm:p-8">
+      {/* Toggle connexion / inscription */}
       <div className="flex rounded-full bg-[var(--surface)] p-1 text-sm">
         {(["signup", "login"] as Mode[]).map((m) => (
           <button
             key={m}
             type="button"
-            onClick={() => { setMode(m); setError(null); }}
+            onClick={() => {
+              setMode(m);
+              setError(null);
+            }}
             className={`flex-1 rounded-full px-4 py-2 font-medium transition-colors ${
               mode === m ? "bg-[var(--background)] shadow-sm" : "text-[var(--subtle)]"
             }`}
@@ -124,43 +151,113 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         {mode === "signup" && (
           <>
+            {/* Choix du rôle */}
             <fieldset>
               <legend className="text-sm font-medium">Je viens sur Toomny pour</legend>
               <div className="mt-2 grid grid-cols-2 gap-2">
-                {([["client", "Recruter"], ["provider", "Travailler"]] as const).map(([r, label]) => (
+                {(
+                  [
+                    ["client", "🤝 Recruter", "Trouver des prestataires"],
+                    ["provider", "💼 Travailler", "Proposer mes services"],
+                  ] as const
+                ).map(([r, label, sub]) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setRole(r)}
                     aria-pressed={role === r}
-                    className={`rounded-xl border px-4 py-3 text-sm font-medium transition-colors ${
+                    className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition-colors ${
                       role === r
                         ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
                         : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)]"
                     }`}
                   >
-                    {label}
+                    <span className="text-sm font-semibold">{label}</span>
+                    <span className="mt-0.5 text-xs opacity-70">{sub}</span>
                   </button>
                 ))}
               </div>
             </fieldset>
 
-            <Field label="Nom complet" htmlFor="display_name">
-              <input id="display_name" name="display_name" required autoComplete="name" className={inputClass} />
+            {/* Identité */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Prénom" htmlFor="first_name">
+                <input
+                  id="first_name"
+                  name="first_name"
+                  required
+                  autoComplete="given-name"
+                  placeholder="Kofi"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Nom" htmlFor="last_name">
+                <input
+                  id="last_name"
+                  name="last_name"
+                  required
+                  autoComplete="family-name"
+                  placeholder="Asante"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
+
+            {/* Téléphone */}
+            <Field label="Numéro de téléphone" htmlFor="phone">
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="+225 07 00 00 00 00"
+                className={inputClass}
+              />
+              <p className="mt-1.5 text-xs text-[var(--subtle)]">
+                Utilisé pour les versements mobile money
+                {role === "provider" ? " (requis pour être payé)" : " (optionnel)"}.
+              </p>
             </Field>
 
-            <Field label="Pays" htmlFor="country_code">
-              <select id="country_code" name="country_code" defaultValue="CI" className={inputClass}>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>{c.name}</option>
-                ))}
-              </select>
-            </Field>
+            {/* Pays + Ville */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Pays" htmlFor="country_code">
+                <select
+                  id="country_code"
+                  name="country_code"
+                  defaultValue="CI"
+                  className={inputClass}
+                >
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Ville" htmlFor="city">
+                <input
+                  id="city"
+                  name="city"
+                  autoComplete="address-level2"
+                  placeholder="Abidjan"
+                  className={inputClass}
+                />
+              </Field>
+            </div>
           </>
         )}
 
+        {/* Email & mot de passe */}
         <Field label="Adresse e-mail" htmlFor="email">
-          <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={inputClass}
+          />
         </Field>
 
         <Field label="Mot de passe" htmlFor="password">
@@ -189,12 +286,19 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
           disabled={pending}
           className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
         >
-          {pending ? "Un instant…" : mode === "signup" ? "Créer mon compte" : "Se connecter"}
+          {pending
+            ? "Un instant…"
+            : mode === "signup"
+              ? "Créer mon compte"
+              : "Se connecter"}
         </button>
 
         <p className="text-center text-xs leading-relaxed text-[var(--subtle)]">
-          En créant un compte, vous acceptez nos conditions d&apos;utilisation et notre politique
-          de confidentialité.
+          En créant un compte, vous acceptez nos{" "}
+          <a href="/cgu" className="underline underline-offset-2">
+            conditions d&apos;utilisation
+          </a>{" "}
+          et notre politique de confidentialité.
         </p>
       </form>
     </div>

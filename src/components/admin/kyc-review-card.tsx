@@ -17,6 +17,9 @@ type VerifRow = {
   document_country: string;
   storage_path: string;
   rejection_reason: string | null;
+  declared_first_name: string | null;
+  declared_last_name: string | null;
+  declared_dob: string | null;
   created_at: string;
   profile: {
     id: string;
@@ -96,19 +99,36 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
         </span>
       </div>
 
-      <div className="border-t border-[var(--border)] px-5 py-3 text-sm">
+      <div className="border-t border-[var(--border)] px-5 py-3 text-sm space-y-1.5">
+        {/* Informations déclarées — à comparer avec les documents */}
+        {(verif.declared_first_name || verif.declared_last_name) && (
+          <p>
+            <span className="text-[var(--subtle)]">Identité déclarée : </span>
+            <strong>{[verif.declared_first_name, verif.declared_last_name].filter(Boolean).join(" ")}</strong>
+          </p>
+        )}
+        {verif.declared_dob && (
+          <p>
+            <span className="text-[var(--subtle)]">Date de naissance : </span>
+            <strong>
+              {new Date(verif.declared_dob).toLocaleDateString("fr-FR", {
+                day: "numeric", month: "long", year: "numeric",
+              })}
+            </strong>
+          </p>
+        )}
         <p>
           <span className="text-[var(--subtle)]">Document : </span>
           <strong>{docLabel}</strong> ({verif.document_country})
         </p>
-        <p className="mt-1">
+        <p>
           <span className="text-[var(--subtle)]">Soumis le : </span>
           {new Date(verif.created_at).toLocaleDateString("fr-FR", {
             day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
           })}
         </p>
         {verif.rejection_reason && (
-          <p className="mt-1 text-red-600">
+          <p className="text-red-600">
             <span className="font-medium">Motif de rejet : </span>{verif.rejection_reason}
           </p>
         )}

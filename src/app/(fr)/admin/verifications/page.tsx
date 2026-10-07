@@ -27,7 +27,8 @@ export default async function AdminVerificationsPage({
     .from("verifications")
     .select(`
       id, status, document_type, document_country, storage_path,
-      rejection_reason, created_at,
+      rejection_reason, declared_first_name, declared_last_name, declared_dob,
+      created_at,
       profile:profiles!profile_id (
         id, display_name, email, country_code, role
       )
@@ -112,6 +113,9 @@ export default async function AdminVerificationsPage({
               key={v.id}
               verif={{
                 ...v,
+                declared_first_name: (v as { declared_first_name?: string | null }).declared_first_name ?? null,
+                declared_last_name: (v as { declared_last_name?: string | null }).declared_last_name ?? null,
+                declared_dob: (v as { declared_dob?: string | null }).declared_dob ?? null,
                 profile: Array.isArray(v.profile) ? v.profile[0] ?? null : v.profile,
               }}
             />
