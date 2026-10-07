@@ -3,13 +3,13 @@
 /* ---------------------------------------------------------------------------
    Toomny — charte.
 
-   Le vert de marque est relevé sur le logo : #108043 (H148, S77 %, L28 %).
-   La rampe est construite autour de cette teinte, le 500 étant la couleur
-   exacte du logo.
+   Vert de marque relevé par échantillonnage du logo : #108043
+   (H148, S77 %, L28 %). La rampe est construite autour, le 500 étant la
+   couleur exacte du logo.
 
-   Mobile d'abord et réseau lent d'abord : pas de police distante, pas
-   d'image décorative. Plus de 90 % du trafic viendra d'un téléphone,
-   souvent en 3G.
+   Contrainte de fond : mobile d'abord, réseau lent d'abord. Les polices sont
+   auto-hébergées par next/font, aucune image décorative n'est chargée, et le
+   JavaScript d'animation n'arrive qu'après le contenu.
    --------------------------------------------------------------------------- */
 
 @theme {
@@ -24,14 +24,18 @@
   --color-brand-800: #084322;
   --color-brand-900: #06301a;
 
-  --color-ink: #0c1a14;
-  --color-muted: #5a6f65;
-  --color-line: #dbe5df;
+  --color-ink: #0a1710;
+  --color-muted: #55685e;
+  --color-line: #e2eae5;
+
+  --font-display: var(--font-display), system-ui, sans-serif;
+  --font-sans: var(--font-text), system-ui, sans-serif;
 }
 
 :root {
   --background: #ffffff;
-  --surface: var(--color-brand-50);
+  --surface: #f6faf8;
+  --surface-strong: var(--color-brand-50);
   --foreground: var(--color-ink);
   --subtle: var(--color-muted);
   --border: var(--color-line);
@@ -39,23 +43,27 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #07140e;
-    --surface: #0c1f17;
-    --foreground: #e6f2ec;
-    --subtle: #93a9a0;
-    --border: #1b332a;
+    --background: #060f0b;
+    --surface: #0b1912;
+    --surface-strong: #0e2118;
+    --foreground: #e9f3ee;
+    --subtle: #8ea79b;
+    --border: #182d22;
   }
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Rien ne doit pouvoir provoquer de défilement horizontal sur un écran étroit. */
@@ -63,7 +71,34 @@ body {
   min-width: 0;
 }
 
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.022em;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-brand-500);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 4px;
 }
+
+/* Révélations au défilement.
+   Sans la classe `js` (JavaScript absent, ou animations refusées par
+   l'utilisateur), rien n'est masqué : le contenu s'affiche normalement. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  html.js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
