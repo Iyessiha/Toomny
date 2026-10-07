@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "signup" | "login";
@@ -42,7 +41,6 @@ function Field({
 }
 
 export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
-  const router = useRouter();
   const [mode, setMode] = useState<Mode>("signup");
   const [role, setRole] = useState<Role>(initialRole);
   const [pending, setPending] = useState(false);
@@ -63,8 +61,10 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/dashboard");
-        router.refresh();
+        // Rechargement complet obligatoire : un router.push() côté client ne
+        // transmet pas encore les cookies de session au serveur, ce qui ferait
+        // échouer requireAuth() et renverrait vers /auth.
+        window.location.href = "/dashboard";
         return;
       }
 
