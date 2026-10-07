@@ -91,5 +91,5 @@ export interface PaymentProvider {
   refundHold(req: RefundRequest): Promise<RefundResult>;
 
   /** Vérifie la signature d'un webhook et le normalise. Lève si invalide. */
-  parseWebhook(rawBody: string, signature: string | null): WebhookEvent;
+  parseWebhook(rawBody: string, signature: string | null, timestamp?: string): WebhookEvent;
 }
