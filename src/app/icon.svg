@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <rect width="120" height="120" rx="26" fill="#108043"/>
+  <g transform="translate(60 62) scale(0.78) translate(-60 -60)" color="#ffffff">
+    <circle cx="43" cy="22" r="11.5" fill="currentColor"/>
+    <circle cx="77" cy="22" r="11.5" fill="currentColor"/>
+    <g fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="butt">
+      <path d="M74 50C62 34 32 37 29 58C26 79 47 87 54 100"/>
+      <path d="M46 50C58 34 88 37 91 58C94 79 73 87 66 100"/>
+    </g>
+  </g>
+</svg>

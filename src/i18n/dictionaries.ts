@@ -21,7 +21,7 @@ export const dictionaries = {
   fr: {
     brand: {
       name: "Toomny",
-      tagline: "Le talent africain, payé chez lui.",
+      tagline: "Travailler ensemble, grandir ensemble.",
     },
     nav: {
       browse: "Parcourir",
@@ -71,7 +71,7 @@ export const dictionaries = {
   en: {
     brand: {
       name: "Toomny",
-      tagline: "African talent, paid at home.",
+      tagline: "Work together, grow together.",
     },
     nav: {
       browse: "Browse",

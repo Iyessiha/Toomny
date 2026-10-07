@@ -1,30 +1,49 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Toomny — jetons de thème.
+   Toomny — charte.
+
+   Le vert de marque est relevé sur le logo : #108043 (H148, S77 %, L28 %).
+   La rampe est construite autour de cette teinte, le 500 étant la couleur
+   exacte du logo.
+
    Mobile d'abord et réseau lent d'abord : pas de police distante, pas
-   d'image décorative. Plus de 90 % du trafic viendra d'un téléphone, souvent
-   en 3G.
+   d'image décorative. Plus de 90 % du trafic viendra d'un téléphone,
+   souvent en 3G.
    --------------------------------------------------------------------------- */
 
 @theme {
-  --color-brand-50: #eef7f3;
-  --color-brand-500: #0f8f5f;
-  --color-brand-600: #0b7a50;
-  --color-brand-700: #075f3e;
-  --color-ink: #10231c;
-  --color-muted: #5d7068;
+  --color-brand-50: #ecf7f1;
+  --color-brand-100: #d1ede0;
+  --color-brand-200: #a3dbc1;
+  --color-brand-300: #6cc39b;
+  --color-brand-400: #33a472;
+  --color-brand-500: #108043;
+  --color-brand-600: #0d6b38;
+  --color-brand-700: #0a552d;
+  --color-brand-800: #084322;
+  --color-brand-900: #06301a;
+
+  --color-ink: #0c1a14;
+  --color-muted: #5a6f65;
+  --color-line: #dbe5df;
 }
 
 :root {
   --background: #ffffff;
+  --surface: var(--color-brand-50);
   --foreground: var(--color-ink);
+  --subtle: var(--color-muted);
+  --border: var(--color-line);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b1512;
-    --foreground: #e8f1ed;
+    --background: #07140e;
+    --surface: #0c1f17;
+    --foreground: #e6f2ec;
+    --subtle: #93a9a0;
+    --border: #1b332a;
   }
 }
 
@@ -35,10 +54,16 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+/* Rien ne doit pouvoir provoquer de défilement horizontal sur un écran étroit. */
 * {
   min-width: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
 }

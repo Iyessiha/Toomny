@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Toomny — Le talent africain, payé chez lui",
+    default: "Toomny — Travailler ensemble, grandir ensemble",
     template: "%s · Toomny",
   },
   description:
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0f8f5f",
+  themeColor: "#108043",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
