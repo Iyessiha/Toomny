@@ -23,6 +23,7 @@ export default async function DashboardPage() {
         { href: "/dashboard", label: "Vue d'ensemble", current: true },
         { href: "/orders", label: "Commandes" },
         { href: "/messages", label: "Messages" },
+        { href: "/dashboard/verification", label: "Vérification KYC" },
         ...(user.role === "admin" ? [{ href: "/admin", label: "Administration" }] : []),
       ]}
     >

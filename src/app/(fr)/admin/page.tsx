@@ -28,20 +28,31 @@ export default async function AdminPage() {
       subtitle="Vue d'ensemble de la plateforme"
       nav={[
         { href: "/admin", label: "Vue d'ensemble", current: true },
+        { href: "/admin/verifications", label: "Vérifications KYC" },
         { href: "/dashboard", label: "Mon tableau de bord" },
       ]}
     >
       {/* Ce qui demande une action humaine passe en premier. */}
       {needsAttention > 0 && (
-        <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-          <p className="font-display text-sm font-bold text-amber-900">
-            {needsAttention} dossier{needsAttention > 1 ? "s" : ""} en attente
-          </p>
-          <p className="mt-1 text-sm text-amber-800">
-            {s.openDisputes} litige{s.openDisputes > 1 ? "s" : ""} ouvert
-            {s.openDisputes > 1 ? "s" : ""} · {s.pendingVerifications} vérification
-            {s.pendingVerifications > 1 ? "s" : ""} d&apos;identité à traiter.
-          </p>
+        <div className="mb-8 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-display text-sm font-bold text-amber-900">
+              {needsAttention} dossier{needsAttention > 1 ? "s" : ""} en attente
+            </p>
+            <p className="mt-1 text-sm text-amber-800">
+              {s.openDisputes} litige{s.openDisputes > 1 ? "s" : ""} ouvert
+              {s.openDisputes > 1 ? "s" : ""} · {s.pendingVerifications} vérification
+              {s.pendingVerifications > 1 ? "s" : ""} d&apos;identité à traiter.
+            </p>
+          </div>
+          {s.pendingVerifications > 0 && (
+            <a
+              href="/admin/verifications"
+              className="shrink-0 rounded-full bg-amber-900 px-5 py-2 text-center text-sm font-semibold text-white hover:bg-amber-800"
+            >
+              Traiter les KYC
+            </a>
+          )}
         </div>
       )}
 
