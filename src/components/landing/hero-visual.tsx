@@ -1,4 +1,6 @@
 import { Logo } from "@/components/ui/logo";
+import { getLanding } from "@/content/landing";
+import type { Locale } from "@/i18n/dictionaries";
 
 /**
  * Visuel du hero : une composition de l'interface réelle du produit —
@@ -8,7 +10,8 @@ import { Logo } from "@/components/ui/logo";
  * tout écran, ça pèse zéro octet de média sur une 3G, et ça ne montre aucune
  * fonctionnalité que le produit n'aura pas.
  */
-export function HeroVisual() {
+export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
+  const t = getLanding(locale).visual;
   return (
     <div className="relative select-none pb-20" aria-hidden>
       {/* Carte principale — une commande en cours */}
@@ -18,7 +21,7 @@ export function HeroVisual() {
             <Logo size={22} />
           </span>
           <span className="rounded-full bg-[var(--color-brand-50)] px-3 py-1 text-[11px] font-semibold text-[var(--color-brand-700)]">
-            Fonds bloqués
+            {t.escrowBadge}
           </span>
         </div>
 
@@ -27,25 +30,25 @@ export function HeroVisual() {
             AK
           </div>
           <div className="min-w-0">
-            <p className="font-display text-sm font-bold">Identité visuelle complète</p>
+            <p className="font-display text-sm font-bold">{t.serviceTitle}</p>
             <p className="mt-0.5 text-xs text-[var(--subtle)]">
-              Aïcha K. · Abidjan · Livraison sous 5 jours
+              {t.serviceMeta}
             </p>
           </div>
         </div>
 
         <dl className="mt-6 space-y-2.5 border-t border-[var(--border)] pt-5 text-sm">
           <div className="flex justify-between">
-            <dt className="text-[var(--subtle)]">Montant</dt>
-            <dd className="font-semibold">150 000 FCFA</dd>
+            <dt className="text-[var(--subtle)]">{t.amount}</dt>
+            <dd className="font-semibold">{t.amountValue}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[var(--subtle)]">Commission Toomny</dt>
-            <dd className="text-[var(--subtle)]">15 000 FCFA</dd>
+            <dt className="text-[var(--subtle)]">{t.commission}</dt>
+            <dd className="text-[var(--subtle)]">{t.commissionValue}</dd>
           </div>
           <div className="flex justify-between border-t border-[var(--border)] pt-2.5">
-            <dt className="font-semibold">Net prestataire</dt>
-            <dd className="font-display font-bold text-[var(--color-brand-600)]">135 000 FCFA</dd>
+            <dt className="font-semibold">{t.net}</dt>
+            <dd className="font-display font-bold text-[var(--color-brand-600)]">{t.netValue}</dd>
           </div>
         </dl>
 
@@ -53,7 +56,7 @@ export function HeroVisual() {
           <div className="h-full w-2/3 rounded-full bg-[var(--color-brand-500)]" />
         </div>
         <p className="mt-2 text-[11px] text-[var(--subtle)]">
-          Étape 2 sur 3 — en attente de livraison
+          {t.step}
         </p>
       </div>
 
@@ -66,8 +69,8 @@ export function HeroVisual() {
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="font-display text-sm font-bold">Versement effectué</p>
-            <p className="text-xs text-[var(--subtle)]">135 000 FCFA sur Wave</p>
+            <p className="font-display text-sm font-bold">{t.payoutTitle}</p>
+            <p className="text-xs text-[var(--subtle)]">{t.payoutMeta}</p>
           </div>
         </div>
       </div>
@@ -77,7 +80,7 @@ export function HeroVisual() {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[var(--color-brand-500)]" strokeLinecap="round" strokeLinejoin="round">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
         </svg>
-        <span className="text-xs font-semibold">Identité vérifiée</span>
+        <span className="text-xs font-semibold">{t.verified}</span>
       </div>
     </div>
   );

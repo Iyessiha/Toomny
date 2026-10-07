@@ -1,0 +1,306 @@
+import type { Locale } from "@/i18n/dictionaries";
+
+/**
+ * Tout le contenu rédactionnel de la landing, dans les deux langues.
+ *
+ * Il est sorti des composants pour que l'ouverture du marché anglophone —
+ * phase 2 du plan — ne demande pas de toucher au code, et pour que les deux
+ * versions soient rendues côté serveur : un contenu traduit uniquement côté
+ * client n'est pas indexé.
+ */
+
+const fr = {
+    nav: {
+      links: [
+        { href: "#categories", label: "Catégories" },
+        { href: "#fonctionnement", label: "Comment ça marche" },
+        { href: "#tarifs", label: "Tarifs" },
+        { href: "#securite", label: "Sécurité" },
+      ],
+      login: "Se connecter",
+      signup: "Créer un compte",
+      menu: "Menu",
+      home: "Toomny — accueil",
+    },
+    hero: {
+      audiences: {
+        client: {
+          label: "Je cherche un prestataire",
+          title: ["Recrutez les meilleurs", "talents d'Afrique de l'Ouest"],
+          lead: "Payez en FCFA par mobile money. Votre argent reste bloqué jusqu'à la livraison. Des prestataires vérifiés, dans votre langue et votre fuseau horaire.",
+          cta: "Trouver un prestataire",
+          href: "/services",
+          points: ["0 % de frais côté client", "Fonds bloqués jusqu'à validation", "Litige arbitré en français"],
+        },
+        provider: {
+          label: "Je propose mes services",
+          title: ["Vendez vos services,", "soyez payé chez vous"],
+          lead: "Vous gardez 90 % de ce que vous facturez, versé sous 24 h sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
+          cta: "Proposer mes services",
+          href: "/auth?role=provider",
+          points: ["10 % de commission, c'est tout", "Versé sous 24 h en mobile money", "Candidature gratuite"],
+        },
+      },
+      secondaryCta: "Comment ça marche",
+      railsLabel: "Paiements et versements par",
+    },
+    visual: {
+      escrowBadge: "Fonds bloqués",
+      serviceTitle: "Identité visuelle complète",
+      serviceMeta: "Aïcha K. · Abidjan · Livraison sous 5 jours",
+      amount: "Montant",
+      commission: "Commission Toomny",
+      net: "Net prestataire",
+      step: "Étape 2 sur 3 — en attente de livraison",
+      payoutTitle: "Versement effectué",
+      payoutMeta: "135 000 FCFA sur Wave",
+      verified: "Identité vérifiée",
+      amountValue: "150 000 FCFA",
+      commissionValue: "15 000 FCFA",
+      netValue: "135 000 FCFA",
+    },
+    how: {
+      eyebrow: "Fonctionnement",
+      title: "Trois étapes, et personne ne se fait avoir",
+      tabs: { client: "Je recrute", provider: "Je travaille" },
+      client: [
+        { title: "Choisissez une prestation", body: "Parcourez le catalogue : chaque prestation affiche son prix et son délai. Pas de cahier des charges à rédiger, pas d'appel d'offres à gérer." },
+        { title: "Payez, l'argent est bloqué", body: "Vous réglez en FCFA par mobile money. Les fonds sont conservés par notre partenaire agréé : le prestataire sait qu'il sera payé, vous gardez la main." },
+        { title: "Validez la livraison", body: "Le travail livré vous convient, vous validez et les fonds partent. Un problème ? Vous ouvrez un litige, arbitré en français, sans délai interminable." },
+      ],
+      provider: [
+        { title: "Publiez vos prestations", body: "Vous décrivez ce que vous savez faire, à quel prix et en combien de temps. La publication et les candidatures sont gratuites." },
+        { title: "Travaillez l'esprit tranquille", body: "Vous ne commencez que lorsque l'argent du client est déjà bloqué. Fini les relances et les impayés sur un travail déjà livré." },
+        { title: "Recevez sous 24 h", body: "Dès validation, vous êtes payé sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer, sans frais de change." },
+      ],
+    },
+    pricing: {
+      eyebrow: "Tarifs",
+      title: "Ce que les plateformes mondiales vous prennent vraiment",
+      lead: "Entre la commission, les frais côté client et le coût du rapatriement, un prestataire africain perd couramment un quart à un tiers de ce qu'il facture. Voici la comparaison, chiffre par chiffre.",
+      rows: [
+        { label: "Commission prestataire", fiverr: "20 % fixe", upwork: "0 à 15 %, ~10 % en pratique", toomny: "10 %" },
+        { label: "Frais côté client", fiverr: "~5,5 % + 3,50 $ sous 200 $", upwork: "3 à 5 %", toomny: "0 %" },
+        { label: "Coût pour postuler", fiverr: "—", upwork: "Connects payants", toomny: "Gratuit" },
+        { label: "Rapatriement de l'argent", fiverr: "Payoneer : 1 % + retrait + change", upwork: "Payoneer ou virement + change", toomny: "Mobile money, versement direct" },
+        { label: "Délai pour être payé", fiverr: "Plusieurs jours", upwork: "Plusieurs jours", toomny: "Sous 24 h" },
+      ],
+      sourcesPrefix: "Grilles relevées en octobre 2026 sur les barèmes publics de ",
+      sourcesMid: " et sur les ",
+      sourcesSuffix: ". Les conditions de ces plateformes peuvent changer.",
+      sourceA: "Fiverr et Upwork",
+      sourceB: "frais Payoneer",
+    },
+    categories: {
+      eyebrow: "Catégories",
+      title: "Les métiers dont les entreprises d'ici ont besoin",
+      lead: "Nous ouvrons progressivement, métier par métier, pour que chaque catégorie soit réellement fournie le jour où vous la cherchez.",
+      explore: "Explorer",
+      items: [
+        { name: "Design graphique", items: "Logo, flyer, charte, packaging", slug: "design-graphique" },
+        { name: "Développement web", items: "Site vitrine, e-commerce, application", slug: "developpement-web" },
+        { name: "Community management", items: "Publications, modération, calendrier", slug: "community-management" },
+        { name: "Montage vidéo", items: "Réels, publicités, sous-titrage", slug: "montage-video" },
+        { name: "Rédaction & traduction", items: "Articles, fiches produit, français-anglais", slug: "redaction-traduction" },
+        { name: "Marketing digital", items: "Publicités Meta et TikTok, référencement", slug: "marketing-digital" },
+        { name: "Comptabilité & admin", items: "Saisie, facturation, assistance", slug: "comptabilite-admin" },
+        { name: "Photographie", items: "Produit, événement, portrait", slug: "photographie" },
+      ],
+    },
+    security: {
+      eyebrow: "Sécurité",
+      title: "Votre argent est bloqué, pas confié",
+      lead: "La confiance ne se décrète pas sur une page d'accueil. Elle vient du fait que ni le client ni le prestataire n'a besoin de faire confiance à l'autre.",
+      flowTitle: "Le parcours d'un paiement",
+      flow: [
+        "Le client paie en mobile money",
+        "Les fonds sont bloqués chez le partenaire agréé",
+        "Le prestataire livre",
+        "Validation, puis versement sous 24 h",
+      ],
+      guarantees: [
+        { title: "Les fonds ne transitent pas par nous", body: "L'argent du client est conservé par un établissement agréé pour détenir des fonds. Toomny déclenche la libération, mais ne touche jamais au dépôt." },
+        { title: "Identité vérifiée des deux côtés", body: "Pièce d'identité, numéro mobile money et références contrôlés. Notre vérification est pensée pour les pièces locales, pas pour les recaler." },
+        { title: "Litige arbitré rapidement", body: "En cas de désaccord, un humain tranche à partir des échanges et des livrables conservés sur la plateforme. En français, sans attendre des semaines." },
+        { title: "Validation automatique sous 72 h", body: "Si le client ne valide pas une livraison conforme, le paiement part quand même. Un client inactif ne bloque pas le revenu d'un prestataire." },
+      ],
+    },
+    faq: {
+      title: "Questions fréquentes",
+      items: [
+        { q: "Faut-il créer une société américaine pour être payé ?", a: "Non. C'est précisément ce que Toomny évite. Vous êtes payé en tant que personne, sur votre compte mobile money, dans votre pays. Aucune LLC, aucun EIN, aucun compte Payoneer." },
+        { q: "Quels moyens de paiement acceptez-vous ?", a: "Wave, Orange Money, MTN MoMo et Moov Money, en FCFA. Nous ouvrons d'autres canaux au fur et à mesure de notre extension en Afrique de l'Ouest." },
+        { q: "Qui détient l'argent pendant la mission ?", a: "Un établissement agréé pour la détention de fonds, partenaire de Toomny. Nous n'avons jamais les fonds sur nos propres comptes : nous ne faisons que déclencher leur libération une fois le travail validé." },
+        { q: "Combien ça coûte ?", a: "10 % sur le montant de la mission, prélevés côté prestataire. Rien côté client, ni à l'inscription, ni pour postuler, ni pour publier une prestation." },
+        { q: "Que se passe-t-il si le travail ne convient pas ?", a: "Vous ouvrez un litige avant de valider. Un arbitre humain tranche à partir des échanges et des livrables conservés sur la plateforme, et les fonds sont libérés ou rendus en conséquence." },
+        { q: "Dans quels pays Toomny est-il disponible ?", a: "Nous démarrons en Afrique de l'Ouest francophone, puis nous ouvrons aux marchés anglophones de la région. La plateforme est bilingue français-anglais dès maintenant." },
+      ],
+    },
+    cta: {
+      title: "Travailler ensemble, grandir ensemble",
+      lead: "Rejoignez Toomny, que vous cherchiez un prestataire de confiance ou que vous vouliez enfin être payé correctement pour votre travail.",
+      primary: "Créer mon compte",
+      secondary: "Parcourir le catalogue",
+    },
+    footer: {
+      blurb: "La marketplace de talents d'Afrique de l'Ouest. Paiement en mobile money, fonds sécurisés jusqu'à la livraison.",
+      tagline: "Travailler ensemble, grandir ensemble.",
+      columns: [
+        { title: "Plateforme", links: [["Catégories", "#categories"], ["Comment ça marche", "#fonctionnement"], ["Tarifs", "#tarifs"], ["Sécurité", "#securite"]] },
+        { title: "Prestataires", links: [["Proposer mes services", "/auth?role=provider"], ["Être payé en mobile money", "#tarifs"], ["Tableau de bord", "/dashboard"]] },
+        { title: "Entreprises", links: [["Trouver un prestataire", "/services"], ["Mes commandes", "/orders"], ["Litiges", "/disputes"]] },
+      ],
+    },
+};
+
+export type LandingContent = typeof fr;
+
+const en: LandingContent = {
+    nav: {
+      links: [
+        { href: "#categories", label: "Categories" },
+        { href: "#fonctionnement", label: "How it works" },
+        { href: "#tarifs", label: "Pricing" },
+        { href: "#securite", label: "Security" },
+      ],
+      login: "Log in",
+      signup: "Sign up",
+      menu: "Menu",
+      home: "Toomny — home",
+    },
+    hero: {
+      audiences: {
+        client: {
+          label: "I'm hiring",
+          title: ["Hire the best talent", "in West Africa"],
+          lead: "Pay in CFA francs by mobile money. Your money stays locked until delivery. Verified providers, in your language and your time zone.",
+          cta: "Find a provider",
+          href: "/services",
+          points: ["0% buyer fees", "Funds locked until you approve", "Disputes settled locally"],
+        },
+        provider: {
+          label: "I'm selling my services",
+          title: ["Sell your services,", "get paid where you live"],
+          lead: "You keep 90% of what you charge, paid within 24 hours to your Wave or Orange Money. No US company, no Payoneer.",
+          cta: "Offer my services",
+          href: "/auth?role=provider",
+          points: ["10% commission, nothing else", "Paid within 24h by mobile money", "Free to apply"],
+        },
+      },
+      secondaryCta: "How it works",
+      railsLabel: "Payments and payouts via",
+    },
+    visual: {
+      escrowBadge: "Funds locked",
+      serviceTitle: "Full brand identity",
+      serviceMeta: "Aïcha K. · Abidjan · Delivered in 5 days",
+      amount: "Amount",
+      commission: "Toomny commission",
+      net: "Provider receives",
+      step: "Step 2 of 3 — awaiting delivery",
+      payoutTitle: "Payout sent",
+      payoutMeta: "135,000 CFA to Wave",
+      verified: "Identity verified",
+      amountValue: "150,000 CFA",
+      commissionValue: "15,000 CFA",
+      netValue: "135,000 CFA",
+    },
+    how: {
+      eyebrow: "How it works",
+      title: "Three steps, and nobody gets burned",
+      tabs: { client: "I'm hiring", provider: "I'm working" },
+      client: [
+        { title: "Pick a service", body: "Browse the catalogue: every service shows its price and its delivery time. No brief to write, no job post to manage." },
+        { title: "Pay, and the money is locked", body: "You pay in CFA francs by mobile money. The funds are held by our licensed partner: the provider knows they will be paid, and you stay in control." },
+        { title: "Approve the delivery", body: "Happy with the work? Approve it and the funds are released. A problem? Open a dispute, settled by a human, without endless delays." },
+      ],
+      provider: [
+        { title: "List your services", body: "Describe what you do, at what price and in how long. Listing a service and applying are both free." },
+        { title: "Work with peace of mind", body: "You only start once the client's money is already locked. No more chasing payment for work you've already delivered." },
+        { title: "Get paid within 24 hours", body: "Once approved, you're paid to your Wave or Orange Money. No US company, no Payoneer, no currency conversion fees." },
+      ],
+    },
+    pricing: {
+      eyebrow: "Pricing",
+      title: "What global platforms actually take from you",
+      lead: "Between commission, buyer fees and the cost of getting the money home, an African provider routinely loses a quarter to a third of what they charge. Here is the comparison, figure by figure.",
+      rows: [
+        { label: "Provider commission", fiverr: "20% flat", upwork: "0–15%, ~10% in practice", toomny: "10%" },
+        { label: "Buyer fees", fiverr: "~5.5% + $3.50 under $200", upwork: "3–5%", toomny: "0%" },
+        { label: "Cost to apply", fiverr: "—", upwork: "Paid Connects", toomny: "Free" },
+        { label: "Getting the money home", fiverr: "Payoneer: 1% + withdrawal + FX", upwork: "Payoneer or wire + FX", toomny: "Mobile money, paid direct" },
+        { label: "Time to get paid", fiverr: "Several days", upwork: "Several days", toomny: "Within 24 hours" },
+      ],
+      sourcesPrefix: "Rates recorded in October 2026 from the public schedules of ",
+      sourcesMid: " and from ",
+      sourcesSuffix: ". These platforms may change their terms.",
+      sourceA: "Fiverr and Upwork",
+      sourceB: "Payoneer fees",
+    },
+    categories: {
+      eyebrow: "Categories",
+      title: "The skills businesses here actually need",
+      lead: "We open one trade at a time, so that every category is genuinely staffed the day you come looking for it.",
+      explore: "Explore",
+      items: [
+        { name: "Graphic design", items: "Logo, flyer, brand guide, packaging", slug: "design-graphique" },
+        { name: "Web development", items: "Website, e-commerce, application", slug: "developpement-web" },
+        { name: "Community management", items: "Posts, moderation, content calendar", slug: "community-management" },
+        { name: "Video editing", items: "Reels, ads, subtitling", slug: "montage-video" },
+        { name: "Writing & translation", items: "Articles, product copy, French-English", slug: "redaction-traduction" },
+        { name: "Digital marketing", items: "Meta and TikTok ads, SEO", slug: "marketing-digital" },
+        { name: "Accounting & admin", items: "Data entry, invoicing, assistance", slug: "comptabilite-admin" },
+        { name: "Photography", items: "Product, event, portrait", slug: "photographie" },
+      ],
+    },
+    security: {
+      eyebrow: "Security",
+      title: "Your money is locked, not handed over",
+      lead: "Trust isn't something a homepage can claim. It comes from neither side having to trust the other in the first place.",
+      flowTitle: "How a payment travels",
+      flow: [
+        "The client pays by mobile money",
+        "Funds are locked with the licensed partner",
+        "The provider delivers",
+        "Approval, then payout within 24 hours",
+      ],
+      guarantees: [
+        { title: "The funds never pass through us", body: "The client's money is held by an institution licensed to hold funds. Toomny triggers the release but never touches the deposit." },
+        { title: "Identity verified on both sides", body: "ID document, mobile money number and references are checked. Our verification is built for local ID documents, not to reject them." },
+        { title: "Disputes settled quickly", body: "If you disagree, a human decides based on the messages and deliverables kept on the platform. Without waiting weeks." },
+        { title: "Automatic approval after 72 hours", body: "If a client doesn't approve a delivery that meets the brief, the payment goes out anyway. An inactive client cannot hold a provider's income hostage." },
+      ],
+    },
+    faq: {
+      title: "Frequently asked questions",
+      items: [
+        { q: "Do I need a US company to get paid?", a: "No. That is exactly what Toomny removes. You are paid as an individual, to your mobile money account, in your own country. No LLC, no EIN, no Payoneer account." },
+        { q: "Which payment methods do you accept?", a: "Wave, Orange Money, MTN MoMo and Moov Money, in CFA francs. We add more channels as we expand across West Africa." },
+        { q: "Who holds the money during a job?", a: "An institution licensed to hold funds, partnered with Toomny. We never hold the money in our own accounts: we only trigger its release once the work is approved." },
+        { q: "What does it cost?", a: "10% of the job value, charged to the provider. Nothing for the client — not to sign up, not to apply, not to list a service." },
+        { q: "What if the work isn't right?", a: "You open a dispute before approving. A human arbitrator decides based on the messages and deliverables kept on the platform, and the funds are released or returned accordingly." },
+        { q: "Which countries is Toomny available in?", a: "We are starting in French-speaking West Africa, then opening to the region's English-speaking markets. The platform is bilingual French-English already." },
+      ],
+    },
+    cta: {
+      title: "Work together, grow together",
+      lead: "Join Toomny, whether you're looking for a provider you can trust or you want to finally be paid properly for your work.",
+      primary: "Create my account",
+      secondary: "Browse the catalogue",
+    },
+    footer: {
+      blurb: "The talent marketplace for West Africa. Mobile money payments, funds secured until delivery.",
+      tagline: "Work together, grow together.",
+      columns: [
+        { title: "Platform", links: [["Categories", "#categories"], ["How it works", "#fonctionnement"], ["Pricing", "#tarifs"], ["Security", "#securite"]] },
+        { title: "Providers", links: [["Offer my services", "/auth?role=provider"], ["Get paid by mobile money", "#tarifs"], ["Dashboard", "/dashboard"]] },
+        { title: "Businesses", links: [["Find a provider", "/services"], ["My orders", "/orders"], ["Disputes", "/disputes"]] },
+      ],
+    },
+};
+
+export const landing: Record<Locale, LandingContent> = { fr, en };
+
+export function getLanding(locale: Locale): LandingContent {
+  return landing[locale] ?? landing.fr;
+}

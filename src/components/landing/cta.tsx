@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
+import { getLanding } from "@/content/landing";
+import type { Locale } from "@/i18n/dictionaries";
 
-export function FinalCta() {
+export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
+  const t = getLanding(locale).cta;
   return (
     <section className="border-t border-[var(--border)]">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
@@ -22,24 +25,21 @@ export function FinalCta() {
               <Logo size={44} withWordmark={false} />
             </span>
             <h2 className="mx-auto mt-6 max-w-2xl text-3xl font-bold leading-tight text-white sm:text-5xl">
-              Travailler ensemble, grandir ensemble
+              {t.title}
             </h2>
-            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">
-              Rejoignez Toomny, que vous cherchiez un prestataire de confiance ou que vous vouliez
-              enfin être payé correctement pour votre travail.
-            </p>
+            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">{t.lead}</p>
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
                 href="/auth"
                 className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-700)] transition-transform duration-200 hover:scale-[1.03] active:scale-95"
               >
-                Créer mon compte
+                {t.primary}
               </Link>
               <Link
                 href="/services"
                 className="rounded-full border border-white/25 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
               >
-                Parcourir le catalogue
+                {t.secondary}
               </Link>
             </div>
           </div>

@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/ui/logo";
+import { getLanding } from "@/content/landing";
+import type { Locale } from "@/i18n/dictionaries";
 
-const LINKS = [
-  { href: "#categories", label: "Catégories" },
-  { href: "#fonctionnement", label: "Comment ça marche" },
-  { href: "#tarifs", label: "Tarifs" },
-  { href: "#securite", label: "Sécurité" },
-];
-
-export function Header() {
+export function Header({ locale = "fr" }: { locale?: Locale }) {
+  const t = getLanding(locale).nav;
+  const home = locale === "en" ? "/en" : "/";
+  const other = locale === "en" ? "/" : "/en";
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -31,17 +29,13 @@ export function Header() {
       }`}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <Link href="/" className="text-[var(--color-brand-500)]" aria-label="Toomny — accueil">
+        <Link href={home} className="text-[var(--color-brand-500)]" aria-label={t.home}>
           <Logo size={30} />
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm lg:flex">
-          {LINKS.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
-            >
+          {t.links.map((l) => (
+            <a key={l.href} href={l.href} className="text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]">
               {l.label}
             </a>
           ))}
@@ -49,25 +43,24 @@ export function Header() {
 
         <div className="hidden items-center gap-2 sm:flex">
           <Link
-            href="/auth"
-            className="rounded-full px-4 py-2 text-sm font-medium text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
+            href={other}
+            hrefLang={locale === "en" ? "fr" : "en"}
+            className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
           >
-            Se connecter
+            {locale === "en" ? "FR" : "EN"}
+          </Link>
+          <Link href="/auth" className="rounded-full px-4 py-2 text-sm font-medium text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]">
+            {t.login}
           </Link>
           <Link
             href="/auth"
             className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
           >
-            Créer un compte
+            {t.signup}
           </Link>
         </div>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-label="Menu"
-          className="sm:hidden"
-        >
+        <button onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={t.menu} className="sm:hidden">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {open ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 7h18M3 12h18M3 17h18" />}
           </svg>
@@ -77,21 +70,16 @@ export function Header() {
       {open && (
         <div className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-4 sm:hidden">
           <nav className="flex flex-col gap-1">
-            {LINKS.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)]"
-              >
+            {t.links.map((l) => (
+              <a key={l.href} href={l.href} onClick={() => setOpen(false)} className="rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)]">
                 {l.label}
               </a>
             ))}
-            <Link
-              href="/auth"
-              className="mt-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white"
-            >
-              Créer un compte
+            <Link href={other} className="rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)]">
+              {locale === "en" ? "Français" : "English"}
+            </Link>
+            <Link href="/auth" className="mt-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white">
+              {t.signup}
             </Link>
           </nav>
         </div>

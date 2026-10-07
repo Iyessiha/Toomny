@@ -3,38 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { HeroVisual } from "./hero-visual";
+import { getLanding } from "@/content/landing";
+import type { Locale } from "@/i18n/dictionaries";
 
-/**
- * Double audience dès le premier écran : c'est la structure retenue par les
- * marketplaces régionales qui fonctionnent (Workana en Amérique latine). Un
- * visiteur doit savoir en une seconde laquelle des deux promesses le concerne.
- */
-const AUDIENCES = {
-  client: {
-    label: "Je cherche un prestataire",
-    title: ["Recrutez les meilleurs", "talents d'Afrique de l'Ouest"],
-    lead: "Payez en FCFA par mobile money. Votre argent reste bloqué jusqu'à la livraison. Des prestataires vérifiés, dans votre langue et votre fuseau horaire.",
-    cta: "Trouver un prestataire",
-    href: "/services",
-    points: ["0 % de frais côté client", "Fonds bloqués jusqu'à validation", "Litige arbitré en français"],
-  },
-  provider: {
-    label: "Je propose mes services",
-    title: ["Vendez vos services,", "soyez payé chez vous"],
-    lead: "Vous gardez 90 % de ce que vous facturez, versé sous 24 h sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
-    cta: "Proposer mes services",
-    href: "/auth",
-    points: ["10 % de commission, c'est tout", "Versé sous 24 h en mobile money", "Candidature gratuite"],
-  },
-} as const;
-
-type Key = keyof typeof AUDIENCES;
+type Key = "client" | "provider";
 
 const RAILS = ["Wave", "Orange Money", "MTN MoMo", "Moov Money"];
 
-export function Hero() {
+export function Hero({ locale = "fr" }: { locale?: Locale }) {
+  const t = getLanding(locale).hero;
   const [key, setKey] = useState<Key>("client");
-  const a = AUDIENCES[key];
+  const a = t.audiences[key];
 
   return (
     <section className="relative overflow-hidden">
@@ -56,7 +35,7 @@ export function Hero() {
           className="inline-flex rounded-full border border-[var(--border)] bg-[var(--background)] p-1 text-sm shadow-sm"
           role="tablist"
         >
-          {(Object.keys(AUDIENCES) as Key[]).map((k) => (
+          {(["client", "provider"] as Key[]).map((k) => (
             <button
               key={k}
               role="tab"
@@ -68,7 +47,7 @@ export function Hero() {
                   : "text-[var(--subtle)] hover:text-[var(--foreground)]"
               }`}
             >
-              {AUDIENCES[k].label}
+              {t.audiences[k].label}
             </button>
           ))}
         </div>
@@ -97,7 +76,7 @@ export function Hero() {
             href="#fonctionnement"
             className="rounded-full border border-[var(--border)] px-7 py-3.5 text-sm font-semibold transition-colors hover:bg-[var(--surface)]"
           >
-            Comment ça marche
+            {t.secondaryCta}
           </a>
         </div>
 
@@ -116,7 +95,7 @@ export function Hero() {
 
         {/* Colonne droite : l'interface réelle, pas une photo d'illustration. */}
         <div className="hidden lg:block" data-reveal style={{ transitionDelay: "120ms" }}>
-          <HeroVisual />
+          <HeroVisual locale={locale} />
         </div>
       </div>
 
@@ -124,7 +103,7 @@ export function Hero() {
         {/* Preuve réelle : les canaux de paiement, pas de faux logos clients. */}
         <div data-reveal style={{ transitionDelay: "250ms" }} className="border-t border-[var(--border)] pt-6">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--subtle)]">
-            Paiements et versements par
+            {t.railsLabel}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-3">
             {RAILS.map((r) => (

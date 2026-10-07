@@ -1,58 +1,21 @@
-/**
- * Comparaison de frais. Tous les chiffres sont vérifiables et sourcés sous le
- * tableau : c'est la preuve la plus forte dont nous disposons avant d'avoir
- * des clients à citer, et la seule qui soit honnête à ce stade.
- */
+import { getLanding } from "@/content/landing";
+import type { Locale } from "@/i18n/dictionaries";
 
-const ROWS = [
-  {
-    label: "Commission prestataire",
-    fiverr: "20 % fixe",
-    upwork: "0 à 15 %, ~10 % en pratique",
-    toomny: "10 %",
-  },
-  {
-    label: "Frais côté client",
-    fiverr: "~5,5 % + 3,50 $ sous 200 $",
-    upwork: "3 à 5 %",
-    toomny: "0 %",
-  },
-  {
-    label: "Coût pour postuler",
-    fiverr: "—",
-    upwork: "Connects payants",
-    toomny: "Gratuit",
-  },
-  {
-    label: "Rapatriement de l'argent",
-    fiverr: "Payoneer : 1 % + retrait + change",
-    upwork: "Payoneer ou virement + change",
-    toomny: "Mobile money, versement direct",
-  },
-  {
-    label: "Délai pour être payé",
-    fiverr: "Plusieurs jours",
-    upwork: "Plusieurs jours",
-    toomny: "Sous 24 h",
-  },
-];
+export function Pricing({ locale = "fr" }: { locale?: Locale }) {
+  const t = getLanding(locale).pricing;
+  const ROWS = t.rows;
 
-export function Pricing() {
   return (
     <section id="tarifs" className="border-t border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div data-reveal className="max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-600)]">
-            Tarifs
+            {t.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-            Ce que les plateformes mondiales vous prennent vraiment
+            {t.title}
           </h2>
-          <p className="mt-4 text-lg leading-relaxed text-[var(--subtle)]">
-            Entre la commission, les frais côté client et le coût du rapatriement, un prestataire
-            africain perd couramment un quart à un tiers de ce qu&apos;il facture. Voici la
-            comparaison, chiffre par chiffre.
-          </p>
+          <p className="mt-4 text-lg leading-relaxed text-[var(--subtle)]">{t.lead}</p>
         </div>
 
         {/* Desktop : tableau. Mobile : cartes empilées, car un tableau à quatre
@@ -107,25 +70,15 @@ export function Pricing() {
         </div>
 
         <p data-reveal className="mt-6 text-xs leading-relaxed text-[var(--subtle)]">
-          Grilles relevées en octobre 2026 sur les barèmes publics de{" "}
-          <a
-            href="https://www.jobbers.io/?p=53038"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            Fiverr et Upwork
-          </a>{" "}
-          et sur les{" "}
-          <a
-            href="https://vaultleap.com/blog/payoneer-fees-explained-2026"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            frais Payoneer
+          {t.sourcesPrefix}
+          <a href="https://www.jobbers.io/?p=53038" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+            {t.sourceA}
           </a>
-          . Les conditions de ces plateformes peuvent changer.
+          {t.sourcesMid}
+          <a href="https://vaultleap.com/blog/payoneer-fees-explained-2026" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+            {t.sourceB}
+          </a>
+          {t.sourcesSuffix}
         </p>
       </div>
     </section>
