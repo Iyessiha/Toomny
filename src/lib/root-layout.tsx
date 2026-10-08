@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { MotionProvider } from "@/components/motion-provider";
@@ -27,7 +28,9 @@ const text = Inter({
  * lire la page avec les règles de prononciation de l'autre langue par un
  * lecteur d'écran, et brouille l'indexation.
  */
-export function RootShell({ locale, children }: { locale: Locale; children: React.ReactNode }) {
+export async function RootShell({ locale, children }: { locale: Locale; children: React.ReactNode }) {
+  // Nonce posé par le proxy pour la CSP : il autorise le script inline ci-dessous.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang={locale} className={`${display.variable} ${text.variable}`} suppressHydrationWarning>
       <body>
@@ -36,6 +39,7 @@ export function RootShell({ locale, children }: { locale: Locale; children: Reac
             tourne ET que l'utilisateur accepte les animations. Sans JS, la
             classe n'est jamais posée et tout reste visible. */}
         <script
+          nonce={nonce}
           dangerouslySetInnerHTML={{
             __html:
               "try{if(matchMedia('(prefers-reduced-motion: no-preference)').matches)document.documentElement.classList.add('js')}catch(e){}",
