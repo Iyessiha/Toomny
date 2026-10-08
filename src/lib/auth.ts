@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export type UserRole = "client" | "provider" | "both" | "admin";
 
@@ -16,6 +17,51 @@ export type CurrentUser = {
   verificationStatus: string;
 };
 
+const PROFILE_COLUMNS =
+  "id, display_name, first_name, last_name, phone, city, country_code, role, verification_status";
+
+/**
+ * Crée le profil d'un compte authentifié qui n'en a pas encore (inscription faite
+ * avant la mise en place du trigger, ou trigger non appliqué). Même règle que le
+ * trigger SQL : le rôle ne peut être que client ou prestataire, jamais admin.
+ */
+async function ensureProfile(user: {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown>;
+}) {
+  const meta = user.user_metadata ?? {};
+  const str = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : null);
+  const country = typeof meta.country_code === "string" ? meta.country_code.toUpperCase() : "";
+
+  const admin = createAdminClient();
+  const { error } = await admin.from("profiles").upsert(
+    {
+      id: user.id,
+      email: user.email ?? `${user.id}@invalid.local`,
+      display_name: str(meta.display_name, 120),
+      first_name: str(meta.first_name, 60),
+      last_name: str(meta.last_name, 60),
+      phone: str(meta.phone, 30),
+      city: str(meta.city, 80),
+      country_code: /^[A-Z]{2}$/.test(country) ? country : "CI",
+      role: meta.role === "provider" ? "provider" : "client",
+    },
+    { onConflict: "id", ignoreDuplicates: true },
+  );
+  if (error) {
+    console.error("ensureProfile:", error.message);
+    return null;
+  }
+
+  const { data } = await admin
+    .from("profiles")
+    .select(PROFILE_COLUMNS)
+    .eq("id", user.id)
+    .maybeSingle();
+  return data;
+}
+
 /** Profil de l'utilisateur connecté, ou null. Ne redirige pas. */
 export async function getCurrentUser(): Promise<CurrentUser | null> {
   const supabase = await createClient();
@@ -25,25 +71,28 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, first_name, last_name, phone, city, country_code, role, verification_status")
+    .select(PROFILE_COLUMNS)
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!data) return null;
+  if (error) console.error("getCurrentUser:", error.message);
+
+  const profile = data ?? (await ensureProfile(user));
+  if (!profile) return null;
 
   return {
-    id: data.id,
+    id: profile.id,
     email: user.email ?? null,
-    displayName: data.display_name,
-    firstName: data.first_name ?? null,
-    lastName: data.last_name ?? null,
-    phone: data.phone ?? null,
-    city: data.city ?? null,
-    countryCode: data.country_code,
-    role: data.role as UserRole,
-    verificationStatus: data.verification_status,
+    displayName: profile.display_name,
+    firstName: profile.first_name ?? null,
+    lastName: profile.last_name ?? null,
+    phone: profile.phone ?? null,
+    city: profile.city ?? null,
+    countryCode: profile.country_code,
+    role: profile.role as UserRole,
+    verificationStatus: profile.verification_status,
   };
 }
 
