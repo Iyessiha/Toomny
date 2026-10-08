@@ -118,8 +118,8 @@ function ProviderDashboard({
         </div>
 
         {/* Publier une prestation */}
-        <div
-          aria-disabled="true"
+        <Link
+          href="/dashboard/prestations"
           className="group flex flex-col justify-between rounded-2xl border border-dashed border-[var(--color-brand-300)] bg-[var(--color-brand-50)] p-5 transition-colors hover:bg-[var(--color-brand-100)]"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
@@ -129,9 +129,9 @@ function ProviderDashboard({
           </div>
           <div className="mt-4">
             <p className="text-sm font-semibold text-[var(--color-brand-800)]">Publier une prestation</p>
-            <p className="mt-0.5 text-xs text-[var(--color-brand-600)]">Bientôt disponible</p>
+            <p className="mt-0.5 text-xs text-[var(--color-brand-600)]">Ouvrir mes prestations</p>
           </div>
-        </div>
+        </Link>
 
         {/* Configurer versements */}
         <div

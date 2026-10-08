@@ -4,6 +4,7 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { getCategories, getServices, categoryName } from "@/lib/catalog";
 import { formatMoney } from "@/lib/money";
+import { categoryMeta } from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Catalogue des prestations",
@@ -31,6 +32,9 @@ export default async function ServicesPage({
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
             {active ? categoryName(active, "fr") : "Catalogue des prestations"}
           </h1>
+          {active && categoryMeta(active.slug) && (
+            <p className="mt-3 text-base text-[var(--subtle)]">{categoryMeta(active.slug)?.blurbFr}</p>
+          )}
           <p className="mt-4 text-lg leading-relaxed text-[var(--subtle)]">
             Prix affiché, délai annoncé. Vous payez en mobile money ; le paiement sera conservé
             jusqu&apos;à votre validation de la livraison.
@@ -49,7 +53,9 @@ export default async function ServicesPage({
           >
             Toutes
           </Link>
-          {categories.map((c) => (
+          {categories.map((c) => {
+            const Icon = categoryMeta(c.slug)?.icon;
+            return (
             <Link
               key={c.id}
               href={`/services?categorie=${c.slug}`}
@@ -59,9 +65,13 @@ export default async function ServicesPage({
                   : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)]"
               }`}
             >
-              {categoryName(c, "fr")}
+              <span className="inline-flex items-center gap-2">
+                {Icon && <Icon className="h-4 w-4" aria-hidden />}
+                {categoryName(c, "fr")}
+              </span>
             </Link>
-          ))}
+            );
+          })}
         </nav>
 
         {services.length > 0 ? (

@@ -2,21 +2,12 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { KYC_COUNTRIES } from "@/lib/kyc";
 
 type Mode = "signup" | "login";
 type Role = "client" | "provider";
 
-const COUNTRIES = [
-  { code: "CI", name: "Côte d'Ivoire" },
-  { code: "SN", name: "Sénégal" },
-  { code: "BF", name: "Burkina Faso" },
-  { code: "ML", name: "Mali" },
-  { code: "BJ", name: "Bénin" },
-  { code: "TG", name: "Togo" },
-  { code: "NE", name: "Niger" },
-  { code: "GW", name: "Guinée-Bissau" },
-  { code: "CM", name: "Cameroun" },
-];
+const COUNTRIES = KYC_COUNTRIES;
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
@@ -40,7 +31,19 @@ function Field({
   );
 }
 
-export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
+const SUPPORTED = new Set(KYC_COUNTRIES.map((c) => c.code));
+
+export function AuthForm({
+  initialRole = "client",
+  initialCountry,
+  initialCity,
+}: {
+  initialRole?: Role;
+  initialCountry?: string;
+  initialCity?: string;
+}) {
+  // Pays détecté seulement s'il fait partie des pays couverts ; sinon Côte d'Ivoire.
+  const defaultCountry = initialCountry && SUPPORTED.has(initialCountry as never) ? initialCountry : "CI";
   const [mode, setMode] = useState<Mode>("signup");
   const [role, setRole] = useState<Role>(initialRole);
   const [pending, setPending] = useState(false);
@@ -233,7 +236,7 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
                 <select
                   id="country_code"
                   name="country_code"
-                  defaultValue="CI"
+                  defaultValue={defaultCountry}
                   className={inputClass}
                 >
                   {COUNTRIES.map((c) => (
@@ -248,6 +251,7 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
                   id="city"
                   name="city"
                   autoComplete="address-level2"
+                  defaultValue={initialCity ?? ""}
                   placeholder="Abidjan"
                   className={inputClass}
                 />

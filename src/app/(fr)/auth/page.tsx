@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { Logo } from "@/components/ui/logo";
 import { AuthForm } from "@/components/auth/auth-form";
@@ -30,6 +31,13 @@ export default async function AuthPage({
   searchParams: Promise<{ role?: string }>;
 }) {
   const { role } = await searchParams;
+
+  // Pays et ville détectés par Vercel : pré-remplissage du formulaire, jamais une contrainte.
+  const h = await headers();
+  const detectedCountry = h.get("x-vercel-ip-country") ?? undefined;
+  const detectedCity = h.get("x-vercel-ip-city")
+    ? decodeURIComponent(h.get("x-vercel-ip-city") as string)
+    : undefined;
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
@@ -86,7 +94,11 @@ export default async function AuthPage({
           </p>
 
           <div className="mt-7">
-            <AuthForm initialRole={role === "provider" ? "provider" : "client"} />
+            <AuthForm
+              initialRole={role === "provider" ? "provider" : "client"}
+              initialCountry={detectedCountry}
+              initialCity={detectedCity}
+            />
           </div>
 
           <p className="mt-6 text-center text-sm text-[var(--subtle)]">
