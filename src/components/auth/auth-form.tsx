@@ -3,47 +3,43 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { KYC_COUNTRIES } from "@/lib/kyc";
+import { getAuthTexts, countryNames } from "@/i18n/auth";
+import type { Locale } from "@/i18n/dictionaries";
 
 type Mode = "signup" | "login";
 type Role = "client" | "provider";
 
-const COUNTRIES = KYC_COUNTRIES;
-
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
 
-function Field({
-  label,
-  htmlFor,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
+const SUPPORTED = new Set(KYC_COUNTRIES.map((c) => c.code));
+
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div>
-      <label htmlFor={htmlFor} className="text-sm font-medium">
-        {label}
-      </label>
+      <label htmlFor={htmlFor} className="text-sm font-medium">{label}</label>
       {children}
     </div>
   );
 }
 
-const SUPPORTED = new Set(KYC_COUNTRIES.map((c) => c.code));
-
 export function AuthForm({
+  locale = "fr",
   initialRole = "client",
   initialCountry,
   initialCity,
 }: {
+  locale?: Locale;
   initialRole?: Role;
   initialCountry?: string;
   initialCity?: string;
 }) {
+  const t = getAuthTexts(locale);
+  const names = countryNames[locale];
+
   // Pays détecté seulement s'il fait partie des pays couverts ; sinon Côte d'Ivoire.
   const defaultCountry = initialCountry && SUPPORTED.has(initialCountry as never) ? initialCountry : "CI";
+
   const [mode, setMode] = useState<Mode>("signup");
   const [role, setRole] = useState<Role>(initialRole);
   const [pending, setPending] = useState(false);
@@ -60,8 +56,6 @@ export function AuthForm({
     try {
       if (mode === "login") {
         // Route Handler : le Set-Cookie est dans la réponse HTTP standard.
-        // Le navigateur stocke les cookies AVANT que window.location.href
-        // ne déclenche la navigation — pas de race condition possible.
         const email = String(form.get("email") ?? "").trim();
         const password = String(form.get("password") ?? "");
         const res = await fetch("/api/auth/login", {
@@ -69,13 +63,13 @@ export function AuthForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error ?? "Erreur de connexion.");
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error ?? t.errors.login);
         window.location.href = "/dashboard";
         return;
       }
 
-      // ── Inscription (signup) via client-side — email + confirmation ──
+      // Inscription côté navigateur : Supabase envoie un e-mail de confirmation.
       const firstName = String(form.get("first_name") ?? "").trim();
       const lastName = String(form.get("last_name") ?? "").trim();
       const phone = String(form.get("phone") ?? "").trim();
@@ -84,12 +78,10 @@ export function AuthForm({
       const email = String(form.get("email") ?? "").trim();
       const password = String(form.get("password") ?? "");
 
-      if (!firstName || !lastName) throw new Error("Le prénom et le nom sont obligatoires.");
+      if (!firstName || !lastName) throw new Error(t.errors.nameRequired);
 
-      const displayName = `${firstName} ${lastName}`;
       const supabase = createClient();
-
-      const { error } = await supabase.auth.signUp({
+      const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -97,23 +89,24 @@ export function AuthForm({
           data: {
             first_name: firstName,
             last_name: lastName,
-            display_name: displayName,
+            display_name: `${firstName} ${lastName}`,
             phone,
             city,
             country_code: countryCode,
             role,
+            preferred_locale: locale,
           },
         },
       });
-      if (error) throw error;
+      if (signUpError) throw signUpError;
       setSent(true);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Une erreur est survenue.";
+      const message = err instanceof Error ? err.message : t.errors.generic;
       setError(
         message.includes("already registered")
-          ? "Cette adresse est déjà utilisée. Connectez-vous."
+          ? t.errors.alreadyRegistered
           : message.includes("Invalid login")
-            ? "Adresse e-mail ou mot de passe incorrect."
+            ? t.errors.invalidCredentials
             : message,
       );
     } finally {
@@ -129,18 +122,14 @@ export function AuthForm({
             <path d="m5 13 4 4L19 7" />
           </svg>
         </div>
-        <h2 className="mt-5 font-display text-lg font-bold">Vérifiez votre boîte mail</h2>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--subtle)]">
-          Nous vous avons envoyé un lien de confirmation. Cliquez dessus pour activer votre compte
-          Toomny.
-        </p>
+        <h2 className="mt-5 font-display text-lg font-bold">{t.sent.title}</h2>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--subtle)]">{t.sent.body}</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-7 shadow-[0_18px_44px_-24px_rgba(10,23,16,0.18)] sm:p-8">
-      {/* Toggle connexion / inscription */}
       <div className="flex rounded-full bg-[var(--surface)] p-1 text-sm">
         {(["signup", "login"] as Mode[]).map((m) => (
           <button
@@ -154,7 +143,7 @@ export function AuthForm({
               mode === m ? "bg-[var(--background)] shadow-sm" : "text-[var(--subtle)]"
             }`}
           >
-            {m === "signup" ? "Créer un compte" : "Se connecter"}
+            {m === "signup" ? t.tabs.signup : t.tabs.login}
           </button>
         ))}
       </div>
@@ -162,16 +151,10 @@ export function AuthForm({
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
         {mode === "signup" && (
           <>
-            {/* Choix du rôle */}
             <fieldset>
-              <legend className="text-sm font-medium">Je viens sur Toomny pour</legend>
+              <legend className="text-sm font-medium">{t.roleLegend}</legend>
               <div className="mt-2 grid grid-cols-2 gap-2">
-                {(
-                  [
-                    ["client", "🤝 Recruter", "Trouver des prestataires"],
-                    ["provider", "💼 Travailler", "Proposer mes services"],
-                  ] as const
-                ).map(([r, label, sub]) => (
+                {(["client", "provider"] as const).map((r) => (
                   <button
                     key={r}
                     type="button"
@@ -183,96 +166,49 @@ export function AuthForm({
                         : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)]"
                     }`}
                   >
-                    <span className="text-sm font-semibold">{label}</span>
-                    <span className="mt-0.5 text-xs opacity-70">{sub}</span>
+                    <span className="text-sm font-semibold">{t.roles[r].label}</span>
+                    <span className="mt-0.5 text-xs opacity-70">{t.roles[r].sub}</span>
                   </button>
                 ))}
               </div>
             </fieldset>
 
-            {/* Identité */}
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Prénom" htmlFor="first_name">
-                <input
-                  id="first_name"
-                  name="first_name"
-                  required
-                  autoComplete="given-name"
-                  placeholder="Kofi"
-                  className={inputClass}
-                />
+              <Field label={t.fields.firstName} htmlFor="first_name">
+                <input id="first_name" name="first_name" required autoComplete="given-name" placeholder={t.placeholders.firstName} className={inputClass} />
               </Field>
-              <Field label="Nom" htmlFor="last_name">
-                <input
-                  id="last_name"
-                  name="last_name"
-                  required
-                  autoComplete="family-name"
-                  placeholder="Asante"
-                  className={inputClass}
-                />
+              <Field label={t.fields.lastName} htmlFor="last_name">
+                <input id="last_name" name="last_name" required autoComplete="family-name" placeholder={t.placeholders.lastName} className={inputClass} />
               </Field>
             </div>
 
-            {/* Téléphone */}
-            <Field label="Numéro de téléphone" htmlFor="phone">
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                placeholder="+225 07 00 00 00 00"
-                className={inputClass}
-              />
+            <Field label={t.fields.phone} htmlFor="phone">
+              <input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+225 07 00 00 00 00" className={inputClass} />
               <p className="mt-1.5 text-xs text-[var(--subtle)]">
-                Utilisé pour les versements mobile money
-                {role === "provider" ? " (requis pour être payé)" : " (optionnel)"}.
+                {role === "provider" ? t.fields.phoneHintProvider : t.fields.phoneHintClient}
               </p>
             </Field>
 
-            {/* Pays + Ville */}
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Pays" htmlFor="country_code">
-                <select
-                  id="country_code"
-                  name="country_code"
-                  defaultValue={defaultCountry}
-                  className={inputClass}
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.name}
-                    </option>
+              <Field label={t.fields.country} htmlFor="country_code">
+                <select id="country_code" name="country_code" defaultValue={defaultCountry} className={inputClass}>
+                  {KYC_COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>{names[c.code] ?? c.name}</option>
                   ))}
                 </select>
               </Field>
-              <Field label="Ville" htmlFor="city">
-                <input
-                  id="city"
-                  name="city"
-                  autoComplete="address-level2"
-                  defaultValue={initialCity ?? ""}
-                  placeholder="Abidjan"
-                  className={inputClass}
-                />
+              <Field label={t.fields.city} htmlFor="city">
+                <input id="city" name="city" autoComplete="address-level2" defaultValue={initialCity ?? ""} placeholder={t.placeholders.city} className={inputClass} />
               </Field>
             </div>
           </>
         )}
 
-        {/* Email & mot de passe */}
-        <Field label="Adresse e-mail" htmlFor="email">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className={inputClass}
-          />
+        <Field label={t.fields.email} htmlFor="email">
+          <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
         </Field>
 
-        <Field label="Mot de passe" htmlFor="password">
+        <Field label={t.fields.password} htmlFor="password">
           <input
             id="password"
             name="password"
@@ -282,9 +218,7 @@ export function AuthForm({
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             className={inputClass}
           />
-          {mode === "signup" && (
-            <p className="mt-1.5 text-xs text-[var(--subtle)]">8 caractères minimum.</p>
-          )}
+          {mode === "signup" && <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.fields.passwordHint}</p>}
         </Field>
 
         {error && (
@@ -298,19 +232,13 @@ export function AuthForm({
           disabled={pending}
           className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
         >
-          {pending
-            ? "Un instant…"
-            : mode === "signup"
-              ? "Créer mon compte"
-              : "Se connecter"}
+          {pending ? t.submit.pending : mode === "signup" ? t.submit.signup : t.submit.login}
         </button>
 
         <p className="text-center text-xs leading-relaxed text-[var(--subtle)]">
-          En créant un compte, vous acceptez nos{" "}
-          <a href="/cgu" className="underline underline-offset-2">
-            conditions d&apos;utilisation
-          </a>{" "}
-          et notre politique de confidentialité.
+          {t.terms}{" "}
+          <a href="/cgu" className="underline underline-offset-2">{t.termsLink}</a>{" "}
+          {t.termsAnd}
         </p>
       </form>
     </div>

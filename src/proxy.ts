@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { LOCALE_COOKIE, localeForCountry } from "@/i18n/locale-detection";
 
 /**
  * Rafraîchit la session Supabase à chaque requête.
@@ -10,6 +11,20 @@ import { createServerClient } from "@supabase/ssr";
  * d'auth, contrairement à `getSession()` qui se contente de lire le cookie.
  */
 export async function proxy(request: NextRequest) {
+  // Première visite sur l'accueil : langue choisie selon le pays détecté, une seule fois.
+  // Le cookie évite toute boucle de redirection et respecte un choix déjà fait.
+  if (request.nextUrl.pathname === "/" && !request.cookies.get(LOCALE_COOKIE)) {
+    const locale = localeForCountry(request.headers.get("x-vercel-ip-country"));
+    const target = locale === "en" ? "/en" : "/";
+    const redirect = NextResponse.redirect(new URL(target, request.url));
+    redirect.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+    if (locale === "en") return redirect;
+    // Français : on sert la page et on mémorise le choix.
+    const page = NextResponse.next({ request });
+    page.cookies.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+    return page;
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
