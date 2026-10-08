@@ -110,9 +110,9 @@ function ProviderDashboard({ user, data }: { user: User; data: Data }) {
           </div>
         </Link>
 
-        <div
-          aria-disabled="true"
-          className="flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 opacity-70"
+        <Link
+          href="/dashboard/versements"
+          className="flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 transition-colors hover:bg-[var(--surface)]"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface)]">
             <svg className="h-4 w-4 text-[var(--subtle)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -121,9 +121,9 @@ function ProviderDashboard({ user, data }: { user: User; data: Data }) {
           </div>
           <div className="mt-4">
             <p className="text-sm font-semibold">{t.provider.payoutsTitle}</p>
-            <p className="mt-0.5 text-xs text-[var(--subtle)]">{t.common.comingSoon} · {t.provider.payoutsHint}</p>
+            <p className="mt-0.5 text-xs text-[var(--subtle)]">{t.provider.payoutsHint}</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       <OrdersTable user={user} data={data} locale={locale} title={t.provider.ordersReceived} empty={{ title: t.provider.noOrdersTitle, body: t.provider.noOrdersBody, action: { href: "/dashboard/prestations", label: t.provider.publishTitle } }} />

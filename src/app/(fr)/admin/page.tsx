@@ -76,6 +76,9 @@ export default async function AdminPage() {
           <StatCard label={t.services} value={String(s.services)} hint={`${s.activeServices} ${t.published}`} />
           <StatCard label={t.openDisputes} value={String(s.openDisputes)} />
           <StatCard label={t.pendingVerifications} value={String(s.pendingVerifications)} />
+          <a href="/admin/services" className="block">
+            <StatCard label={t.draftServices} value={String(s.draftServices)} hint={t.draftServicesHint} />
+          </a>
         </div>
       </section>
 

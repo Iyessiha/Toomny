@@ -13,6 +13,7 @@ export type AdminStats = {
   providers: number;
   services: number;
   activeServices: number;
+  draftServices: number;
   orders: number;
   completedOrders: number;
   openDisputes: number;
@@ -29,12 +30,13 @@ export async function getAdminStats(): Promise<AdminStats> {
 
   const head = { count: "exact" as const, head: true };
 
-  const [users, providers, services, activeServices, orders, completed, disputes, verifications] =
+  const [users, providers, services, activeServices, draftServices, orders, completed, disputes, verifications] =
     await Promise.all([
       db.from("profiles").select("id", head),
       db.from("profiles").select("id", head).in("role", ["provider", "both"]),
       db.from("services").select("id", head),
       db.from("services").select("id", head).eq("status", "active"),
+      db.from("services").select("id", head).eq("status", "draft"),
       db.from("orders").select("id", head),
       db.from("orders").select("id", head).eq("status", "completed"),
       db.from("disputes").select("id", head).eq("status", "open"),
@@ -57,6 +59,7 @@ export async function getAdminStats(): Promise<AdminStats> {
     providers: providers.count ?? 0,
     services: services.count ?? 0,
     activeServices: activeServices.count ?? 0,
+    draftServices: draftServices.count ?? 0,
     orders: orders.count ?? 0,
     completedOrders: completed.count ?? 0,
     openDisputes: disputes.count ?? 0,
