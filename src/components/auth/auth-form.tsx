@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getAuthTexts, countryNames } from "@/i18n/auth";
+import { TurnstileWidget } from "@/components/auth/turnstile";
 import type { Locale } from "@/i18n/dictionaries";
 
 type Mode = "signup" | "login";
@@ -45,6 +45,7 @@ export function AuthForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,6 +55,8 @@ export function AuthForm({
     const form = new FormData(e.currentTarget);
 
     try {
+      if (Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) && !token) throw new Error(t.errors.captchaRequired);
+
       if (mode === "login") {
         // Route Handler : le Set-Cookie est dans la réponse HTTP standard.
         const email = String(form.get("email") ?? "").trim();
@@ -61,7 +64,7 @@ export function AuthForm({
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, turnstileToken: token }),
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(json.error ?? t.errors.login);
@@ -69,36 +72,28 @@ export function AuthForm({
         return;
       }
 
-      // Inscription côté navigateur : Supabase envoie un e-mail de confirmation.
+      // Inscription par la route serveur : limitation, CAPTCHA et validation côté serveur.
       const firstName = String(form.get("first_name") ?? "").trim();
       const lastName = String(form.get("last_name") ?? "").trim();
-      const phone = String(form.get("phone") ?? "").trim();
-      const city = String(form.get("city") ?? "").trim();
-      const countryCode = String(form.get("country_code") ?? "CI");
-      const email = String(form.get("email") ?? "").trim();
-      const password = String(form.get("password") ?? "");
-
       if (!firstName || !lastName) throw new Error(t.errors.nameRequired);
 
-      const supabase = createClient();
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            display_name: `${firstName} ${lastName}`,
-            phone,
-            city,
-            country_code: countryCode,
-            role,
-            preferred_locale: locale,
-          },
-        },
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: String(form.get("email") ?? "").trim(),
+          password: String(form.get("password") ?? ""),
+          first_name: firstName,
+          last_name: lastName,
+          phone: String(form.get("phone") ?? "").trim(),
+          city: String(form.get("city") ?? "").trim(),
+          country_code: String(form.get("country_code") ?? "CI"),
+          role,
+          turnstileToken: token,
+        }),
       });
-      if (signUpError) throw signUpError;
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? t.errors.generic);
       setSent(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : t.errors.generic;
@@ -220,6 +215,8 @@ export function AuthForm({
           />
           {mode === "signup" && <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.fields.passwordHint}</p>}
         </Field>
+
+        <TurnstileWidget onToken={setToken} />
 
         {error && (
           <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">

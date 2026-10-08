@@ -50,6 +50,7 @@ const fr = {
       alreadyRegistered: "Cette adresse est déjà utilisée. Connectez-vous.",
       generic: "Une erreur est survenue.",
       login: "Erreur de connexion.",
+      captchaRequired: "Confirmez que vous n'êtes pas un robot.",
     },
     sent: {
       title: "Vérifiez votre boîte mail",
@@ -101,6 +102,7 @@ const en: typeof fr = {
       alreadyRegistered: "This address is already used. Please log in.",
       generic: "Something went wrong.",
       login: "Login failed.",
+      captchaRequired: "Please confirm you are not a robot.",
     },
     sent: {
       title: "Check your inbox",
