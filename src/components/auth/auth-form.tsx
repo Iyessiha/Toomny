@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { loginAction } from "@/app/(fr)/auth/actions";
 
 type Mode = "signup" | "login";
 type Role = "client" | "provider";
@@ -57,15 +56,19 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
 
     try {
       if (mode === "login") {
-        // Le Server Action signInWithPassword côté serveur → les cookies
-        // Set-Cookie sont dans la réponse HTTP avant que le navigateur
-        // n'exécute la navigation. window.location.href force un rechargement
-        // complet qui envoie ces cookies au serveur dès la première requête.
-        const result = await loginAction(form);
-        if (result?.error) throw new Error(result.error);
-        if (result?.success) {
-          window.location.href = "/dashboard";
-        }
+        // Route Handler : le Set-Cookie est dans la réponse HTTP standard.
+        // Le navigateur stocke les cookies AVANT que window.location.href
+        // ne déclenche la navigation — pas de race condition possible.
+        const email = String(form.get("email") ?? "").trim();
+        const password = String(form.get("password") ?? "");
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error ?? "Erreur de connexion.");
+        window.location.href = "/dashboard";
         return;
       }
 
