@@ -102,3 +102,112 @@ h1, h2, h3, .font-display {
 /* Lenis */
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+/* ---------------------------------------------------------------------------
+   Animations de l'application (tableaux de bord, catalogue, inscription).
+   Uniquement si l'utilisateur n'a pas demandé moins de mouvement.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes app-enter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .app-enter {
+    animation: app-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Enfants qui apparaissent l'un après l'autre (listes, grilles de cartes). */
+  .app-stagger > * {
+    animation: app-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .app-stagger > *:nth-child(2) { animation-delay: 0.05s; }
+  .app-stagger > *:nth-child(3) { animation-delay: 0.10s; }
+  .app-stagger > *:nth-child(4) { animation-delay: 0.15s; }
+  .app-stagger > *:nth-child(5) { animation-delay: 0.20s; }
+  .app-stagger > *:nth-child(6) { animation-delay: 0.25s; }
+  .app-stagger > *:nth-child(n + 7) { animation-delay: 0.30s; }
+
+  /* Cartes qui se soulèvent légèrement au survol. */
+  .app-lift {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .app-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -18px rgba(10, 23, 16, 0.35);
+  }
+
+  /* Retour visuel sur les boutons. */
+  .app-press {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .app-press:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Moins de mouvement demandé : tout est ramené à un changement instantané. */
+@media (prefers-reduced-motion: reduce) {
+  .app-enter,
+  .app-stagger > * {
+    animation: none;
+  }
+  .app-lift,
+  .app-press {
+    transition: none;
+  }
+}
+
+/* ── Premium landing ──────────────────────────────────────────────────────── */
+
+/* Texte en dégradé vert pour les titres hero. */
+.gradient-text {
+  background: linear-gradient(145deg, var(--color-brand-500), var(--color-brand-400) 60%, var(--color-brand-300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Variables ombre premium. */
+:root {
+  --shadow-sm: 0 2px 8px -2px rgba(10,23,16,.10);
+  --shadow-md: 0 8px 24px -8px rgba(10,23,16,.14);
+  --shadow-lg: 0 16px 48px -16px rgba(10,23,16,.18);
+  --shadow-xl: 0 32px 80px -24px rgba(10,23,16,.22);
+}
+
+/* Pilules de paiement (rail pills). */
+.rail-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--subtle);
+  transition: border-color .2s;
+}
+.rail-pill:hover { border-color: var(--color-brand-300); }
+.rail-pill-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Animations flottantes hero visual. */
+@media (prefers-reduced-motion: no-preference) {
+  .float-a { animation: float-a 3.2s ease-in-out infinite; }
+  .float-b { animation: float-b 3.8s ease-in-out infinite; }
+  @keyframes float-a {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-7px); }
+  }
+  @keyframes float-b {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+  }
+}

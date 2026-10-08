@@ -10,7 +10,7 @@ export function Footer({ locale = "fr" }: { locale?: Locale }) {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <span className="inline-flex text-[var(--color-brand-500)]">
               <Logo size={28} />

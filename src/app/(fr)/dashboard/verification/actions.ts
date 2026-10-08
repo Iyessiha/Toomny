@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getKycTexts } from "@/i18n/kyc";
 import {
   DOCUMENT_TYPES,
   KYC_COUNTRIES,
@@ -31,7 +32,9 @@ export async function submitVerification(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { error: "Non connecté." };
+  const locale = (await supabase.from("profiles").select("preferred_locale").eq("id", user?.id ?? "").maybeSingle()).data?.preferred_locale === "en" ? "en" : "fr";
+  const e = getKycTexts(locale).errors;
+  if (!user) return { error: e.notConnected };
 
   const documentType = String(formData.get("documentType") ?? "");
   const documentCountry = String(formData.get("documentCountry") ?? "").toUpperCase();
@@ -42,28 +45,28 @@ export async function submitVerification(formData: FormData) {
   const selfie = formData.get("selfie");
 
   if (!firstName || !lastName || !dob || !(front instanceof File) || !(selfie instanceof File)) {
-    return { error: "Tous les champs sont obligatoires." };
+    return { error: e.required };
   }
 
   if (!DOCUMENT_TYPES.some((d) => d.value === documentType)) {
-    return { error: "Type de document inconnu." };
+    return { error: e.docType };
   }
   if (!KYC_COUNTRIES.some((c) => c.code === documentCountry)) {
-    return { error: "Pays de délivrance inconnu." };
+    return { error: e.country };
   }
   if (firstName.length > 80 || lastName.length > 80) {
-    return { error: "Nom ou prénom trop long." };
+    return { error: e.nameLength };
   }
   if (!isValidAdultDob(dob)) {
-    return { error: "Date de naissance invalide : vous devez avoir au moins 18 ans." };
+    return { error: e.dob };
   }
 
   for (const file of [front, selfie]) {
     if (file.size === 0 || file.size > KYC_MAX_BYTES) {
-      return { error: "Chaque fichier doit faire moins de 10 Mo." };
+      return { error: e.size };
     }
     if (!(file.type in KYC_MIME_EXT)) {
-      return { error: "Formats acceptés : JPEG, PNG, WebP, PDF." };
+      return { error: e.format };
     }
   }
 
@@ -76,14 +79,14 @@ export async function submitVerification(formData: FormData) {
     .maybeSingle();
 
   if (existing) {
-    return { error: "Vous avez déjà une demande de vérification en cours." };
+    return { error: e.pending };
   }
 
   // Contrôle des octets réels : un fichier renommé ou forgé est refusé.
   const frontBuf = new Uint8Array(await front.arrayBuffer());
   const selfieBuf = new Uint8Array(await selfie.arrayBuffer());
   if (!matchesMagicBytes(frontBuf, front.type) || !matchesMagicBytes(selfieBuf, selfie.type)) {
-    return { error: "Le contenu du fichier ne correspond pas à son format." };
+    return { error: e.magic };
   }
 
   const frontPath = kycStoragePath(user.id, KYC_MIME_EXT[front.type], "front");
@@ -92,14 +95,14 @@ export async function submitVerification(formData: FormData) {
   const { error: frontErr } = await supabase.storage
     .from("kyc-documents")
     .upload(frontPath, frontBuf, { contentType: front.type, upsert: false });
-  if (frontErr) return { error: "Le recto n'a pas pu être envoyé. Réessayez." };
+  if (frontErr) return { error: e.front };
 
   const { error: selfieErr } = await supabase.storage
     .from("kyc-documents")
     .upload(selfiePath, selfieBuf, { contentType: selfie.type, upsert: false });
   if (selfieErr) {
     await supabase.storage.from("kyc-documents").remove([frontPath]);
-    return { error: "Le selfie n'a pas pu être envoyé. Réessayez." };
+    return { error: e.selfie };
   }
 
   const { error: insertErr } = await supabase.from("verifications").insert({
@@ -114,7 +117,7 @@ export async function submitVerification(formData: FormData) {
   });
   if (insertErr) {
     await supabase.storage.from("kyc-documents").remove([frontPath, selfiePath]);
-    return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
+    return { error: e.save };
   }
 
   const admin = createAdminClient();
@@ -123,7 +126,7 @@ export async function submitVerification(formData: FormData) {
     .update({ verification_status: "pending", updated_at: new Date().toISOString() })
     .eq("id", user.id);
   if (profileErr) {
-    return { error: "La demande est enregistrée mais le statut n'a pas pu être mis à jour. Contactez le support." };
+    return { error: e.status };
   }
 
   revalidatePath("/dashboard/verification");

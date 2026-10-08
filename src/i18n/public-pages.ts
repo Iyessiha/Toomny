@@ -1,0 +1,84 @@
+// Textes des pages publiques et des titres de page, FR et EN.
+import type { Locale } from "./dictionaries";
+
+const fr = {
+  notFound: {
+    title: "Page introuvable",
+    body: "Cette page n'existe pas ou a été déplacée.",
+    home: "Retour à l'accueil",
+  },
+  cgu: {
+    metaTitle: "Conditions d'utilisation",
+    title: "Conditions d'utilisation",
+    // Texte provisoire : à remplacer par la version validée par un juriste.
+    body: "Les conditions d'utilisation de Toomny sont en cours de rédaction. Elles seront publiées ici avant l'ouverture des paiements.",
+    home: "Retour à l'accueil",
+  },
+  error: {
+    title: "Une erreur est survenue",
+    body: "Réessayez dans un instant. Si le problème persiste, contactez-nous.",
+    retry: "Réessayer",
+  },
+  site: {
+    title: "Toomny — Recrutez les meilleurs talents d'Afrique de l'Ouest",
+    description:
+      "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money, paiement conservé jusqu'à la livraison. 10 % de commission côté prestataire, 0 % côté client.",
+    ogTitle: "Toomny — Travailler ensemble, grandir ensemble",
+    ogDescription: "La marketplace de talents d'Afrique de l'Ouest. Paiement mobile money, conservé jusqu'à la livraison.",
+  },
+  titles: {
+    auth: "Créer un compte",
+    authDescription:
+      "Rejoignez Toomny : recrutez un prestataire d'Afrique de l'Ouest, ou vendez vos services et soyez payé en mobile money.",
+    order: "Commande · Toomny",
+    orders: "Mes commandes · Toomny",
+    dashboard: "Tableau de bord · Toomny",
+    verification: "Vérification d'identité · Toomny",
+    profile: "Mon profil public · Toomny",
+    services: "Mes prestations · Toomny",
+  },
+};
+
+const en: typeof fr = {
+  notFound: {
+    title: "Page not found",
+    body: "This page does not exist or has moved.",
+    home: "Back to home",
+  },
+  cgu: {
+    metaTitle: "Terms of use",
+    title: "Terms of use",
+    // Provisional wording: to be replaced by the version approved by a lawyer.
+    body: "Toomny's terms of use are being drafted. They will be published here before payments open.",
+    home: "Back to home",
+  },
+  error: {
+    title: "Something went wrong",
+    body: "Try again in a moment. If the problem persists, contact us.",
+    retry: "Try again",
+  },
+  site: {
+    title: "Toomny — Hire the best talent in West Africa",
+    description:
+      "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery. 10% commission, 0% for buyers.",
+    ogTitle: "Toomny — Work together, grow together",
+    ogDescription: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
+  },
+  titles: {
+    auth: "Create an account",
+    authDescription:
+      "Join Toomny: hire a vetted provider in West Africa, or sell your services and get paid by mobile money.",
+    order: "Order · Toomny",
+    orders: "My orders · Toomny",
+    dashboard: "Dashboard · Toomny",
+    verification: "Identity verification · Toomny",
+    profile: "My public profile · Toomny",
+    services: "My services · Toomny",
+  },
+};
+
+export const publicPageTexts: Record<Locale, typeof fr> = { fr, en };
+
+export function getPublicPageTexts(locale: Locale): typeof fr {
+  return publicPageTexts[locale];
+}

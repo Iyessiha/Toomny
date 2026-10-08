@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { SignOutButton } from "./sign-out";
+import { getDashboardTexts } from "@/i18n/dashboard";
+import { getAccountTexts } from "@/i18n/account";
+import type { Locale } from "@/i18n/dictionaries";
 
 export type NavItem = { href: string; label: string; current?: boolean };
 
@@ -9,14 +12,17 @@ export function DashboardShell({
   nav,
   title,
   subtitle,
+  locale = "fr",
   children,
 }: {
   user: { displayName: string | null; email: string | null; role: string };
   nav: NavItem[];
   title: string;
   subtitle?: string;
+  locale?: Locale;
   children: React.ReactNode;
 }) {
+  const t = getDashboardTexts(locale);
   const initials = (user.displayName ?? user.email ?? "?")
     .split(/[\s@.]+/)
     .filter(Boolean)
@@ -32,7 +38,10 @@ export function DashboardShell({
             <Logo size={28} />
           </Link>
           <div className="flex items-center gap-4">
-            <SignOutButton />
+            <Link href="/dashboard/compte" className="text-sm text-[var(--subtle)] hover:text-[var(--foreground)]">
+              {getAccountTexts(locale).nav}
+            </Link>
+            <SignOutButton label={t.shell.signOut} />
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-brand-100)] font-display text-xs font-bold text-[var(--color-brand-700)]"
               title={user.email ?? undefined}
@@ -67,7 +76,7 @@ export function DashboardShell({
           </nav>
         )}
 
-        <div className="mt-8">{children}</div>
+        <div className="app-enter mt-8">{children}</div>
       </div>
     </div>
   );
@@ -86,7 +95,7 @@ export function StatCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-5 ${
+      className={`app-lift rounded-2xl border p-5 ${
         accent
           ? "border-[var(--color-brand-200)] bg-[var(--color-brand-50)]"
           : "border-[var(--border)] bg-[var(--background)]"

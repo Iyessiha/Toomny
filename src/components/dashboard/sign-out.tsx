@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignOutButton({ label = "Se déconnecter" }: { label?: string }) {
+export function SignOutButton({ label }: { label: string }) {
   const [pending, setPending] = useState(false);
 
   return (
