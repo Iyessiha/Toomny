@@ -149,6 +149,7 @@ const fr = {
         { title: "Plateforme", links: [["Catégories", "#categories"], ["Comment ça marche", "#fonctionnement"], ["Tarifs", "#tarifs"], ["Sécurité", "#securite"]] },
         { title: "Prestataires", links: [["Proposer mes services", "/auth?role=provider"], ["Être payé en mobile money", "#tarifs"], ["Tableau de bord", "/dashboard"]] },
         { title: "Entreprises", links: [["Trouver un prestataire", "/services"], ["Mes commandes", "/orders"], ["Litiges", "/disputes"]] },
+        { title: "Légal", links: [["Conditions d'utilisation", "/cgu"], ["Mentions légales", "/mentions-legales"], ["Confidentialité", "/confidentialite"]] },
       ],
     },
 };
@@ -295,6 +296,7 @@ const en: LandingContent = {
         { title: "Platform", links: [["Categories", "#categories"], ["How it works", "#fonctionnement"], ["Pricing", "#tarifs"], ["Security", "#securite"]] },
         { title: "Providers", links: [["Offer my services", "/auth?role=provider"], ["Get paid by mobile money", "#tarifs"], ["Dashboard", "/dashboard"]] },
         { title: "Businesses", links: [["Find a provider", "/services"], ["My orders", "/orders"], ["Disputes", "/disputes"]] },
+        { title: "Legal", links: [["Terms of use", "/en/cgu"], ["Legal notice", "/mentions-legales"], ["Privacy", "/confidentialite"]] },
       ],
     },
 };
