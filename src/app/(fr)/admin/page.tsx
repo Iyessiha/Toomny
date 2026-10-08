@@ -30,6 +30,7 @@ export default async function AdminPage() {
         { href: "/admin", label: "Vue d'ensemble", current: true },
         { href: "/admin/verifications", label: "Vérifications KYC" },
         { href: "/admin/services", label: "Prestations" },
+        { href: "/admin/orders", label: "Commandes" },
         { href: "/dashboard", label: "Mon tableau de bord" },
       ]}
     >

@@ -66,6 +66,7 @@ export default async function AdminVerificationsPage({
         { href: "/admin", label: "Vue d'ensemble" },
         { href: "/admin/verifications", label: "Vérifications KYC", current: true },
         { href: "/admin/services", label: "Prestations" },
+        { href: "/admin/orders", label: "Commandes" },
       ]}
     >
       {/* Alerte si dossiers urgents */}

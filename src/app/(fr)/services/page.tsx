@@ -81,7 +81,7 @@ export default async function ServicesPage({
                 key={s.id}
                 className="group flex flex-col rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-brand-300)] hover:shadow-lg hover:shadow-black/[0.04]"
               >
-                <h2 className="font-display text-base font-bold leading-snug">{s.title}</h2>
+                <h2 className="font-display text-base font-bold leading-snug"><Link href={`/services/${s.id}`} className="hover:underline">{s.title}</Link></h2>
                 <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-[var(--subtle)]">
                   {s.description}
                 </p>

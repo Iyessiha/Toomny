@@ -56,6 +56,7 @@ export default async function AdminServicesPage({
         { href: "/admin", label: "Vue d'ensemble" },
         { href: "/admin/verifications", label: "Vérifications KYC" },
         { href: "/admin/services", label: "Prestations", current: true },
+        { href: "/admin/orders", label: "Commandes" },
         { href: "/dashboard", label: "Mon tableau de bord" },
       ]}
     >
