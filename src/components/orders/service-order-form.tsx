@@ -3,8 +3,11 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createOrder } from "@/app/(fr)/orders/actions";
+import { getCatalogTexts } from "@/i18n/catalog";
+import type { Locale } from "@/i18n/dictionaries";
 
-export function ServiceOrderForm({ serviceId }: { serviceId: string }) {
+export function ServiceOrderForm({ serviceId, locale = "fr" }: { serviceId: string; locale?: Locale }) {
+  const t = getCatalogTexts(locale);
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +28,7 @@ export function ServiceOrderForm({ serviceId }: { serviceId: string }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
-      <label htmlFor="requirements" className="text-sm font-medium">Votre besoin</label>
+      <label htmlFor="requirements" className="text-sm font-medium">{t.orderNeed}</label>
       <textarea
         id="requirements"
         name="requirements"
@@ -33,14 +36,14 @@ export function ServiceOrderForm({ serviceId }: { serviceId: string }) {
         minLength={10}
         maxLength={2000}
         rows={5}
-        placeholder="Objectif, contraintes, supports fournis, délai souhaité…"
+        placeholder={t.orderPlaceholder}
         className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
       />
       {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
       <button type="submit" disabled={pending} className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60">
-        {pending ? "Création…" : "Commander"}
+        {pending ? t.ordering : t.order}
       </button>
-      <p className="text-xs text-[var(--subtle)]">Aucun paiement n&apos;est prélevé à cette étape : la commande attend la confirmation du paiement.</p>
+      <p className="text-xs text-[var(--subtle)]">{t.orderNote}</p>
     </form>
   );
 }

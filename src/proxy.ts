@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { LOCALE_COOKIE, localeForCountry } from "@/i18n/locale-detection";
+import type { Locale } from "@/i18n/dictionaries";
 
 /**
  * Rafraîchit la session Supabase à chaque requête.
@@ -25,7 +26,16 @@ export async function proxy(request: NextRequest) {
     return page;
   }
 
+  // Un passage explicite sur /en ou / met à jour la langue mémorisée (lien de changement de langue).
+  const path = request.nextUrl.pathname;
+  const pathLocale: Locale | null = path === "/en" || path.startsWith("/en/") ? "en" : path === "/" ? "fr" : null;
+  const current = request.cookies.get(LOCALE_COOKIE)?.value;
+  const syncLocale = pathLocale !== null && current !== pathLocale;
+
   let response = NextResponse.next({ request });
+  if (syncLocale && pathLocale) {
+    response.cookies.set(LOCALE_COOKIE, pathLocale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
