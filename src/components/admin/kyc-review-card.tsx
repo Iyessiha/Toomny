@@ -8,7 +8,10 @@ import {
   flagForManualReview,
   getKycSignedUrls,
 } from "@/app/(fr)/admin/verifications/actions";
-import { DOCUMENT_TYPES, VERIFICATION_STATUS_FR, VERIFICATION_STATUS_TONE } from "@/lib/kyc";
+import { DOCUMENT_TYPES, VERIFICATION_STATUS_TONE } from "@/lib/kyc";
+import { getAdminTexts } from "@/i18n/admin";
+import { getKycTexts } from "@/i18n/kyc";
+import type { Locale } from "@/i18n/dictionaries";
 
 type VerifRow = {
   id: string;
@@ -30,7 +33,10 @@ type VerifRow = {
   } | null;
 };
 
-export function KycReviewCard({ verif }: { verif: VerifRow }) {
+export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; locale?: Locale }) {
+  const a = getAdminTexts(locale).kycCard;
+  const statusLabel = getKycTexts(locale).statusLabels;
+  const dateLocale = locale === "en" ? "en-GB" : "fr-FR";
   const [loading, setLoading] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
@@ -39,14 +45,16 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
   const [loadingDocs, setLoadingDocs] = useState(false);
 
   const docLabel =
-    DOCUMENT_TYPES.find((d) => d.value === verif.document_type)?.label ?? verif.document_type;
+    getKycTexts(locale).docTypes[verif.document_type] ??
+    DOCUMENT_TYPES.find((d) => d.value === verif.document_type)?.label ??
+    verif.document_type;
 
   async function handleApprove() {
     setLoading("approve");
     setMessage(null);
     const r = await approveVerification(verif.id);
     if (r.error) setMessage({ type: "err", text: r.error });
-    else setMessage({ type: "ok", text: "Dossier approuvé." });
+    else setMessage({ type: "ok", text: a.success.approved });
     setLoading(null);
   }
 
@@ -56,7 +64,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
     setMessage(null);
     const r = await rejectVerification(verif.id, rejectReason.trim());
     if (r.error) setMessage({ type: "err", text: r.error });
-    else setMessage({ type: "ok", text: "Dossier rejeté." });
+    else setMessage({ type: "ok", text: a.success.rejected });
     setLoading(null);
     setShowRejectForm(false);
   }
@@ -65,7 +73,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
     setLoading("flag");
     setMessage(null);
     await flagForManualReview(verif.id);
-    setMessage({ type: "ok", text: "Marqué pour revue manuelle." });
+    setMessage({ type: "ok", text: a.success.flagged });
     setLoading(null);
   }
 
@@ -74,7 +82,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
     setLoadingDocs(true);
     const r = await getKycSignedUrls(verif.storage_path);
     if ("error" in r) {
-      setMessage({ type: "err", text: r.error ?? "Erreur" });
+      setMessage({ type: "err", text: r.error ?? a.error });
     } else {
       setDocs(r);
     }
@@ -91,11 +99,11 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
           <p className="font-medium">{verif.profile?.display_name ?? "—"}</p>
           <p className="text-xs text-[var(--subtle)]">{verif.profile?.email}</p>
           <p className="mt-1 text-xs text-[var(--subtle)]">
-            Pays : {verif.profile?.country_code} · Rôle : {verif.profile?.role}
+            {a.country} {verif.profile?.country_code} · {a.role} {getAdminTexts(locale).roles[verif.profile?.role ?? ""] ?? verif.profile?.role}
           </p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${VERIFICATION_STATUS_TONE[verif.status]}`}>
-          {VERIFICATION_STATUS_FR[verif.status] ?? verif.status}
+          {statusLabel[verif.status] ?? verif.status}
         </span>
       </div>
 
@@ -103,13 +111,13 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
         {/* Informations déclarées — à comparer avec les documents */}
         {(verif.declared_first_name || verif.declared_last_name) && (
           <p>
-            <span className="text-[var(--subtle)]">Identité déclarée : </span>
+            <span className="text-[var(--subtle)]">{a.declaredIdentity} </span>
             <strong>{[verif.declared_first_name, verif.declared_last_name].filter(Boolean).join(" ")}</strong>
           </p>
         )}
         {verif.declared_dob && (
           <p>
-            <span className="text-[var(--subtle)]">Date de naissance : </span>
+            <span className="text-[var(--subtle)]">{a.birthDate} </span>
             <strong>
               {new Date(verif.declared_dob).toLocaleDateString("fr-FR", {
                 day: "numeric", month: "long", year: "numeric",
@@ -118,18 +126,18 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
           </p>
         )}
         <p>
-          <span className="text-[var(--subtle)]">Document : </span>
+          <span className="text-[var(--subtle)]">{a.document} </span>
           <strong>{docLabel}</strong> ({verif.document_country})
         </p>
         <p>
-          <span className="text-[var(--subtle)]">Soumis le : </span>
+          <span className="text-[var(--subtle)]">{a.submittedOn} </span>
           {new Date(verif.created_at).toLocaleDateString("fr-FR", {
             day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
           })}
         </p>
         {verif.rejection_reason && (
           <p className="text-red-600">
-            <span className="font-medium">Motif de rejet : </span>{verif.rejection_reason}
+            <span className="font-medium">{a.rejectionReason} </span>{verif.rejection_reason}
           </p>
         )}
       </div>
@@ -142,7 +150,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
           disabled={loadingDocs}
           className="text-sm font-medium text-[var(--color-brand-600)] hover:underline disabled:opacity-50"
         >
-          {loadingDocs ? "Chargement..." : docs ? "Masquer les documents" : "Voir les documents"}
+          {loadingDocs ? a.loading : docs ? a.hideDocs : a.viewDocs}
         </button>
 
         {docs && (
@@ -153,7 +161,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                 <a href={docs.frontUrl} target="_blank" rel="noopener noreferrer">
                   <img
                     src={docs.frontUrl}
-                    alt="Recto du document"
+                    alt={a.front}
                     className="w-full rounded-xl border border-[var(--border)] object-contain max-h-64"
                     onError={(e) => {
                       // PDF : afficher lien direct
@@ -161,7 +169,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                       el.style.display = "none";
                       const p = document.createElement("p");
                       p.className = "text-sm text-[var(--color-brand-600)] underline";
-                      p.textContent = "Ouvrir le fichier (PDF)";
+                      p.textContent = a.openPdf;
                       el.parentElement?.appendChild(p);
                     }}
                   />
@@ -174,7 +182,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                 <a href={docs.selfieUrl} target="_blank" rel="noopener noreferrer">
                   <img
                     src={docs.selfieUrl}
-                    alt="Selfie avec le document"
+                    alt={a.selfie}
                     className="w-full rounded-xl border border-[var(--border)] object-contain max-h-64"
                   />
                 </a>
@@ -201,14 +209,14 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                 disabled={loading === "approve"}
                 className="rounded-full bg-[var(--color-brand-500)] px-5 py-2 text-sm font-semibold text-white hover:bg-[var(--color-brand-600)] disabled:opacity-50"
               >
-                {loading === "approve" ? "En cours..." : "✓ Approuver"}
+                {loading === "approve" ? a.approving : a.approve}
               </button>
               <button
                 type="button"
                 onClick={() => setShowRejectForm(true)}
                 className="rounded-full border border-red-200 bg-red-50 px-5 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"
               >
-                ✕ Rejeter
+                {a.reject}
               </button>
               <button
                 type="button"
@@ -216,7 +224,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                 disabled={loading === "flag"}
                 className="rounded-full border border-blue-200 bg-blue-50 px-5 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-50"
               >
-                {loading === "flag" ? "..." : "⚑ Revue manuelle"}
+                {loading === "flag" ? a.flagging : a.flag}
               </button>
             </div>
           ) : (
@@ -225,7 +233,7 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Ex : Photo floue, document expiré, visage non visible sur le selfie..."
+                placeholder={a.rejectReasonPlaceholder}
                 rows={3}
                 className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
               />
@@ -236,14 +244,14 @@ export function KycReviewCard({ verif }: { verif: VerifRow }) {
                   disabled={!rejectReason.trim() || loading === "reject"}
                   className="rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
                 >
-                  {loading === "reject" ? "En cours..." : "Confirmer le rejet"}
+                  {loading === "reject" ? a.rejecting : a.confirmReject}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowRejectForm(false)}
                   className="rounded-full border border-[var(--border)] px-5 py-2 text-sm font-medium text-[var(--subtle)] hover:text-[var(--foreground)]"
                 >
-                  Annuler
+                  {a.cancel}
                 </button>
               </div>
             </div>
