@@ -8,6 +8,8 @@ import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { DEFAULT_COMMISSION_BPS, splitOrderAmount } from "@/lib/money";
 import { ORDER_RULES, UUID_RE, orderReference, type OrderAction } from "@/lib/orders";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
+import { recordCompletion, refreshProviderRating } from "@/lib/order-ledger";
 
 type Result = { error: string } | { success: true; orderId?: string };
 
@@ -133,6 +135,8 @@ export async function advanceOrder(input: {
     if (disputeErr) console.error("advanceOrder dispute:", disputeErr.message);
   }
 
+  if (rule.to === "completed") await recordCompletion(db, order.id, order.provider_id);
+
   revalidatePath(`/orders/${order.id}`);
   revalidatePath("/orders");
   return { success: true };
@@ -157,5 +161,42 @@ export async function sendMessage(input: { orderId: string; body: string }): Pro
   if (error) return { error: t.sendError };
 
   revalidatePath(`/orders/${input.orderId}`);
+  return { success: true };
+}
+
+/**
+ * Avis du client sur une commande terminée. Un seul avis par commande (contrainte
+ * unique en base). La note moyenne du prestataire est recalculée ensuite.
+ */
+export async function submitReview(input: { orderId: string; rating: number; comment: string }): Promise<Result> {
+  const user = await requireAuth();
+  const t = getMarketplaceTexts(user.preferredLocale).review.errors;
+
+  if (!UUID_RE.test(input.orderId)) return { error: t.notAllowed };
+  if (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 5) return { error: t.rating };
+  const comment = input.comment.trim();
+  if (comment.length > 1000) return { error: t.comment };
+
+  const db = createAdminClient();
+  const { data: order } = await db
+    .from("orders")
+    .select("id, status, client_id, provider_id")
+    .eq("id", input.orderId)
+    .maybeSingle();
+  if (!order || order.client_id !== user.id) return { error: t.notAllowed };
+  if (order.status !== "completed") return { error: t.wrongState };
+
+  const { error } = await db.from("reviews").insert({
+    order_id: order.id,
+    author_id: user.id,
+    target_id: order.provider_id,
+    rating: input.rating,
+    comment: comment || null,
+  });
+  if (error) return { error: error.code === "23505" ? t.already : t.save };
+
+  await refreshProviderRating(db, order.provider_id);
+  revalidatePath(`/orders/${order.id}`);
+  revalidatePath(`/prestataires/${order.provider_id}`);
   return { success: true };
 }

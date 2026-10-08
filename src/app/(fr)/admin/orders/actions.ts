@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { UUID_RE } from "@/lib/orders";
+import { recordFunding } from "@/lib/order-ledger";
 
 /**
  * Confirmer un paiement reçu chez le partenaire agréé : pending_payment -> funded.
@@ -18,7 +19,11 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
   if (!UUID_RE.test(orderId)) return;
 
   const db = createAdminClient();
-  const { data: order } = await db.from("orders").select("id, status").eq("id", orderId).maybeSingle();
+  const { data: order } = await db
+    .from("orders")
+    .select("id, status, amount_minor, currency")
+    .eq("id", orderId)
+    .maybeSingle();
   if (!order) return;
 
   try {
@@ -33,7 +38,11 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
     .eq("id", orderId)
     .eq("status", "pending_payment");
 
-  if (error) console.error("confirmPaymentReceived:", error.message);
+  if (error) {
+    console.error("confirmPaymentReceived:", error.message);
+    return;
+  }
+  await recordFunding(db, order);
   revalidatePath("/admin/orders");
   revalidatePath(`/orders/${orderId}`);
 }

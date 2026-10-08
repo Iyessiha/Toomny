@@ -7,8 +7,12 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { confirmPaymentReceived } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
+import { visitorLocale } from "@/i18n/server-locale";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
 
-export const metadata: Metadata = { title: "Commandes · Admin Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getAdminTexts(await visitorLocale()).ordersPage.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {
@@ -38,6 +42,7 @@ export default async function AdminOrdersPage() {
         { href: "/admin/verifications", label: nav.kyc },
         { href: "/admin/services", label: nav.services },
         { href: "/admin/orders", label: nav.orders, current: true },
+        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
       ]}
     >

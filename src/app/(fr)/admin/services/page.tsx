@@ -5,6 +5,12 @@ import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
+import { visitorLocale } from "@/i18n/server-locale";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getAdminTexts(await visitorLocale()).servicesPage.metaTitle };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +55,7 @@ export default async function AdminServicesPage({
         { href: "/admin/verifications", label: nav.kyc },
         { href: "/admin/services", label: nav.services, current: true },
         { href: "/admin/orders", label: nav.orders },
+        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
       ]}
     >

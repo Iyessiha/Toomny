@@ -9,6 +9,8 @@ import { formatMoney } from "@/lib/money";
 import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
 import { MessageForm } from "@/components/orders/message-form";
+import { ReviewForm } from "@/components/orders/review-form";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
 
 export const metadata: Metadata = { title: "Commande · Toomny" };
 export const dynamic = "force-dynamic";
@@ -38,6 +40,13 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   const isClient = order.client_id === user.id;
   const isProvider = order.provider_id === user.id;
+
+  // Avis : une fois par commande terminée, par le client seulement.
+  const { data: existingReview } =
+    isClient && order.status === "completed"
+      ? await supabase.from("reviews").select("id").eq("order_id", id).maybeSingle()
+      : { data: null };
+  const reviewText = getMarketplaceTexts(locale).review;
   const actions = availableActions(isClient, isProvider, order.status);
   const service = Array.isArray(order.service) ? order.service[0] : order.service;
   const amount = isProvider ? order.provider_net_minor : order.amount_minor;
@@ -91,6 +100,19 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         </div>
 
         <aside className="space-y-4">
+          {isClient && order.status === "completed" && (
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
+              <h2 className="font-display text-base font-bold">{reviewText.title}</h2>
+              <div className="mt-4">
+                {existingReview ? (
+                  <p className="text-sm text-[var(--subtle)]">{reviewText.alreadyDone}</p>
+                ) : (
+                  <ReviewForm orderId={order.id} locale={locale} />
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
             <h2 className="font-display text-base font-bold">{t.actions}</h2>
             <div className="mt-4">

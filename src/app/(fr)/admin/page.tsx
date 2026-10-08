@@ -5,9 +5,13 @@ import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/she
 import { statusTone } from "@/lib/dashboard";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
+import { visitorLocale } from "@/i18n/server-locale";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
-export const metadata: Metadata = { title: "Administration" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getAdminTexts(await visitorLocale()).overview.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
@@ -32,6 +36,7 @@ export default async function AdminPage() {
         { href: "/admin/verifications", label: nav.kyc },
         { href: "/admin/services", label: nav.services },
         { href: "/admin/orders", label: nav.orders },
+        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
       ]}
     >

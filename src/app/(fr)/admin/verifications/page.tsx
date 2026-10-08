@@ -4,8 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
 import { getAdminTexts } from "@/i18n/admin";
+import { visitorLocale } from "@/i18n/server-locale";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
 
-export const metadata: Metadata = { title: "Vérifications KYC · Admin Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getAdminTexts(await visitorLocale()).kycPage.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 type FilterStatus = "pending" | "manual_review" | "verified" | "rejected" | "all";
@@ -66,6 +70,7 @@ export default async function AdminVerificationsPage({
         { href: "/admin/verifications", label: t.nav.kyc, current: true },
         { href: "/admin/services", label: t.nav.services },
         { href: "/admin/orders", label: t.nav.orders },
+        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: t.nav.myDashboard },
       ]}
     >
