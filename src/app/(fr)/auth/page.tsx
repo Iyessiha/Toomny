@@ -6,21 +6,21 @@ import { AuthForm } from "@/components/auth/auth-form";
 export const metadata: Metadata = {
   title: "Créer un compte",
   description:
-    "Rejoignez Toomny : recrutez un prestataire vérifié, ou vendez vos services et soyez payé sous 24 h en mobile money.",
+    "Rejoignez Toomny : recrutez un prestataire d'Afrique de l'Ouest, ou vendez vos services et soyez payé en mobile money.",
 };
 
 const ARGUMENTS = [
   {
-    title: "Payé sous 24 h",
-    body: "Directement sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
+    title: "Versement mobile money",
+    body: "Sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
   },
   {
     title: "Vous gardez 90 %",
     body: "10 % de commission côté prestataire, rien côté client. Publier et postuler sont gratuits.",
   },
   {
-    title: "Fonds bloqués",
-    body: "L'argent du client est conservé par un établissement agréé jusqu'à la validation de la livraison.",
+    title: "Paiement conservé",
+    body: "Le paiement du client sera conservé par un partenaire agréé jusqu'à la validation de la livraison.",
   },
 ];
 

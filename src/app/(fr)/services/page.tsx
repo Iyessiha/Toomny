@@ -8,7 +8,7 @@ import { formatMoney } from "@/lib/money";
 export const metadata: Metadata = {
   title: "Catalogue des prestations",
   description:
-    "Trouvez un prestataire vérifié en Afrique de l'Ouest. Prix affiché, délai annoncé, fonds bloqués jusqu'à la livraison.",
+    "Trouvez un prestataire en Afrique de l'Ouest. Prix affiché, délai annoncé avant toute commande.",
 };
 
 export const revalidate = 60;
@@ -32,8 +32,8 @@ export default async function ServicesPage({
             {active ? categoryName(active, "fr") : "Catalogue des prestations"}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-[var(--subtle)]">
-            Prix affiché, délai annoncé. Vous payez en mobile money et les fonds restent bloqués
-            jusqu&apos;à ce que vous validiez la livraison.
+            Prix affiché, délai annoncé. Vous payez en mobile money ; le paiement sera conservé
+            jusqu&apos;à votre validation de la livraison.
           </p>
         </div>
 

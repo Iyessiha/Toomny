@@ -34,14 +34,14 @@ export const dictionaries = {
       messages: "Messages",
     },
     promise: {
-      provider: "Payé sous 24 h sur ton mobile money.",
-      client: "Ton argent reste bloqué jusqu'à la livraison.",
+      provider: "Payé sur ton mobile money après validation.",
+      client: "Ton paiement est conservé jusqu'à la livraison.",
       commission: "Tu gardes 90 % de ce que tu factures.",
     },
     order: {
       status: {
         pending_payment: "En attente de paiement",
-        funded: "Fonds sécurisés",
+        funded: "Paiement conservé",
         in_progress: "En cours",
         delivered: "Livré",
         completed: "Terminé",
@@ -50,7 +50,7 @@ export const dictionaries = {
         refunded: "Remboursé",
       },
       deliveryIn: "Livraison en {days} jour(s)",
-      escrowNotice: "Les fonds sont conservés par notre partenaire agréé jusqu'à votre validation.",
+      escrowNotice: "Les fonds seront conservés par un partenaire agréé jusqu'à votre validation.",
     },
     payout: {
       channel: {
@@ -84,8 +84,8 @@ export const dictionaries = {
       messages: "Messages",
     },
     promise: {
-      provider: "Paid within 24h to your mobile money.",
-      client: "Your money stays locked until delivery.",
+      provider: "Paid to your mobile money after approval.",
+      client: "Your payment is held until delivery.",
       commission: "You keep 90% of what you charge.",
     },
     order: {

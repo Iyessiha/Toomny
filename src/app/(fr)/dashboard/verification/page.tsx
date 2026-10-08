@@ -112,7 +112,7 @@ export default async function VerificationPage() {
                 {[
                   { step: "1", title: "Choisissez votre document", body: "CNI, passeport, permis ou autre pièce officielle." },
                   { step: "2", title: "Photographiez recto + selfie", body: "Photo nette en bonne lumière, toutes les informations lisibles." },
-                  { step: "3", title: "Soumettez & attendez", body: "Réponse sous 24-48 h par l'équipe Toomny." },
+                  { step: "3", title: "Soumettez & attendez", body: "Réponse par l'équipe Toomny." },
                 ].map((s) => (
                   <div key={s.step} className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]">

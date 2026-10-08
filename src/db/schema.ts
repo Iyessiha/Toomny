@@ -7,6 +7,7 @@ import {
   integer,
   bigint,
   boolean,
+  date,
   jsonb,
   numeric,
   index,
@@ -111,8 +112,11 @@ export const profiles = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     email: text("email").unique().notNull(),
     phone: text("phone"), // le numéro mobile money est l'identifiant réel ici
-    passwordHash: text("password_hash"),
+    // Les mots de passe restent chez Supabase Auth : aucun hash ici.
     displayName: text("display_name"),
+    firstName: text("first_name"),
+    lastName: text("last_name"),
+    city: text("city"),
     role: userRoleEnum("role").default("client").notNull(),
     countryCode: text("country_code").notNull(), // ISO 3166-1 alpha-2 : CI, SN, BF...
     preferredLocale: localeEnum("preferred_locale").default("fr").notNull(),
@@ -152,6 +156,9 @@ export const verifications = pgTable("verifications", {
     .references(() => profiles.id, { onDelete: "cascade" }),
   documentType: text("document_type").notNull(), // cni, passeport, permis, attestation
   documentCountry: text("document_country").notNull(),
+  declaredFirstName: text("declared_first_name"),
+  declaredLastName: text("declared_last_name"),
+  declaredDob: date("declared_dob"),
   storagePath: text("storage_path").notNull(), // bucket Supabase, jamais en base
   status: verificationStatusEnum("status").default("pending").notNull(),
   rejectionReason: text("rejection_reason"),

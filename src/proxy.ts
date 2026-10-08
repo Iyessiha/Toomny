@@ -9,7 +9,7 @@ import { createServerClient } from "@supabase/ssr";
  * qui déclenche le renouvellement et qui valide le jeton auprès du serveur
  * d'auth, contrairement à `getSession()` qui se contente de lire le cookie.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

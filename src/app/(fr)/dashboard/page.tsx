@@ -87,7 +87,7 @@ function ProviderDashboard({
         <StatCard
           label="En attente"
           value={formatMoney(data.pendingMinor, cur, "fr")}
-          hint="Fonds bloqués"
+          hint="Fonds retenus, pas encore versés"
         />
         <StatCard
           label="Prestations"
@@ -118,8 +118,8 @@ function ProviderDashboard({
         </div>
 
         {/* Publier une prestation */}
-        <Link
-          href="/dashboard/prestations"
+        <div
+          aria-disabled="true"
           className="group flex flex-col justify-between rounded-2xl border border-dashed border-[var(--color-brand-300)] bg-[var(--color-brand-50)] p-5 transition-colors hover:bg-[var(--color-brand-100)]"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
@@ -129,13 +129,13 @@ function ProviderDashboard({
           </div>
           <div className="mt-4">
             <p className="text-sm font-semibold text-[var(--color-brand-800)]">Publier une prestation</p>
-            <p className="mt-0.5 text-xs text-[var(--color-brand-600)]">Soyez visible dans le catalogue</p>
+            <p className="mt-0.5 text-xs text-[var(--color-brand-600)]">Bientôt disponible</p>
           </div>
-        </Link>
+        </div>
 
         {/* Configurer versements */}
-        <Link
-          href="/dashboard/versements"
+        <div
+          aria-disabled="true"
           className="flex flex-col justify-between rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 transition-colors hover:bg-[var(--surface)]"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--surface)]">
@@ -145,9 +145,9 @@ function ProviderDashboard({
           </div>
           <div className="mt-4">
             <p className="text-sm font-semibold">Configurer les versements</p>
-            <p className="mt-0.5 text-xs text-[var(--subtle)]">Wave · Orange Money · MTN MoMo</p>
+            <p className="mt-0.5 text-xs text-[var(--subtle)]">Bientôt disponible · Wave · Orange Money · MTN MoMo</p>
           </div>
-        </Link>
+        </div>
       </div>
 
       {/* Commandes récentes */}
@@ -236,7 +236,7 @@ function ClientDashboard({
         <div>
           <h2 className="font-display text-xl font-bold">Trouvez le bon prestataire</h2>
           <p className="mt-1 text-sm text-white/80">
-            Des centaines de talents vérifiés en Afrique de l&apos;Ouest. Paiement sécurisé, livraison garantie.
+            Des prestataires d&apos;Afrique de l&apos;Ouest, avec prix et délai affichés avant de commander.
           </p>
         </div>
         <Link
@@ -274,7 +274,7 @@ function ClientDashboard({
           <div className="mt-5">
             <EmptyState
               title="Vous n'avez pas encore commandé"
-              body="Parcourez le catalogue et trouvez le prestataire idéal. Vos fonds restent bloqués jusqu'à la livraison — vous ne payez que si vous êtes satisfait."
+              body="Parcourez le catalogue et trouvez le prestataire qu'il vous faut. Le prix et le délai sont affichés avant toute commande."
               action={{ href: "/services", label: "Parcourir le catalogue" }}
             />
           </div>

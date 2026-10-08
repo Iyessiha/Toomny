@@ -37,6 +37,8 @@ import type {
   WebhookEvent,
 } from "./types";
 
+const WEBHOOK_TOLERANCE_SECONDS = 300;
+
 const GP_BASE = process.env.GENIUSPAY_API_URL ?? "https://geniuspay.ci/api/v1/merchant";
 
 function requireEnv(name: string): string {
@@ -125,7 +127,7 @@ export class GeniusPayProvider implements PaymentProvider {
 
   /** Consultation de l'état d'un paiement. */
   async getPayment(reference: string): Promise<PaymentData> {
-    const res = await fetch(`${GP_BASE}/payments/${reference}`, { headers: headers() });
+    const res = await fetch(`${GP_BASE}/payments/${encodeURIComponent(reference)}`, { headers: headers() });
     const text = await res.text();
     if (!res.ok) throw new Error(parseError(res.status, text));
     return JSON.parse(text).data as PaymentData;
@@ -152,6 +154,13 @@ export class GeniusPayProvider implements PaymentProvider {
 
     if (!signature) throw new Error("Webhook sans signature : rejeté.");
     if (!timestamp) throw new Error("Webhook sans horodatage : rejeté.");
+
+    // Anti-rejeu : une signature valide capturée n'est acceptée que 5 minutes.
+    const sentAt = Number(timestamp);
+    const nowSec = Date.now() / 1000;
+    if (!Number.isFinite(sentAt) || Math.abs(nowSec - sentAt) > WEBHOOK_TOLERANCE_SECONDS) {
+      throw new Error("Webhook hors fenêtre temporelle : rejeté.");
+    }
 
     const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
     const a = Buffer.from(signature, "utf8");

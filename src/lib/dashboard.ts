@@ -55,7 +55,12 @@ export async function getDashboardData(user: CurrentUser): Promise<DashboardData
     const isMine = o.provider_id === user.id;
     if (isMine && o.status === "completed") earned += BigInt(o.provider_net_minor);
     if (isMine && HELD.includes(o.status)) pending += BigInt(o.provider_net_minor);
-    if (o.client_id === user.id && o.status !== "cancelled" && o.status !== "refunded") {
+    if (
+      o.client_id === user.id &&
+      o.status !== "pending_payment" &&
+      o.status !== "cancelled" &&
+      o.status !== "refunded"
+    ) {
       spent += BigInt(o.amount_minor);
     }
   }
@@ -72,7 +77,7 @@ export async function getDashboardData(user: CurrentUser): Promise<DashboardData
 
 export const ORDER_STATUS_FR: Record<string, string> = {
   pending_payment: "En attente de paiement",
-  funded: "Fonds sécurisés",
+  funded: "Paiement conservé",
   in_progress: "En cours",
   delivered: "Livré",
   completed: "Terminé",
