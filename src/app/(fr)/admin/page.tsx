@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
+import { getRecentAdminActions } from "@/lib/admin-audit";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
 import { statusTone } from "@/lib/dashboard";
 import { formatMoney } from "@/lib/money";
@@ -21,6 +23,7 @@ export default async function AdminPage() {
   const nav = getAdminTexts(locale).nav;
   const statusLabel = getDashboardTexts(locale).status;
   const s = await getAdminStats();
+  const audit = await getRecentAdminActions(createAdminClient());
 
   const needsAttention = s.openDisputes + s.pendingVerifications;
   const plural = (n: number, one: string, many: string) => (n > 1 ? many : one);
@@ -146,6 +149,45 @@ export default async function AdminPage() {
           )}
         </section>
       </div>
+
+      <section className="mt-10">
+        <h2 className="font-display text-base font-bold">{t.auditTitle}</h2>
+        <p className="mt-1 text-sm text-[var(--subtle)]">{t.auditBody}</p>
+        {audit.length === 0 ? (
+          <div className="mt-4"><EmptyState title={t.auditEmpty} body={t.auditEmptyBody} /></div>
+        ) : (
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--subtle)]">
+                <tr>
+                  <th className="px-5 py-3 font-medium">{t.colWhen}</th>
+                  <th className="px-5 py-3 font-medium">{t.colActor}</th>
+                  <th className="px-5 py-3 font-medium">{t.colAction}</th>
+                  <th className="px-5 py-3 font-medium">{t.colTarget}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {audit.map((row, i) => (
+                  <tr key={row.id} className={i < audit.length - 1 ? "border-b border-[var(--border)]" : ""}>
+                    <td className="whitespace-nowrap px-5 py-3.5 text-[var(--subtle)]">
+                      {new Date(row.created_at).toLocaleString(locale === "fr" ? "fr-FR" : "en-GB", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                        timeZone: "Africa/Abidjan",
+                      })}
+                    </td>
+                    <td className="px-5 py-3.5">{row.actor_name}</td>
+                    <td className="px-5 py-3.5">{t.auditActions[row.action] ?? row.action}</td>
+                    <td className="px-5 py-3.5 text-[var(--subtle)]">
+                      {t.targetTypes[row.target_type] ?? row.target_type} · {row.target_id.slice(0, 8)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </DashboardShell>
   );
 }

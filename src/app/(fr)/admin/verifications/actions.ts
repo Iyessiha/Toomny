@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminTexts } from "@/i18n/admin";
+import { recordAdminAction } from "@/lib/admin-audit";
 
 /**
  * Approuver une demande KYC.
@@ -36,6 +37,14 @@ export async function approveVerification(verificationId: string) {
     .update({ verification_status: "verified", updated_at: now })
     .eq("id", verif.profile_id);
   if (profErr) return { error: profErr.message };
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "kyc.approve",
+    targetType: "verification",
+    targetId: verificationId,
+    details: { profileId: verif.profile_id },
+  });
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");
@@ -73,6 +82,14 @@ export async function rejectVerification(verificationId: string, reason: string)
     .eq("id", verif.profile_id);
   if (profErr) return { error: profErr.message };
 
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "kyc.reject",
+    targetType: "verification",
+    targetId: verificationId,
+    details: { profileId: verif.profile_id, reason },
+  });
+
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");
   return { success: true };
@@ -91,6 +108,13 @@ export async function flagForManualReview(verificationId: string) {
     .update({ status: "manual_review" })
     .eq("id", verificationId);
   if (error) return { error: error.message };
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "kyc.flag",
+    targetType: "verification",
+    targetId: verificationId,
+  });
 
   revalidatePath("/admin/verifications");
   return { success: true };

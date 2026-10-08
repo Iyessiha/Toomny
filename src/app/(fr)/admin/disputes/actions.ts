@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { UUID_RE } from "@/lib/orders";
 import { recordCompletion } from "@/lib/order-ledger";
+import { recordAdminAction } from "@/lib/admin-audit";
 
 const OPEN_STATUSES = ["open", "awaiting_provider", "awaiting_client"];
 
@@ -72,6 +73,14 @@ export async function resolveDispute(formData: FormData): Promise<void> {
   }
 
   if (target === "completed") await recordCompletion(db, order.id, order.provider_id);
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "dispute.resolve",
+    targetType: "dispute",
+    targetId: dispute.id,
+    details: { decision, orderId: order.id, orderStatus: target },
+  });
 
   revalidatePath("/admin/disputes");
   revalidatePath(`/orders/${order.id}`);

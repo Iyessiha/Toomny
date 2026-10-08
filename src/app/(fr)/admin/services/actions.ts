@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { recordAdminAction } from "@/lib/admin-audit";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
@@ -13,7 +14,7 @@ type ModerationStatus = (typeof MODERATION_STATUSES)[number];
  * qui empêche un prestataire de se publier lui-même.
  */
 export async function moderateService(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   const id = String(formData.get("serviceId") ?? "");
   const status = String(formData.get("status") ?? "") as ModerationStatus;
@@ -31,6 +32,14 @@ export async function moderateService(formData: FormData): Promise<void> {
     console.error("moderateService:", error.message);
     return;
   }
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "service.moderate",
+    targetType: "service",
+    targetId: id,
+    details: { status },
+  });
 
   revalidatePath("/admin/services");
   revalidatePath("/services");
