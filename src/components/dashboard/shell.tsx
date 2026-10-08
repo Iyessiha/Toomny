@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { SignOutButton } from "./sign-out";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { getAccountTexts } from "@/i18n/account";
 import type { Locale } from "@/i18n/dictionaries";
 
 export type NavItem = { href: string; label: string; current?: boolean };
@@ -37,6 +38,9 @@ export function DashboardShell({
             <Logo size={28} />
           </Link>
           <div className="flex items-center gap-4">
+            <Link href="/dashboard/compte" className="text-sm text-[var(--subtle)] hover:text-[var(--foreground)]">
+              {getAccountTexts(locale).nav}
+            </Link>
             <SignOutButton label={t.shell.signOut} />
             <div
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-brand-100)] font-display text-xs font-bold text-[var(--color-brand-700)]"
