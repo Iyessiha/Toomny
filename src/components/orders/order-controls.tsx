@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { advanceOrder } from "@/app/(fr)/orders/actions";
 import type { OrderAction } from "@/lib/orders";
 import { ORDER_RULES } from "@/lib/orders";
+import { getDashboardTexts } from "@/i18n/dashboard";
+import type { Locale } from "@/i18n/dictionaries";
 
-export function OrderControls({ orderId, actions }: { orderId: string; actions: OrderAction[] }) {
+export function OrderControls({ orderId, actions, locale = "fr" }: { orderId: string; actions: OrderAction[]; locale?: Locale }) {
+  const t = getDashboardTexts(locale).orders;
   const router = useRouter();
   const [pending, setPending] = useState<OrderAction | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +38,7 @@ export function OrderControls({ orderId, actions }: { orderId: string; actions: 
           onChange={(e) => setReason(e.target.value)}
           rows={3}
           maxLength={2000}
-          placeholder="Si vous ouvrez un litige : décrivez le problème (20 caractères minimum)."
+          placeholder={t.disputePlaceholder}
           className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
         />
       )}
@@ -52,7 +55,7 @@ export function OrderControls({ orderId, actions }: { orderId: string; actions: 
                 : "bg-[var(--color-brand-500)] text-white"
             }`}
           >
-            {pending === a ? "En cours…" : ORDER_RULES[a].label}
+            {pending === a ? t.inProgress : t.actionLabels[a]}
           </button>
         ))}
       </div>

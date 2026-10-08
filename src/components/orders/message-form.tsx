@@ -3,8 +3,11 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { sendMessage } from "@/app/(fr)/orders/actions";
+import { getDashboardTexts } from "@/i18n/dashboard";
+import type { Locale } from "@/i18n/dictionaries";
 
-export function MessageForm({ orderId }: { orderId: string }) {
+export function MessageForm({ orderId, locale = "fr" }: { orderId: string; locale?: Locale }) {
+  const t = getDashboardTexts(locale).orders;
   const router = useRouter();
   const ref = useRef<HTMLTextAreaElement>(null);
   const [pending, setPending] = useState(false);
@@ -32,12 +35,12 @@ export function MessageForm({ orderId }: { orderId: string }) {
         required
         rows={3}
         maxLength={2000}
-        placeholder="Écrivez à l'autre partie…"
+        placeholder={t.messagePlaceholder}
         className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
       />
       {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
       <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
-        {pending ? "Envoi…" : "Envoyer"}
+        {pending ? t.sending : t.send}
       </button>
     </form>
   );

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Locale } from "@/i18n/dictionaries";
 
 export type UserRole = "client" | "provider" | "both" | "admin";
 
@@ -15,10 +16,11 @@ export type CurrentUser = {
   countryCode: string | null;
   role: UserRole;
   verificationStatus: string;
+  preferredLocale: Locale;
 };
 
 const PROFILE_COLUMNS =
-  "id, display_name, first_name, last_name, phone, city, country_code, role, verification_status";
+  "id, display_name, first_name, last_name, phone, city, country_code, role, verification_status, preferred_locale";
 
 /**
  * Crée le profil d'un compte authentifié qui n'en a pas encore (inscription faite
@@ -93,6 +95,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     countryCode: profile.country_code,
     role: profile.role as UserRole,
     verificationStatus: profile.verification_status,
+    preferredLocale: profile.preferred_locale === "en" ? "en" : "fr",
   };
 }
 

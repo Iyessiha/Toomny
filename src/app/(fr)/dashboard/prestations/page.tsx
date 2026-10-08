@@ -6,20 +6,17 @@ import { getCategories } from "@/lib/catalog";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { formatMoney } from "@/lib/money";
 import { ServiceForm } from "@/components/dashboard/service-form";
+import { getDashboardTexts } from "@/i18n/dashboard";
 
 export const metadata: Metadata = { title: "Mes prestations · Toomny" };
 export const dynamic = "force-dynamic";
 
-const STATUS_FR: Record<string, string> = {
-  draft: "Brouillon",
-  active: "Publiée",
-  paused: "En pause",
-  removed: "Retirée",
-};
-
 export default async function PrestationsPage() {
   const user = await requireAuth();
   if (!isProvider(user.role)) redirect("/dashboard");
+  const locale = user.preferredLocale;
+  const t = getDashboardTexts(locale).services;
+  const nav = getDashboardTexts(locale).nav;
 
   const supabase = await createClient();
   const [{ data: services }, categories] = await Promise.all([
@@ -36,24 +33,25 @@ export default async function PrestationsPage() {
   return (
     <DashboardShell
       user={user}
-      title="Mes prestations"
-      subtitle="Ce que vous proposez aux clients"
+      title={t.title}
+      subtitle={t.subtitle}
+      locale={locale}
       nav={[
-        { href: "/dashboard", label: "Vue d'ensemble" },
-        { href: "/dashboard/prestations", label: "Mes prestations", current: true },
-        { href: "/dashboard/profil", label: "Mon profil" },
-        { href: "/orders", label: "Commandes" },
-        { href: "/messages", label: "Messages" },
+        { href: "/dashboard", label: nav.overview },
+        { href: "/dashboard/prestations", label: nav.services, current: true },
+        { href: "/dashboard/profil", label: nav.profile },
+        { href: "/orders", label: nav.orders },
+        { href: "/messages", label: nav.messages },
       ]}
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <section>
-          <h2 className="font-display text-lg font-bold">Vos prestations</h2>
+          <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
           {list.length === 0 ? (
             <div className="mt-4">
               <EmptyState
-                title="Aucune prestation"
-                body="Créez votre première offre à droite. Elle reste en brouillon jusqu'à validation par l'équipe Toomny."
+                title={t.emptyTitle}
+                body={t.emptyBody}
               />
             </div>
           ) : (
@@ -63,11 +61,11 @@ export default async function PrestationsPage() {
                   <div className="min-w-0">
                     <p className="truncate font-medium">{s.title}</p>
                     <p className="mt-0.5 text-xs text-[var(--subtle)]">
-                      Livraison en {s.delivery_days} j · {STATUS_FR[s.status] ?? s.status}
+                      {t.delivery} {s.delivery_days} {t.days} · {getDashboardTexts(locale).service[s.status] ?? s.status}
                     </p>
                   </div>
                   <p className="shrink-0 font-display font-bold">
-                    {formatMoney(BigInt(s.price_minor), s.currency, "fr")}
+                    {formatMoney(BigInt(s.price_minor), s.currency, locale)}
                   </p>
                 </li>
               ))}
@@ -76,9 +74,9 @@ export default async function PrestationsPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg font-bold">Nouvelle prestation</h2>
+          <h2 className="font-display text-lg font-bold">{t.newTitle}</h2>
           <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <ServiceForm categories={categories.map((c) => ({ id: c.id, name: c.name_fr }))} />
+            <ServiceForm locale={locale} categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))} />
           </div>
         </section>
       </div>

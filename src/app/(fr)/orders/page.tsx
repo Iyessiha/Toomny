@@ -3,7 +3,8 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
-import { ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
+import { statusTone } from "@/lib/dashboard";
+import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 
 export const metadata: Metadata = { title: "Mes commandes · Toomny" };
@@ -11,6 +12,8 @@ export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
   const user = await requireAuth();
+  const locale = user.preferredLocale;
+  const t = getDashboardTexts(locale);
   const supabase = await createClient();
   const { data } = await supabase
     .from("orders")
@@ -23,16 +26,17 @@ export default async function OrdersPage() {
   return (
     <DashboardShell
       user={user}
-      title="Mes commandes"
-      subtitle="Chaque commande suit son état, de la confirmation du paiement à la validation"
+      title={t.orders.title}
+      locale={locale}
+      subtitle={t.orders.subtitle}
       nav={[
-        { href: "/dashboard", label: "Vue d'ensemble" },
-        { href: "/orders", label: "Commandes", current: true },
-        { href: "/messages", label: "Messages" },
+        { href: "/dashboard", label: t.nav.overview },
+        { href: "/orders", label: t.nav.orders, current: true },
+        { href: "/messages", label: t.nav.messages },
       ]}
     >
       {list.length === 0 ? (
-        <EmptyState title="Aucune commande" body="Parcourez le catalogue pour passer votre première commande." action={{ href: "/services", label: "Voir le catalogue" }} />
+        <EmptyState title={t.orders.empty} body={t.orders.emptyBody} action={{ href: "/services", label: t.orders.emptyCta }} />
       ) : (
         <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
           {list.map((o) => {
@@ -43,13 +47,13 @@ export default async function OrdersPage() {
                 <Link href={`/orders/${o.id}`} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-[var(--surface)]">
                   <div>
                     <p className="font-medium">{o.reference}</p>
-                    <p className="text-xs text-[var(--subtle)]">{isProvider ? "Vous êtes prestataire" : "Vous êtes client"}</p>
+                    <p className="text-xs text-[var(--subtle)]">{isProvider ? t.orders.asProvider : t.orders.asClient}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(o.status)}`}>
-                      {ORDER_STATUS_FR[o.status] ?? o.status}
+                      {t.status[o.status] ?? o.status}
                     </span>
-                    <span className="font-display font-bold">{formatMoney(BigInt(amount), o.currency, "fr")}</span>
+                    <span className="font-display font-bold">{formatMoney(BigInt(amount), o.currency, locale)}</span>
                   </div>
                 </Link>
               </li>

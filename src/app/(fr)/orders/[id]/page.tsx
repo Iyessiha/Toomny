@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
-import { ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
+import { statusTone } from "@/lib/dashboard";
+import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
@@ -14,6 +15,9 @@ export const dynamic = "force-dynamic";
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireAuth();
+  const locale = user.preferredLocale;
+  const t = getDashboardTexts(locale).orders;
+  const nav = getDashboardTexts(locale).nav;
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
 
@@ -42,11 +46,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     <DashboardShell
       user={user}
       title={order.reference}
-      subtitle={service?.title ?? "Prestation"}
+      subtitle={service?.title ?? t.detailSubtitleFallback}
+      locale={locale}
       nav={[
-        { href: "/dashboard", label: "Vue d'ensemble" },
-        { href: "/orders", label: "Commandes", current: true },
-        { href: "/messages", label: "Messages" },
+        { href: "/dashboard", label: nav.overview },
+        { href: "/orders", label: nav.orders, current: true },
+        { href: "/messages", label: nav.messages },
       ]}
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -54,51 +59,51 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(order.status)}`}>
-                {ORDER_STATUS_FR[order.status] ?? order.status}
+                {getDashboardTexts(locale).status[order.status] ?? order.status}
               </span>
               <span className="font-display text-xl font-bold">
-                {formatMoney(BigInt(amount), order.currency, "fr")}
-                <span className="ml-2 text-xs font-normal text-[var(--subtle)]">{isProvider ? "net pour vous" : "TTC"}</span>
+                {formatMoney(BigInt(amount), order.currency, locale)}
+                <span className="ml-2 text-xs font-normal text-[var(--subtle)]">{isProvider ? t.netLabel : t.ttc}</span>
               </span>
             </div>
-            <h2 className="mt-6 text-sm font-semibold">Besoin du client</h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">{order.requirements ?? "—"}</p>
+            <h2 className="mt-6 text-sm font-semibold">{t.requirements}</h2>
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">{order.requirements ?? t.noRequirements}</p>
           </section>
 
           <section>
-            <h2 className="font-display text-lg font-bold">Échanges</h2>
+            <h2 className="font-display text-lg font-bold">{t.exchanges}</h2>
             <div className="mt-4 space-y-3">
-              {(messages ?? []).length === 0 && <p className="text-sm text-[var(--subtle)]">Aucun message pour l&apos;instant.</p>}
+              {(messages ?? []).length === 0 && <p className="text-sm text-[var(--subtle)]">{t.noMessages}</p>}
               {(messages ?? []).map((m) => {
                 const mine = m.sender_id === user.id;
                 return (
                   <div key={m.id} className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${mine ? "ml-auto bg-[var(--color-brand-50)]" : "bg-[var(--surface)]"}`}>
                     <p className="whitespace-pre-line">{m.body}</p>
-                    <p className="mt-1 text-xs text-[var(--subtle)]">{new Date(m.created_at).toLocaleString("fr-FR")}</p>
+                    <p className="mt-1 text-xs text-[var(--subtle)]">{new Date(m.created_at).toLocaleString(locale === "en" ? "en-GB" : "fr-FR")}</p>
                   </div>
                 );
               })}
             </div>
             <div className="mt-6">
-              <MessageForm orderId={order.id} />
+              <MessageForm orderId={order.id} locale={locale} />
             </div>
           </section>
         </div>
 
         <aside className="space-y-4">
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <h2 className="font-display text-base font-bold">Actions</h2>
+            <h2 className="font-display text-base font-bold">{t.actions}</h2>
             <div className="mt-4">
               {actions.length > 0 ? (
-                <OrderControls orderId={order.id} actions={actions} />
+                <OrderControls orderId={order.id} actions={actions} locale={locale} />
               ) : (
-                <p className="text-sm text-[var(--subtle)]">Aucune action disponible pour le moment.</p>
+                <p className="text-sm text-[var(--subtle)]">{t.noActions}</p>
               )}
             </div>
           </div>
           {order.status === "pending_payment" && (
             <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              En attente de la confirmation du paiement. Le travail démarre une fois les fonds confirmés.
+              {t.pendingPayment}
             </p>
           )}
         </aside>

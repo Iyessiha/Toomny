@@ -3,23 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getDashboardTexts } from "@/i18n/dashboard";
 
 const CONTENT_LOCALES = ["fr", "en"] as const;
 
 /** Profil public du prestataire. La RLS limite l'écriture à sa propre fiche. */
 export async function saveProviderProfile(formData: FormData) {
   const user = await requireAuth();
-  if (!isProvider(user.role)) return { error: "Réservé aux comptes prestataires." };
+  const e = getDashboardTexts(user.preferredLocale).profile.errors;
+  if (!isProvider(user.role)) return { error: e.notProvider };
 
   const headline = String(formData.get("headline") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
   const locale = String(formData.get("contentLocale") ?? "fr");
 
-  if (headline.length > 120) return { error: "Titre : 120 caractères maximum." };
-  if (bio.length > 2000) return { error: "Présentation : 2000 caractères maximum." };
-  if (city.length > 80) return { error: "Ville : 80 caractères maximum." };
-  if (!(CONTENT_LOCALES as readonly string[]).includes(locale)) return { error: "Langue inconnue." };
+  if (headline.length > 120) return { error: e.headline };
+  if (bio.length > 2000) return { error: e.bio };
+  if (city.length > 80) return { error: e.city };
+  if (!(CONTENT_LOCALES as readonly string[]).includes(locale)) return { error: e.locale };
 
   const supabase = await createClient();
   const { error } = await supabase.from("provider_profiles").upsert(
@@ -32,7 +34,7 @@ export async function saveProviderProfile(formData: FormData) {
     },
     { onConflict: "profile_id" },
   );
-  if (error) return { error: "Le profil n'a pas pu être enregistré." };
+  if (error) return { error: e.save };
 
   revalidatePath(`/prestataires/${user.id}`);
   revalidatePath("/dashboard/profil");

@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { DEFAULT_COMMISSION_BPS, splitOrderAmount } from "@/lib/money";
 import { ORDER_RULES, UUID_RE, orderReference, type OrderAction } from "@/lib/orders";
+import { getDashboardTexts } from "@/i18n/dashboard";
 
 type Result = { error: string } | { success: true; orderId?: string };
 
@@ -16,11 +17,12 @@ type Result = { error: string } | { success: true; orderId?: string };
  */
 export async function createOrder(input: { serviceId: string; requirements: string }): Promise<Result> {
   const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).orders.errors;
 
-  if (!UUID_RE.test(input.serviceId)) return { error: "Prestation introuvable." };
+  if (!UUID_RE.test(input.serviceId)) return { error: e.notFound };
   const requirements = input.requirements.trim();
   if (requirements.length < 10 || requirements.length > 2000) {
-    return { error: "Décrivez votre besoin en 10 à 2000 caractères." };
+    return { error: e.createRange };
   }
 
   const db = createAdminClient();
@@ -30,8 +32,8 @@ export async function createOrder(input: { serviceId: string; requirements: stri
     .eq("id", input.serviceId)
     .maybeSingle();
 
-  if (!service || service.status !== "active") return { error: "Cette prestation n'est plus disponible." };
-  if (service.provider_id === user.id) return { error: "Vous ne pouvez pas commander votre propre prestation." };
+  if (!service || service.status !== "active") return { error: e.unavailable };
+  if (service.provider_id === user.id) return { error: e.own };
 
   const now = new Date();
   const split = splitOrderAmount(BigInt(service.price_minor), DEFAULT_COMMISSION_BPS);
@@ -55,7 +57,7 @@ export async function createOrder(input: { serviceId: string; requirements: stri
     .select("id")
     .single();
 
-  if (error || !order) return { error: "La commande n'a pas pu être créée. Réessayez." };
+  if (error || !order) return { error: e.create };
 
   revalidatePath("/orders");
   return { success: true, orderId: order.id };
@@ -72,9 +74,10 @@ export async function advanceOrder(input: {
   reason?: string;
 }): Promise<Result> {
   const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).orders.errors;
 
   const rule = ORDER_RULES[input.action];
-  if (!rule || !UUID_RE.test(input.orderId)) return { error: "Action inconnue." };
+  if (!rule || !UUID_RE.test(input.orderId)) return { error: e.unknownAction };
 
   const db = createAdminClient();
   const { data: order } = await db
@@ -83,25 +86,25 @@ export async function advanceOrder(input: {
     .eq("id", input.orderId)
     .maybeSingle();
 
-  if (!order) return { error: "Commande introuvable." };
+  if (!order) return { error: e.notFound };
 
   const allowed = rule.role === "client" ? order.client_id === user.id : order.provider_id === user.id;
-  if (!allowed) return { error: "Action non autorisée sur cette commande." };
+  if (!allowed) return { error: e.notAllowed };
   if (!(rule.from as readonly string[]).includes(order.status)) {
-    return { error: "Cette action n'est pas possible dans l'état actuel de la commande." };
+    return { error: e.wrongState };
   }
 
   try {
     assertTransition(order.status as OrderStatus, rule.to as OrderStatus);
   } catch {
-    return { error: "Transition refusée." };
+    return { error: e.transition };
   }
 
   let reason: string | null = null;
   if ("needsReason" in rule && rule.needsReason) {
     reason = (input.reason ?? "").trim();
     if (reason.length < 20 || reason.length > 2000) {
-      return { error: "Décrivez le problème en 20 à 2000 caractères." };
+      return { error: e.disputeLength };
     }
   }
 
@@ -118,7 +121,7 @@ export async function advanceOrder(input: {
     .select("id")
     .maybeSingle();
 
-  if (error || !updated) return { error: "La commande a changé entre-temps. Actualisez la page." };
+  if (error || !updated) return { error: e.changed };
 
   if (reason) {
     const { error: disputeErr } = await db.from("disputes").insert({
@@ -138,10 +141,12 @@ export async function advanceOrder(input: {
 /** Message dans le fil d'une commande. La politique RLS n'autorise que les parties concernées. */
 export async function sendMessage(input: { orderId: string; body: string }): Promise<Result> {
   const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).orders.errors;
+  const t = getDashboardTexts(user.preferredLocale).orders;
   const body = input.body.trim();
 
-  if (!UUID_RE.test(input.orderId)) return { error: "Commande introuvable." };
-  if (body.length < 1 || body.length > 2000) return { error: "Message : 1 à 2000 caractères." };
+  if (!UUID_RE.test(input.orderId)) return { error: e.notFound };
+  if (body.length < 1 || body.length > 2000) return { error: t.messageLength };
 
   const supabase = await createClient();
   const { error } = await supabase.from("messages").insert({
@@ -149,7 +154,7 @@ export async function sendMessage(input: { orderId: string; body: string }): Pro
     sender_id: user.id,
     body,
   });
-  if (error) return { error: "Message non envoyé." };
+  if (error) return { error: t.sendError };
 
   revalidatePath(`/orders/${input.orderId}`);
   return { success: true };

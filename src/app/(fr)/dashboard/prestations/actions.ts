@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { toMinor } from "@/lib/money";
+import { getDashboardTexts } from "@/i18n/dashboard";
 
 /**
  * Créer une prestation en brouillon. Seul un prestataire peut le faire (RLS :
@@ -12,7 +13,8 @@ import { toMinor } from "@/lib/money";
  */
 export async function createService(formData: FormData) {
   const user = await requireAuth();
-  if (!isProvider(user.role)) return { error: "Réservé aux comptes prestataires." };
+  const e = getDashboardTexts(user.preferredLocale).services.errors;
+  if (!isProvider(user.role)) return { error: e.notProvider };
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -20,23 +22,23 @@ export async function createService(formData: FormData) {
   const priceRaw = String(formData.get("price") ?? "").trim();
   const deliveryDays = Number(formData.get("deliveryDays"));
 
-  if (!title || title.length > 120) return { error: "Titre requis (120 caractères maximum)." };
+  if (!title || title.length > 120) return { error: e.title };
   if (description.length < 30 || description.length > 3000) {
-    return { error: "Description : entre 30 et 3000 caractères." };
+    return { error: e.description };
   }
-  if (!categoryId) return { error: "Choisissez une catégorie." };
+  if (!categoryId) return { error: e.category };
   if (!Number.isInteger(deliveryDays) || deliveryDays < 1 || deliveryDays > 365) {
-    return { error: "Délai de livraison : entre 1 et 365 jours." };
+    return { error: e.deliveryRange };
   }
 
   let priceMinor: bigint;
   try {
     priceMinor = toMinor(priceRaw, "XOF");
   } catch {
-    return { error: "Prix invalide : entier en FCFA." };
+    return { error: e.price };
   }
   if (priceMinor < 1000n || priceMinor > 10_000_000n) {
-    return { error: "Prix : entre 1 000 et 10 000 000 FCFA." };
+    return { error: e.priceRange };
   }
 
   const supabase = await createClient();
@@ -51,7 +53,7 @@ export async function createService(formData: FormData) {
     content_locale: "fr",
     status: "draft",
   });
-  if (error) return { error: "La prestation n'a pas pu être enregistrée." };
+  if (error) return { error: e.save };
 
   revalidatePath("/dashboard/prestations");
   return { success: true };
