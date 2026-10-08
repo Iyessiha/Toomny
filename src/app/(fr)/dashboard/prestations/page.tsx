@@ -41,6 +41,7 @@ export default async function PrestationsPage() {
       nav={[
         { href: "/dashboard", label: "Vue d'ensemble" },
         { href: "/dashboard/prestations", label: "Mes prestations", current: true },
+        { href: "/dashboard/profil", label: "Mon profil" },
         { href: "/orders", label: "Commandes" },
         { href: "/messages", label: "Messages" },
       ]}

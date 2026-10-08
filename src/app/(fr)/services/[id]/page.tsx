@@ -58,7 +58,9 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           </p>
           <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{service.title}</h1>
           <p className="mt-2 text-sm text-[var(--subtle)]">
-            {provider?.display_name ?? "Prestataire"}
+            <Link href={`/prestataires/${service.provider_id}`} className="underline underline-offset-4">
+              {provider?.display_name ?? "Prestataire"}
+            </Link>
             {provider?.country_code ? ` · ${provider.country_code}` : ""}
             {avg !== null ? ` · ★ ${avg.toFixed(1)} (${reviews.length})` : " · Pas encore d'avis"}
           </p>

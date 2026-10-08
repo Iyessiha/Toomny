@@ -41,6 +41,7 @@ function ProviderDashboard({
       nav={[
         { href: "/dashboard", label: "Vue d'ensemble", current: true },
         { href: "/dashboard/prestations", label: "Mes prestations" },
+        { href: "/dashboard/profil", label: "Mon profil" },
         { href: "/dashboard/versements", label: "Versements" },
         { href: "/orders", label: "Commandes" },
         { href: "/messages", label: "Messages" },
