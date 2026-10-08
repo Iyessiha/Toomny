@@ -235,7 +235,7 @@ export function KycForm({
           </Field>
           <Field label={t.country} htmlFor="documentCountry">
             <select id="documentCountry" name="documentCountry" required className={inputClass}>
-              <option value="">Choisir...</option>
+              <option value="">{t.choose}</option>
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>{names[c.code] ?? c.name}</option>
               ))}

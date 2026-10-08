@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -6,7 +8,9 @@ import { DashboardShell } from "@/components/dashboard/shell";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
-export const metadata: Metadata = { title: "Mon profil public · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.profile };
+}
 export const dynamic = "force-dynamic";
 
 export default async function ProfilPage() {

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -7,7 +9,9 @@ import { statusTone } from "@/lib/dashboard";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 
-export const metadata: Metadata = { title: "Mes commandes · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.orders };
+}
 export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {

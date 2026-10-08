@@ -84,6 +84,7 @@ const fr = {
     metaTitle: "Vérifications KYC · Admin Toomny",
   },
   kycCard: {
+    rejectReason: "Motif de rejet",
     success: { approved: "Dossier approuvé.", rejected: "Dossier rejeté.", flagged: "Marqué pour revue manuelle." },
     error: "Erreur",
     declaredIdentity: "Identité déclarée :",
@@ -226,6 +227,7 @@ const en: typeof fr = {
     metaTitle: "Identity checks · Toomny Admin",
   },
   kycCard: {
+    rejectReason: "Rejection reason",
     success: { approved: "File approved.", rejected: "File rejected.", flagged: "Marked for manual review." },
     error: "Error",
     declaredIdentity: "Declared identity:",

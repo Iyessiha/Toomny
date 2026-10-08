@@ -75,17 +75,6 @@ export async function getDashboardData(user: CurrentUser): Promise<DashboardData
   };
 }
 
-export const ORDER_STATUS_FR: Record<string, string> = {
-  pending_payment: "En attente de paiement",
-  funded: "Paiement conservé",
-  in_progress: "En cours",
-  delivered: "Livré",
-  completed: "Terminé",
-  disputed: "Litige",
-  cancelled: "Annulé",
-  refunded: "Remboursé",
-};
-
 export function statusTone(status: string): string {
   if (status === "completed") return "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]";
   if (status === "disputed") return "bg-red-50 text-red-700";

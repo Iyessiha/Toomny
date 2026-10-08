@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -12,7 +14,9 @@ import { MessageForm } from "@/components/orders/message-form";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 
-export const metadata: Metadata = { title: "Commande · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.order };
+}
 export const dynamic = "force-dynamic";
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {

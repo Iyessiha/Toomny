@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -8,7 +10,9 @@ import { VERIFICATION_STATUS_TONE, DOCUMENT_TYPES } from "@/lib/kyc";
 import { getKycTexts } from "@/i18n/kyc";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
-export const metadata: Metadata = { title: "Vérification d'identité · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.verification };
+}
 export const dynamic = "force-dynamic";
 
 export default async function VerificationPage() {

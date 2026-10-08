@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
@@ -55,9 +56,9 @@ export default async function AdminPage() {
             </p>
           </div>
           {s.pendingVerifications > 0 && (
-            <a href="/admin/verifications" className="shrink-0 rounded-full bg-amber-900 px-5 py-2 text-center text-sm font-semibold text-white hover:bg-amber-800">
+            <Link href="/admin/verifications" className="shrink-0 rounded-full bg-amber-900 px-5 py-2 text-center text-sm font-semibold text-white hover:bg-amber-800">
               {t.processKyc}
-            </a>
+            </Link>
           )}
         </div>
       )}
@@ -79,9 +80,9 @@ export default async function AdminPage() {
           <StatCard label={t.services} value={String(s.services)} hint={`${s.activeServices} ${t.published}`} />
           <StatCard label={t.openDisputes} value={String(s.openDisputes)} />
           <StatCard label={t.pendingVerifications} value={String(s.pendingVerifications)} />
-          <a href="/admin/services" className="block">
+          <Link href="/admin/services" className="block">
             <StatCard label={t.draftServices} value={String(s.draftServices)} hint={t.draftServicesHint} />
-          </a>
+          </Link>
         </div>
       </section>
 

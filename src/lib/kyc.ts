@@ -20,14 +20,6 @@ export const DOCUMENT_TYPES = [
 
 export type DocumentType = (typeof DOCUMENT_TYPES)[number]["value"];
 
-export const VERIFICATION_STATUS_FR: Record<string, string> = {
-  unverified: "Non vérifié",
-  pending: "En attente de revue",
-  verified: "Vérifié",
-  rejected: "Rejeté",
-  manual_review: "Revue manuelle",
-};
-
 export const VERIFICATION_STATUS_TONE: Record<string, string> = {
   unverified: "bg-neutral-100 text-neutral-600",
   pending: "bg-amber-50 text-amber-700",

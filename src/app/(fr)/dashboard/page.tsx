@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { getDashboardData, statusTone } from "@/lib/dashboard";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
@@ -7,7 +9,9 @@ import { formatMoney } from "@/lib/money";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import type { Locale } from "@/i18n/dictionaries";
 
-export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.dashboard };
+}
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {

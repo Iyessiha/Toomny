@@ -12,15 +12,15 @@ export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f
  * est revalidée par `assertTransition` (lib/escrow.ts) avant écriture.
  */
 export const ORDER_RULES = {
-  cancel: { role: "client", from: ["pending_payment"], to: "cancelled", label: "Annuler la commande", danger: true },
-  start: { role: "provider", from: ["funded"], to: "in_progress", label: "Commencer la mission" },
-  deliver: { role: "provider", from: ["in_progress"], to: "delivered", label: "Marquer comme livrée" },
-  accept: { role: "client", from: ["delivered"], to: "completed", label: "Valider la livraison" },
+  cancel: { role: "client", from: ["pending_payment"], to: "cancelled", danger: true },
+  start: { role: "provider", from: ["funded"], to: "in_progress" },
+  deliver: { role: "provider", from: ["in_progress"], to: "delivered" },
+  accept: { role: "client", from: ["delivered"], to: "completed" },
   dispute: {
     role: "client",
     from: ["funded", "in_progress", "delivered"],
     to: "disputed",
-    label: "Ouvrir un litige",
+   
     danger: true,
     needsReason: true,
   },

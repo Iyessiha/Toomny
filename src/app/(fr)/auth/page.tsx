@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import { headers } from "next/headers";
 import { AuthScreen } from "@/components/auth/auth-screen";
 
-export const metadata: Metadata = {
-  title: "Créer un compte",
-  description:
-    "Rejoignez Toomny : recrutez un prestataire d'Afrique de l'Ouest, ou vendez vos services et soyez payé en mobile money.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = getPublicPageTexts(await visitorLocale()).titles;
+  return { title: t.auth, description: t.authDescription };
+}
 
 export default async function AuthPage({
   searchParams,

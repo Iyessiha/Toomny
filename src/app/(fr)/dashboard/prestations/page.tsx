@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -8,7 +10,9 @@ import { formatMoney } from "@/lib/money";
 import { ServiceForm } from "@/components/dashboard/service-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
-export const metadata: Metadata = { title: "Mes prestations · Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getPublicPageTexts(await visitorLocale()).titles.services };
+}
 export const dynamic = "force-dynamic";
 
 export default async function PrestationsPage() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getAuthTexts, countryNames } from "@/i18n/auth";
 import { TurnstileWidget } from "@/components/auth/turnstile";
@@ -234,7 +235,7 @@ export function AuthForm({
 
         <p className="text-center text-xs leading-relaxed text-[var(--subtle)]">
           {t.terms}{" "}
-          <a href="/cgu" className="underline underline-offset-2">{t.termsLink}</a>{" "}
+          <Link href={locale === "en" ? "/en/cgu" : "/cgu"} className="underline underline-offset-2">{t.termsLink}</Link>{" "}
           {t.termsAnd}
         </p>
       </form>

@@ -157,7 +157,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {docs.frontUrl && (
               <div>
-                <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">Recto</p>
+                <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">{a.front}</p>
                 <a href={docs.frontUrl} target="_blank" rel="noopener noreferrer">
                   <img
                     src={docs.frontUrl}
@@ -178,7 +178,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
             )}
             {docs.selfieUrl && (
               <div>
-                <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">Selfie</p>
+                <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">{a.selfie}</p>
                 <a href={docs.selfieUrl} target="_blank" rel="noopener noreferrer">
                   <img
                     src={docs.selfieUrl}
@@ -229,7 +229,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
             </div>
           ) : (
             <div className="space-y-3">
-              <label className="text-sm font-medium">Motif de rejet</label>
+              <label className="text-sm font-medium">{a.rejectReason}</label>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
