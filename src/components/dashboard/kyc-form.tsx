@@ -3,19 +3,14 @@
 import { useState, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { submitVerification } from "@/app/(fr)/dashboard/verification/actions";
-import { DOCUMENT_TYPES } from "@/lib/kyc";
+import { DOCUMENT_TYPES, KYC_COUNTRIES } from "@/lib/kyc";
 
-const COUNTRIES = [
-  { code: "CI", name: "Côte d'Ivoire" },
-  { code: "SN", name: "Sénégal" },
-  { code: "BF", name: "Burkina Faso" },
-  { code: "ML", name: "Mali" },
-  { code: "BJ", name: "Bénin" },
-  { code: "TG", name: "Togo" },
-  { code: "NE", name: "Niger" },
-  { code: "GW", name: "Guinée-Bissau" },
-  { code: "CM", name: "Cameroun" },
-];
+const COUNTRIES = KYC_COUNTRIES;
+
+// Calculée au chargement du module : évite un appel impur pendant le rendu.
+const MAX_DOB = new Date(Date.UTC(new Date().getUTCFullYear() - 18, new Date().getUTCMonth(), new Date().getUTCDate()))
+  .toISOString()
+  .split("T")[0];
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
@@ -208,7 +203,7 @@ export function KycForm({
               name="declared_dob"
               type="date"
               required
-              max={new Date(Date.now() - 18 * 365.25 * 24 * 3600 * 1000).toISOString().split("T")[0]}
+              max={MAX_DOB}
               className={inputClass}
             />
           </Field>
@@ -286,7 +281,7 @@ export function KycForm({
 
       {/* Mentions légales */}
       <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-        <strong>Confidentialité garantie.</strong> Vos documents sont chiffrés et accessibles
+        <strong>Confidentialité.</strong> Vos documents sont stockés dans un espace privé et accessibles
         uniquement à notre équipe de vérification. Ils ne sont jamais partagés ni vendus. Nous
         vérifions visuellement que le visage sur le selfie correspond au document, et que les
         informations déclarées concordent.

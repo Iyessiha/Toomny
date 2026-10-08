@@ -8,6 +8,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * total sans transférer les lignes.
  */
 
+/** Commandes dont les fonds ont été retenus : seules elles comptent comme volume. */
+const FUNDED_STATUSES = ["funded", "in_progress", "delivered", "completed", "disputed"];
+
 export type AdminStats = {
   users: number;
   providers: number;
@@ -42,7 +45,10 @@ export async function getAdminStats(): Promise<AdminStats> {
     ]);
 
   const [{ data: moneyRows }, { data: recentUsers }, { data: recentOrders }] = await Promise.all([
-    db.from("orders").select("amount_minor, commission_minor, currency").neq("status", "cancelled").neq("status", "refunded"),
+    db
+      .from("orders")
+      .select("amount_minor, commission_minor, currency")
+      .in("status", FUNDED_STATUSES),
     db.from("profiles").select("id, display_name, email, role, country_code, created_at").order("created_at", { ascending: false }).limit(8),
     db.from("orders").select("id, reference, status, amount_minor, currency, created_at").order("created_at", { ascending: false }).limit(8),
   ]);

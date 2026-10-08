@@ -2,20 +2,28 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { kycStoragePath } from "@/lib/kyc";
+import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  DOCUMENT_TYPES,
+  KYC_COUNTRIES,
+  KYC_MAX_BYTES,
+  KYC_MIME_EXT,
+  isValidAdultDob,
+  kycStoragePath,
+  matchesMagicBytes,
+} from "@/lib/kyc";
 
 /**
  * Soumettre une demande de vérification KYC.
  *
- * Le formulaire envoie :
- * - documentType : cni | passeport | permis | carte_sejour | attestation
- * - documentCountry : ISO alpha-2
- * - front : File (recto du document)
- * - selfie : File (photo avec le document à côté du visage)
+ * Le formulaire envoie : documentType, documentCountry, declared_first_name,
+ * declared_last_name, declared_dob (AAAA-MM-JJ), front (recto), selfie.
  *
- * Les fichiers vont dans le bucket privé kyc-documents/<userId>/...
- * Une ligne est créée dans la table `verifications` avec status=pending.
- * Le profil passe aussi en verification_status=pending.
+ * Tout est revalidé ici : le navigateur n'est jamais une garantie. Les fichiers
+ * vont dans le bucket privé kyc-documents/<userId>/... (politique RLS : seul le
+ * propriétaire du dossier y écrit). Le statut du profil n'est modifié que par la
+ * clé service, après validation, car la politique RLS interdit à l'utilisateur
+ * de changer son propre statut de vérification.
  */
 export async function submitVerification(formData: FormData) {
   const supabase = await createClient();
@@ -25,30 +33,41 @@ export async function submitVerification(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Non connecté." };
 
-  const documentType = formData.get("documentType") as string;
-  const documentCountry = formData.get("documentCountry") as string;
-  const declaredFirstName = (formData.get("declared_first_name") as string ?? "").trim();
-  const declaredLastName = (formData.get("declared_last_name") as string ?? "").trim();
-  const declaredDob = (formData.get("declared_dob") as string ?? "").trim();
-  const front = formData.get("front") as File | null;
-  const selfie = formData.get("selfie") as File | null;
+  const documentType = String(formData.get("documentType") ?? "");
+  const documentCountry = String(formData.get("documentCountry") ?? "").toUpperCase();
+  const firstName = String(formData.get("declared_first_name") ?? "").trim();
+  const lastName = String(formData.get("declared_last_name") ?? "").trim();
+  const dob = String(formData.get("declared_dob") ?? "").trim();
+  const front = formData.get("front");
+  const selfie = formData.get("selfie");
 
-  if (!documentType || !documentCountry || !declaredFirstName || !declaredLastName || !declaredDob || !front || !selfie) {
+  if (!firstName || !lastName || !dob || !(front instanceof File) || !(selfie instanceof File)) {
     return { error: "Tous les champs sont obligatoires." };
   }
 
-  // Limites
-  const MAX_SIZE = 10 * 1024 * 1024; // 10 Mo
-  if (front.size > MAX_SIZE || selfie.size > MAX_SIZE) {
-    return { error: "Chaque fichier doit faire moins de 10 Mo." };
+  if (!DOCUMENT_TYPES.some((d) => d.value === documentType)) {
+    return { error: "Type de document inconnu." };
+  }
+  if (!KYC_COUNTRIES.some((c) => c.code === documentCountry)) {
+    return { error: "Pays de délivrance inconnu." };
+  }
+  if (firstName.length > 80 || lastName.length > 80) {
+    return { error: "Nom ou prénom trop long." };
+  }
+  if (!isValidAdultDob(dob)) {
+    return { error: "Date de naissance invalide : vous devez avoir au moins 18 ans." };
   }
 
-  const allowed = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-  if (!allowed.includes(front.type) || !allowed.includes(selfie.type)) {
-    return { error: "Formats acceptés : JPEG, PNG, WebP, PDF." };
+  for (const file of [front, selfie]) {
+    if (file.size === 0 || file.size > KYC_MAX_BYTES) {
+      return { error: "Chaque fichier doit faire moins de 10 Mo." };
+    }
+    if (!(file.type in KYC_MIME_EXT)) {
+      return { error: "Formats acceptés : JPEG, PNG, WebP, PDF." };
+    }
   }
 
-  // Vérifier qu'il n'y a pas déjà une demande en attente
+  // Une demande en cours suffit à bloquer une nouvelle soumission.
   const { data: existing } = await supabase
     .from("verifications")
     .select("id, status")
@@ -60,43 +79,52 @@ export async function submitVerification(formData: FormData) {
     return { error: "Vous avez déjà une demande de vérification en cours." };
   }
 
-  // Upload recto
-  const frontPath = kycStoragePath(user.id, front.name, "front");
-  const frontBuf = Buffer.from(await front.arrayBuffer());
+  // Contrôle des octets réels : un fichier renommé ou forgé est refusé.
+  const frontBuf = new Uint8Array(await front.arrayBuffer());
+  const selfieBuf = new Uint8Array(await selfie.arrayBuffer());
+  if (!matchesMagicBytes(frontBuf, front.type) || !matchesMagicBytes(selfieBuf, selfie.type)) {
+    return { error: "Le contenu du fichier ne correspond pas à son format." };
+  }
+
+  const frontPath = kycStoragePath(user.id, KYC_MIME_EXT[front.type], "front");
+  const selfiePath = kycStoragePath(user.id, KYC_MIME_EXT[selfie.type], "selfie");
+
   const { error: frontErr } = await supabase.storage
     .from("kyc-documents")
     .upload(frontPath, frontBuf, { contentType: front.type, upsert: false });
-  if (frontErr) return { error: `Erreur upload recto : ${frontErr.message}` };
+  if (frontErr) return { error: "Le recto n'a pas pu être envoyé. Réessayez." };
 
-  // Upload selfie
-  const selfiePath = kycStoragePath(user.id, selfie.name, "selfie");
-  const selfieBuf = Buffer.from(await selfie.arrayBuffer());
   const { error: selfieErr } = await supabase.storage
     .from("kyc-documents")
     .upload(selfiePath, selfieBuf, { contentType: selfie.type, upsert: false });
-  if (selfieErr) return { error: `Erreur upload selfie : ${selfieErr.message}` };
+  if (selfieErr) {
+    await supabase.storage.from("kyc-documents").remove([frontPath]);
+    return { error: "Le selfie n'a pas pu être envoyé. Réessayez." };
+  }
 
-  // Stocker les deux chemins en JSON dans storage_path
-  const storagePaths = JSON.stringify({ front: frontPath, selfie: selfiePath });
-
-  // Créer la ligne dans verifications
   const { error: insertErr } = await supabase.from("verifications").insert({
     profile_id: user.id,
     document_type: documentType,
     document_country: documentCountry,
-    storage_path: storagePaths,
-    declared_first_name: declaredFirstName,
-    declared_last_name: declaredLastName,
-    declared_dob: declaredDob,
+    declared_first_name: firstName,
+    declared_last_name: lastName,
+    declared_dob: dob,
+    storage_path: JSON.stringify({ front: frontPath, selfie: selfiePath }),
     status: "pending",
   });
-  if (insertErr) return { error: `Erreur enregistrement : ${insertErr.message}` };
+  if (insertErr) {
+    await supabase.storage.from("kyc-documents").remove([frontPath, selfiePath]);
+    return { error: "La demande n'a pas pu être enregistrée. Réessayez." };
+  }
 
-  // Passer le profil en "pending"
-  await supabase
+  const admin = createAdminClient();
+  const { error: profileErr } = await admin
     .from("profiles")
     .update({ verification_status: "pending", updated_at: new Date().toISOString() })
     .eq("id", user.id);
+  if (profileErr) {
+    return { error: "La demande est enregistrée mais le statut n'a pas pu être mis à jour. Contactez le support." };
+  }
 
   revalidatePath("/dashboard/verification");
   revalidatePath("/dashboard");

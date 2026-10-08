@@ -29,10 +29,11 @@ export async function approveVerification(verificationId: string) {
 
   if (verifErr) return { error: verifErr.message };
 
-  await db
+  const { error: profErr } = await db
     .from("profiles")
     .update({ verification_status: "verified", updated_at: now })
     .eq("id", verif.profile_id);
+  if (profErr) return { error: profErr.message };
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");
@@ -63,10 +64,11 @@ export async function rejectVerification(verificationId: string, reason: string)
 
   if (verifErr) return { error: verifErr.message };
 
-  await db
+  const { error: profErr } = await db
     .from("profiles")
     .update({ verification_status: "rejected", updated_at: now })
     .eq("id", verif.profile_id);
+  if (profErr) return { error: profErr.message };
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");
@@ -80,10 +82,11 @@ export async function flagForManualReview(verificationId: string) {
   await requireAdmin();
   const db = createAdminClient();
 
-  await db
+  const { error } = await db
     .from("verifications")
     .update({ status: "manual_review" })
     .eq("id", verificationId);
+  if (error) return { error: error.message };
 
   revalidatePath("/admin/verifications");
   return { success: true };
@@ -107,16 +110,18 @@ export async function getKycSignedUrls(storagePath: string) {
   const results: { frontUrl?: string; selfieUrl?: string; error?: string } = {};
 
   if (paths.front) {
-    const { data } = await db.storage
+    const { data, error } = await db.storage
       .from("kyc-documents")
       .createSignedUrl(paths.front, 300); // 5 minutes
-    results.frontUrl = data?.signedUrl;
+    if (error || !data) return { error: "Document recto introuvable." };
+    results.frontUrl = data.signedUrl;
   }
   if (paths.selfie) {
-    const { data } = await db.storage
+    const { data, error } = await db.storage
       .from("kyc-documents")
       .createSignedUrl(paths.selfie, 300);
-    results.selfieUrl = data?.signedUrl;
+    if (error || !data) return { error: "Selfie introuvable." };
+    results.selfieUrl = data.signedUrl;
   }
 
   return results;

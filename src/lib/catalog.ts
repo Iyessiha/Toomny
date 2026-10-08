@@ -52,9 +52,8 @@ export async function getServices(categorySlug?: string): Promise<ServiceCard[]>
 
   let query = supabase
     .from("services")
-    .select(
-      "id, title, description, price_minor, currency, delivery_days, category_id, provider:profiles!services_provider_id_profiles_id_fk(display_name, country_code)",
-    )
+    .select("id, title, description, price_minor, currency, delivery_days, category_id, provider_id")
+    .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(48);
 
@@ -76,11 +75,24 @@ export async function getServices(categorySlug?: string): Promise<ServiceCard[]>
     return [];
   }
 
-  // La jointure revient en tableau ou en objet selon la cardinalité : on normalise.
-  return (data ?? []).map((row) => {
-    const r = row as unknown as Omit<ServiceCard, "provider"> & {
-      provider: ServiceCard["provider"] | ServiceCard["provider"][] | null;
+  const rows = (data ?? []) as (Omit<ServiceCard, "provider"> & { provider_id: string })[];
+  if (rows.length === 0) return [];
+
+  // Vue publique : seuls le nom affiché et le pays des prestataires sont exposés,
+  // jamais leur téléphone ni leur e-mail.
+  const providerIds = [...new Set(rows.map((r) => r.provider_id))];
+  const { data: providers } = await supabase
+    .from("provider_directory")
+    .select("id, display_name, country_code")
+    .in("id", providerIds);
+
+  const byId = new Map((providers ?? []).map((p) => [p.id as string, p]));
+
+  return rows.map(({ provider_id, ...r }) => {
+    const p = byId.get(provider_id);
+    return {
+      ...r,
+      provider: p ? { display_name: p.display_name, country_code: p.country_code } : null,
     };
-    return { ...r, provider: Array.isArray(r.provider) ? (r.provider[0] ?? null) : r.provider };
   });
 }
