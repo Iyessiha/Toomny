@@ -80,8 +80,15 @@ revoke all on public.verifications from anon, authenticated;
 grant select, insert on public.verifications to authenticated;
 create policy verifications_select_own on public.verifications
   for select to authenticated using (profile_id = auth.uid());
+-- Insertion seulement en attente, sans aucun champ de décision (reviewer, date, motif).
 create policy verifications_insert_own on public.verifications
-  for insert to authenticated with check (profile_id = auth.uid());
+  for insert to authenticated with check (
+    profile_id = auth.uid()
+    and status = 'pending'
+    and reviewed_by is null
+    and reviewed_at is null
+    and rejection_reason is null
+  );
 
 -- 5. Catalogue : catégories actives et prestations publiées sont publiques.
 --    Un prestataire gère les siennes, quel que soit leur statut.
@@ -98,10 +105,25 @@ create policy services_public_read on public.services
   for select to anon, authenticated using (status = 'active');
 create policy services_owner_read on public.services
   for select to authenticated using (provider_id = auth.uid());
+-- Seuls les comptes prestataires créent des prestations, en brouillon.
+-- Un prestataire ne peut pas se publier lui-même : le passage à « active » relève
+-- de la modération, donc de la clé service côté serveur.
 create policy services_owner_insert on public.services
-  for insert to authenticated with check (provider_id = auth.uid());
+  for insert to authenticated with check (
+    provider_id = auth.uid()
+    and status = 'draft'
+    and exists (select 1 from public.profiles p
+                where p.id = auth.uid() and p.role in ('provider', 'both'))
+  );
 create policy services_owner_update on public.services
-  for update to authenticated using (provider_id = auth.uid()) with check (provider_id = auth.uid());
+  for update to authenticated
+  using (provider_id = auth.uid())
+  with check (
+    provider_id = auth.uid()
+    and status <> 'active'
+    and exists (select 1 from public.profiles p
+                where p.id = auth.uid() and p.role in ('provider', 'both'))
+  );
 
 -- 6. Commandes, séquestre, versements, messages, litiges : visibles des seules
 --    parties concernées. Aucune écriture côté navigateur : tout passe par le serveur.
@@ -200,5 +222,10 @@ create policy kyc_objects_insert_own on storage.objects
   );
 create policy kyc_objects_select_own on storage.objects
   for select to authenticated using (
+    bucket_id = 'kyc-documents' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+-- Nettoyage d'un envoi KYC échoué : l'utilisateur ne supprime que son propre dossier.
+create policy kyc_objects_delete_own on storage.objects
+  for delete to authenticated using (
     bucket_id = 'kyc-documents' and (storage.foldername(name))[1] = auth.uid()::text
   );
