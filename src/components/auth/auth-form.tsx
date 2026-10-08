@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { loginAction } from "@/app/(fr)/auth/actions";
 
 type Mode = "signup" | "login";
 type Role = "client" | "provider";
@@ -53,30 +54,34 @@ export function AuthForm({ initialRole = "client" }: { initialRole?: Role }) {
     setPending(true);
 
     const form = new FormData(e.currentTarget);
-    const email = String(form.get("email") ?? "").trim();
-    const password = String(form.get("password") ?? "");
-    const supabase = createClient();
 
     try {
       if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        // Rechargement complet obligatoire : un router.push() côté client ne
-        // transmet pas encore les cookies de session au serveur, ce qui ferait
-        // échouer requireAuth() et renverrait vers /auth.
-        window.location.href = "/dashboard";
+        // Le Server Action signInWithPassword côté serveur → les cookies
+        // Set-Cookie sont dans la réponse HTTP avant que le navigateur
+        // n'exécute la navigation. window.location.href force un rechargement
+        // complet qui envoie ces cookies au serveur dès la première requête.
+        const result = await loginAction(form);
+        if (result?.error) throw new Error(result.error);
+        if (result?.success) {
+          window.location.href = "/dashboard";
+        }
         return;
       }
 
+      // ── Inscription (signup) via client-side — email + confirmation ──
       const firstName = String(form.get("first_name") ?? "").trim();
       const lastName = String(form.get("last_name") ?? "").trim();
       const phone = String(form.get("phone") ?? "").trim();
       const city = String(form.get("city") ?? "").trim();
       const countryCode = String(form.get("country_code") ?? "CI");
+      const email = String(form.get("email") ?? "").trim();
+      const password = String(form.get("password") ?? "");
 
       if (!firstName || !lastName) throw new Error("Le prénom et le nom sont obligatoires.");
 
       const displayName = `${firstName} ${lastName}`;
+      const supabase = createClient();
 
       const { error } = await supabase.auth.signUp({
         email,

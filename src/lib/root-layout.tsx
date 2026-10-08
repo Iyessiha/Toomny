@@ -29,7 +29,7 @@ const text = Inter({
  */
 export function RootShell({ locale, children }: { locale: Locale; children: React.ReactNode }) {
   return (
-    <html lang={locale} className={`${display.variable} ${text.variable}`}>
+    <html lang={locale} className={`${display.variable} ${text.variable}`} suppressHydrationWarning>
       <body>
         {/* Premier élément du corps : s'exécute avant que le reste du document
             ne soit analysé. On masque les blocs à révéler uniquement si le JS

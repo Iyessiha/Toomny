@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * Révélations au défilement + défilement fluide.
  *
- * Les révélations reposent sur IntersectionObserver et une transition CSS,
- * pas sur une librairie d'animation : l'affichage du contenu ne doit jamais
- * dépendre du bon chargement de 60 Ko de JavaScript sur une 3G. Lenis n'est
- * qu'un confort, chargé après coup, et son absence ne casse rien.
+ * On re-scanne les [data-reveal] à chaque changement de route : en App Router,
+ * les composants sont remontés lors des navigations côté client, donc les
+ * éléments perdent leur classe `is-revealed`. Sans rescan, ils restent
+ * opacity:0 jusqu'au safety timeout de 3 s.
  *
  * Tout est neutralisé si l'utilisateur a demandé moins d'animations.
  */
 export function MotionProvider() {
+  const pathname = usePathname();
+
   useEffect(() => {
     const root = document.documentElement;
-
     const reveal = (el: Element) => el.classList.add("is-revealed");
 
     if (!root.classList.contains("js") || typeof IntersectionObserver === "undefined") {
@@ -37,10 +39,18 @@ export function MotionProvider() {
     const targets = document.querySelectorAll("[data-reveal]");
     targets.forEach((el) => observer.observe(el));
 
-    // Filet de sécurité : au-delà de 3 s, on réaffiche tout quoi qu'il arrive.
-    // Un contenu invisible est bien pire qu'un contenu sans animation.
-    const safety = window.setTimeout(() => targets.forEach(reveal), 3000);
+    // Filet de sécurité : au-delà de 1,5 s, on réaffiche tout.
+    // Réduit de 3 s à 1,5 s pour limiter l'écran blanc sur connexion lente.
+    const safety = window.setTimeout(() => targets.forEach(reveal), 1500);
 
+    return () => {
+      window.clearTimeout(safety);
+      observer.disconnect();
+    };
+  }, [pathname]);
+
+  // Lenis : chargé une seule fois, indépendamment des navigations.
+  useEffect(() => {
     let destroyLenis = () => {};
 
     import("lenis")
@@ -61,11 +71,7 @@ export function MotionProvider() {
         // Sans Lenis, le défilement natif prend le relais. Rien à faire.
       });
 
-    return () => {
-      window.clearTimeout(safety);
-      observer.disconnect();
-      destroyLenis();
-    };
+    return () => destroyLenis();
   }, []);
 
   return null;
