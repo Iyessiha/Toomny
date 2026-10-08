@@ -54,7 +54,7 @@ export function AuthScreen({
       </aside>
 
       <div className="flex flex-col justify-center px-4 py-12 sm:px-10">
-        <div className="mx-auto w-full max-w-md">
+        <div className="app-enter mx-auto w-full max-w-md">
           <Link href={home} className="inline-flex text-[var(--color-brand-500)] lg:hidden">
             <Logo size={28} />
           </Link>

@@ -30,7 +30,7 @@ export default async function ServicesPage({
     <>
       <Header locale={locale} />
 
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+      <main className="app-enter mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="max-w-2xl">
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
             {active ? categoryName(active, locale) : t.listTitle}
@@ -76,7 +76,7 @@ export default async function ServicesPage({
         </nav>
 
         {services.length > 0 ? (
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="app-stagger mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {services.map((s) => (
               <li
                 key={s.id}

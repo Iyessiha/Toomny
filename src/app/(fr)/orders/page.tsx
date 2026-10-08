@@ -38,7 +38,7 @@ export default async function OrdersPage() {
       {list.length === 0 ? (
         <EmptyState title={t.orders.empty} body={t.orders.emptyBody} action={{ href: "/services", label: t.orders.emptyCta }} />
       ) : (
-        <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+        <ul className="app-stagger divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
           {list.map((o) => {
             const isProvider = o.provider_id === user.id;
             const amount = isProvider ? o.provider_net_minor : o.amount_minor;

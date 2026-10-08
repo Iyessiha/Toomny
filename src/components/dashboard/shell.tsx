@@ -72,7 +72,7 @@ export function DashboardShell({
           </nav>
         )}
 
-        <div className="mt-8">{children}</div>
+        <div className="app-enter mt-8">{children}</div>
       </div>
     </div>
   );
@@ -91,7 +91,7 @@ export function StatCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-5 ${
+      className={`app-lift rounded-2xl border p-5 ${
         accent
           ? "border-[var(--color-brand-200)] bg-[var(--color-brand-50)]"
           : "border-[var(--border)] bg-[var(--background)]"
