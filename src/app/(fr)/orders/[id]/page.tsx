@@ -10,7 +10,7 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
-import { MessageForm } from "@/components/orders/message-form";
+import { MessageSection } from "@/components/orders/message-section";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 
@@ -83,24 +83,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">{order.requirements ?? t.noRequirements}</p>
           </section>
 
-          <section>
-            <h2 className="font-display text-lg font-bold">{t.exchanges}</h2>
-            <div className="mt-4 space-y-3">
-              {(messages ?? []).length === 0 && <p className="text-sm text-[var(--subtle)]">{t.noMessages}</p>}
-              {(messages ?? []).map((m) => {
-                const mine = m.sender_id === user.id;
-                return (
-                  <div key={m.id} className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${mine ? "ml-auto bg-[var(--color-brand-50)]" : "bg-[var(--surface)]"}`}>
-                    <p className="whitespace-pre-line">{m.body}</p>
-                    <p className="mt-1 text-xs text-[var(--subtle)]">{new Date(m.created_at).toLocaleString(locale === "en" ? "en-GB" : "fr-FR")}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-6">
-              <MessageForm orderId={order.id} locale={locale} />
-            </div>
-          </section>
+          <MessageSection
+            orderId={order.id}
+            userId={user.id}
+            initialMessages={messages ?? []}
+            locale={locale}
+          />
         </div>
 
         <aside className="space-y-4">

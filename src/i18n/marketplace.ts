@@ -8,6 +8,7 @@ const fr = {
     empty: "Aucune conversation",
     emptyBody: "Les échanges apparaissent ici dès qu'une commande existe.",
     open: "Ouvrir la conversation",
+    noMessage: "Aucun message",
     metaTitle: "Messages · Toomny",
   },
   disputes: {
@@ -73,6 +74,7 @@ const en: typeof fr = {
     empty: "No conversations",
     emptyBody: "Conversations appear here as soon as an order exists.",
     open: "Open conversation",
+    noMessage: "No messages yet",
     metaTitle: "Messages · Toomny",
   },
   disputes: {
