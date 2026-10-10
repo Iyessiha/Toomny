@@ -84,6 +84,8 @@ export default async function AdminDisputesPage() {
         { href: "/admin", label: nav.overview },
         { href: "/admin/verifications", label: nav.kyc },
         { href: "/admin/services", label: nav.services },
+        { href: "/admin/categories", label: nav.categories },
+        { href: "/admin/users", label: nav.users },
         { href: "/admin/orders", label: nav.orders },
         { href: "/admin/disputes", label: t.title, current: true },
         { href: "/dashboard", label: nav.myDashboard },

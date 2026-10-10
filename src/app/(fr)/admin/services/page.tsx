@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
@@ -54,6 +55,8 @@ export default async function AdminServicesPage({
         { href: "/admin", label: nav.overview },
         { href: "/admin/verifications", label: nav.kyc },
         { href: "/admin/services", label: nav.services, current: true },
+        { href: "/admin/categories", label: nav.categories },
+        { href: "/admin/users", label: nav.users },
         { href: "/admin/orders", label: nav.orders },
         { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
@@ -106,6 +109,12 @@ export default async function AdminServicesPage({
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap justify-end gap-2">
+                      <Link
+                        href={`/admin/services/${s.id}`}
+                        className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--subtle)] hover:text-[var(--foreground)]"
+                      >
+                        {t.edit}
+                      </Link>
                       {s.status !== "active" && (
                         <ModerationButton serviceId={s.id} status="active" label={t.publish} primary />
                       )}
