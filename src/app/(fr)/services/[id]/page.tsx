@@ -66,7 +66,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         .maybeSingle(),
       supabase
         .from("provider_profiles")
-        .select("headline, bio, rating_avg, rating_count, completed_orders")
+        .select("headline, bio, rating_avg, rating_count, completed_orders, avatar_url")
         .eq("profile_id", service.provider_id)
         .maybeSingle(),
       supabase
@@ -230,13 +230,23 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   href={`/prestataires/${service.provider_id}`}
                   className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition-colors hover:border-[var(--color-brand-300)]"
                 >
-                  <span
-                    aria-hidden
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ background: gradient }}
-                  >
-                    {providerInitials}
-                  </span>
+                  {providerProfile?.avatar_url ? (
+                    <Image
+                      src={providerProfile.avatar_url}
+                      alt={provider?.display_name ?? ""}
+                      width={28}
+                      height={28}
+                      className="h-7 w-7 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                      style={{ background: gradient }}
+                    >
+                      {providerInitials}
+                    </span>
+                  )}
                   <span className="font-semibold">
                     {provider?.display_name ?? t.detailProvider}
                   </span>
@@ -281,13 +291,23 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                     : `À propos de ${provider?.display_name ?? "ce prestataire"}`}
                 </h2>
                 <div className="mt-5 flex items-start gap-4">
-                  <span
-                    aria-hidden
-                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
-                    style={{ background: gradient }}
-                  >
-                    {providerInitials}
-                  </span>
+                  {providerProfile?.avatar_url ? (
+                    <Image
+                      src={providerProfile.avatar_url}
+                      alt={provider?.display_name ?? ""}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 shrink-0 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
+                      style={{ background: gradient }}
+                    >
+                      {providerInitials}
+                    </span>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="text-lg font-semibold">{provider?.display_name}</p>
                     {providerProfile.headline && (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
@@ -43,7 +44,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     { data: reviews },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
-    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders").eq("profile_id", id).maybeSingle(),
+    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url").eq("profile_id", id).maybeSingle(),
     // placeholder — la vérification est lue depuis provider_directory (voir ci-dessus).
     Promise.resolve({ data: null }),
     supabase
@@ -97,12 +98,22 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
             {/* Avatar */}
             <div className="flex-none">
-              <span
-                aria-hidden
-                className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--color-brand-500)] text-2xl font-extrabold text-white shadow-lg shadow-[var(--color-brand-500)]/30"
-              >
-                {initials}
-              </span>
+              {profile?.avatar_url ? (
+                <Image
+                  src={profile.avatar_url}
+                  alt={person.display_name ?? ""}
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 rounded-2xl object-cover shadow-lg"
+                />
+              ) : (
+                <span
+                  aria-hidden
+                  className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--color-brand-500)] text-2xl font-extrabold text-white shadow-lg shadow-[var(--color-brand-500)]/30"
+                >
+                  {initials}
+                </span>
+              )}
             </div>
 
             {/* Infos */}
