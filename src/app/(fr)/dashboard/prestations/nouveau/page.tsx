@@ -44,7 +44,7 @@ export default async function NouvellePrestation() {
           {locale === "en" ? "Back to services" : "Retour aux prestations"}
         </Link>
 
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-8">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 sm:p-8">
           <h2 className="font-display text-xl font-bold mb-6">{t.services.newTitle}</h2>
           <ServiceForm
             locale={locale}

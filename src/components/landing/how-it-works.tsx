@@ -75,7 +75,7 @@ export function HowItWorks({ locale = "fr" }: { locale?: Locale }) {
           </div>
         </div>
 
-        <ol className="mt-14 grid gap-6 md:grid-cols-3">
+        <ol className="mt-14 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {steps.map((s, i) => {
             const c = STEP_COLORS[i];
             return (

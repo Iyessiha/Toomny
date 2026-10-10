@@ -486,7 +486,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* ── Sidebar de commande ── */}
-          <aside className="h-fit space-y-4 lg:sticky lg:top-6">
+          <aside id="commande" className="h-fit space-y-4 lg:sticky lg:top-6">
             <ServiceSidebar
               serviceId={service.id}
               providerId={service.provider_id}
@@ -523,6 +523,30 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           </section>
         )}
       </main>
+
+      {/* ── Barre sticky mobile (≤ lg) ── */}
+      {!isOwner && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--border)] bg-[var(--background)]/95 px-4 py-3 backdrop-blur-xl lg:hidden">
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+            <div>
+              <p className="text-[10px] text-[var(--subtle)]">{t.from}</p>
+              <p className="font-display text-lg font-bold text-[var(--color-brand-600)]">
+                {(service.price_minor).toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} FCFA
+              </p>
+            </div>
+            <a
+              href="#commande"
+              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+            >
+              {user ? t.order : t.loginToOrder}
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Espace pour la barre sticky mobile */}
+      <div className="h-16 lg:hidden" aria-hidden />
+
       <Footer locale={locale} />
     </>
   );

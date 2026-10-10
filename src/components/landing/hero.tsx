@@ -103,7 +103,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           <h1
             data-reveal
             style={{ transitionDelay: "50ms" }}
-            className="mt-8 text-[2.5rem] font-extrabold leading-[1.05] text-balance sm:text-[3.3rem] lg:text-[3.25rem] xl:text-[3.6rem]"
+            className="mt-6 text-[1.9rem] font-extrabold leading-[1.1] text-balance sm:mt-8 sm:text-[2.8rem] lg:text-[3.25rem] xl:text-[3.6rem]"
           >
             {a.title[0]}{" "}
             <em className="not-italic gradient-text">{a.title[1]}</em>
@@ -116,7 +116,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           <div data-reveal style={{ transitionDelay: "150ms" }} className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href={a.href}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[var(--color-brand-500)]/20 transition-all duration-200 hover:-translate-y-px hover:bg-[var(--color-brand-600)] active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[var(--color-brand-500)]/20 transition-all duration-200 hover:-translate-y-px hover:bg-[var(--color-brand-600)] active:scale-95 sm:px-7 sm:py-3.5"
             >
               {a.cta}
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -125,7 +125,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             </Link>
             <a
               href="#fonctionnement"
-              className="rounded-full border border-[var(--border)] px-7 py-3.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:bg-[var(--surface)]"
+              className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:bg-[var(--surface)] sm:px-7 sm:py-3.5"
             >
               {t.secondaryCta}
             </a>

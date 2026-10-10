@@ -75,7 +75,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
         </nav>
 
         {/* Desktop actions */}
-        <div className="hidden items-center gap-2 sm:flex">
+        <div className="hidden items-center gap-2 lg:flex">
           <Link
             href={other}
             hrefLang={locale === "en" ? "fr" : "en"}
@@ -128,12 +128,12 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
           )}
         </div>
 
-        {/* Mobile burger */}
+        {/* Mobile/tablet burger */}
         <button
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-label={t.menu}
-          className="sm:hidden"
+          className="lg:hidden"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {open ? (
@@ -145,9 +145,9 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile/tablet menu */}
       {open && (
-        <div className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-4 sm:hidden">
+        <div className="border-t border-[var(--border)] bg-[var(--background)] px-4 py-4 lg:hidden">
           <nav className="flex flex-col gap-1">
             {t.links.map((l) => (
               <Link

@@ -302,7 +302,7 @@ export function ServiceForm({
       </div>
 
       {/* Prix + délai */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label htmlFor="price" className="text-sm font-medium">{t.form.price}</label>
           <input id="price" name="price" required inputMode="numeric" pattern="[0-9 ]+" placeholder="25000" className={inputClass} />
