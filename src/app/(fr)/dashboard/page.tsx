@@ -68,7 +68,6 @@ function ProviderDashboard({ user, data, services }: { user: User; data: Data; s
         { href: "/dashboard/verification", label: t.nav.kyc },
         { href: "/orders", label: t.nav.orders },
         { href: "/messages", label: t.nav.messages },
-        ...(user.role === "admin" ? [{ href: "/admin", label: t.nav.admin }] : []),
       ]}
     >
       {!kycDone && !kycPending && (
@@ -238,7 +237,6 @@ function ClientDashboard({ user, data }: { user: User; data: Data }) {
         { href: "/services", label: t.nav.findProvider },
         { href: "/orders", label: t.nav.myOrders },
         { href: "/messages", label: t.nav.messages },
-        ...(user.role === "admin" ? [{ href: "/admin", label: t.nav.admin }] : []),
       ]}
     >
       <div className="mb-8 flex flex-col gap-4 rounded-2xl bg-[var(--color-brand-500)] p-6 text-white sm:flex-row sm:items-center sm:justify-between">
