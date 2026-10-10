@@ -19,10 +19,12 @@ type Pkg = {
 };
 
 type TrustItem = { icon: string; label: string };
+type ProviderService = { id: string; title: string; price_minor: number; currency: string };
 
 export function ServiceSidebar({
   serviceId,
   providerId,
+  providerName,
   packages,
   basePrice,
   baseCurrency,
@@ -31,9 +33,11 @@ export function ServiceSidebar({
   isGuest,
   isOwner,
   trustItems,
+  providerServices = [],
 }: {
   serviceId: string;
   providerId: string;
+  providerName?: string;
   packages: Pkg[];
   basePrice: number;
   baseCurrency: string;
@@ -42,6 +46,7 @@ export function ServiceSidebar({
   isGuest: boolean;
   isOwner: boolean;
   trustItems: TrustItem[];
+  providerServices?: ProviderService[];
 }) {
   const t = getCatalogTexts(locale);
   const router = useRouter();
@@ -61,12 +66,11 @@ export function ServiceSidebar({
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const requirements = String(new FormData(e.currentTarget).get("requirements") ?? "");
     setPending(true);
     setError(null);
     const result = await createOrder({
       serviceId,
-      requirements,
+      requirements: "",
       packageId: selectedPkg?.id,
     });
     if ("error" in result) {
@@ -139,19 +143,6 @@ export function ServiceSidebar({
             <p className="text-center text-sm text-[var(--subtle)]">{t.ownService}</p>
           ) : (
             <form onSubmit={onSubmit} className="space-y-3">
-              <label htmlFor="requirements" className="text-sm font-medium">
-                {t.orderNeed}
-              </label>
-              <textarea
-                id="requirements"
-                name="requirements"
-                required
-                minLength={10}
-                maxLength={2000}
-                rows={4}
-                placeholder={t.orderPlaceholder}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
-              />
               {error && (
                 <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
@@ -201,6 +192,40 @@ export function ServiceSidebar({
           ))}
         </ul>
       </div>
+
+      {/* Autres services du prestataire */}
+      {providerServices.length > 0 && (
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+          <p className="mb-3 text-sm font-semibold">
+            {locale === "en"
+              ? `More from ${providerName ?? "this seller"}`
+              : `Autres prestations de ${providerName ?? "ce prestataire"}`}
+          </p>
+          <ul className="space-y-2">
+            {providerServices.map((s) => (
+              <li key={s.id}>
+                <Link
+                  href={`/services/${s.id}`}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-sm transition-colors hover:border-[var(--color-brand-300)] hover:bg-[var(--background)]"
+                >
+                  <span className="line-clamp-1 flex-1 font-medium leading-snug">
+                    {s.title}
+                  </span>
+                  <span className="shrink-0 font-semibold text-[var(--color-brand-600)]">
+                    {formatMoney(BigInt(s.price_minor), s.currency, locale)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={`/prestataires/${providerId}`}
+            className="mt-3 block text-center text-xs font-semibold text-[var(--color-brand-600)] hover:underline"
+          >
+            {locale === "en" ? "View all services →" : "Voir toutes les prestations →"}
+          </Link>
+        </div>
+      )}
     </>
   );
 }

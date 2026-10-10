@@ -23,8 +23,8 @@ export async function createOrder(input: { serviceId: string; requirements: stri
 
   if (!UUID_RE.test(input.serviceId)) return { error: e.notFound };
   if (input.packageId && !UUID_RE.test(input.packageId)) return { error: e.notFound };
-  const requirements = input.requirements.trim();
-  if (requirements.length < 10 || requirements.length > 2000) {
+  const requirements = (input.requirements ?? "").trim();
+  if (requirements.length > 2000) {
     return { error: e.createRange };
   }
 

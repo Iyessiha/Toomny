@@ -113,6 +113,15 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
   const isOwner = user?.id === service.provider_id;
 
+  // Autres services du même prestataire
+  const { data: moreFromProvider } = await supabase
+    .from("services")
+    .select("id, title, price_minor, currency, delivery_days")
+    .eq("provider_id", service.provider_id)
+    .eq("status", "active")
+    .neq("id", id)
+    .limit(4);
+
   // Recommended services — same category, other providers
   const allCatServices = category?.slug
     ? await getServices({ categorySlug: category.slug })
@@ -481,6 +490,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             <ServiceSidebar
               serviceId={service.id}
               providerId={service.provider_id}
+              providerName={provider?.display_name ?? undefined}
               packages={packages}
               basePrice={service.price_minor}
               baseCurrency={service.currency}
@@ -489,6 +499,12 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
               isGuest={!user}
               isOwner={isOwner}
               trustItems={trustItems}
+              providerServices={(moreFromProvider ?? []).map((s) => ({
+                id: s.id,
+                title: s.title,
+                price_minor: s.price_minor,
+                currency: s.currency,
+              }))}
             />
           </aside>
         </div>
