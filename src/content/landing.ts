@@ -12,10 +12,10 @@ import type { Locale } from "@/i18n/dictionaries";
 const fr = {
     nav: {
       links: [
-        { href: "#categories", label: "Catégories" },
-        { href: "#fonctionnement", label: "Comment ça marche" },
-        { href: "#tarifs", label: "Tarifs" },
-        { href: "#securite", label: "Sécurité" },
+        { href: "/services", label: "Catalogue" },
+        { href: "/comment-ca-marche", label: "Comment ça marche" },
+        { href: "/tarifs", label: "Tarifs" },
+        { href: "/securite", label: "Sécurité" },
       ],
       login: "Se connecter",
       signup: "Créer un compte",
@@ -146,8 +146,8 @@ const fr = {
       blurb: "La marketplace de talents d'Afrique de l'Ouest. Paiement en mobile money, paiements conservés jusqu'à la livraison.",
       tagline: "Travailler ensemble, grandir ensemble.",
       columns: [
-        { title: "Plateforme", links: [["Catégories", "#categories"], ["Comment ça marche", "#fonctionnement"], ["Tarifs", "#tarifs"], ["Sécurité", "#securite"]] },
-        { title: "Prestataires", links: [["Proposer mes services", "/auth?role=provider"], ["Être payé en mobile money", "#tarifs"], ["Tableau de bord", "/dashboard"]] },
+        { title: "Plateforme", links: [["Catalogue", "/services"], ["Comment ça marche", "/comment-ca-marche"], ["Tarifs", "/tarifs"], ["Sécurité", "/securite"]] },
+        { title: "Prestataires", links: [["Proposer mes services", "/auth?role=provider"], ["Être payé en mobile money", "/tarifs"], ["Tableau de bord", "/dashboard"]] },
         { title: "Entreprises", links: [["Trouver un prestataire", "/services"], ["Mes commandes", "/orders"], ["Litiges", "/disputes"]] },
         { title: "Légal", links: [["Conditions d'utilisation", "/cgu"], ["Mentions légales", "/mentions-legales"], ["Confidentialité", "/confidentialite"]] },
       ],
@@ -159,10 +159,10 @@ export type LandingContent = typeof fr;
 const en: LandingContent = {
     nav: {
       links: [
-        { href: "#categories", label: "Categories" },
-        { href: "#fonctionnement", label: "How it works" },
-        { href: "#tarifs", label: "Pricing" },
-        { href: "#securite", label: "Security" },
+        { href: "/services", label: "Catalogue" },
+        { href: "/comment-ca-marche", label: "How it works" },
+        { href: "/tarifs", label: "Pricing" },
+        { href: "/securite", label: "Security" },
       ],
       login: "Log in",
       signup: "Sign up",
@@ -293,8 +293,8 @@ const en: LandingContent = {
       blurb: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
       tagline: "Work together, grow together.",
       columns: [
-        { title: "Platform", links: [["Categories", "#categories"], ["How it works", "#fonctionnement"], ["Pricing", "#tarifs"], ["Security", "#securite"]] },
-        { title: "Providers", links: [["Offer my services", "/auth?role=provider"], ["Get paid by mobile money", "#tarifs"], ["Dashboard", "/dashboard"]] },
+        { title: "Platform", links: [["Catalogue", "/services"], ["How it works", "/comment-ca-marche"], ["Pricing", "/tarifs"], ["Security", "/securite"]] },
+        { title: "Providers", links: [["Offer my services", "/auth?role=provider"], ["Get paid by mobile money", "/tarifs"], ["Dashboard", "/dashboard"]] },
         { title: "Businesses", links: [["Find a provider", "/services"], ["My orders", "/orders"], ["Disputes", "/disputes"]] },
         { title: "Legal", links: [["Terms of use", "/en/cgu"], ["Legal notice", "/mentions-legales"], ["Privacy", "/confidentialite"]] },
       ],
