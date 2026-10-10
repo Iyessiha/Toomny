@@ -6,6 +6,7 @@ import { HowItWorks } from "./how-it-works";
 import { Testimonials } from "./testimonials";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
+import { ProvidersCarousel } from "./providers-carousel-server";
 import { Faq } from "./faq";
 import { FinalCta } from "./cta";
 import { Footer } from "./footer";
@@ -24,6 +25,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <Testimonials locale={locale} />
         <Pricing locale={locale} />
         <Security locale={locale} />
+        <ProvidersCarousel locale={locale} />
         <Faq locale={locale} />
         <FinalCta locale={locale} />
       </main>

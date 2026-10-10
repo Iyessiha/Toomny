@@ -245,7 +245,7 @@ export default async function ServicesPage({
             <>
               <ul className="app-stagger mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {services.map((s) => (
-                  <li key={s.id}>
+                  <li key={s.id} className="flex">
                     <ServiceCard service={s} locale={locale} />
                   </li>
                 ))}

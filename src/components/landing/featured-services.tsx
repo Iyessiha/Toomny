@@ -30,7 +30,7 @@ export async function FeaturedServices({ locale }: { locale: Locale }) {
 
         <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {featured.map((s) => (
-            <li key={s.id} data-reveal>
+            <li key={s.id} data-reveal className="flex">
               <ServiceCard service={s} locale={locale} />
             </li>
           ))}
