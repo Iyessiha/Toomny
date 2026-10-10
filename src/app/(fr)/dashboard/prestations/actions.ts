@@ -3,8 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { toMinor } from "@/lib/money";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { UUID_RE } from "@/lib/orders";
+
+type PackageInput = {
+  tier: 1 | 2 | 3;
+  name: string;
+  description: string;
+  price_minor: number;
+  delivery_days: number;
+};
 
 /**
  * Créer une prestation en brouillon. Seul un prestataire peut le faire (RLS :
@@ -132,6 +142,44 @@ export async function toggleServiceStatus(id: string, currentStatus: string) {
     .eq("provider_id", user.id);
 
   if (error) return { error: e.toggle };
+
+  revalidatePath("/dashboard/prestations");
+  return { success: true };
+}
+
+export async function upsertPackages(serviceId: string, packages: PackageInput[]) {
+  const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).services.errors;
+  if (!isProvider(user.role)) return { error: e.notProvider };
+  if (!UUID_RE.test(serviceId)) return { error: e.notOwner };
+
+  const db = createAdminClient();
+  const { data: svc } = await db.from("services").select("provider_id").eq("id", serviceId).maybeSingle();
+  if (!svc || svc.provider_id !== user.id) return { error: e.notOwner };
+
+  const enabledTiers = packages.map((p) => p.tier);
+
+  // Delete packages not in the enabled list
+  if (enabledTiers.length < 3) {
+    const tiersToDelete = ([1, 2, 3] as const).filter((t) => !enabledTiers.includes(t));
+    await db.from("service_packages").delete().eq("service_id", serviceId).in("tier", tiersToDelete);
+  }
+
+  if (packages.length > 0) {
+    const rows = packages.map((p) => ({
+      service_id: serviceId,
+      tier: p.tier,
+      name: p.name.trim().slice(0, 60),
+      description: p.description.trim().slice(0, 500) || null,
+      price_minor: p.price_minor,
+      currency: "XOF",
+      delivery_days: p.delivery_days,
+    }));
+    const { error } = await db
+      .from("service_packages")
+      .upsert(rows, { onConflict: "service_id,tier" });
+    if (error) return { error: e.update };
+  }
 
   revalidatePath("/dashboard/prestations");
   return { success: true };

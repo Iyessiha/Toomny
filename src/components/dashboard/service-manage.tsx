@@ -7,6 +7,7 @@ import {
   updateService,
   deleteService,
   toggleServiceStatus,
+  upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { EmptyState } from "@/components/dashboard/shell";
@@ -26,6 +27,30 @@ type Service = {
   tags: string[] | null;
 };
 
+type PackageRow = {
+  id: string;
+  tier: 1 | 2 | 3;
+  name: string;
+  description: string | null;
+  price_minor: number;
+  delivery_days: number;
+  currency: string;
+};
+
+type PackageSlot = {
+  enabled: boolean;
+  name: string;
+  description: string;
+  price: string;
+  deliveryDays: string;
+};
+
+const DEFAULT_SLOTS: [PackageSlot, PackageSlot, PackageSlot] = [
+  { enabled: false, name: "Basique", description: "", price: "", deliveryDays: "" },
+  { enabled: false, name: "Standard", description: "", price: "", deliveryDays: "" },
+  { enabled: false, name: "Premium", description: "", price: "", deliveryDays: "" },
+];
+
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
 
@@ -40,10 +65,12 @@ export function ServiceManage({
   services,
   categories,
   locale = "fr",
+  packagesByService = {},
 }: {
   services: Service[];
   categories: { id: string; name: string }[];
   locale?: Locale;
+  packagesByService?: Record<string, PackageRow[]>;
 }) {
   const t = getDashboardTexts(locale).services;
   const statusLabels = getDashboardTexts(locale).service;
@@ -71,6 +98,9 @@ export function ServiceManage({
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
+  // Packages (3 slots: Basic, Standard, Premium)
+  const [pkgSlots, setPkgSlots] = useState<[PackageSlot, PackageSlot, PackageSlot]>([...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]);
+
   function openEdit(s: Service) {
     setEditing(s);
     setCoverUrl(s.cover_url);
@@ -82,6 +112,14 @@ export function ServiceManage({
     setError(null);
     setSuccess(null);
     setUploadError(null);
+    // Init package slots from existing packages
+    const existing = packagesByService[s.id] ?? [];
+    setPkgSlots([1, 2, 3].map((tier) => {
+      const pkg = existing.find((p) => p.tier === tier);
+      if (pkg) return { enabled: true, name: pkg.name, description: pkg.description ?? "", price: String(pkg.price_minor), deliveryDays: String(pkg.delivery_days) };
+      const defaultName = tier === 1 ? (locale === "en" ? "Basic" : "Basique") : tier === 2 ? "Standard" : "Premium";
+      return { enabled: false, name: defaultName, description: "", price: "", deliveryDays: "" };
+    }) as [PackageSlot, PackageSlot, PackageSlot]);
   }
 
   function closeEdit() {
@@ -91,6 +129,7 @@ export function ServiceManage({
     setGalleryUrls([]);
     setTags([]);
     setTagInput("");
+    setPkgSlots([...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]);
     setGalleryError(null);
     setError(null);
     setSuccess(null);
@@ -174,10 +213,28 @@ export function ServiceManage({
     setPending(true);
     setError(null);
     const fd = new FormData(e.currentTarget);
-    const result = await updateService(editing.id, fd);
+
+    // Build enabled packages
+    const enabledPackages = pkgSlots
+      .map((slot, i) => ({ ...slot, tier: (i + 1) as 1 | 2 | 3 }))
+      .filter((slot) => slot.enabled && slot.price && slot.deliveryDays)
+      .map((slot) => ({
+        tier: slot.tier,
+        name: slot.name.trim() || (slot.tier === 1 ? "Basique" : slot.tier === 2 ? "Standard" : "Premium"),
+        description: slot.description,
+        price_minor: Number(slot.price.replace(/\s/g, "")),
+        delivery_days: Number(slot.deliveryDays),
+      }));
+
+    const [result, pkgResult] = await Promise.all([
+      updateService(editing.id, fd),
+      upsertPackages(editing.id, enabledPackages),
+    ]);
     setPending(false);
     if ("error" in result && result.error) {
       setError(result.error);
+    } else if ("error" in pkgResult && pkgResult.error) {
+      setError(pkgResult.error);
     } else {
       setSuccess(t.updated);
       router.refresh();
@@ -424,6 +481,73 @@ export function ServiceManage({
                       className="h-7 min-w-[120px] flex-1 rounded-full border border-dashed border-[var(--border)] bg-transparent px-3 text-xs outline-none focus:border-[var(--color-brand-400)]"
                     />
                   )}
+                </div>
+              </div>
+
+              {/* Packages */}
+              <div>
+                <p className="text-sm font-medium">{t.form.packages}</p>
+                <p className="mb-3 mt-0.5 text-xs text-[var(--subtle)]">{t.form.packagesHint}</p>
+                <div className="space-y-3">
+                  {([t.form.pkgBasic, t.form.pkgStandard, t.form.pkgPremium] as const).map((tierLabel, i) => {
+                    const slot = pkgSlots[i];
+                    return (
+                      <div key={i} className={`rounded-xl border ${slot.enabled ? "border-[var(--color-brand-300)] bg-[var(--color-brand-50)]" : "border-[var(--border)]"} p-3`}>
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={slot.enabled}
+                            onChange={(e) => setPkgSlots((prev) => {
+                              const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot];
+                              next[i] = { ...next[i], enabled: e.target.checked };
+                              return next;
+                            })}
+                            className="h-4 w-4 accent-[var(--color-brand-500)]"
+                          />
+                          <span className="text-sm font-semibold">{tierLabel}</span>
+                        </label>
+                        {slot.enabled && (
+                          <div className="mt-2 space-y-2">
+                            <input
+                              type="text"
+                              value={slot.name}
+                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], name: e.target.value }; return next; })}
+                              placeholder={t.form.pkgName}
+                              maxLength={60}
+                              className={inputClass}
+                            />
+                            <textarea
+                              value={slot.description}
+                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], description: e.target.value }; return next; })}
+                              placeholder={t.form.pkgDescPlaceholder}
+                              maxLength={500}
+                              rows={2}
+                              className={inputClass}
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={slot.price}
+                                onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], price: e.target.value }; return next; })}
+                                placeholder={t.form.pkgPrice}
+                                className={inputClass}
+                              />
+                              <input
+                                type="number"
+                                min={1}
+                                max={365}
+                                value={slot.deliveryDays}
+                                onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], deliveryDays: e.target.value }; return next; })}
+                                placeholder={t.form.pkgDelivery}
+                                className={inputClass}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 

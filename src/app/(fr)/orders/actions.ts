@@ -17,11 +17,12 @@ type Result = { error: string } | { success: true; orderId?: string };
  * Commander une prestation. La commande est figée au prix du moment (montants
  * recalculés ici, jamais repris du formulaire). Elle démarre en `pending_payment`.
  */
-export async function createOrder(input: { serviceId: string; requirements: string }): Promise<Result> {
+export async function createOrder(input: { serviceId: string; requirements: string; packageId?: string }): Promise<Result> {
   const user = await requireAuth();
   const e = getDashboardTexts(user.preferredLocale).orders.errors;
 
   if (!UUID_RE.test(input.serviceId)) return { error: e.notFound };
+  if (input.packageId && !UUID_RE.test(input.packageId)) return { error: e.notFound };
   const requirements = input.requirements.trim();
   if (requirements.length < 10 || requirements.length > 2000) {
     return { error: e.createRange };
@@ -37,8 +38,26 @@ export async function createOrder(input: { serviceId: string; requirements: stri
   if (!service || service.status !== "active") return { error: e.unavailable };
   if (service.provider_id === user.id) return { error: e.own };
 
+  // Si un forfait est sélectionné, on utilise ses prix/délai
+  let priceMinor = BigInt(service.price_minor);
+  let deliveryDays = service.delivery_days;
+  let packageId: string | null = null;
+
+  if (input.packageId) {
+    const { data: pkg } = await db
+      .from("service_packages")
+      .select("id, price_minor, delivery_days")
+      .eq("id", input.packageId)
+      .eq("service_id", input.serviceId)
+      .maybeSingle();
+    if (!pkg) return { error: e.notFound };
+    priceMinor = BigInt(pkg.price_minor);
+    deliveryDays = pkg.delivery_days;
+    packageId = pkg.id;
+  }
+
   const now = new Date();
-  const split = splitOrderAmount(BigInt(service.price_minor), DEFAULT_COMMISSION_BPS);
+  const split = splitOrderAmount(priceMinor, DEFAULT_COMMISSION_BPS);
 
   const { data: order, error } = await db
     .from("orders")
@@ -54,7 +73,8 @@ export async function createOrder(input: { serviceId: string; requirements: stri
       currency: service.currency,
       commission_rate_bps: split.commissionRateBps,
       requirements,
-      due_at: new Date(now.getTime() + service.delivery_days * 86_400_000).toISOString(),
+      due_at: new Date(now.getTime() + deliveryDays * 86_400_000).toISOString(),
+      ...(packageId ? { package_id: packageId } : {}),
     })
     .select("id")
     .single();

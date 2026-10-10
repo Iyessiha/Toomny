@@ -34,6 +34,21 @@ export default async function PrestationsPage() {
 
   const list = services ?? [];
 
+  const serviceIds = list.map((s) => s.id);
+  const { data: allPackages } = serviceIds.length
+    ? await supabase
+        .from("service_packages")
+        .select("id, service_id, tier, name, description, price_minor, delivery_days, currency")
+        .in("service_id", serviceIds)
+        .order("tier")
+    : { data: [] };
+
+  const packagesByService: Record<string, { id: string; tier: 1 | 2 | 3; name: string; description: string | null; price_minor: number; delivery_days: number; currency: string }[]> = {};
+  for (const pkg of allPackages ?? []) {
+    const p = pkg as typeof pkg & { tier: 1 | 2 | 3 };
+    (packagesByService[p.service_id] ??= []).push(p);
+  }
+
   return (
     <DashboardShell
       user={user}
@@ -55,6 +70,7 @@ export default async function PrestationsPage() {
             services={list}
             categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}
             locale={locale}
+            packagesByService={packagesByService}
           />
         </section>
 

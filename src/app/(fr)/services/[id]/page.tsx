@@ -57,7 +57,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   const meta = category ? categoryMeta(category.slug) : null;
   const gradient = categoryGradient(category?.slug);
 
-  const [{ data: provider }, { data: providerProfile }, { data: reviewRows }] =
+  const [{ data: provider }, { data: providerProfile }, { data: reviewRows }, { data: pkgRows }] =
     await Promise.all([
       supabase
         .from("provider_directory")
@@ -73,7 +73,17 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         .from("reviews")
         .select("id, rating, comment, created_at, author_id")
         .eq("target_id", service.provider_id),
+      supabase
+        .from("service_packages")
+        .select("id, tier, name, description, price_minor, delivery_days, currency")
+        .eq("service_id", service.id)
+        .order("tier"),
     ]);
+
+  const packages = (pkgRows ?? []) as {
+    id: string; tier: 1 | 2 | 3; name: string; description: string | null;
+    price_minor: number; delivery_days: number; currency: string;
+  }[];
 
   const reviews = (reviewRows ?? []) as {
     id: string;
@@ -511,7 +521,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   <p className="text-center text-sm text-[var(--subtle)]">{t.ownService}</p>
                 ) : (
                   <>
-                    <ServiceOrderForm serviceId={service.id} locale={locale} />
+                    <ServiceOrderForm serviceId={service.id} locale={locale} packages={packages} />
                     <Link
                       href={`/services/${service.id}/contact`}
                       className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
