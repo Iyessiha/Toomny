@@ -50,6 +50,17 @@ const fr = {
   missions: "Missions",
   noReviewsList: "Pas encore d'avis.",
   ratingOutOf: "/ 5",
+  contactSeller: "Contacter le prestataire",
+  contactTitle: "Envoyer un message",
+  contactLead: "Posez vos questions avant de commander. Le prestataire recevra votre message et pourra vous répondre.",
+  contactPlaceholder: "Décrivez votre besoin, vos contraintes, vos questions…",
+  contactSend: "Envoyer le message",
+  contactSending: "Envoi en cours…",
+  contactDone: "Message envoyé ! Le prestataire a bien reçu votre demande.",
+  contactBack: "Retour à la prestation",
+  contactErrorShort: "Votre message doit contenir au moins 10 caractères.",
+  contactErrorLong: "Message trop long (1 000 caractères maximum).",
+  contactErrorFailed: "Impossible d'envoyer le message. Réessayez.",
 };
 
 const en: typeof fr = {
@@ -101,6 +112,17 @@ const en: typeof fr = {
   missions: "Missions",
   noReviewsList: "No reviews yet.",
   ratingOutOf: "/ 5",
+  contactSeller: "Contact the provider",
+  contactTitle: "Send a message",
+  contactLead: "Ask your questions before ordering. The provider will receive your message and can reply.",
+  contactPlaceholder: "Describe your need, constraints, or questions…",
+  contactSend: "Send message",
+  contactSending: "Sending…",
+  contactDone: "Message sent! The provider has received your inquiry.",
+  contactBack: "Back to the service",
+  contactErrorShort: "Your message must be at least 10 characters.",
+  contactErrorLong: "Message too long (1,000 characters maximum).",
+  contactErrorFailed: "Could not send the message. Please try again.",
 };
 
 export const catalogTexts: Record<Locale, typeof fr> = { fr, en };

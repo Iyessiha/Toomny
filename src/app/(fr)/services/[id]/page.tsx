@@ -442,6 +442,15 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   <>
                     <ServiceOrderForm serviceId={service.id} locale={locale} />
                     <Link
+                      href={`/services/${service.id}/contact`}
+                      className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                      {t.contactSeller}
+                    </Link>
+                    <Link
                       href={`/prestataires/${service.provider_id}`}
                       className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
                     >
