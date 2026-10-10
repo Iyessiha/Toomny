@@ -5,6 +5,7 @@ import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
+import { OrderTrendChart } from "@/components/admin/order-trend-chart";
 import { statusTone } from "@/lib/dashboard";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
@@ -86,7 +87,47 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      {/* Tendance 30 jours + pays */}
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
+          <OrderTrendChart
+            data={s.dailyOrders}
+            label={locale === "en" ? "Orders — last 30 days" : "Commandes — 30 derniers jours"}
+            emptyLabel={locale === "en" ? "No orders yet" : "Aucune commande encore"}
+          />
+        </div>
+
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">
+            {locale === "en" ? "Countries" : "Pays"}
+          </p>
+          {s.countryBreakdown.length === 0 ? (
+            <p className="mt-4 text-sm text-[var(--subtle)]">{t.noUsers}</p>
+          ) : (
+            <ul className="mt-4 space-y-2">
+              {s.countryBreakdown.map((c) => {
+                const pct = s.users > 0 ? Math.round((c.total / s.users) * 100) : 0;
+                return (
+                  <li key={c.country_code} className="flex items-center gap-3">
+                    <span className="w-8 text-sm font-semibold">{c.country_code}</span>
+                    <div className="flex-1 overflow-hidden rounded-full bg-[var(--surface)] h-2">
+                      <div
+                        className="h-full rounded-full bg-[var(--color-brand-400)]"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-16 text-right text-xs text-[var(--subtle)]">
+                      {c.total} ({pct} %)
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section>
           <h2 className="font-display text-base font-bold">{t.recentUsers}</h2>
           {s.recentUsers.length === 0 ? (
