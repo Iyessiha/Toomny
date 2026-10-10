@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
 
@@ -39,13 +40,21 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
       {/* ── Carte service principale ── */}
       <div className="w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
 
-        {/* Cover gradient avec icône catégorie */}
-        <div
-          className="relative flex h-36 items-end p-4"
-          style={{
-            background: "linear-gradient(135deg, #6B46C1 0%, #2563EB 50%, #0891B2 100%)",
-          }}
-        >
+        {/* Cover photo réelle + overlay gradient */}
+        <div className="relative flex h-36 items-end p-4">
+          <Image
+            src="/images/hero-provider.jpg"
+            alt=""
+            fill
+            className="object-cover object-top"
+            priority
+            sizes="340px"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{ background: "linear-gradient(160deg, rgba(107,70,193,0.55) 0%, rgba(8,145,178,0.7) 100%)" }}
+          />
           {/* Watermark SVG Toomny mark en fond */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10">
             <svg viewBox="0 0 120 120" width="100" height="100" fill="none">
@@ -80,8 +89,8 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
         {/* Infos prestataire */}
         <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3.5">
           <div className="relative">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-brand-400)] to-[var(--color-brand-600)] font-display text-sm font-bold text-white">
-              AK
+            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--background)]">
+              <Image src="/images/hero-provider.jpg" alt="Awa Konaté" fill className="object-cover object-top" sizes="40px" />
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--background)] bg-green-500 text-[8px] text-white">✓</span>
           </div>

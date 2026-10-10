@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Logo } from "@/components/ui/logo";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
@@ -47,51 +48,68 @@ export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
             }}
           />
 
-          <div className="relative">
-            <span className="inline-flex text-white/90">
-              <Logo size={44} withWordmark={false} />
-            </span>
-
-            {/* Pill trust signal */}
-            <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-green-400" />
-              <span className="text-xs font-semibold text-white/80">
-                {locale === "fr" ? "Paiement mobile money · Afrique de l'Ouest" : "Mobile money payments · West Africa"}
+          <div className="relative grid gap-10 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16 lg:text-left">
+            {/* Texte gauche */}
+            <div>
+              <span className="inline-flex text-white/90">
+                <Logo size={44} withWordmark={false} />
               </span>
+
+              {/* Pill trust signal */}
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-green-400" />
+                <span className="text-xs font-semibold text-white/80">
+                  {locale === "fr" ? "Paiement mobile money · Afrique de l'Ouest" : "Mobile money payments · West Africa"}
+                </span>
+              </div>
+
+              <h2 className="mt-6 max-w-xl text-3xl font-bold leading-tight text-white sm:text-5xl">
+                {t.title}
+              </h2>
+              <p className="mt-5 max-w-md text-base leading-relaxed text-white/75 sm:text-lg">{t.lead}</p>
+
+              <div className="mt-9 flex flex-wrap gap-3 lg:justify-start justify-center">
+                <Link
+                  href="/auth"
+                  className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-700)] shadow-xl shadow-black/20 transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl active:scale-95"
+                >
+                  {t.primary}
+                </Link>
+                <Link
+                  href="/services"
+                  className="rounded-full border border-white/25 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  {t.secondary}
+                </Link>
+              </div>
+
+              {/* Mini stats */}
+              <div className="mt-10 flex flex-wrap gap-8 lg:justify-start justify-center">
+                {[
+                  { n: "10 %", label: locale === "fr" ? "de commission" : "commission" },
+                  { n: "0 %", label: locale === "fr" ? "côté client" : "client fee" },
+                  { n: "72 h", label: locale === "fr" ? "validation auto" : "auto-approval" },
+                ].map(({ n, label }) => (
+                  <div key={n} className="text-center">
+                    <p className="font-display text-2xl font-extrabold text-white">{n}</p>
+                    <p className="mt-0.5 text-xs text-white/60">{label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h2 className="mx-auto mt-6 max-w-2xl text-3xl font-bold leading-tight text-white sm:text-5xl">
-              {t.title}
-            </h2>
-            <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">{t.lead}</p>
-
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
-              <Link
-                href="/auth"
-                className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-700)] shadow-xl shadow-black/20 transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl active:scale-95"
-              >
-                {t.primary}
-              </Link>
-              <Link
-                href="/services"
-                className="rounded-full border border-white/25 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-              >
-                {t.secondary}
-              </Link>
-            </div>
-
-            {/* Mini stats */}
-            <div className="mx-auto mt-10 flex flex-wrap justify-center gap-8">
-              {[
-                { n: "10 %", label: locale === "fr" ? "de commission" : "commission" },
-                { n: "0 %", label: locale === "fr" ? "côté client" : "client fee" },
-                { n: "72 h", label: locale === "fr" ? "validation auto" : "auto-approval" },
-              ].map(({ n, label }) => (
-                <div key={n} className="text-center">
-                  <p className="font-display text-2xl font-extrabold text-white">{n}</p>
-                  <p className="mt-0.5 text-xs text-white/60">{label}</p>
-                </div>
-              ))}
+            {/* Visuel cover Toomny — desktop only */}
+            <div className="hidden lg:block shrink-0">
+              <div className="relative w-[380px] overflow-hidden rounded-2xl shadow-2xl shadow-black/40 border border-white/10">
+                <Image
+                  src="/images/toomny-cover.jpg"
+                  alt="Toomny — Meilleure plateforme de talents africains"
+                  width={760}
+                  height={428}
+                  className="w-full h-auto"
+                  sizes="380px"
+                />
+              </div>
             </div>
           </div>
         </div>

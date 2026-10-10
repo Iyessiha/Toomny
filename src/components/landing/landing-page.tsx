@@ -3,6 +3,7 @@ import { Hero } from "./hero";
 import { Categories } from "./categories";
 import { FeaturedServices } from "./featured-services";
 import { HowItWorks } from "./how-it-works";
+import { Testimonials } from "./testimonials";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { Faq } from "./faq";
@@ -20,6 +21,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />
         <HowItWorks locale={locale} />
+        <Testimonials locale={locale} />
         <Pricing locale={locale} />
         <Security locale={locale} />
         <Faq locale={locale} />
