@@ -28,12 +28,15 @@ export type ServiceCard = {
   } | null;
 };
 
+export const CATALOG_PAGE_SIZE = 12;
+
 export type ServiceFilters = {
   categorySlug?: string;
   q?: string;
   maxPrice?: number;
   maxDays?: number;
   sort?: "recent" | "rating";
+  page?: number;
 };
 
 export function categoryName(c: Category, locale: Locale): string {
@@ -55,14 +58,15 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getServices(filters: ServiceFilters = {}): Promise<ServiceCard[]> {
-  const { categorySlug, q, maxPrice, maxDays, sort = "recent" } = filters;
+  const { categorySlug, q, maxPrice, maxDays, sort = "recent", page = 1 } = filters;
   const supabase = await createClient();
+  const offset = (Math.max(1, page) - 1) * CATALOG_PAGE_SIZE;
 
   let query = supabase
     .from("services")
     .select("id, title, description, price_minor, currency, delivery_days, category_id, cover_url, provider_id")
     .eq("status", "active")
-    .limit(48);
+    .range(offset, offset + CATALOG_PAGE_SIZE); // fetch PAGE_SIZE+1 to detect hasMore
 
   if (categorySlug) {
     const { data: cat } = await supabase

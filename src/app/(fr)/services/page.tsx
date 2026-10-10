@@ -7,6 +7,7 @@ import { categoryMeta, categoryGradient } from "@/lib/categories";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { CATALOG_PAGE_SIZE } from "@/lib/catalog";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getCatalogTexts(await visitorLocale());
@@ -43,37 +44,41 @@ function buildUrl(base: Record<string, string | undefined>, override: Record<str
 export default async function ServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categorie?: string; q?: string; sort?: string; budget?: string; jours?: string }>;
+  searchParams: Promise<{ categorie?: string; q?: string; sort?: string; budget?: string; jours?: string; page?: string }>;
 }) {
   const locale = await visitorLocale();
   const t = getCatalogTexts(locale);
-  const { categorie, q, sort, budget, jours } = await searchParams;
+  const { categorie, q, sort, budget, jours, page: pageParam } = await searchParams;
 
   const maxPrice = budget ? Number(budget) : undefined;
   const maxDays = jours ? Number(jours) : undefined;
   const sortValue = sort === "rating" ? "rating" : "recent";
+  const page = pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
 
-  const [categories, services] = await Promise.all([
+  const [categories, rawServices] = await Promise.all([
     getCategories(),
-    getServices({ categorySlug: categorie, q, maxPrice, maxDays, sort: sortValue }),
+    getServices({ categorySlug: categorie, q, maxPrice, maxDays, sort: sortValue, page }),
   ]);
+
+  const hasMore = rawServices.length > CATALOG_PAGE_SIZE;
+  const services = rawServices.slice(0, CATALOG_PAGE_SIZE);
 
   const active = categories.find((c) => c.slug === categorie);
 
   // Chips de filtres actifs
-  const currentParams = { categorie, q, sort, budget, jours };
+  const currentParams = { categorie, q, sort, budget, jours, page: pageParam };
   const activeChips: { label: string; removeUrl: string }[] = [];
-  if (q) activeChips.push({ label: `"${q}"`, removeUrl: buildUrl(currentParams, { q: undefined }) });
+  if (q) activeChips.push({ label: `"${q}"`, removeUrl: buildUrl(currentParams, { q: undefined, page: undefined }) });
   if (budget) {
     const opt = BUDGET_OPTIONS.find((o) => o.value === budget);
-    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { budget: undefined }) });
+    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { budget: undefined, page: undefined }) });
   }
   if (jours) {
     const opt = DELIVERY_OPTIONS.find((o) => o.value === jours);
-    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { jours: undefined }) });
+    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { jours: undefined, page: undefined }) });
   }
   if (sort && sort !== "recent") {
-    activeChips.push({ label: t.sortRating, removeUrl: buildUrl(currentParams, { sort: undefined }) });
+    activeChips.push({ label: t.sortRating, removeUrl: buildUrl(currentParams, { sort: undefined, page: undefined }) });
   }
   const hasActiveFilters = activeChips.length > 0;
 
@@ -237,13 +242,50 @@ export default async function ServicesPage({
 
           {/* Grille de cartes */}
           {services.length > 0 ? (
-            <ul className="app-stagger mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {services.map((s) => (
-                <li key={s.id}>
-                  <ServiceCard service={s} locale={locale} />
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="app-stagger mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {services.map((s) => (
+                  <li key={s.id}>
+                    <ServiceCard service={s} locale={locale} />
+                  </li>
+                ))}
+              </ul>
+
+              {/* Pagination prev / next */}
+              {(page > 1 || hasMore) && (
+                <nav className="mt-10 flex items-center justify-center gap-3" aria-label={locale === "fr" ? "Pagination" : "Pagination"}>
+                  {page > 1 ? (
+                    <Link
+                      href={buildUrl(currentParams, { page: page > 2 ? String(page - 1) : undefined })}
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+                    >
+                      ← {locale === "fr" ? "Précédent" : "Previous"}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold opacity-30 cursor-default select-none">
+                      ← {locale === "fr" ? "Précédent" : "Previous"}
+                    </span>
+                  )}
+
+                  <span className="min-w-[2.5rem] text-center text-sm font-semibold tabular-nums text-[var(--subtle)]">
+                    {page}
+                  </span>
+
+                  {hasMore ? (
+                    <Link
+                      href={buildUrl(currentParams, { page: String(page + 1) })}
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+                    >
+                      {locale === "fr" ? "Suivant" : "Next"} →
+                    </Link>
+                  ) : (
+                    <span className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold opacity-30 cursor-default select-none">
+                      {locale === "fr" ? "Suivant" : "Next"} →
+                    </span>
+                  )}
+                </nav>
+              )}
+            </>
           ) : (
             <div className="mt-16 rounded-3xl border border-dashed border-[var(--border)] bg-[var(--surface)] px-6 py-16 text-center">
               <h2 className="font-display text-xl font-bold">{active ? t.emptyCategory : t.emptyAll}</h2>
