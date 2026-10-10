@@ -21,6 +21,7 @@ export async function createService(formData: FormData) {
   const categoryId = String(formData.get("categoryId") ?? "");
   const priceRaw = String(formData.get("price") ?? "").trim();
   const deliveryDays = Number(formData.get("deliveryDays"));
+  const coverUrl = String(formData.get("coverUrl") ?? "").trim() || null;
 
   if (!title || title.length > 120) return { error: e.title };
   if (description.length < 30 || description.length > 3000) {
@@ -52,6 +53,7 @@ export async function createService(formData: FormData) {
     delivery_days: deliveryDays,
     content_locale: "fr",
     status: "draft",
+    ...(coverUrl ? { cover_url: coverUrl } : {}),
   });
   if (error) return { error: e.save };
 
