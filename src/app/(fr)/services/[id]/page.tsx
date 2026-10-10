@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
-import { categoryMeta } from "@/lib/categories";
+import { categoryMeta, categoryGradient } from "@/lib/categories";
 import { ServiceOrderForm } from "@/components/orders/service-order-form";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
+import { getServices } from "@/lib/catalog";
+import { ServiceCard } from "@/components/catalog/service-card";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +20,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   if (!UUID_RE.test(id)) return { title: "Prestation introuvable" };
   const supabase = await createClient();
-  const { data } = await supabase.from("services").select("title, description").eq("id", id).maybeSingle();
+  const { data } = await supabase
+    .from("services")
+    .select("title, description")
+    .eq("id", id)
+    .maybeSingle();
   const locale = await visitorLocale();
   const t = getCatalogTexts(locale);
   return {
@@ -33,38 +40,69 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   const t = getCatalogTexts(locale);
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: service } = await supabase
     .from("services")
-    .select("id, title, description, price_minor, currency, delivery_days, status, provider_id, category:categories(slug, name_fr, name_en)")
+    .select(
+      "id, title, description, price_minor, currency, delivery_days, status, provider_id, cover_url, category:categories(slug, name_fr, name_en)"
+    )
     .eq("id", id)
     .maybeSingle();
   if (!service) notFound();
 
-  const [
-    { data: provider },
-    { data: providerProfile },
-    { data: reviewRows },
-    { data: otherServices },
-  ] = await Promise.all([
-    supabase.from("provider_directory").select("display_name, country_code").eq("id", service.provider_id).maybeSingle(),
-    supabase.from("provider_profiles").select("headline, bio, rating_avg, rating_count, completed_orders").eq("profile_id", service.provider_id).maybeSingle(),
-    supabase.from("reviews").select("rating").eq("target_id", service.provider_id),
-    supabase
-      .from("services")
-      .select("id, title, price_minor, currency, delivery_days")
-      .eq("provider_id", service.provider_id)
-      .eq("status", "active")
-      .neq("id", service.id)
-      .limit(3),
-  ]);
-
   const category = Array.isArray(service.category) ? service.category[0] : service.category;
   const meta = category ? categoryMeta(category.slug) : null;
-  const reviews = reviewRows ?? [];
-  const avg = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
+  const gradient = categoryGradient(category?.slug);
+
+  const [{ data: provider }, { data: providerProfile }, { data: reviewRows }] =
+    await Promise.all([
+      supabase
+        .from("provider_directory")
+        .select("display_name, country_code")
+        .eq("id", service.provider_id)
+        .maybeSingle(),
+      supabase
+        .from("provider_profiles")
+        .select("headline, bio, rating_avg, rating_count, completed_orders")
+        .eq("profile_id", service.provider_id)
+        .maybeSingle(),
+      supabase
+        .from("reviews")
+        .select("id, rating, comment, created_at")
+        .eq("target_id", service.provider_id),
+    ]);
+
+  const reviews = (reviewRows ?? []) as {
+    id: string;
+    rating: number;
+    comment: string | null;
+    created_at: string;
+  }[];
+  const avg =
+    reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
   const isOwner = user?.id === service.provider_id;
+
+  // Recommended services — same category, other providers
+  const allCatServices = category?.slug
+    ? await getServices({ categorySlug: category.slug })
+    : [];
+  const recommended = allCatServices
+    .filter((s) => s.id !== id && s.provider?.id !== service.provider_id)
+    .slice(0, 4);
+
+  // Rating breakdown bars
+  const breakdown = [5, 4, 3, 2, 1].map((n) => ({
+    star: n,
+    count: reviews.filter((r) => r.rating === n).length,
+  }));
+  const maxBreakdown = Math.max(...breakdown.map((b) => b.count), 1);
+
+  const providerInitials = (provider?.display_name ?? "P").slice(0, 2).toUpperCase();
+  const categoryName =
+    locale === "en" ? category?.name_en ?? category?.name_fr : category?.name_fr;
 
   const trustItems =
     locale === "en"
@@ -82,17 +120,23 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   return (
     <>
       <Header locale={locale} />
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {/* Fil d'Ariane */}
-        <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-[var(--subtle)]" aria-label="breadcrumb">
+        <nav
+          className="mb-6 flex flex-wrap items-center gap-2 text-sm text-[var(--subtle)]"
+          aria-label="breadcrumb"
+        >
           <Link href="/services" className="hover:text-[var(--foreground)]">
             {t.listTitle}
           </Link>
           <span aria-hidden>›</span>
           {category && (
             <>
-              <Link href={`/services?categorie=${category.slug}`} className="hover:text-[var(--foreground)]">
-                {locale === "en" ? category.name_en ?? category.name_fr : category.name_fr}
+              <Link
+                href={`/services?categorie=${category.slug}`}
+                className="hover:text-[var(--foreground)]"
+              >
+                {categoryName}
               </Link>
               <span aria-hidden>›</span>
             </>
@@ -100,144 +144,322 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           <span className="truncate text-[var(--foreground)]">{service.title}</span>
         </nav>
 
-        <div className="grid gap-10 lg:grid-cols-[1fr_380px]">
+        <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
           {/* ── Colonne principale ── */}
-          <div className="space-y-10">
-            <article>
+          <div className="space-y-8">
+            {/* Hero cover image */}
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl">
+              {service.cover_url ? (
+                <Image
+                  src={service.cover_url}
+                  alt={service.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 65vw"
+                  priority
+                />
+              ) : (
+                <div
+                  className="flex h-full w-full items-center justify-center"
+                  style={{ background: gradient }}
+                  aria-hidden
+                >
+                  {meta?.icon ? (
+                    <meta.icon className="h-24 w-24 text-white/20" />
+                  ) : (
+                    <span className="text-6xl font-bold text-white/25">{providerInitials}</span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Title + category badge + provider row */}
+            <div>
               {meta && (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--subtle)]">
                   <meta.icon className="h-3.5 w-3.5" aria-hidden />
-                  {locale === "en" ? category?.name_en ?? category?.name_fr : category?.name_fr}
+                  {categoryName}
                 </span>
               )}
+              <h1 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
+                {service.title}
+              </h1>
 
-              <h1 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl">{service.title}</h1>
-
-              {/* Provider headline + rating */}
+              {/* Provider chip + rating */}
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Link
                   href={`/prestataires/${service.provider_id}`}
-                  className="inline-flex items-center gap-2 text-sm text-[var(--subtle)] hover:text-[var(--foreground)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition-colors hover:border-[var(--color-brand-300)]"
                 >
                   <span
                     aria-hidden
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ background: gradient }}
                   >
-                    {(provider?.display_name ?? "P").slice(0, 2).toUpperCase()}
+                    {providerInitials}
                   </span>
-                  <span className="font-medium">{provider?.display_name ?? t.detailProvider}</span>
-                  {provider?.country_code && <span className="text-[var(--subtle)]">· {provider.country_code}</span>}
+                  <span className="font-semibold">
+                    {provider?.display_name ?? t.detailProvider}
+                  </span>
+                  {provider?.country_code && (
+                    <span className="text-[var(--subtle)]">· {provider.country_code}</span>
+                  )}
                 </Link>
-                {avg !== null && (
-                  <span className="text-sm text-[var(--subtle)]">
-                    ★ {avg.toFixed(1)} ({reviews.length})
+
+                {avg !== null ? (
+                  <span className="flex items-center gap-1 text-sm">
+                    <span className="text-amber-400">
+                      {"★".repeat(Math.min(Math.round(avg), 5))}
+                      {"☆".repeat(Math.max(0, 5 - Math.round(avg)))}
+                    </span>
+                    <span className="font-semibold text-amber-600">{avg.toFixed(1)}</span>
+                    <span className="text-[var(--subtle)]">
+                      ({reviews.length} {t.reviewsCount.toLowerCase()})
+                    </span>
                   </span>
+                ) : (
+                  <span className="text-sm text-[var(--subtle)]">{t.noReviews}</span>
                 )}
-                {!avg && <span className="text-sm text-[var(--subtle)]">{t.noReviews}</span>}
               </div>
+            </div>
 
-              <div className="mt-8 whitespace-pre-line text-base leading-relaxed">{service.description}</div>
-            </article>
+            {/* Description */}
+            <section>
+              <h2 className="font-display text-xl font-bold">
+                {locale === "en" ? "About the service" : "À propos de cette prestation"}
+              </h2>
+              <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-[var(--subtle)]">
+                {service.description}
+              </div>
+            </section>
 
-            {/* À propos du prestataire */}
+            {/* About the provider */}
             {(providerProfile?.bio || providerProfile?.headline) && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <div className="flex items-center gap-3">
+                <h2 className="font-display text-xl font-bold">
+                  {locale === "en"
+                    ? `About ${provider?.display_name ?? "the provider"}`
+                    : `À propos de ${provider?.display_name ?? "ce prestataire"}`}
+                </h2>
+                <div className="mt-5 flex items-start gap-4">
                   <span
                     aria-hidden
-                    className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-base font-bold text-[var(--color-brand-700)]"
+                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
+                    style={{ background: gradient }}
                   >
-                    {(provider?.display_name ?? "P").slice(0, 2).toUpperCase()}
+                    {providerInitials}
                   </span>
-                  <div>
-                    <p className="font-semibold">{provider?.display_name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-semibold">{provider?.display_name}</p>
                     {providerProfile.headline && (
-                      <p className="text-sm text-[var(--subtle)]">{providerProfile.headline}</p>
+                      <p className="mt-0.5 text-sm text-[var(--subtle)]">
+                        {providerProfile.headline}
+                      </p>
                     )}
+                    <div className="mt-3 flex flex-wrap gap-6 text-sm">
+                      {providerProfile.completed_orders != null &&
+                        providerProfile.completed_orders > 0 && (
+                          <div>
+                            <p className="font-bold">{providerProfile.completed_orders}</p>
+                            <p className="text-xs text-[var(--subtle)]">{t.missions}</p>
+                          </div>
+                        )}
+                      {providerProfile.rating_avg != null && (
+                        <div>
+                          <p className="font-bold">
+                            {Number(providerProfile.rating_avg).toFixed(1)}
+                            <span className="ml-1 font-normal text-amber-400">★</span>
+                          </p>
+                          <p className="text-xs text-[var(--subtle)]">{t.rating}</p>
+                        </div>
+                      )}
+                      {provider?.country_code && (
+                        <div>
+                          <p className="font-bold">{provider.country_code}</p>
+                          <p className="text-xs text-[var(--subtle)]">
+                            {locale === "en" ? "Location" : "Localisation"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 {providerProfile.bio && (
-                  <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-[var(--subtle)]">
+                  <p className="mt-4 text-sm leading-relaxed text-[var(--subtle)]">
                     {providerProfile.bio}
                   </p>
                 )}
-                <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--subtle)]">
-                  {providerProfile.completed_orders != null && providerProfile.completed_orders > 0 && (
-                    <span>✓ {providerProfile.completed_orders} {locale === "en" ? "missions" : "missions"}</span>
-                  )}
-                  {providerProfile.rating_avg && (
-                    <span>★ {Number(providerProfile.rating_avg).toFixed(1)} / 5</span>
-                  )}
-                </div>
                 <Link
                   href={`/prestataires/${service.provider_id}`}
-                  className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand-600)] hover:underline"
+                  className="mt-4 inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
                 >
                   {locale === "en" ? "View full profile →" : "Voir le profil complet →"}
                 </Link>
               </section>
             )}
 
-            {/* Autres services de ce prestataire */}
-            {(otherServices ?? []).length > 0 && (
-              <section>
-                <h2 className="font-display text-xl font-bold">
-                  {locale === "en" ? "Other services by this provider" : "Autres prestations de ce prestataire"}
-                </h2>
-                <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {(otherServices ?? []).map((s) => (
-                    <li key={s.id}>
-                      <Link
-                        href={`/services/${s.id}`}
-                        className="block rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 transition-all hover:-translate-y-px hover:border-[var(--color-brand-300)] hover:shadow-md"
-                      >
-                        <p className="font-semibold leading-snug">{s.title}</p>
-                        <p className="mt-3 text-sm text-[var(--subtle)]">
-                          {formatMoney(BigInt(s.price_minor), s.currency, locale)} ·{" "}
-                          {s.delivery_days} {s.delivery_days > 1 ? t.days : t.day}
+            {/* Reviews section */}
+            <section>
+              <div className="flex items-center gap-3">
+                <h2 className="font-display text-xl font-bold">{t.reviews}</h2>
+                {avg !== null && (
+                  <span className="flex items-center gap-1 text-sm font-semibold">
+                    <span className="text-amber-400">★</span>
+                    <span>{avg.toFixed(1)}</span>
+                    <span className="font-normal text-[var(--subtle)]">({reviews.length})</span>
+                  </span>
+                )}
+              </div>
+
+              {reviews.length === 0 ? (
+                <p className="mt-4 text-sm text-[var(--subtle)]">{t.noReviewsList}</p>
+              ) : (
+                <div className="mt-6 space-y-6">
+                  {/* Rating summary + breakdown bars */}
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
+                    <div className="flex flex-wrap items-center gap-6">
+                      <div className="text-center">
+                        <p className="text-5xl font-bold">{avg!.toFixed(1)}</p>
+                        <p className="mt-1 text-lg text-amber-400">
+                          {"★".repeat(Math.min(Math.round(avg!), 5))}
+                          {"☆".repeat(Math.max(0, 5 - Math.round(avg!)))}
                         </p>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+                        <p className="mt-1 text-xs text-[var(--subtle)]">
+                          {reviews.length} {t.reviewsCount.toLowerCase()}
+                        </p>
+                      </div>
+                      <div className="flex-1 min-w-[160px] space-y-2">
+                        {breakdown.map(({ star, count }) => (
+                          <div key={star} className="flex items-center gap-2 text-xs">
+                            <span className="w-4 text-right text-[var(--subtle)]">{star}</span>
+                            <span className="text-amber-400">★</span>
+                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
+                              <div
+                                className="h-full rounded-full bg-amber-400 transition-all"
+                                style={{ width: `${(count / maxBreakdown) * 100}%` }}
+                              />
+                            </div>
+                            <span className="w-4 text-[var(--subtle)]">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Individual reviews */}
+                  <div className="divide-y divide-[var(--border)]">
+                    {reviews.slice(0, 6).map((review, idx) => (
+                      <div key={review.id ?? idx} className="py-5 first:pt-0">
+                        <div className="flex items-start gap-3">
+                          <span
+                            aria-hidden
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--subtle)]"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+                            </svg>
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm font-semibold">
+                                {locale === "en" ? "Verified Client" : "Client vérifié"}
+                              </span>
+                              <span className="text-xs text-amber-400">
+                                {"★".repeat(review.rating)}
+                                {"☆".repeat(5 - review.rating)}
+                              </span>
+                              {review.created_at && (
+                                <span className="text-xs text-[var(--subtle)]">
+                                  {new Date(review.created_at).toLocaleDateString(
+                                    locale === "fr" ? "fr-FR" : "en-US",
+                                    { year: "numeric", month: "short", day: "numeric" }
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                            {review.comment ? (
+                              <p className="mt-1.5 text-sm leading-relaxed text-[var(--subtle)]">
+                                {review.comment}
+                              </p>
+                            ) : (
+                              <p className="mt-1.5 text-sm italic text-[var(--subtle)]">
+                                {locale === "en" ? "No comment." : "Pas de commentaire."}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
           </div>
 
           {/* ── Sidebar de commande ── */}
-          <aside className="space-y-4 lg:sticky lg:top-6 h-fit">
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-              <p className="font-display text-2xl font-bold">
-                {formatMoney(BigInt(service.price_minor), service.currency, locale)}
-              </p>
-              <p className="mt-1 text-sm text-[var(--subtle)]">
-                {locale === "en" ? "Delivery in" : "Livraison en"}{" "}
-                <strong>{service.delivery_days}</strong>{" "}
-                {service.delivery_days > 1 ? t.days : t.day}
-              </p>
+          <aside className="h-fit space-y-4 lg:sticky lg:top-6">
+            {/* Pricing + CTA card */}
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+              <div className="border-b border-[var(--border)] px-6 pb-4 pt-5">
+                <p className="text-xs font-medium uppercase tracking-wider text-[var(--subtle)]">
+                  {t.from}
+                </p>
+                <p className="font-display text-3xl font-bold text-[var(--color-brand-600)]">
+                  {formatMoney(BigInt(service.price_minor), service.currency, locale)}
+                </p>
+                <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--subtle)]">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  {locale === "en" ? "Delivery in" : "Livraison en"}{" "}
+                  <strong className="font-semibold text-[var(--foreground)]">
+                    {service.delivery_days}
+                  </strong>{" "}
+                  {service.delivery_days > 1 ? t.days : t.day}
+                </p>
+              </div>
 
-              <div className="mt-6">
+              <div className="space-y-3 p-6">
                 {!user ? (
                   <Link
                     href="/auth"
-                    className="block rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+                    className="flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
                   >
                     {t.loginToOrder}
                   </Link>
                 ) : isOwner ? (
-                  <p className="text-sm text-[var(--subtle)]">{t.ownService}</p>
+                  <p className="text-center text-sm text-[var(--subtle)]">{t.ownService}</p>
                 ) : (
-                  <ServiceOrderForm serviceId={service.id} locale={locale} />
+                  <>
+                    <ServiceOrderForm serviceId={service.id} locale={locale} />
+                    <Link
+                      href={`/prestataires/${service.provider_id}`}
+                      className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+                    >
+                      {locale === "en" ? "View profile" : "Voir le profil"}
+                    </Link>
+                  </>
                 )}
               </div>
             </div>
 
-            {/* Garanties */}
+            {/* Trust badges */}
             <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
               <ul className="space-y-3">
                 {trustItems.map((item) => (
                   <li key={item.label} className="flex items-start gap-3 text-sm">
-                    <span aria-hidden className="mt-0.5 text-base">{item.icon}</span>
+                    <span aria-hidden className="mt-0.5 text-base">
+                      {item.icon}
+                    </span>
                     <span className="leading-snug text-[var(--subtle)]">{item.label}</span>
                   </li>
                 ))}
@@ -245,6 +467,20 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             </div>
           </aside>
         </div>
+
+        {/* Recommended services */}
+        {recommended.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-display text-xl font-bold">
+              {locale === "en" ? "Others also viewed" : "Les clients ont aussi consulté"}
+            </h2>
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {recommended.map((s) => (
+                <ServiceCard key={s.id} service={s} locale={locale} />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer locale={locale} />
     </>
