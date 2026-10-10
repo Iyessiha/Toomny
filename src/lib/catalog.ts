@@ -1,15 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/dictionaries";
 
-/**
- * Lecture du catalogue public.
- *
- * On passe par supabase-js et la clé anonyme plutôt que par Drizzle : les
- * politiques RLS et les droits colonne par colonne définis en base sont alors
- * la seule autorité sur ce qui sort. Aucun mot de passe de base n'est requis,
- * et une erreur de code ici ne peut pas exposer un numéro mobile money.
- */
-
 export type Category = {
   id: string;
   slug: string;
@@ -26,7 +17,22 @@ export type ServiceCard = {
   currency: string;
   delivery_days: number;
   category_id: string;
-  provider: { display_name: string | null; country_code: string | null } | null;
+  category_slug: string | null;
+  cover_url: string | null;
+  provider: {
+    id: string;
+    display_name: string | null;
+    country_code: string | null;
+    rating_avg: number | null;
+    rating_count: number;
+  } | null;
+};
+
+export type ServiceFilters = {
+  categorySlug?: string;
+  q?: string;
+  maxPrice?: number;
+  sort?: "recent" | "rating";
 };
 
 export function categoryName(c: Category, locale: Locale): string {
@@ -47,14 +53,14 @@ export async function getCategories(): Promise<Category[]> {
   return (data ?? []) as Category[];
 }
 
-export async function getServices(categorySlug?: string): Promise<ServiceCard[]> {
+export async function getServices(filters: ServiceFilters = {}): Promise<ServiceCard[]> {
+  const { categorySlug, q, maxPrice, sort = "recent" } = filters;
   const supabase = await createClient();
 
   let query = supabase
     .from("services")
-    .select("id, title, description, price_minor, currency, delivery_days, category_id, provider_id")
+    .select("id, title, description, price_minor, currency, delivery_days, category_id, cover_url, provider_id")
     .eq("status", "active")
-    .order("created_at", { ascending: false })
     .limit(48);
 
   if (categorySlug) {
@@ -63,36 +69,64 @@ export async function getServices(categorySlug?: string): Promise<ServiceCard[]>
       .select("id")
       .eq("slug", categorySlug)
       .maybeSingle();
-
     if (!cat) return [];
     query = query.eq("category_id", cat.id);
   }
 
-  const { data, error } = await query;
+  if (q) {
+    query = query.ilike("title", `%${q}%`);
+  }
 
+  if (maxPrice) {
+    query = query.lte("price_minor", maxPrice);
+  }
+
+  if (sort === "recent") {
+    query = query.order("created_at", { ascending: false });
+  } else {
+    query = query.order("created_at", { ascending: false });
+  }
+
+  const { data, error } = await query;
   if (error) {
     console.error("getServices:", error.message);
     return [];
   }
 
-  const rows = (data ?? []) as (Omit<ServiceCard, "provider"> & { provider_id: string })[];
+  const rows = (data ?? []) as (Omit<ServiceCard, "provider" | "category_slug"> & { provider_id: string })[];
   if (rows.length === 0) return [];
 
-  // Vue publique : seuls le nom affiché et le pays des prestataires sont exposés,
-  // jamais leur téléphone ni leur e-mail.
-  const providerIds = [...new Set(rows.map((r) => r.provider_id))];
-  const { data: providers } = await supabase
-    .from("provider_directory")
-    .select("id, display_name, country_code")
-    .in("id", providerIds);
+  const [allCategories, providers, profiles] = await Promise.all([
+    supabase.from("categories").select("id, slug"),
+    supabase
+      .from("provider_directory")
+      .select("id, display_name, country_code")
+      .in("id", [...new Set(rows.map((r) => r.provider_id))]),
+    supabase
+      .from("provider_profiles")
+      .select("profile_id, rating_avg, rating_count")
+      .in("profile_id", [...new Set(rows.map((r) => r.provider_id))]),
+  ]);
 
-  const byId = new Map((providers ?? []).map((p) => [p.id as string, p]));
+  const catById = new Map(((allCategories.data ?? []) as { id: string; slug: string }[]).map((c) => [c.id, c.slug]));
+  const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((p) => [p.id, p]));
+  const profById = new Map(((profiles.data ?? []) as { profile_id: string; rating_avg: number | null; rating_count: number }[]).map((p) => [p.profile_id, p]));
 
   return rows.map(({ provider_id, ...r }) => {
-    const p = byId.get(provider_id);
+    const dir = dirById.get(provider_id);
+    const prof = profById.get(provider_id);
     return {
       ...r,
-      provider: p ? { display_name: p.display_name, country_code: p.country_code } : null,
+      category_slug: catById.get(r.category_id) ?? null,
+      provider: dir
+        ? {
+            id: provider_id,
+            display_name: dir.display_name,
+            country_code: dir.country_code,
+            rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null,
+            rating_count: prof?.rating_count ?? 0,
+          }
+        : null,
     };
   });
 }

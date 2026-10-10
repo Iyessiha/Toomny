@@ -132,7 +132,32 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           </div>
 
           {/* Rail pills — preuve sociale immédiate, sans logos flottants. */}
-          <div data-reveal style={{ transitionDelay: "200ms" }} className="mt-8 flex flex-wrap items-center gap-2">
+          {/* Barre de recherche */}
+          <form
+            data-reveal
+            style={{ transitionDelay: "175ms" }}
+            method="GET"
+            action="/services"
+            className="mt-8 flex w-full max-w-lg overflow-hidden rounded-full border border-[var(--border)] bg-[var(--background)] shadow-lg shadow-black/[0.06] focus-within:border-[var(--color-brand-400)] focus-within:ring-2 focus-within:ring-[var(--color-brand-400)]/20"
+          >
+            <input
+              type="search"
+              name="q"
+              placeholder={locale === "fr" ? "Que recherchez-vous ?" : "What are you looking for?"}
+              className="flex-1 bg-transparent px-5 py-3 text-sm outline-none"
+            />
+            <button
+              type="submit"
+              className="m-1.5 flex shrink-0 items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)]"
+            >
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />
+              </svg>
+              {locale === "fr" ? "Rechercher" : "Search"}
+            </button>
+          </form>
+
+          <div data-reveal style={{ transitionDelay: "200ms" }} className="mt-6 flex flex-wrap items-center gap-2">
             <span className="mr-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--subtle)]">
               {t.railsLabel}
             </span>
