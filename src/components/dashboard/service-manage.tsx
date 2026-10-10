@@ -113,13 +113,20 @@ export function ServiceManage({
     setError(null);
     setSuccess(null);
     setUploadError(null);
-    // Init package slots from existing packages
+    // Init package slots from existing packages — pré-cocher et pré-remplir si vide
     const existing = packagesByService[s.id] ?? [];
+    const basePrice = s.price_minor;
+    const baseDays = s.delivery_days;
     setPkgSlots([1, 2, 3].map((tier) => {
       const pkg = existing.find((p) => p.tier === tier);
       if (pkg) return { enabled: true, name: pkg.name, description: pkg.description ?? "", price: String(pkg.price_minor), deliveryDays: String(pkg.delivery_days) };
-      const defaultName = tier === 1 ? (locale === "en" ? "Basic" : "Basique") : tier === 2 ? "Standard" : "Premium";
-      return { enabled: false, name: defaultName, description: "", price: "", deliveryDays: "" };
+      // Aucun forfait existant → pré-remplir avec des valeurs suggérées
+      const multiplierPrice = tier === 1 ? 0.6 : tier === 2 ? 1.0 : 1.5;
+      const multiplierDays = tier === 1 ? 0.8 : tier === 2 ? 1.0 : 1.4;
+      const suggestedPrice = Math.round((basePrice * multiplierPrice) / 5000) * 5000 || basePrice;
+      const suggestedDays = Math.max(1, Math.round(baseDays * multiplierDays));
+      const defaultName = tier === 1 ? (locale === "en" ? "Basic" : "Essentiel") : tier === 2 ? "Standard" : "Premium";
+      return { enabled: true, name: defaultName, description: "", price: String(suggestedPrice), deliveryDays: String(suggestedDays) };
     }) as [PackageSlot, PackageSlot, PackageSlot]);
   }
 
@@ -357,6 +364,85 @@ export function ServiceManage({
             </div>
 
             <form ref={formRef} onSubmit={onEditSubmit} className="space-y-4">
+
+              {/* ── Forfaits (en premier pour visibilité) ── */}
+              <div className="rounded-xl bg-[var(--surface)] p-4">
+                <p className="text-sm font-semibold">{t.form.packages}</p>
+                <p className="mb-3 mt-0.5 text-xs text-[var(--subtle)]">{t.form.packagesHint}</p>
+                <div className="space-y-3">
+                  {([t.form.pkgBasic, t.form.pkgStandard, t.form.pkgPremium] as const).map((tierLabel, i) => {
+                    const slot = pkgSlots[i];
+                    return (
+                      <div key={i} className={`rounded-xl border ${slot.enabled ? "border-[var(--color-brand-300)] bg-[var(--background)]" : "border-[var(--border)] bg-[var(--background)]"} p-3`}>
+                        <label className="flex cursor-pointer items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={slot.enabled}
+                            onChange={(e) => setPkgSlots((prev) => {
+                              const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot];
+                              next[i] = { ...next[i], enabled: e.target.checked };
+                              return next;
+                            })}
+                            className="h-4 w-4 accent-[var(--color-brand-500)]"
+                          />
+                          <span className="text-sm font-semibold">{tierLabel}</span>
+                          {slot.enabled && slot.price && (
+                            <span className="ml-auto text-xs font-semibold text-[var(--color-brand-600)]">
+                              {Number(slot.price).toLocaleString("fr-FR")} FCFA
+                            </span>
+                          )}
+                        </label>
+                        {slot.enabled && (
+                          <div className="mt-2 space-y-2">
+                            <input
+                              type="text"
+                              value={slot.name}
+                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], name: e.target.value }; return next; })}
+                              placeholder={t.form.pkgName}
+                              maxLength={60}
+                              className={inputClass}
+                            />
+                            <textarea
+                              value={slot.description}
+                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], description: e.target.value }; return next; })}
+                              placeholder={t.form.pkgDescPlaceholder}
+                              maxLength={500}
+                              rows={2}
+                              className={inputClass}
+                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <p className="mb-1 text-[11px] text-[var(--subtle)]">Prix (FCFA)</p>
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={slot.price}
+                                  onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], price: e.target.value }; return next; })}
+                                  placeholder={t.form.pkgPrice}
+                                  className={inputClass}
+                                />
+                              </div>
+                              <div>
+                                <p className="mb-1 text-[11px] text-[var(--subtle)]">Délai (jours)</p>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  max={365}
+                                  value={slot.deliveryDays}
+                                  onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], deliveryDays: e.target.value }; return next; })}
+                                  placeholder={t.form.pkgDelivery}
+                                  className={inputClass}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Cover */}
               <div>
                 <p className="text-sm font-medium">{t.form.cover}</p>
@@ -488,73 +574,6 @@ export function ServiceManage({
                       className="h-7 min-w-[120px] flex-1 rounded-full border border-dashed border-[var(--border)] bg-transparent px-3 text-xs outline-none focus:border-[var(--color-brand-400)]"
                     />
                   )}
-                </div>
-              </div>
-
-              {/* Packages */}
-              <div>
-                <p className="text-sm font-medium">{t.form.packages}</p>
-                <p className="mb-3 mt-0.5 text-xs text-[var(--subtle)]">{t.form.packagesHint}</p>
-                <div className="space-y-3">
-                  {([t.form.pkgBasic, t.form.pkgStandard, t.form.pkgPremium] as const).map((tierLabel, i) => {
-                    const slot = pkgSlots[i];
-                    return (
-                      <div key={i} className={`rounded-xl border ${slot.enabled ? "border-[var(--color-brand-300)] bg-[var(--color-brand-50)]" : "border-[var(--border)]"} p-3`}>
-                        <label className="flex cursor-pointer items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={slot.enabled}
-                            onChange={(e) => setPkgSlots((prev) => {
-                              const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot];
-                              next[i] = { ...next[i], enabled: e.target.checked };
-                              return next;
-                            })}
-                            className="h-4 w-4 accent-[var(--color-brand-500)]"
-                          />
-                          <span className="text-sm font-semibold">{tierLabel}</span>
-                        </label>
-                        {slot.enabled && (
-                          <div className="mt-2 space-y-2">
-                            <input
-                              type="text"
-                              value={slot.name}
-                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], name: e.target.value }; return next; })}
-                              placeholder={t.form.pkgName}
-                              maxLength={60}
-                              className={inputClass}
-                            />
-                            <textarea
-                              value={slot.description}
-                              onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], description: e.target.value }; return next; })}
-                              placeholder={t.form.pkgDescPlaceholder}
-                              maxLength={500}
-                              rows={2}
-                              className={inputClass}
-                            />
-                            <div className="grid grid-cols-2 gap-2">
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                value={slot.price}
-                                onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], price: e.target.value }; return next; })}
-                                placeholder={t.form.pkgPrice}
-                                className={inputClass}
-                              />
-                              <input
-                                type="number"
-                                min={1}
-                                max={365}
-                                value={slot.deliveryDays}
-                                onChange={(e) => setPkgSlots((prev) => { const next = [...prev] as [PackageSlot, PackageSlot, PackageSlot]; next[i] = { ...next[i], deliveryDays: e.target.value }; return next; })}
-                                placeholder={t.form.pkgDelivery}
-                                className={inputClass}
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
                 </div>
               </div>
 
