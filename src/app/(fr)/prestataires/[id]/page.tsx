@@ -53,13 +53,27 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .eq("status", "active")
       .order("created_at", { ascending: false })
       .limit(24),
-    supabase.from("reviews").select("id, rating, comment, created_at").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("reviews").select("id, rating, comment, created_at, author_id").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
   ]);
 
   if (!person) notFound();
 
   const list = services ?? [];
-  const reviewList = reviews ?? [];
+  const reviewList = (reviews ?? []) as { id: string; rating: number; comment: string | null; created_at: string; author_id: string }[];
+
+  const authorIds = [...new Set(reviewList.map((r) => r.author_id).filter(Boolean))];
+  const { data: authorProfiles } = authorIds.length
+    ? await supabase.from("profiles").select("id, display_name, first_name, last_name").in("id", authorIds)
+    : { data: [] };
+
+  function authorName(authorId: string): string {
+    const p = (authorProfiles ?? []).find((x) => x.id === authorId);
+    if (!p) return locale === "en" ? "Verified Client" : "Client vérifié";
+    if (p.display_name) return p.display_name;
+    const first = p.first_name ?? "";
+    const lastInitial = p.last_name ? ` ${p.last_name.charAt(0).toUpperCase()}.` : "";
+    return (first + lastInitial).trim() || (locale === "en" ? "Verified Client" : "Client vérifié");
+  }
   const avg = profile?.rating_avg ? Number(profile.rating_avg) : null;
   const initials = (person.display_name ?? "P").slice(0, 2).toUpperCase();
   const isVerified = person.verification_status === "verified";
@@ -180,11 +194,22 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <ul className="mt-4 space-y-4">
               {reviewList.map((r) => (
                 <li key={r.id} className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">
-                      {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                  <div className="flex items-start gap-3">
+                    <span
+                      aria-hidden
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
+                    >
+                      {authorName(r.author_id).charAt(0).toUpperCase()}
                     </span>
-                    <span className="text-sm text-[var(--subtle)]">{r.rating} {t.ratingOutOf}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold leading-none">{authorName(r.author_id)}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span className="text-sm font-semibold">
+                          {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                        </span>
+                        <span className="text-sm text-[var(--subtle)]">{r.rating} {t.ratingOutOf}</span>
+                      </div>
+                    </div>
                   </div>
                   {r.comment && (
                     <p className="mt-2 text-sm leading-relaxed">{r.comment}</p>

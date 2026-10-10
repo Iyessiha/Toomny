@@ -71,7 +71,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         .maybeSingle(),
       supabase
         .from("reviews")
-        .select("id, rating, comment, created_at")
+        .select("id, rating, comment, created_at, author_id")
         .eq("target_id", service.provider_id),
     ]);
 
@@ -80,7 +80,26 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     rating: number;
     comment: string | null;
     created_at: string;
+    author_id: string;
   }[];
+
+  // Profils des acheteurs (pour afficher le prénom + initiale)
+  const authorIds = [...new Set(reviews.map((r) => r.author_id).filter(Boolean))];
+  const { data: authorProfiles } = authorIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, display_name, first_name, last_name")
+        .in("id", authorIds)
+    : { data: [] };
+
+  function authorName(authorId: string): string {
+    const p = (authorProfiles ?? []).find((x) => x.id === authorId);
+    if (!p) return locale === "en" ? "Verified Client" : "Client vérifié";
+    if (p.display_name) return p.display_name;
+    const first = p.first_name ?? "";
+    const lastInitial = p.last_name ? ` ${p.last_name.charAt(0).toUpperCase()}.` : "";
+    return (first + lastInitial).trim() || (locale === "en" ? "Verified Client" : "Client vérifié");
+  }
   const avg =
     reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
   const isOwner = user?.id === service.provider_id;
@@ -373,16 +392,14 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                         <div className="flex items-start gap-3">
                           <span
                             aria-hidden
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--subtle)]"
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
                           >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-                            </svg>
+                            {authorName(review.author_id).charAt(0).toUpperCase()}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="text-sm font-semibold">
-                                {locale === "en" ? "Verified Client" : "Client vérifié"}
+                                {authorName(review.author_id)}
                               </span>
                               <span className="text-xs text-amber-400">
                                 {"★".repeat(review.rating)}
