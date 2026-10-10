@@ -90,6 +90,20 @@ export function ServiceCard({ service: s, locale }: Props) {
           {s.title}
         </p>
 
+        {/* Tags */}
+        {s.tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {s.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-[var(--surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--subtle)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Price + delivery */}
         <div className="mt-3 flex items-end justify-between border-t border-[var(--border)] pt-3">
           <p className="text-[10px] text-[var(--subtle)]">

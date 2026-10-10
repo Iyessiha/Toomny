@@ -23,6 +23,7 @@ type Service = {
   category_id: string | null;
   cover_url: string | null;
   gallery_urls: string[] | null;
+  tags: string[] | null;
 };
 
 const inputClass =
@@ -66,11 +67,17 @@ export function ServiceManage({
   const [galleryError, setGalleryError] = useState<string | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  // Tags
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
   function openEdit(s: Service) {
     setEditing(s);
     setCoverUrl(s.cover_url);
     setCoverPreview(s.cover_url);
     setGalleryUrls(s.gallery_urls ?? []);
+    setTags(s.tags ?? []);
+    setTagInput("");
     setGalleryError(null);
     setError(null);
     setSuccess(null);
@@ -82,9 +89,21 @@ export function ServiceManage({
     setCoverUrl(null);
     setCoverPreview(null);
     setGalleryUrls([]);
+    setTags([]);
+    setTagInput("");
     setGalleryError(null);
     setError(null);
     setSuccess(null);
+  }
+
+  function addTag(raw: string) {
+    const tag = raw.trim().slice(0, 30);
+    if (!tag || tags.includes(tag) || tags.length >= 10) return;
+    setTags((prev) => [...prev, tag]);
+  }
+
+  function removeTag(tag: string) {
+    setTags((prev) => prev.filter((t) => t !== tag));
   }
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -279,6 +298,7 @@ export function ServiceManage({
                 <p className="text-sm font-medium">{t.form.cover}</p>
                 <input type="hidden" name="coverUrl" value={coverUrl ?? ""} />
                 <input type="hidden" name="galleryUrls" value={galleryUrls.join(",")} />
+                <input type="hidden" name="tags" value={tags.join(",")} />
                 {coverPreview ? (
                   <div className="relative mt-1.5 aspect-[16/9] overflow-hidden rounded-xl bg-[var(--surface)]">
                     <Image src={coverPreview} alt="" fill className="object-cover" sizes="512px" unoptimized />
@@ -362,6 +382,49 @@ export function ServiceManage({
                   )}
                 </div>
                 {galleryError && <p className="mt-1 text-xs text-red-600">{galleryError}</p>}
+              </div>
+
+              {/* Tags */}
+              <div>
+                <p className="text-sm font-medium">{t.form.tags}</p>
+                <p className="mb-2 mt-0.5 text-xs text-[var(--subtle)]">{t.form.tagsHint}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-700)]"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        aria-label={t.form.tagsRemove}
+                        className="ml-0.5 opacity-60 hover:opacity-100"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                  {tags.length < 10 && (
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addTag(tagInput);
+                          setTagInput("");
+                        }
+                      }}
+                      onBlur={() => {
+                        if (tagInput.trim()) { addTag(tagInput); setTagInput(""); }
+                      }}
+                      placeholder={tags.length === 0 ? t.form.tagsPlaceholder : ""}
+                      className="h-7 min-w-[120px] flex-1 rounded-full border border-dashed border-[var(--border)] bg-transparent px-3 text-xs outline-none focus:border-[var(--color-brand-400)]"
+                    />
+                  )}
+                </div>
               </div>
 
               <div>

@@ -47,7 +47,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   const { data: service } = await supabase
     .from("services")
     .select(
-      "id, title, description, price_minor, currency, delivery_days, status, provider_id, cover_url, gallery_urls, category:categories(slug, name_fr, name_en)"
+      "id, title, description, price_minor, currency, delivery_days, status, provider_id, cover_url, gallery_urls, tags, category:categories(slug, name_fr, name_en)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -271,6 +271,20 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                 )}
               </div>
             </div>
+
+            {/* Tags */}
+            {Array.isArray(service.tags) && service.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(service.tags as string[]).map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium text-[var(--subtle)]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Description */}
             <section>

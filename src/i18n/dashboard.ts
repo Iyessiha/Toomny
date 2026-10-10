@@ -140,6 +140,10 @@ const fr = {
       galleryUploading: "Envoi…",
       galleryRemove: "✕",
       galleryError: "L'image n'a pas pu être envoyée.",
+      tags: "Mots-clés",
+      tagsHint: "Appuyez sur Entrée pour ajouter · 10 mots-clés max",
+      tagsPlaceholder: "ex : logo, identité visuelle, Figma…",
+      tagsRemove: "Supprimer le tag",
     },
     errors: {
       notProvider: "Réservé aux comptes prestataires.",
@@ -371,6 +375,10 @@ const en: DashboardTexts = {
       galleryUploading: "Uploading…",
       galleryRemove: "✕",
       galleryError: "The image could not be uploaded.",
+      tags: "Keywords",
+      tagsHint: "Press Enter to add · Max 10 keywords",
+      tagsPlaceholder: "e.g. logo, branding, Figma…",
+      tagsRemove: "Remove tag",
     },
     errors: {
       notProvider: "Reserved for provider accounts.",

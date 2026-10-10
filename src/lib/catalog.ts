@@ -19,6 +19,7 @@ export type ServiceCard = {
   category_id: string;
   category_slug: string | null;
   cover_url: string | null;
+  tags: string[];
   provider: {
     id: string;
     display_name: string | null;
@@ -64,7 +65,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
 
   let query = supabase
     .from("services")
-    .select("id, title, description, price_minor, currency, delivery_days, category_id, cover_url, provider_id")
+    .select("id, title, description, price_minor, currency, delivery_days, category_id, cover_url, tags, provider_id")
     .eq("status", "active")
     .range(offset, offset + CATALOG_PAGE_SIZE); // fetch PAGE_SIZE+1 to detect hasMore
 
