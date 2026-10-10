@@ -7,6 +7,7 @@ import { getDashboardData, statusTone } from "@/lib/dashboard";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
 import { formatMoney } from "@/lib/money";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/dictionaries";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -14,14 +15,29 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
+type ServicePreview = {
+  id: string;
+  title: string;
+  status: string;
+  price_minor: number;
+};
+
 export default async function DashboardPage() {
   const user = await requireAuth();
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
 
-  return provider
-    ? <ProviderDashboard user={user} data={data} />
-    : <ClientDashboard user={user} data={data} />;
+  if (provider) {
+    const supabase = await createClient();
+    const { data: services } = await supabase
+      .from("services")
+      .select("id, title, status, price_minor")
+      .eq("provider_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    return <ProviderDashboard user={user} data={data} services={(services ?? []) as ServicePreview[]} />;
+  }
+  return <ClientDashboard user={user} data={data} />;
 }
 
 type User = Awaited<ReturnType<typeof requireAuth>>;
@@ -30,7 +46,7 @@ type Data = Awaited<ReturnType<typeof getDashboardData>>;
 // ---------------------------------------------------------------------------
 // Dashboard PRESTATAIRE
 // ---------------------------------------------------------------------------
-function ProviderDashboard({ user, data }: { user: User; data: Data }) {
+function ProviderDashboard({ user, data, services }: { user: User; data: Data; services: ServicePreview[] }) {
   const locale: Locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
   const cur = data.currency;
@@ -130,8 +146,73 @@ function ProviderDashboard({ user, data }: { user: User; data: Data }) {
         </Link>
       </div>
 
+      <ServicesPreviewList services={services} locale={locale} t={t} />
+
       <OrdersTable user={user} data={data} locale={locale} title={t.provider.ordersReceived} empty={{ title: t.provider.noOrdersTitle, body: t.provider.noOrdersBody, action: { href: "/dashboard/prestations", label: t.provider.publishTitle } }} />
     </DashboardShell>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Mini-liste prestations (provider dashboard)
+// ---------------------------------------------------------------------------
+function ServicesPreviewList({
+  services,
+  locale,
+  t,
+}: {
+  services: ServicePreview[];
+  locale: Locale;
+  t: ReturnType<typeof getDashboardTexts>;
+}) {
+  function statusBadge(status: string) {
+    if (status === "active") return "bg-green-100 text-green-700";
+    if (status === "paused") return "bg-yellow-100 text-yellow-700";
+    if (status === "removed") return "bg-red-100 text-red-700";
+    return "bg-[var(--surface)] text-[var(--subtle)]";
+  }
+
+  return (
+    <section className="mt-10">
+      <div className="flex items-center justify-between">
+        <h2 className="font-display text-lg font-bold">{t.nav.services}</h2>
+        <Link href="/dashboard/prestations" className="text-sm text-[var(--color-brand-600)] underline underline-offset-4">
+          {t.common.viewAll}
+        </Link>
+      </div>
+
+      {services.length === 0 ? (
+        <div className="mt-5">
+          <EmptyState
+            title={t.provider.noServicesTitle}
+            body={t.provider.noServicesBody}
+            action={{ href: "/dashboard/prestations", label: t.provider.publishTitle }}
+          />
+        </div>
+      ) : (
+        <ul className="mt-4 divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+          {services.map((s) => (
+            <li key={s.id} className="flex items-center justify-between gap-4 px-5 py-4">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{s.title}</p>
+                <p className="mt-0.5 text-xs text-[var(--subtle)]">
+                  {(s.price_minor / 1).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA
+                </p>
+              </div>
+              <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusBadge(s.status)}`}>
+                {t.service[s.status as keyof typeof t.service] ?? s.status}
+              </span>
+              <Link
+                href="/dashboard/prestations"
+                className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+              >
+                {t.services.edit}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

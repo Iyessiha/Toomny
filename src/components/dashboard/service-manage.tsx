@@ -12,6 +12,7 @@ import {
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { EmptyState } from "@/components/dashboard/shell";
 import type { Locale } from "@/i18n/dictionaries";
+import { resizeCover } from "@/lib/resize-image";
 
 type Service = {
   id: string;
@@ -146,8 +147,14 @@ export function ServiceManage({
   }
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
+    let file: File;
+    try {
+      file = await resizeCover(raw);
+    } catch {
+      file = raw;
+    }
     const preview = URL.createObjectURL(file);
     setCoverPreview(preview);
     setCoverUrl(null);

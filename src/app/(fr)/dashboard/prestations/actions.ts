@@ -75,6 +75,7 @@ export async function updateService(id: string, formData: FormData) {
   const user = await requireAuth();
   const e = getDashboardTexts(user.preferredLocale).services.errors;
   if (!isProvider(user.role)) return { error: e.notProvider };
+  if (!UUID_RE.test(id)) return { error: e.notOwner };
 
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -104,8 +105,20 @@ export async function updateService(id: string, formData: FormData) {
   }
   if (priceMinor < 1000n || priceMinor > 10_000_000n) return { error: e.priceRange };
 
+  // Verify ownership first with user's RLS-scoped client (reads all statuses via services_owner_read)
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: owned } = await supabase
+    .from("services")
+    .select("id")
+    .eq("id", id)
+    .eq("provider_id", user.id)
+    .maybeSingle();
+  if (!owned) return { error: e.notOwner };
+
+  // Use admin client to bypass the services_owner_update WITH CHECK (status <> 'active')
+  // which silently blocks updates on published services even for non-status fields.
+  const db = createAdminClient();
+  const { error } = await db
     .from("services")
     .update({
       category_id: categoryId,
@@ -116,6 +129,7 @@ export async function updateService(id: string, formData: FormData) {
       cover_url: coverUrl,
       gallery_urls: galleryUrls,
       tags,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", id)
     .eq("provider_id", user.id);

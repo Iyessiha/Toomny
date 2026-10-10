@@ -6,6 +6,7 @@ import Image from "next/image";
 import { createService } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import type { Locale } from "@/i18n/dictionaries";
+import { resizeCover } from "@/lib/resize-image";
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
@@ -32,8 +33,15 @@ export function ServiceForm({
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
+
+    let file: File;
+    try {
+      file = await resizeCover(raw);
+    } catch {
+      file = raw;
+    }
 
     const preview = URL.createObjectURL(file);
     setCoverPreview(preview);
