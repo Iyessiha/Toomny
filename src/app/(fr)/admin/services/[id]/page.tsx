@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/catalog";
-import { DashboardShell } from "@/components/dashboard/shell";
+import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -37,16 +37,16 @@ export default async function AdminServiceEditPage({
 
   if (!service) {
     return (
-      <DashboardShell user={user} locale={locale} title="404" subtitle="" nav={[]}>
+      <AdminShell user={user} locale={locale} title="404" subtitle="" nav={[]}>
         <p>Prestation introuvable.</p>
-      </DashboardShell>
+      </AdminShell>
     );
   }
 
   const provider = Array.isArray(service.provider) ? service.provider[0] : service.provider;
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
       locale={locale}
       title={t.title}
@@ -90,6 +90,6 @@ export default async function AdminServiceEditPage({
           locale={locale}
         />
       </div>
-    </DashboardShell>
+    </AdminShell>
   );
 }

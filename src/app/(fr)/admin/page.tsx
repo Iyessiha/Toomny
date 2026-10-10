@@ -4,7 +4,8 @@ import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { StatCard, EmptyState } from "@/components/dashboard/shell";
 import { OrderTrendChart } from "@/components/admin/order-trend-chart";
 import { statusTone } from "@/lib/dashboard";
 import { formatMoney } from "@/lib/money";
@@ -31,7 +32,7 @@ export default async function AdminPage() {
   const plural = (n: number, one: string, many: string) => (n > 1 ? many : one);
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
       locale={locale}
       title={t.title}
@@ -232,6 +233,6 @@ export default async function AdminPage() {
           </div>
         )}
       </section>
-    </DashboardShell>
+    </AdminShell>
   );
 }

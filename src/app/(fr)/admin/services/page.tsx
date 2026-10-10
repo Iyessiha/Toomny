@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { EmptyState } from "@/components/dashboard/shell";
 import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
@@ -46,7 +47,7 @@ export default async function AdminServicesPage({
   });
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
       locale={locale}
       title={t.title}
@@ -132,7 +133,7 @@ export default async function AdminServicesPage({
           </table>
         </div>
       )}
-    </DashboardShell>
+    </AdminShell>
   );
 }
 

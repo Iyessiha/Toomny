@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { EmptyState } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -60,7 +61,7 @@ export default async function AdminVerificationsPage({
   ];
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
       locale={locale}
       title={t.kycPage.title}
@@ -125,6 +126,6 @@ export default async function AdminVerificationsPage({
           ))}
         </div>
       )}
-    </DashboardShell>
+    </AdminShell>
   );
 }

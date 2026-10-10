@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell } from "@/components/dashboard/shell";
+import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -25,7 +25,7 @@ export default async function AdminCategoriesPage() {
     .order("position", { ascending: true });
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
       locale={locale}
       title={t.title}
@@ -42,6 +42,6 @@ export default async function AdminCategoriesPage() {
       ]}
     >
       <CategoryManager categories={categories ?? []} locale={locale} />
-    </DashboardShell>
+    </AdminShell>
   );
 }
