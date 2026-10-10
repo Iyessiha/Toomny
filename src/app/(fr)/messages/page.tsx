@@ -25,11 +25,40 @@ export default async function MessagesPage() {
   // Commandes dont l'utilisateur est partie (RLS).
   const { data: orders } = await supabase
     .from("orders")
-    .select("id, reference, status, updated_at, service:services(title)")
+    .select("id, reference, status, updated_at, client_id, provider_id, service:services(title)")
     .order("updated_at", { ascending: false })
     .limit(60);
 
   const orderIds = orders?.map((o) => o.id) ?? [];
+
+  // Nom de l'interlocuteur pour chaque commande
+  const counterpartIds = [
+    ...new Set(
+      (orders ?? []).map((o) =>
+        o.client_id === user.id ? o.provider_id : o.client_id
+      ).filter(Boolean) as string[]
+    ),
+  ];
+  const { data: counterpartProfiles } = counterpartIds.length
+    ? await supabase
+        .from("profiles")
+        .select("id, display_name, first_name, last_name, email")
+        .in("id", counterpartIds)
+    : { data: [] };
+
+  const profileMap = new Map(
+    (counterpartProfiles ?? []).map((p) => [
+      p.id,
+      {
+        name:
+          p.display_name ??
+          ([p.first_name, p.last_name].filter(Boolean).join(" ") || p.email),
+        initials: (
+          p.display_name ?? p.first_name ?? p.email ?? "?"
+        ).slice(0, 1).toUpperCase(),
+      },
+    ])
+  );
 
   // Dernier message + comptage des non-lus par commande.
   let lastMsgMap = new Map<string, { body: string; created_at: string; mine: boolean }>();
@@ -56,12 +85,18 @@ export default async function MessagesPage() {
     }
   }
 
-  const conversations = (orders ?? []).map((o) => ({
-    ...o,
-    service: Array.isArray(o.service) ? o.service[0] : o.service,
-    lastMsg: lastMsgMap.get(o.id) ?? null,
-    unread: unreadMap.get(o.id) ?? 0,
-  }));
+  const conversations = (orders ?? []).map((o) => {
+    const counterpartId = o.client_id === user.id ? o.provider_id : o.client_id;
+    const counterpart = counterpartId ? profileMap.get(counterpartId) : undefined;
+    return {
+      ...o,
+      service: Array.isArray(o.service) ? o.service[0] : o.service,
+      lastMsg: lastMsgMap.get(o.id) ?? null,
+      unread: unreadMap.get(o.id) ?? 0,
+      counterpartName: counterpart?.name ?? null,
+      counterpartInitials: counterpart?.initials ?? o.reference.slice(-2),
+    };
+  });
 
   return (
     <DashboardShell
@@ -91,15 +126,22 @@ export default async function MessagesPage() {
                   aria-hidden
                   className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-bold text-[var(--color-brand-700)]"
                 >
-                  {c.reference.slice(-2)}
+                  {c.counterpartInitials}
                 </span>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-semibold">
-                      {c.service?.title ?? c.reference}
-                    </span>
-                    <span className="flex-none text-xs text-[var(--subtle)]">
+                    <div className="min-w-0">
+                      {c.counterpartName && (
+                        <p className="truncate text-sm font-semibold leading-tight">
+                          {c.counterpartName}
+                        </p>
+                      )}
+                      <span className={`truncate text-xs ${c.counterpartName ? "text-[var(--subtle)]" : "text-sm font-semibold"}`}>
+                        {c.service?.title ?? c.reference}
+                      </span>
+                    </div>
+                    <span className="flex-none shrink-0 text-xs text-[var(--subtle)]">
                       {c.lastMsg
                         ? new Date(c.lastMsg.created_at).toLocaleDateString(
                             locale === "en" ? "en-GB" : "fr-FR",
