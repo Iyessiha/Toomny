@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/dashboard/shell";
 import { getAccountTexts } from "@/i18n/account";
 import { visitorLocale } from "@/i18n/server-locale";
 import { deleteMyAccount } from "./actions";
+import { AccountEmailForm, AccountPasswordForm } from "@/components/dashboard/account-forms";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAccountTexts(await visitorLocale()).title };
@@ -30,7 +31,12 @@ export default async function AccountPage({
         </p>
       )}
 
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AccountEmailForm currentEmail={user.email ?? ""} locale={locale} />
+        <AccountPasswordForm locale={locale} />
+      </div>
+
+      <section className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
         <h2 className="font-display text-base font-bold">{t.exportTitle}</h2>
         <p className="mt-2 text-sm text-[var(--subtle)]">{t.exportBody}</p>
         <a
