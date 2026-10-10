@@ -47,7 +47,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   const { data: service } = await supabase
     .from("services")
     .select(
-      "id, title, description, price_minor, currency, delivery_days, status, provider_id, cover_url, category:categories(slug, name_fr, name_en)"
+      "id, title, description, price_minor, currency, delivery_days, status, provider_id, cover_url, gallery_urls, category:categories(slug, name_fr, name_en)"
     )
     .eq("id", id)
     .maybeSingle();
@@ -172,6 +172,26 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                 </div>
               )}
             </div>
+
+            {/* Gallery row (additional images) */}
+            {Array.isArray(service.gallery_urls) && service.gallery_urls.length > 0 && (
+              <div className="flex gap-3 overflow-x-auto pb-1">
+                {service.gallery_urls.map((url, i) => (
+                  <div
+                    key={url}
+                    className="relative aspect-[4/3] h-32 shrink-0 overflow-hidden rounded-xl bg-[var(--surface)]"
+                  >
+                    <Image
+                      src={url}
+                      alt={`${service.title} — image ${i + 2}`}
+                      fill
+                      className="object-cover"
+                      sizes="128px"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Title + category badge + provider row */}
             <div>

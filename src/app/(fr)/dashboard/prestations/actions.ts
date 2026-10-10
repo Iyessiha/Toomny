@@ -72,6 +72,10 @@ export async function updateService(id: string, formData: FormData) {
   const priceRaw = String(formData.get("price") ?? "").trim();
   const deliveryDays = Number(formData.get("deliveryDays"));
   const coverUrl = String(formData.get("coverUrl") ?? "").trim() || null;
+  const galleryRaw = String(formData.get("galleryUrls") ?? "").trim();
+  const galleryUrls = galleryRaw
+    ? galleryRaw.split(",").map((u) => u.trim()).filter(Boolean).slice(0, 4)
+    : [];
 
   if (!title || title.length > 120) return { error: e.title };
   if (description.length < 30 || description.length > 3000) return { error: e.description };
@@ -96,6 +100,7 @@ export async function updateService(id: string, formData: FormData) {
       price_minor: priceMinor.toString(),
       delivery_days: deliveryDays,
       cover_url: coverUrl,
+      gallery_urls: galleryUrls,
     })
     .eq("id", id)
     .eq("provider_id", user.id);

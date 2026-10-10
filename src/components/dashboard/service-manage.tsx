@@ -22,6 +22,7 @@ type Service = {
   status: string;
   category_id: string | null;
   cover_url: string | null;
+  gallery_urls: string[] | null;
 };
 
 const inputClass =
@@ -59,10 +60,18 @@ export function ServiceManage({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Gallery
+  const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [galleryError, setGalleryError] = useState<string | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
   function openEdit(s: Service) {
     setEditing(s);
     setCoverUrl(s.cover_url);
     setCoverPreview(s.cover_url);
+    setGalleryUrls(s.gallery_urls ?? []);
+    setGalleryError(null);
     setError(null);
     setSuccess(null);
     setUploadError(null);
@@ -72,6 +81,8 @@ export function ServiceManage({
     setEditing(null);
     setCoverUrl(null);
     setCoverPreview(null);
+    setGalleryUrls([]);
+    setGalleryError(null);
     setError(null);
     setSuccess(null);
   }
@@ -108,6 +119,34 @@ export function ServiceManage({
     setCoverPreview(null);
     setUploadError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function handleGalleryChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (galleryUrls.length >= 4) return;
+    setGalleryError(null);
+    setGalleryUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/services/gallery", { method: "POST", body: fd });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        setGalleryError(data.error ?? t.form.galleryError);
+      } else {
+        setGalleryUrls((prev) => [...prev, data.url!].slice(0, 4));
+      }
+    } catch {
+      setGalleryError(t.form.galleryError);
+    } finally {
+      setGalleryUploading(false);
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+    }
+  }
+
+  function removeGalleryImage(index: number) {
+    setGalleryUrls((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function onEditSubmit(e: FormEvent<HTMLFormElement>) {
@@ -239,6 +278,7 @@ export function ServiceManage({
               <div>
                 <p className="text-sm font-medium">{t.form.cover}</p>
                 <input type="hidden" name="coverUrl" value={coverUrl ?? ""} />
+                <input type="hidden" name="galleryUrls" value={galleryUrls.join(",")} />
                 {coverPreview ? (
                   <div className="relative mt-1.5 aspect-[16/9] overflow-hidden rounded-xl bg-[var(--surface)]">
                     <Image src={coverPreview} alt="" fill className="object-cover" sizes="512px" unoptimized />
@@ -274,6 +314,54 @@ export function ServiceManage({
                   </label>
                 )}
                 {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
+              </div>
+
+              {/* Gallery */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{t.form.gallery}</p>
+                  <span className="text-xs text-[var(--subtle)]">{galleryUrls.length}/4</span>
+                </div>
+                <p className="mb-2 mt-0.5 text-xs text-[var(--subtle)]">{t.form.galleryHint}</p>
+                <div className="flex flex-wrap gap-2">
+                  {galleryUrls.map((url, i) => (
+                    <div key={url} className="relative h-20 w-20 overflow-hidden rounded-xl bg-[var(--surface)]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt="" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(i)}
+                        className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold text-white hover:bg-black/80"
+                        aria-label="Supprimer"
+                      >
+                        {t.form.galleryRemove}
+                      </button>
+                    </div>
+                  ))}
+                  {galleryUrls.length < 4 && (
+                    <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] ${galleryUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                      {galleryUploading ? (
+                        <span className="text-[10px] font-semibold">{t.form.galleryUploading}</span>
+                      ) : (
+                        <>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                          </svg>
+                          <span className="text-[10px] font-medium text-center leading-tight px-1">{t.form.galleryAdd}</span>
+                        </>
+                      )}
+                      <input
+                        ref={galleryInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="sr-only"
+                        onChange={handleGalleryChange}
+                        disabled={galleryUploading}
+                      />
+                    </label>
+                  )}
+                </div>
+                {galleryError && <p className="mt-1 text-xs text-red-600">{galleryError}</p>}
               </div>
 
               <div>

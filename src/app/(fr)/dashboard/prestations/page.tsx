@@ -26,7 +26,7 @@ export default async function PrestationsPage() {
   const [{ data: services }, categories] = await Promise.all([
     supabase
       .from("services")
-      .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, created_at")
+      .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, gallery_urls, created_at")
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false }),
     getCategories(),
