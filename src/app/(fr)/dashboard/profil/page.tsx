@@ -22,7 +22,7 @@ export default async function ProfilPage() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("provider_profiles")
-    .select("headline, bio, city, content_locale")
+    .select("headline, bio, city, content_locale, avatar_url, skills")
     .eq("profile_id", user.id)
     .maybeSingle();
 
@@ -46,6 +46,8 @@ export default async function ProfilPage() {
             bio: profile?.bio ?? "",
             city: profile?.city ?? user.city ?? "",
             contentLocale: profile?.content_locale ?? "fr",
+            avatarUrl: profile?.avatar_url ?? null,
+            skills: profile?.skills ?? null,
           }}
           publicPath={`/prestataires/${user.id}`}
           locale={locale}

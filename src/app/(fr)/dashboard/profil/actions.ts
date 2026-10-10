@@ -17,11 +17,14 @@ export async function saveProviderProfile(formData: FormData) {
   const bio = String(formData.get("bio") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim();
   const locale = String(formData.get("contentLocale") ?? "fr");
+  const avatarUrl = String(formData.get("avatarUrl") ?? "").trim() || null;
+  const skills = String(formData.get("skills") ?? "").trim();
 
   if (headline.length > 120) return { error: e.headline };
   if (bio.length > 2000) return { error: e.bio };
   if (city.length > 80) return { error: e.city };
   if (!(CONTENT_LOCALES as readonly string[]).includes(locale)) return { error: e.locale };
+  if (skills.length > 500) return { error: e.skills };
 
   const supabase = await createClient();
   const { error } = await supabase.from("provider_profiles").upsert(
@@ -31,6 +34,8 @@ export async function saveProviderProfile(formData: FormData) {
       bio: bio || null,
       city: city || null,
       content_locale: locale,
+      avatar_url: avatarUrl,
+      skills: skills || null,
     },
     { onConflict: "profile_id" },
   );
