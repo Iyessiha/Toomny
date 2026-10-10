@@ -11,6 +11,7 @@ import { formatMoney } from "@/lib/money";
 import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
 import { MessageSection } from "@/components/orders/message-section";
+import { PayButton } from "@/components/orders/pay-button";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 
@@ -115,10 +116,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               )}
             </div>
           </div>
-          {order.status === "pending_payment" && (
-            <p className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              {t.pendingPayment}
-            </p>
+          {isClient && order.status === "pending_payment" && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p>{t.pendingPayment}</p>
+              <PayButton
+                orderId={order.id}
+                labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
+              />
+            </div>
           )}
         </aside>
       </div>
