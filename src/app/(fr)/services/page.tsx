@@ -22,24 +22,60 @@ const BUDGET_OPTIONS = [
   { value: "999999999", labelKey: "budget200plus" as const },
 ];
 
+const DELIVERY_OPTIONS = [
+  { value: "", labelKey: "deliveryAll" as const },
+  { value: "1", labelKey: "delivery1" as const },
+  { value: "3", labelKey: "delivery3" as const },
+  { value: "7", labelKey: "delivery7" as const },
+  { value: "14", labelKey: "delivery14" as const },
+];
+
+function buildUrl(base: Record<string, string | undefined>, override: Record<string, string | undefined>) {
+  const merged = { ...base, ...override };
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(merged)) {
+    if (v) params.set(k, v);
+  }
+  const s = params.toString();
+  return `/services${s ? "?" + s : ""}`;
+}
+
 export default async function ServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ categorie?: string; q?: string; sort?: string; budget?: string }>;
+  searchParams: Promise<{ categorie?: string; q?: string; sort?: string; budget?: string; jours?: string }>;
 }) {
   const locale = await visitorLocale();
   const t = getCatalogTexts(locale);
-  const { categorie, q, sort, budget } = await searchParams;
+  const { categorie, q, sort, budget, jours } = await searchParams;
 
   const maxPrice = budget ? Number(budget) : undefined;
+  const maxDays = jours ? Number(jours) : undefined;
   const sortValue = sort === "rating" ? "rating" : "recent";
 
   const [categories, services] = await Promise.all([
     getCategories(),
-    getServices({ categorySlug: categorie, q, maxPrice, sort: sortValue }),
+    getServices({ categorySlug: categorie, q, maxPrice, maxDays, sort: sortValue }),
   ]);
 
   const active = categories.find((c) => c.slug === categorie);
+
+  // Chips de filtres actifs
+  const currentParams = { categorie, q, sort, budget, jours };
+  const activeChips: { label: string; removeUrl: string }[] = [];
+  if (q) activeChips.push({ label: `"${q}"`, removeUrl: buildUrl(currentParams, { q: undefined }) });
+  if (budget) {
+    const opt = BUDGET_OPTIONS.find((o) => o.value === budget);
+    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { budget: undefined }) });
+  }
+  if (jours) {
+    const opt = DELIVERY_OPTIONS.find((o) => o.value === jours);
+    if (opt) activeChips.push({ label: t[opt.labelKey], removeUrl: buildUrl(currentParams, { jours: undefined }) });
+  }
+  if (sort && sort !== "recent") {
+    activeChips.push({ label: t.sortRating, removeUrl: buildUrl(currentParams, { sort: undefined }) });
+  }
+  const hasActiveFilters = activeChips.length > 0;
 
   return (
     <>
@@ -49,7 +85,7 @@ export default async function ServicesPage({
         {/* Barre de recherche + filtres */}
         <div className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--background)]/95 backdrop-blur">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <form method="GET" action="/services" className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:gap-4">
+            <form method="GET" action="/services" className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:gap-3">
               {/* Champ recherche */}
               <div className="relative flex-1">
                 <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--subtle)]" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
@@ -85,6 +121,17 @@ export default async function ServicesPage({
                 ))}
               </select>
 
+              {/* Délai de livraison */}
+              <select
+                name="jours"
+                defaultValue={jours ?? ""}
+                className="h-10 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-sm outline-none focus:border-[var(--color-brand-400)]"
+              >
+                {DELIVERY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{t[o.labelKey]}</option>
+                ))}
+              </select>
+
               {/* Conserver la catégorie active dans le form */}
               {categorie && <input type="hidden" name="categorie" value={categorie} />}
 
@@ -102,7 +149,7 @@ export default async function ServicesPage({
           {/* Onglets catégories */}
           <nav className="flex flex-wrap gap-2" aria-label={t.filterLabel}>
             <Link
-              href="/services"
+              href={buildUrl({ q, sort, budget, jours }, { categorie: undefined })}
               className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 !categorie
                   ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
@@ -117,7 +164,7 @@ export default async function ServicesPage({
               return (
                 <Link
                   key={c.id}
-                  href={`/services?categorie=${c.slug}`}
+                  href={buildUrl({ q, sort, budget, jours }, { categorie: c.slug })}
                   className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
@@ -132,6 +179,29 @@ export default async function ServicesPage({
               );
             })}
           </nav>
+
+          {/* Chips filtres actifs */}
+          {hasActiveFilters && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium text-[var(--subtle)]">{t.activeFiltersLabel} :</span>
+              {activeChips.map((chip) => (
+                <Link
+                  key={chip.label}
+                  href={chip.removeUrl}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-3 py-1 text-xs font-semibold text-[var(--color-brand-700)] transition-colors hover:border-[var(--color-brand-500)]"
+                >
+                  {chip.label}
+                  <span aria-hidden className="font-normal opacity-60">✕</span>
+                </Link>
+              ))}
+              <Link
+                href={categorie ? `/services?categorie=${categorie}` : "/services"}
+                className="text-xs font-medium text-[var(--subtle)] underline underline-offset-2 hover:text-[var(--foreground)]"
+              >
+                {t.clearFilters}
+              </Link>
+            </div>
+          )}
 
           {/* Titre + count */}
           <div className="mt-6">

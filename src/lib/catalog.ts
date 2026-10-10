@@ -32,6 +32,7 @@ export type ServiceFilters = {
   categorySlug?: string;
   q?: string;
   maxPrice?: number;
+  maxDays?: number;
   sort?: "recent" | "rating";
 };
 
@@ -54,7 +55,7 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getServices(filters: ServiceFilters = {}): Promise<ServiceCard[]> {
-  const { categorySlug, q, maxPrice, sort = "recent" } = filters;
+  const { categorySlug, q, maxPrice, maxDays, sort = "recent" } = filters;
   const supabase = await createClient();
 
   let query = supabase
@@ -79,6 +80,10 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
 
   if (maxPrice) {
     query = query.lte("price_minor", maxPrice);
+  }
+
+  if (maxDays) {
+    query = query.lte("delivery_days", maxDays);
   }
 
   if (sort === "recent") {
