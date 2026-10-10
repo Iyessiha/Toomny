@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getPublicPageTexts } from "@/i18n/public-pages";
 import { visitorLocale } from "@/i18n/server-locale";
 import { redirect } from "next/navigation";
@@ -6,7 +7,6 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
-import { ServiceForm } from "@/components/dashboard/service-form";
 import { ServiceManage } from "@/components/dashboard/service-manage";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
@@ -63,24 +63,24 @@ export default async function PrestationsPage() {
         { href: "/messages", label: nav.messages },
       ]}
     >
-      <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
-        <section>
-          <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
-          <ServiceManage
-            services={list}
-            categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}
-            locale={locale}
-            packagesByService={packagesByService}
-          />
-        </section>
-
-        <section>
-          <h2 className="font-display text-lg font-bold">{t.newTitle}</h2>
-          <div className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <ServiceForm locale={locale} categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))} />
-          </div>
-        </section>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
+        <Link
+          href="/dashboard/prestations/nouveau"
+          className="flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          {t.newTitle}
+        </Link>
       </div>
+      <ServiceManage
+        services={list}
+        categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}
+        locale={locale}
+        packagesByService={packagesByService}
+      />
     </DashboardShell>
   );
 }
