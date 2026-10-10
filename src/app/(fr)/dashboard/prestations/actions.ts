@@ -52,20 +52,54 @@ export async function createService(formData: FormData) {
     return { error: e.priceRange };
   }
 
+  const galleryRaw = String(formData.get("galleryUrls") ?? "").trim();
+  const galleryUrls = galleryRaw
+    ? galleryRaw.split(",").map((u) => u.trim()).filter(Boolean).slice(0, 4)
+    : [];
+  const tagsRaw = String(formData.get("tags") ?? "").trim();
+  const tags = tagsRaw
+    ? tagsRaw.split(",").map((t) => t.trim().slice(0, 30)).filter(Boolean).slice(0, 10)
+    : [];
+  let packages: PackageInput[] = [];
+  const packagesJson = String(formData.get("packagesJson") ?? "").trim();
+  if (packagesJson) {
+    try { packages = JSON.parse(packagesJson); } catch {}
+  }
+
   const supabase = await createClient();
-  const { error } = await supabase.from("services").insert({
-    provider_id: user.id,
-    category_id: categoryId,
-    title,
-    description,
-    price_minor: priceMinor.toString(),
-    currency: "XOF",
-    delivery_days: deliveryDays,
-    content_locale: "fr",
-    status: "draft",
-    ...(coverUrl ? { cover_url: coverUrl } : {}),
-  });
-  if (error) return { error: e.save };
+  const { data: newService, error } = await supabase
+    .from("services")
+    .insert({
+      provider_id: user.id,
+      category_id: categoryId,
+      title,
+      description,
+      price_minor: priceMinor.toString(),
+      currency: "XOF",
+      delivery_days: deliveryDays,
+      content_locale: "fr",
+      status: "draft",
+      ...(coverUrl ? { cover_url: coverUrl } : {}),
+      ...(galleryUrls.length ? { gallery_urls: galleryUrls } : {}),
+      ...(tags.length ? { tags } : {}),
+    })
+    .select("id")
+    .single();
+  if (error || !newService) return { error: e.save };
+
+  if (packages.length > 0) {
+    const db = createAdminClient();
+    const rows = packages.map((p) => ({
+      service_id: newService.id,
+      tier: p.tier,
+      name: p.name.trim().slice(0, 60),
+      description: p.description.trim().slice(0, 500) || null,
+      price_minor: p.price_minor,
+      currency: "XOF",
+      delivery_days: p.delivery_days,
+    }));
+    await db.from("service_packages").insert(rows);
+  }
 
   revalidatePath("/dashboard/prestations");
   return { success: true };

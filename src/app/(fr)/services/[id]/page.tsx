@@ -5,10 +5,9 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { createClient } from "@/lib/supabase/server";
-import { formatMoney } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
 import { categoryMeta, categoryGradient } from "@/lib/categories";
-import { ServiceOrderForm } from "@/components/orders/service-order-form";
+import { ServiceSidebar } from "@/components/catalog/service-sidebar";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getServices } from "@/lib/catalog";
@@ -479,82 +478,18 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
 
           {/* ── Sidebar de commande ── */}
           <aside className="h-fit space-y-4 lg:sticky lg:top-6">
-            {/* Pricing + CTA card */}
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-              <div className="border-b border-[var(--border)] px-6 pb-4 pt-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-[var(--subtle)]">
-                  {t.from}
-                </p>
-                <p className="font-display text-3xl font-bold text-[var(--color-brand-600)]">
-                  {formatMoney(BigInt(service.price_minor), service.currency, locale)}
-                </p>
-                <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--subtle)]">
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  {locale === "en" ? "Delivery in" : "Livraison en"}{" "}
-                  <strong className="font-semibold text-[var(--foreground)]">
-                    {service.delivery_days}
-                  </strong>{" "}
-                  {service.delivery_days > 1 ? t.days : t.day}
-                </p>
-              </div>
-
-              <div className="space-y-3 p-6">
-                {!user ? (
-                  <Link
-                    href="/auth"
-                    className="flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
-                  >
-                    {t.loginToOrder}
-                  </Link>
-                ) : isOwner ? (
-                  <p className="text-center text-sm text-[var(--subtle)]">{t.ownService}</p>
-                ) : (
-                  <>
-                    <ServiceOrderForm serviceId={service.id} locale={locale} packages={packages} />
-                    <Link
-                      href={`/services/${service.id}/contact`}
-                      className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                      {t.contactSeller}
-                    </Link>
-                    <Link
-                      href={`/prestataires/${service.provider_id}`}
-                      className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
-                    >
-                      {locale === "en" ? "View profile" : "Voir le profil"}
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Trust badges */}
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
-              <ul className="space-y-3">
-                {trustItems.map((item) => (
-                  <li key={item.label} className="flex items-start gap-3 text-sm">
-                    <span aria-hidden className="mt-0.5 text-base">
-                      {item.icon}
-                    </span>
-                    <span className="leading-snug text-[var(--subtle)]">{item.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <ServiceSidebar
+              serviceId={service.id}
+              providerId={service.provider_id}
+              packages={packages}
+              basePrice={service.price_minor}
+              baseCurrency={service.currency}
+              baseDelivery={service.delivery_days}
+              locale={locale}
+              isGuest={!user}
+              isOwner={isOwner}
+              trustItems={trustItems}
+            />
           </aside>
         </div>
 
