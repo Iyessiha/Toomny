@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { UUID_RE } from "@/lib/orders";
-import { recordFunding } from "@/lib/order-ledger";
+import { recordFunding, recordCompletion } from "@/lib/order-ledger";
 import { recordAdminAction } from "@/lib/admin-audit";
 
 /**
@@ -51,6 +51,71 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
     targetId: orderId,
     details: { amountMinor: String(order.amount_minor), currency: order.currency },
   });
+  revalidatePath("/admin/orders");
+  revalidatePath(`/orders/${orderId}`);
+}
+
+const ADMIN_ALLOWED_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus>> = {
+  funded: "in_progress",
+  in_progress: "delivered",
+  delivered: "completed",
+};
+
+/**
+ * Forcer manuellement une transition d'état pour une commande bloquée.
+ * Uniquement les transitions admin : funded→in_progress, in_progress→delivered,
+ * delivered→completed (libération des fonds équivalent 72 h).
+ */
+export async function forceOrderTransition(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+
+  const orderId = String(formData.get("orderId") ?? "");
+  if (!UUID_RE.test(orderId)) return;
+
+  const db = createAdminClient();
+  const { data: order } = await db
+    .from("orders")
+    .select("id, status, provider_id, amount_minor, currency")
+    .eq("id", orderId)
+    .maybeSingle();
+  if (!order) return;
+
+  const targetStatus = ADMIN_ALLOWED_TRANSITIONS[order.status as OrderStatus];
+  if (!targetStatus) return;
+
+  try {
+    assertTransition(order.status as OrderStatus, targetStatus);
+  } catch {
+    return;
+  }
+
+  const { error } = await db
+    .from("orders")
+    .update({ status: targetStatus, updated_at: new Date().toISOString() })
+    .eq("id", orderId)
+    .eq("status", order.status);
+
+  if (error) {
+    console.error("forceOrderTransition:", error.message);
+    return;
+  }
+
+  if (targetStatus === "completed" && order.provider_id) {
+    await recordCompletion(db, orderId, order.provider_id);
+  }
+
+  const actionKey = `order.force_${targetStatus}` as
+    | "order.force_in_progress"
+    | "order.force_delivered"
+    | "order.force_completed";
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: actionKey,
+    targetType: "order",
+    targetId: orderId,
+    details: { from: order.status, to: targetStatus },
+  });
+
   revalidatePath("/admin/orders");
   revalidatePath(`/orders/${orderId}`);
 }

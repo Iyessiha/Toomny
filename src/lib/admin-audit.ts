@@ -7,6 +7,9 @@ export type AdminAction =
   | "kyc.flag"
   | "service.moderate"
   | "order.confirm_payment"
+  | "order.force_in_progress"
+  | "order.force_delivered"
+  | "order.force_completed"
   | "dispute.resolve";
 
 export type AdminAuditEntry = {
