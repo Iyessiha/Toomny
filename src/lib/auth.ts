@@ -103,7 +103,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/auth");
-  return user;
+  return user as CurrentUser;
 }
 
 /**

@@ -46,8 +46,8 @@ export default async function MessagesPage() {
         .in("id", counterpartIds)
     : { data: [] };
 
-  const profileMap = new Map(
-    (counterpartProfiles ?? []).map((p) => [
+  const profileMap = new Map<string, { name: string | null; initials: string }>(
+    (counterpartProfiles ?? []).map((p: { id: string; display_name: string | null; first_name: string | null; last_name: string | null; email: string }) => [
       p.id,
       {
         name:

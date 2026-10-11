@@ -111,15 +111,27 @@ export default async function AdminVerificationsPage({
         />
       ) : (
         <div className="space-y-4">
-          {verifications.map((v) => (
+          {(verifications as {
+            id: string; status: string; document_type: string; document_country: string;
+            storage_path: string; rejection_reason: string | null;
+            declared_first_name?: string | null; declared_last_name?: string | null; declared_dob?: string | null;
+            created_at: string;
+            profile: { id: string; display_name: string | null; email: string; country_code: string; role: string } | { id: string; display_name: string | null; email: string; country_code: string; role: string }[] | null;
+          }[]).map((v) => (
             <KycReviewCard
               key={v.id}
               locale={locale}
               verif={{
-                ...v,
-                declared_first_name: (v as { declared_first_name?: string | null }).declared_first_name ?? null,
-                declared_last_name: (v as { declared_last_name?: string | null }).declared_last_name ?? null,
-                declared_dob: (v as { declared_dob?: string | null }).declared_dob ?? null,
+                id: v.id,
+                status: v.status,
+                document_type: v.document_type,
+                document_country: v.document_country,
+                storage_path: v.storage_path,
+                rejection_reason: v.rejection_reason,
+                declared_first_name: v.declared_first_name ?? null,
+                declared_last_name: v.declared_last_name ?? null,
+                declared_dob: v.declared_dob ?? null,
+                created_at: v.created_at,
                 profile: Array.isArray(v.profile) ? v.profile[0] ?? null : v.profile,
               }}
             />
