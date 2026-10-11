@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
-import { CguBody } from "@/components/legal/cgu-body";
+import { LegalPageView } from "@/components/legal/legal-page";
+import { getLegalTexts } from "@/content/legal";
 import { getPublicPageTexts } from "@/i18n/public-pages";
 
 export function generateMetadata(): Metadata {
-  return { title: getPublicPageTexts("en").cgu.metaTitle };
+  return { title: getLegalTexts("en").cgu.metaTitle };
 }
 
-/** Provisional terms, English. Not reviewed by a lawyer yet. */
 export default function CguPageEn() {
-  return <CguBody t={getPublicPageTexts("en").cgu} />;
+  const locale = "en";
+  return (
+    <LegalPageView
+      page={getLegalTexts(locale).cgu}
+      homeLabel={getPublicPageTexts(locale).notFound.home}
+    />
+  );
 }
