@@ -5,10 +5,10 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { createClient } from "@/lib/supabase/server";
-import { formatMoney } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
+import { ServiceCard } from "@/components/catalog/service-card";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +52,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     Promise.resolve({ data: null }),
     supabase
       .from("services")
-      .select("id, title, price_minor, currency, delivery_days")
+      .select("id, title, description, price_minor, currency, delivery_days, cover_url, tags, category:categories(slug)")
       .eq("provider_id", id)
       .eq("status", "active")
       .order("created_at", { ascending: false })
@@ -62,7 +62,29 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
 
   if (!person) notFound();
 
-  const list = services ?? [];
+  const rawList = services ?? [];
+  const list = rawList.map((s) => {
+    const cat = Array.isArray(s.category) ? s.category[0] : s.category;
+    return {
+      id: s.id,
+      title: s.title,
+      description: s.description ?? "",
+      price_minor: s.price_minor,
+      currency: s.currency,
+      delivery_days: s.delivery_days,
+      category_id: "",
+      category_slug: cat?.slug ?? null,
+      cover_url: s.cover_url ?? null,
+      tags: (s.tags as string[]) ?? [],
+      provider: {
+        id,
+        display_name: person?.display_name ?? null,
+        country_code: person?.country_code ?? null,
+        rating_avg: profile?.rating_avg ? Number(profile.rating_avg) : null,
+        rating_count: profile?.rating_count ?? 0,
+      },
+    };
+  });
   const reviewList = (reviews ?? []) as { id: string; rating: number; comment: string | null; created_at: string; author_id: string }[];
 
   const authorIds = [...new Set(reviewList.map((r) => r.author_id).filter(Boolean))];
@@ -208,16 +230,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((s) => (
                 <li key={s.id}>
-                  <Link
-                    href={`/services/${s.id}`}
-                    className="group block rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-brand-300)] hover:shadow-lg hover:shadow-black/[0.04]"
-                  >
-                    <p className="font-semibold leading-snug">{s.title}</p>
-                    <p className="mt-3 text-sm text-[var(--subtle)]">
-                      {formatMoney(BigInt(s.price_minor), s.currency, locale)} ·{" "}
-                      {s.delivery_days} {s.delivery_days > 1 ? t.days : t.day}
-                    </p>
-                  </Link>
+                  <ServiceCard service={s} locale={locale} />
                 </li>
               ))}
             </ul>
