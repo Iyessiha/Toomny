@@ -28,6 +28,7 @@ export default async function AdminCategoriesPage() {
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
       nav={[

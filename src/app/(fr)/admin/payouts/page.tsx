@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { EmptyState } from "@/components/dashboard/shell";
 import { PayoutRowActions } from "@/components/admin/payout-row-actions";
+import { FilterTabs, MiniStat, Pill, TableCard, payoutTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { getPayoutTexts } from "@/i18n/payouts";
@@ -19,13 +20,6 @@ export const dynamic = "force-dynamic";
 const ACTIVE_STATUSES = ["queued", "processing", "failed"] as const;
 const ALL_STATUSES = ["queued", "processing", "paid", "failed"] as const;
 type StatusFilter = (typeof ALL_STATUSES)[number] | "all" | "active";
-
-function payoutTone(status: string): string {
-  if (status === "paid") return "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]";
-  if (status === "failed") return "bg-red-50 text-red-700";
-  if (status === "processing") return "bg-blue-50 text-blue-700";
-  return "bg-amber-50 text-amber-700";
-}
 
 export default async function AdminPayoutsPage({
   searchParams,
@@ -117,6 +111,7 @@ export default async function AdminPayoutsPage({
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
       nav={[
@@ -140,113 +135,88 @@ export default async function AdminPayoutsPage({
                 ([currency, s]) => `${s.count} · ${formatMoney(s.total, currency, locale)}`,
               )
             : ["0"];
-          return (
-            <div
-              key={key}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--background)] px-4 py-3"
-            >
-              <p className="text-xs text-[var(--subtle)]">{label}</p>
-              <p className="mt-1 font-display text-base font-bold">{parts.join(" — ")}</p>
-            </div>
-          );
+          return <MiniStat key={key} label={label} value={parts.join(" — ")} />;
         })}
       </div>
 
-      {/* Onglets de filtre */}
-      <div className="mb-5 flex flex-wrap gap-2">
-        {filters.map(({ key, label }) => {
-          const active = activeFilter === key;
-          return (
-            <Link
-              key={key}
-              href={filterHref(key)}
-              className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
-                active
-                  ? "bg-[var(--color-brand-500)] text-white"
-                  : "border border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-400)] hover:text-[var(--foreground)]"
-              }`}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </div>
+      <FilterTabs
+        items={filters.map(({ key, label }) => ({
+          href: filterHref(key),
+          label,
+          current: activeFilter === key,
+        }))}
+      />
 
       {list.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--subtle)]">
-              <tr>
-                <th className="px-5 py-3 font-medium">{t.colOrder}</th>
-                <th className="px-5 py-3 font-medium">{t.colProvider}</th>
-                <th className="px-5 py-3 font-medium">{t.colChannel}</th>
-                <th className="px-5 py-3 text-right font-medium">{t.colAmount}</th>
-                <th className="px-5 py-3 font-medium">{t.colStatus}</th>
-                <th className="px-5 py-3 font-medium">{t.colDate}</th>
-                <th className="px-5 py-3 text-right font-medium">{t.colAction}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((p, i) => (
-                <tr key={p.id} className={i < list.length - 1 ? "border-b border-[var(--border)]" : ""}>
-                  <td className="px-5 py-4">
-                    <Link
-                      href={`/orders/${p.order_id}`}
-                      className="font-medium text-[var(--color-brand-600)] underline-offset-2 hover:underline"
-                    >
-                      {orderRef.get(p.order_id) ?? p.order_id.slice(0, 8)}
+        <TableCard>
+          <thead>
+            <tr>
+              <th>{t.colOrder}</th>
+              <th>{t.colProvider}</th>
+              <th>{t.colChannel}</th>
+              <th className="text-right">{t.colAmount}</th>
+              <th>{t.colStatus}</th>
+              <th>{t.colDate}</th>
+              <th className="text-right">{t.colAction}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((p) => (
+              <tr key={p.id}>
+                <td>
+                  <Link
+                    href={`/orders/${p.order_id}`}
+                    className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                  >
+                    {orderRef.get(p.order_id) ?? p.order_id.slice(0, 8)}
+                  </Link>
+                  <div className="mt-1">
+                    <Link href={`/orders/${p.order_id}`} className="btn-ghost btn-sm">
+                      {t.viewOrder}
                     </Link>
-                    <div className="mt-0.5 flex items-center gap-2">
-                      <Link
-                        href={`/orders/${p.order_id}`}
-                        className="rounded-lg border border-[var(--border)] px-2 py-0.5 text-[11px] font-medium transition-colors hover:border-[var(--color-brand-400)]"
-                      >
-                        {t.viewOrder}
-                      </Link>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <p className="font-medium">{providerName.get(p.provider_id) ?? "—"}</p>
-                    <p className="font-mono text-xs text-[var(--subtle)]">{p.msisdn}</p>
-                  </td>
-                  <td className="px-5 py-4 text-[var(--subtle)]">
-                    {pt.channels[p.channel] ?? p.channel}
-                  </td>
-                  <td className="px-5 py-4 text-right font-display font-bold">
-                    {formatMoney(BigInt(p.amount_minor), p.currency, locale)}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${payoutTone(p.status)}`}>
-                      {pt.payoutStatus[p.status] ?? p.status}
-                    </span>
-                    {(p.attempts ?? 0) > 0 && (
-                      <p className="mt-1 text-[11px] text-[var(--subtle)]">
-                        {p.attempts} {p.attempts > 1 ? t.attemptsPlural : t.attempts}
-                      </p>
-                    )}
-                    {p.provider_ref && (
-                      <p className="mt-0.5 font-mono text-[11px] text-[var(--subtle)]">{p.provider_ref}</p>
-                    )}
-                    {p.failure_reason && (
-                      <p className="mt-0.5 max-w-48 text-[11px] text-red-600">{p.failure_reason}</p>
-                    )}
-                  </td>
-                  <td className="px-5 py-4 text-[var(--subtle)]">
-                    {new Date(p.created_at).toLocaleDateString(
-                      locale === "en" ? "en-GB" : "fr-FR",
-                      { day: "2-digit", month: "short", year: "numeric" },
-                    )}
-                  </td>
-                  <td className="px-5 py-4">
-                    <PayoutRowActions payoutId={p.id} status={p.status} locale={locale} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </td>
+                <td>
+                  <p className="font-semibold">{providerName.get(p.provider_id) ?? "—"}</p>
+                  <p className="font-mono text-xs text-[var(--subtle)]">{p.msisdn}</p>
+                </td>
+                <td className="text-[var(--subtle)]">{pt.channels[p.channel] ?? p.channel}</td>
+                <td className="text-right font-display font-bold">
+                  {formatMoney(BigInt(p.amount_minor), p.currency, locale)}
+                </td>
+                <td>
+                  <Pill tone={payoutTone(p.status)}>
+                    {pt.payoutStatus[p.status] ?? p.status}
+                  </Pill>
+                  {(p.attempts ?? 0) > 0 && (
+                    <p className="mt-1 text-[11px] text-[var(--subtle)]">
+                      {p.attempts} {p.attempts > 1 ? t.attemptsPlural : t.attempts}
+                    </p>
+                  )}
+                  {p.provider_ref && (
+                    <p className="mt-0.5 font-mono text-[11px] text-[var(--subtle)]">{p.provider_ref}</p>
+                  )}
+                  {p.failure_reason && (
+                    <p className="mt-0.5 max-w-48 text-[11px] text-[var(--tone-danger-fg)]">
+                      {p.failure_reason}
+                    </p>
+                  )}
+                </td>
+                <td className="text-[var(--subtle)]">
+                  {new Date(p.created_at).toLocaleDateString(
+                    locale === "en" ? "en-GB" : "fr-FR",
+                    { day: "2-digit", month: "short", year: "numeric" },
+                  )}
+                </td>
+                <td>
+                  <PayoutRowActions payoutId={p.id} status={p.status} locale={locale} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </TableCard>
       )}
     </AdminShell>
   );

@@ -224,7 +224,7 @@ export function ServiceForm({
             />
           </label>
         )}
-        {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
+        {uploadError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{uploadError}</p>}
       </div>
 
       {/* Galerie */}
@@ -272,7 +272,7 @@ export function ServiceForm({
             </label>
           )}
         </div>
-        {galleryError && <p className="mt-1 text-xs text-red-600">{galleryError}</p>}
+        {galleryError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{galleryError}</p>}
       </div>
 
       {/* Titre */}
@@ -458,7 +458,7 @@ export function ServiceForm({
         </div>
       </div>
 
-      {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="notice notice-danger">{error}</p>}
       {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.draftSaved}</p>}
 
       <button

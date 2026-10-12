@@ -5,7 +5,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
-import { statusTone } from "@/lib/dashboard";
+import { Pill, TableCard, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 
@@ -43,28 +43,43 @@ export default async function OrdersPage() {
       {list.length === 0 ? (
         <EmptyState title={t.orders.empty} body={t.orders.emptyBody} action={{ href: "/services", label: t.orders.emptyCta }} />
       ) : (
-        <ul className="app-stagger divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-          {list.map((o) => {
-            const isProvider = o.provider_id === user.id;
-            const amount = isProvider ? o.provider_net_minor : o.amount_minor;
-            return (
-              <li key={o.id}>
-                <Link href={`/orders/${o.id}`} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-[var(--surface)]">
-                  <div>
-                    <p className="font-medium">{o.reference}</p>
-                    <p className="text-xs text-[var(--subtle)]">{isProvider ? t.orders.asProvider : t.orders.asClient}</p>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(o.status)}`}>
-                      {t.status[o.status] ?? o.status}
-                    </span>
-                    <span className="font-display font-bold">{formatMoney(BigInt(amount), o.currency, locale)}</span>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <TableCard>
+          <thead>
+            <tr>
+              <th>{t.orders.colReference}</th>
+              <th>{t.orders.colRole}</th>
+              <th>{t.orders.colStatus}</th>
+              <th className="text-right">{t.orders.colAmount}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((o) => {
+              const providerSide = o.provider_id === user.id;
+              const amount = providerSide ? o.provider_net_minor : o.amount_minor;
+              return (
+                <tr key={o.id}>
+                  <td>
+                    <Link
+                      href={`/orders/${o.id}`}
+                      className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                    >
+                      {o.reference}
+                    </Link>
+                  </td>
+                  <td className="text-[var(--subtle)]">
+                    {providerSide ? t.orders.asProvider : t.orders.asClient}
+                  </td>
+                  <td>
+                    <Pill tone={orderTone(o.status)}>{t.status[o.status] ?? o.status}</Pill>
+                  </td>
+                  <td className="text-right font-display font-bold">
+                    {formatMoney(BigInt(amount), o.currency, locale)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </TableCard>
       )}
     </DashboardShell>
   );

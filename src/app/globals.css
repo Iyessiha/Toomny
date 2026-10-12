@@ -64,6 +64,16 @@
   --tone-neutral-fg: #43564c;
   --tone-brand-bg: var(--color-brand-100);
   --tone-brand-fg: var(--color-brand-700);
+
+  /* Couleurs des boutons d'engagement (destructif, confirmation, remise en
+     file). Volontairement fixes, y compris en mode sombre : le texte y est
+     toujours blanc ou presque noir, donc lisible sur les deux fonds. */
+  --action-danger: #a02a1e;
+  --action-danger-hover: #8b2419;
+  --action-success: #0d6b38;
+  --action-success-hover: #0a552d;
+  --action-warning: #b97f1f;
+  --action-warning-hover: #a06e1a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -323,3 +333,152 @@ html.lenis, html.lenis body { height: auto; }
 }
 .btn-secondary:hover { border-color: var(--color-brand-400); }
 .btn-secondary:active { transform: scale(0.97); }
+
+/* Bouton discret : même gabarit que les précédents, sans fond ni couleur
+   d'accent. Sert aux actions secondaires des tableaux et des formulaires. */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--subtle);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--color-brand-400); color: var(--foreground); }
+.btn-ghost:active { transform: scale(0.97); }
+
+/* Boutons d'engagement : solides, jamais en couleur brute Tailwind, pour que
+   le mode sombre reste lisible et la palette cohérente avec les tons. */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-danger);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-danger:hover { background: var(--action-danger-hover); }
+.btn-danger:active { transform: scale(0.97); }
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-success);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-success:hover { background: var(--action-success-hover); }
+.btn-success:active { transform: scale(0.97); }
+
+.btn-warn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-warning);
+  color: #231600;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-warn:hover { background: var(--action-warning-hover); }
+.btn-warn:active { transform: scale(0.97); }
+
+/* Taille compacte, à combiner avec n'importe quel bouton ci-dessus. */
+.btn-sm { padding: 0.375rem 0.875rem; font-size: 0.75rem; }
+
+/* ── Cartes ───────────────────────────────────────────────────────────────── */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+.card-pad { padding: 1.25rem; }
+@media (min-width: 640px) { .card-pad { padding: 1.5rem; } }
+
+/* ── Puces de filtre ─────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  color: var(--subtle);
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.chip:hover { border-color: var(--color-brand-400); color: var(--foreground); }
+.chip-active,
+.chip-active:hover {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-500);
+  color: #fff;
+}
+.chip-count {
+  border-radius: 9999px;
+  background: var(--surface);
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--subtle);
+}
+.chip-active .chip-count { background: rgb(255 255 255 / 22%); color: #fff; }
+
+/* ── Bandeaux d'information ──────────────────────────────────────────────── */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.notice-warning { background: var(--tone-warning-bg); color: var(--tone-warning-fg); }
+.notice-danger { background: var(--tone-danger-bg); color: var(--tone-danger-fg); }
+.notice-success { background: var(--tone-success-bg); color: var(--tone-success-fg); }
+.notice-info { background: var(--tone-info-bg); color: var(--tone-info-fg); }
+.notice strong { font-weight: 700; }
+
+/* ── Champs de formulaire ────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--color-brand-500); }
+.input::placeholder { color: var(--subtle); }

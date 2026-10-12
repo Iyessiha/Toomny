@@ -21,6 +21,8 @@ const fr = {
     title: "Notifications",
     subtitle: "Demandes, messages, commandes, litiges : tout ce qui vous concerne.",
     markAll: "Tout marquer comme lu",
+    unreadOne: "non lue",
+    unreadMany: "non lues",
     emptyTitle: "Aucune notification",
     emptyBody:
       "Quand un client vous écrira ou qu'une commande avancera, vous serez prévenu ici.",
@@ -113,6 +115,8 @@ const en: typeof fr = {
     title: "Notifications",
     subtitle: "Inquiries, messages, orders, disputes: everything that concerns you.",
     markAll: "Mark all as read",
+    unreadOne: "unread",
+    unreadMany: "unread",
     emptyTitle: "No notifications",
     emptyBody:
       "When a buyer writes to you or an order moves forward, you will be notified here.",

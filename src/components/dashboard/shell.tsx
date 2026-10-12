@@ -9,7 +9,7 @@ import type { Locale } from "@/i18n/dictionaries";
 import type { NavItem } from "./shell-ui";
 
 export type { NavItem } from "./shell-ui";
-export { EmptyState, StatCard } from "./shell-ui";
+export { EmptyState } from "./shell-ui";
 
 export function DashboardShell({
   user,

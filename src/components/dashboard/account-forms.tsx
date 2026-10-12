@@ -49,7 +49,7 @@ export function AccountEmailForm({
             className={inputClass}
           />
         </div>
-        {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="notice notice-danger">{error}</p>}
         {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.emailSent}</p>}
         <button
           type="submit"
@@ -122,7 +122,7 @@ export function AccountPasswordForm({ locale = "fr" }: { locale?: Locale }) {
             className={inputClass}
           />
         </div>
-        {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+        {error && <p role="alert" className="notice notice-danger">{error}</p>}
         {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.passwordDone}</p>}
         <button
           type="submit"

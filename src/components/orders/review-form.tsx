@@ -51,7 +51,7 @@ export function ReviewForm({ orderId, locale = "fr" }: { orderId: string; locale
         <label htmlFor="comment" className="text-sm font-medium">{t.comment}</label>
         <textarea id="comment" name="comment" rows={3} maxLength={1000} className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]" />
       </div>
-      {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="notice notice-danger">{error}</p>}
       <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.submitting : t.submit}
       </button>

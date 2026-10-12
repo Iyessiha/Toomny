@@ -90,6 +90,8 @@ src/
 │   ├── (en)/en       version anglaise : accueil, auth, CGU
 │   └── api/          auth, paiements, webhooks GeniusPay, uploads, export RGPD, cron 72 h
 ├── components/       landing, catalogue, commandes, dashboard, admin, auth
+│   └── dashboard/pro.tsx  kit premium des espaces connectés (pastilles, stats,
+│                     sections, tableaux, bandeaux) — client-safe, sans requête
 ├── content/          contenus éditoriaux (landing, CGU)
 ├── db/schema.ts      schéma Drizzle, source du DDL (jamais requêté)
 ├── i18n/             dictionnaires FR/EN par domaine
@@ -103,6 +105,26 @@ src/
 └── proxy.ts          CSP + langue + rafraîchissement de session
 supabase/migrations/ RLS, fonctions SQL, buckets, seeds de démo
 ```
+
+## Charte des espaces connectés
+
+Les tableaux de bord, le back-office et les parcours de commande partagent un
+même vocabulaire visuel, défini à deux endroits seulement :
+
+- `src/app/globals.css` — les briques : `.btn-primary / .btn-gold /
+  .btn-secondary / .btn-ghost / .btn-danger / .btn-success / .btn-warn`
+  (+ `.btn-sm`), `.card` et `.card-pad`, `.chip` et `.chip-active`, `.notice` et
+  ses quatre tons, `.input`, le bandeau `.hero-band`. Les couleurs passent par
+  des tokens (`--tone-*`, `--action-*`, rampes `--color-brand-*` et
+  `--color-gold-*`) : aucun `bg-red-500` en dur, le mode sombre suit tout seul.
+- `src/components/dashboard/pro.tsx` — les composants : `Pill` et ses fonctions
+  de ton (`orderTone`, `serviceTone`, `payoutTone`, `disputeTone`, `kycTone`,
+  `roleTone`), `ProStat`, `MiniStat`, `Section`, `TableCard`, `FilterTabs`,
+  `Notice`, `QuickAction`, `Avatar`, `ProgressBar`.
+
+`/charte` affiche toutes ces briques sur une seule page, sans base de données
+(la route n'existe pas en production) : c'est l'écran de contrôle avant
+d'habiller une nouvelle page, mode clair comme sombre.
 
 ## Points ouverts connus
 

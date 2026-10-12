@@ -39,7 +39,7 @@ export function UserRoleManager({
   return (
     <div className="flex items-center gap-2 justify-end">
       {msg && (
-        <span className={`text-xs ${msg.ok ? "text-emerald-600" : "text-red-600"}`}>{msg.text}</span>
+        <span className={`text-xs ${msg.ok ? "text-[var(--tone-success-fg)]" : "text-[var(--tone-danger-fg)]"}`}>{msg.text}</span>
       )}
       <select
         value={role}
