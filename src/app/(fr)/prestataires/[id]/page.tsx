@@ -35,6 +35,9 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   const t = getCatalogTexts(locale);
 
   const supabase = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
 
   const [
     { data: person },
@@ -168,6 +171,31 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <p className="relative mt-6 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">
               {profile.bio}
             </p>
+          )}
+
+          {/* CTA Contacter */}
+          {currentUser && currentUser.id !== id && (
+            <div className="relative mt-6 flex flex-wrap gap-3">
+              <Link
+                href={`/prestataires/${id}/contact`}
+                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                {locale === "en" ? "Contact" : "Contacter"}
+              </Link>
+            </div>
+          )}
+          {!currentUser && (
+            <div className="relative mt-6">
+              <Link
+                href="/auth"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+              >
+                {locale === "en" ? "Sign in to contact" : "Se connecter pour contacter"}
+              </Link>
+            </div>
           )}
         </header>
 
