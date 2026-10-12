@@ -22,6 +22,10 @@ export function ProfileForm({
     contentLocale: string;
     avatarUrl: string | null;
     skills: string | null;
+    spokenLanguages: string | null;
+    websiteUrl: string | null;
+    linkedinUrl: string | null;
+    twitterUrl: string | null;
   };
   publicPath: string;
   locale?: Locale;
@@ -167,6 +171,66 @@ export function ProfileForm({
         inputClass={inputClass}
       />
 
+      {/* Langues parlées */}
+      <SkillsField
+        label={p.spokenLanguages}
+        placeholder={p.spokenLanguagesPlaceholder}
+        hint={p.spokenLanguagesHint}
+        initial={defaults.spokenLanguages ?? ""}
+        inputClass={inputClass}
+        fieldName="spokenLanguages"
+        maxLength={200}
+      />
+
+      {/* Liens & portfolio */}
+      <div>
+        <p className="text-sm font-medium">{p.socialLinks}</p>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+                <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </span>
+            <input
+              name="websiteUrl"
+              type="url"
+              defaultValue={defaults.websiteUrl ?? ""}
+              placeholder={p.websiteUrlPlaceholder}
+              className={`${inputClass} mt-0 flex-1`}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </span>
+            <input
+              name="linkedinUrl"
+              type="url"
+              defaultValue={defaults.linkedinUrl ?? ""}
+              placeholder={p.linkedinUrlPlaceholder}
+              className={`${inputClass} mt-0 flex-1`}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </span>
+            <input
+              name="twitterUrl"
+              type="url"
+              defaultValue={defaults.twitterUrl ?? ""}
+              placeholder={p.twitterUrlPlaceholder}
+              className={`${inputClass} mt-0 flex-1`}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor="city" className="text-sm font-medium">{p.city}</label>
@@ -206,23 +270,27 @@ function SkillsField({
   hint,
   initial,
   inputClass: cls,
+  fieldName = "skills",
+  maxLength = 500,
 }: {
   label: string;
   placeholder: string;
   hint: string;
   initial: string;
   inputClass: string;
+  fieldName?: string;
+  maxLength?: number;
 }) {
   const [raw, setRaw] = useState(initial);
   const tags = raw.split(",").map((s) => s.trim()).filter(Boolean);
 
   return (
     <div>
-      <label htmlFor="skills" className="text-sm font-medium">{label}</label>
+      <label htmlFor={fieldName} className="text-sm font-medium">{label}</label>
       <input
-        id="skills"
-        name="skills"
-        maxLength={500}
+        id={fieldName}
+        name={fieldName}
+        maxLength={maxLength}
         value={raw}
         onChange={(e) => setRaw(e.target.value)}
         placeholder={placeholder}
