@@ -128,7 +128,7 @@ const fr = {
       sourcesPrefix: "Grilles relevées en octobre 2026 sur les barèmes publics de ",
       sourcesMid: " et sur les ",
       sourcesSuffix: ". Les conditions de ces plateformes peuvent changer.",
-      sourceA: "Fiverr et Upwork",
+      sourceA: "Fiverr et ComeUp",
       sourceB: "frais Payoneer",
     },
     categories: {
@@ -315,7 +315,7 @@ const en: LandingContent = {
       sourcesPrefix: "Rates recorded in October 2026 from the public schedules of ",
       sourcesMid: " and from ",
       sourcesSuffix: ". These platforms may change their terms.",
-      sourceA: "Fiverr and Upwork",
+      sourceA: "Fiverr and ComeUp",
       sourceB: "Payoneer fees",
     },
     categories: {
