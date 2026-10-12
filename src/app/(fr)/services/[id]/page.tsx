@@ -12,6 +12,7 @@ import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { ReviewsList } from "@/components/catalog/reviews-list";
 
 export const dynamic = "force-dynamic";
 
@@ -405,81 +406,21 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
               {reviews.length === 0 ? (
                 <p className="mt-4 text-sm text-[var(--subtle)]">{t.noReviewsList}</p>
               ) : (
-                <div className="mt-6 space-y-6">
-                  {/* Rating summary + breakdown bars */}
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                    <div className="flex flex-wrap items-center gap-6">
-                      <div className="text-center">
-                        <p className="text-5xl font-bold">{avg!.toFixed(1)}</p>
-                        <p className="mt-1 text-lg text-amber-400">
-                          {"★".repeat(Math.min(Math.round(avg!), 5))}
-                          {"☆".repeat(Math.max(0, 5 - Math.round(avg!)))}
-                        </p>
-                        <p className="mt-1 text-xs text-[var(--subtle)]">
-                          {reviews.length} {t.reviewsCount.toLowerCase()}
-                        </p>
-                      </div>
-                      <div className="flex-1 min-w-[160px] space-y-2">
-                        {breakdown.map(({ star, count }) => (
-                          <div key={star} className="flex items-center gap-2 text-xs">
-                            <span className="w-4 text-right text-[var(--subtle)]">{star}</span>
-                            <span className="text-amber-400">★</span>
-                            <div className="h-2 flex-1 overflow-hidden rounded-full bg-[var(--border)]">
-                              <div
-                                className="h-full rounded-full bg-amber-400 transition-all"
-                                style={{ width: `${(count / maxBreakdown) * 100}%` }}
-                              />
-                            </div>
-                            <span className="w-4 text-[var(--subtle)]">{count}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Individual reviews */}
-                  <div className="divide-y divide-[var(--border)]">
-                    {reviews.slice(0, 6).map((review, idx) => (
-                      <div key={review.id ?? idx} className="py-5 first:pt-0">
-                        <div className="flex items-start gap-3">
-                          <span
-                            aria-hidden
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
-                          >
-                            {authorName(review.author_id).charAt(0).toUpperCase()}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-sm font-semibold">
-                                {authorName(review.author_id)}
-                              </span>
-                              <span className="text-xs text-amber-400">
-                                {"★".repeat(review.rating)}
-                                {"☆".repeat(5 - review.rating)}
-                              </span>
-                              {review.created_at && (
-                                <span className="text-xs text-[var(--subtle)]">
-                                  {new Date(review.created_at).toLocaleDateString(
-                                    locale === "fr" ? "fr-FR" : "en-US",
-                                    { year: "numeric", month: "short", day: "numeric" }
-                                  )}
-                                </span>
-                              )}
-                            </div>
-                            {review.comment ? (
-                              <p className="mt-1.5 text-sm leading-relaxed text-[var(--subtle)]">
-                                {review.comment}
-                              </p>
-                            ) : (
-                              <p className="mt-1.5 text-sm italic text-[var(--subtle)]">
-                                {locale === "en" ? "No comment." : "Pas de commentaire."}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="mt-6">
+                  <ReviewsList
+                    reviews={reviews.map((r) => ({
+                      id: r.id,
+                      rating: r.rating,
+                      comment: r.comment,
+                      created_at: r.created_at,
+                      authorName: authorName(r.author_id),
+                    }))}
+                    avg={avg!}
+                    breakdown={breakdown}
+                    maxBreakdown={maxBreakdown}
+                    reviewsCountLabel={t.reviewsCount.toLowerCase()}
+                    locale={locale}
+                  />
                 </div>
               )}
             </section>
