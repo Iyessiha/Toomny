@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { EmptyState } from "@/components/dashboard/shell";
+import { Pill, Section, disputeTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -23,6 +24,7 @@ export default async function AdminDisputesPage() {
   const locale = user.preferredLocale;
   const t = getMarketplaceTexts(locale).adminDisputes;
   const nav = getAdminTexts(locale).nav;
+  const statusLabels = getMarketplaceTexts(locale).disputes.status;
   const db = createAdminClient();
 
   // Disputes avec données commande (client_id + provider_id pour labelliser les messages)
@@ -79,6 +81,7 @@ export default async function AdminDisputesPage() {
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
       nav={[
@@ -96,96 +99,80 @@ export default async function AdminDisputesPage() {
       {rows.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />
       ) : (
-        <ul className="space-y-4">
-          {rows.map((d) => {
-            const ordMessages = (messagesByOrder.get(d.order_id) ?? []).map((m) => {
-              let role = t.labelAdmin;
-              if (d.order?.client_id === m.sender_id) role = t.labelClient;
-              else if (d.order?.provider_id === m.sender_id) role = t.labelProvider;
-              return {
-                id: m.id,
-                body: m.body,
-                created_at: m.created_at,
-                senderName: profileMap.get(m.sender_id) ?? "—",
-                senderRole: role,
-              };
-            });
+        <>
+          <ul className="space-y-4">
+            {rows.map((d) => {
+              const ordMessages = (messagesByOrder.get(d.order_id) ?? []).map((m) => {
+                let role = t.labelAdmin;
+                if (d.order?.client_id === m.sender_id) role = t.labelClient;
+                else if (d.order?.provider_id === m.sender_id) role = t.labelProvider;
+                return {
+                  id: m.id,
+                  body: m.body,
+                  created_at: m.created_at,
+                  senderName: profileMap.get(m.sender_id) ?? "—",
+                  senderRole: role,
+                };
+              });
 
-            return (
-              <li key={d.id} className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-                {/* Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <p className="font-medium">
-                      {t.colOrder}{" "}
-                      <Link
-                        href={`/orders/${d.order_id}`}
-                        className="text-[var(--color-brand-600)] underline-offset-2 hover:underline"
-                      >
-                        {d.order?.reference ?? d.order_id.slice(0, 8)}
+              return (
+                <li key={d.id}>
+                  <Section
+                    action={<Pill tone={disputeTone(d.status)}>{statusLabels[d.status] ?? d.status}</Pill>}
+                    title={`${t.colOrder} ${d.order?.reference ?? d.order_id.slice(0, 8)}`}
+                    subtitle={
+                      d.order
+                        ? `${formatMoney(BigInt(d.order.amount_minor), d.order.currency, locale)} · ${new Date(
+                            d.created_at,
+                          ).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}`
+                        : new Date(d.created_at).toLocaleDateString(
+                            locale === "en" ? "en-GB" : "fr-FR",
+                            { day: "2-digit", month: "short", year: "numeric" },
+                          )
+                    }
+                  >
+                    <p className="text-sm font-medium text-[var(--subtle)]">{t.reason}</p>
+                    <p className="mt-1 whitespace-pre-line text-sm">{d.reason}</p>
+
+                    <div className="mt-4">
+                      <DisputeThread
+                        messages={ordMessages}
+                        threadLabel={t.thread}
+                        showLabel={t.showThread}
+                        hideLabel={t.hideThread}
+                        noMessagesLabel={t.noMessages}
+                      />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
+                      <Link href={`/orders/${d.order_id}`} className="btn-ghost btn-sm">
+                        {t.viewOrder}
                       </Link>
-                      {d.order && (
-                        <span className="ml-1 text-[var(--subtle)]">
-                          · {formatMoney(BigInt(d.order.amount_minor), d.order.currency, locale)}
-                        </span>
-                      )}
-                    </p>
-                    <Link
-                      href={`/orders/${d.order_id}`}
-                      className="rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)]"
-                    >
-                      {t.viewOrder}
-                    </Link>
-                  </div>
-                  <p className="text-xs text-[var(--subtle)]">
-                    {new Date(d.created_at).toLocaleDateString(
-                      locale === "en" ? "en-GB" : "fr-FR",
-                      { day: "2-digit", month: "short", year: "numeric" }
-                    )}
-                  </p>
-                </div>
-
-                {/* Reason */}
-                <p className="mt-3 whitespace-pre-line text-sm">
-                  <span className="text-[var(--subtle)]">{t.reason} :</span> {d.reason}
-                </p>
-
-                {/* Messages thread (expandable) */}
-                <DisputeThread
-                  messages={ordMessages}
-                  threadLabel={t.thread}
-                  showLabel={t.showThread}
-                  hideLabel={t.hideThread}
-                  noMessagesLabel={t.noMessages}
-                />
-
-                {/* Actions */}
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--border)] pt-4">
-                  <form action={resolveDispute}>
-                    <input type="hidden" name="disputeId" value={d.id} />
-                    <input type="hidden" name="decision" value="client" />
-                    <button
-                      type="submit"
-                      className="rounded-full border border-[var(--border)] px-4 py-2 text-xs font-semibold transition-colors hover:border-red-400 hover:text-red-600"
-                    >
-                      {t.refund}
-                    </button>
-                  </form>
-                  <form action={resolveDispute}>
-                    <input type="hidden" name="disputeId" value={d.id} />
-                    <input type="hidden" name="decision" value="provider" />
-                    <button
-                      type="submit"
-                      className="rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-xs font-semibold text-white"
-                    >
-                      {t.release}
-                    </button>
-                  </form>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                      <form action={resolveDispute}>
+                        <input type="hidden" name="disputeId" value={d.id} />
+                        <input type="hidden" name="decision" value="client" />
+                        <button type="submit" className="btn-danger btn-sm">
+                          {t.refund}
+                        </button>
+                      </form>
+                      <form action={resolveDispute}>
+                        <input type="hidden" name="disputeId" value={d.id} />
+                        <input type="hidden" name="decision" value="provider" />
+                        <button type="submit" className="btn-success btn-sm">
+                          {t.release}
+                        </button>
+                      </form>
+                    </div>
+                  </Section>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </AdminShell>
   );

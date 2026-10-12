@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { Avatar, Pill } from "@/components/dashboard/pro";
 import { InquiryReplyForm } from "@/components/inquiries/reply-form";
 import { MarkConversationReadButton } from "@/components/inquiries/mark-read-button";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -75,18 +76,10 @@ export default async function DemandesPage() {
             const person = names.get(c.otherId);
             const serviceTitle = c.serviceId ? serviceTitles.get(c.serviceId) : undefined;
             return (
-              <li
-                key={c.key}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5"
-              >
+              <li key={c.key} className="card card-pad">
                 {/* En-tête : interlocuteur + prestation */}
                 <div className="flex flex-wrap items-center gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-bold text-[var(--color-brand-700)]"
-                  >
-                    {person?.initials ?? "?"}
-                  </span>
+                  <Avatar name={person?.name ?? person?.initials} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{person?.name ?? "—"}</p>
                     <p className="truncate text-xs text-[var(--subtle)]">
@@ -106,10 +99,7 @@ export default async function DemandesPage() {
                     </p>
                   </div>
                   {providerIds.has(c.otherId) && (
-                    <Link
-                      href={`/prestataires/${c.otherId}`}
-                      className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)]"
-                    >
+                    <Link href={`/prestataires/${c.otherId}`} className="btn-ghost btn-sm">
                       {t.viewProfile}
                     </Link>
                   )}
@@ -122,7 +112,7 @@ export default async function DemandesPage() {
                 </div>
 
                 {/* Fil */}
-                <ul className="mt-4 space-y-2.5">
+                <ul className="app-stagger mt-4 space-y-2.5">
                   {c.messages.map((m) => {
                     const mine = m.from_id === user.id;
                     return (

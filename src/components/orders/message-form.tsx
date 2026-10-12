@@ -38,7 +38,7 @@ export function MessageForm({ orderId, locale = "fr" }: { orderId: string; local
         placeholder={t.messagePlaceholder}
         className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
       />
-      {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="notice notice-danger">{error}</p>}
       <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.sending : t.send}
       </button>

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { EmptyState } from "@/components/dashboard/shell";
+import { Avatar, FilterTabs, Pill, TableCard, roleTone } from "@/components/dashboard/pro";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -47,10 +49,15 @@ export default async function AdminUsersPage({
     { key: "admin", label: t.filterAdmin },
   ];
 
+  function filterHref(key: string | null) {
+    return key ? `/admin/users?role=${key}` : "/admin/users";
+  }
+
   return (
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={`${t.subtitle} — ${list.length} compte${list.length !== 1 ? "s" : ""}`}
       nav={[
@@ -65,66 +72,53 @@ export default async function AdminUsersPage({
         { href: "/dashboard", label: nav.myDashboard },
       ]}
     >
-      <div className="mb-6 flex flex-wrap gap-2">
-        {filters.map((f) => (
-          <a
-            key={f.key ?? "all"}
-            href={f.key ? `/admin/users?role=${f.key}` : "/admin/users"}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${
-              filterRole === f.key
-                ? "bg-[var(--color-brand-500)] text-white"
-                : "border border-[var(--border)] bg-[var(--background)] text-[var(--subtle)]"
-            }`}
-          >
-            {f.label}
-          </a>
-        ))}
-      </div>
+      <FilterTabs
+        items={filters.map((f) => ({
+          href: filterHref(f.key),
+          label: f.label,
+          current: filterRole === f.key,
+        }))}
+      />
 
       {list.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--subtle)]">
-              <tr>
-                <th className="px-5 py-3 font-medium">{t.colName}</th>
-                <th className="px-5 py-3 font-medium">{t.colRole}</th>
-                <th className="px-5 py-3 font-medium">{t.colCountry}</th>
-                <th className="px-5 py-3 font-medium">{t.colDate}</th>
-                <th className="px-5 py-3 font-medium text-right">{t.changeRole}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((u, i) => (
-                <tr key={u.id} className={i < list.length - 1 ? "border-b border-[var(--border)]" : ""}>
-                  <td className="px-5 py-3.5">
-                    <p className="font-medium">{u.display_name ?? "—"}</p>
-                    <p className="text-xs text-[var(--subtle)]">{u.email}</p>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      u.role === "admin"
-                        ? "bg-amber-50 text-amber-700"
-                        : u.role === "provider"
-                        ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
-                        : "bg-[var(--surface)] text-[var(--subtle)]"
-                    }`}>
-                      {roles[u.role] ?? u.role}
+        <TableCard>
+          <thead>
+            <tr>
+              <th>{t.colName}</th>
+              <th>{t.colRole}</th>
+              <th>{t.colCountry}</th>
+              <th>{t.colDate}</th>
+              <th className="text-right">{t.changeRole}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((u) => (
+              <tr key={u.id}>
+                <td className="whitespace-normal!">
+                  <span className="flex items-center gap-3">
+                    <Avatar name={u.display_name ?? u.email} size="sm" />
+                    <span className="min-w-0">
+                      <span className="block truncate font-semibold">{u.display_name ?? "—"}</span>
+                      <span className="block truncate text-xs text-[var(--subtle)]">{u.email}</span>
                     </span>
-                  </td>
-                  <td className="px-5 py-3.5 text-[var(--subtle)]">{u.country_code ?? "—"}</td>
-                  <td className="px-5 py-3.5 text-[var(--subtle)] text-xs">
-                    {new Date(u.created_at).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}
-                  </td>
-                  <td className="px-5 py-3.5 text-right">
-                    <UserRoleManager userId={u.id} currentRole={u.role} locale={locale} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </span>
+                </td>
+                <td>
+                  <Pill tone={roleTone(u.role)}>{roles[u.role] ?? u.role}</Pill>
+                </td>
+                <td className="text-[var(--subtle)]">{u.country_code ?? "—"}</td>
+                <td className="text-xs text-[var(--subtle)]">
+                  {new Date(u.created_at).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}
+                </td>
+                <td className="text-right">
+                  <UserRoleManager userId={u.id} currentRole={u.role} locale={locale} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </TableCard>
       )}
     </AdminShell>
   );

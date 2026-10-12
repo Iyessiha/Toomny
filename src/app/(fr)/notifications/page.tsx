@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { Section } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { getNotificationTexts } from "@/i18n/notifications";
@@ -107,28 +108,29 @@ export default async function NotificationsPage() {
       {items.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />
       ) : (
-        <>
-          {unreadCount > 0 && (
-            <form action={markAllNotificationsRead} className="mb-4 flex justify-end">
-              <button
-                type="submit"
-                className="rounded-full border border-[var(--border)] px-4 py-1.5 text-sm font-medium text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--foreground)]"
-              >
-                {t.markAll}
-              </button>
-            </form>
-          )}
-          <ul className="space-y-2.5">
+        <Section
+          flush
+          title={t.title}
+          subtitle={unreadCount > 0 ? `${unreadCount} ${unreadCount > 1 ? t.unreadMany : t.unreadOne}` : t.subtitle}
+          action={
+            unreadCount > 0 ? (
+              <form action={markAllNotificationsRead}>
+                <button type="submit" className="btn-ghost btn-sm">
+                  {t.markAll}
+                </button>
+              </form>
+            ) : undefined
+          }
+        >
+          <ul className="divide-y divide-[var(--border)]">
             {items.map((n) => (
               <li key={n.id}>
                 <form action={openNotification}>
                   <input type="hidden" name="id" value={n.id} />
                   <button
                     type="submit"
-                    className={`flex w-full items-start gap-3 rounded-2xl border p-4 text-left transition-colors ${
-                      n.unread
-                        ? "border-[var(--color-brand-200)] bg-[var(--color-brand-50)] hover:border-[var(--color-brand-400)]"
-                        : "border-[var(--border)] bg-[var(--background)] hover:border-[var(--color-brand-400)]"
+                    className={`flex w-full items-start gap-3 px-5 py-4 text-left transition-colors hover:bg-[var(--surface)] ${
+                      n.unread ? "bg-[var(--tone-brand-bg)]" : ""
                     }`}
                   >
                     <span
@@ -167,7 +169,7 @@ export default async function NotificationsPage() {
               </li>
             ))}
           </ul>
-        </>
+        </Section>
       )}
     </DashboardShell>
   );

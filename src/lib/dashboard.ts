@@ -74,10 +74,3 @@ export async function getDashboardData(user: CurrentUser): Promise<DashboardData
     currency: rows[0]?.currency ?? "XOF",
   };
 }
-
-export function statusTone(status: string): string {
-  if (status === "completed") return "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]";
-  if (status === "disputed") return "bg-red-50 text-red-700";
-  if (status === "cancelled" || status === "refunded") return "bg-neutral-100 text-neutral-600";
-  return "bg-amber-50 text-amber-700";
-}

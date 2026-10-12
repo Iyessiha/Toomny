@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
-import { statusTone } from "@/lib/dashboard";
+import { Notice, Pill, Section, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { UUID_RE, availableActions } from "@/lib/orders";
@@ -71,19 +71,26 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(order.status)}`}>
-                {getDashboardTexts(locale).status[order.status] ?? order.status}
+          <Section
+            title={t.requirements}
+            action={
+              <span className="flex items-center gap-3">
+                <span className="font-display text-lg font-bold">
+                  {formatMoney(BigInt(amount), order.currency, locale)}
+                  <span className="ml-2 text-xs font-normal text-[var(--subtle)]">
+                    {isProvider ? t.netLabel : t.ttc}
+                  </span>
+                </span>
+                <Pill tone={orderTone(order.status)}>
+                  {getDashboardTexts(locale).status[order.status] ?? order.status}
+                </Pill>
               </span>
-              <span className="font-display text-xl font-bold">
-                {formatMoney(BigInt(amount), order.currency, locale)}
-                <span className="ml-2 text-xs font-normal text-[var(--subtle)]">{isProvider ? t.netLabel : t.ttc}</span>
-              </span>
-            </div>
-            <h2 className="mt-6 text-sm font-semibold">{t.requirements}</h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">{order.requirements ?? t.noRequirements}</p>
-          </section>
+            }
+          >
+            <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">
+              {order.requirements ?? t.noRequirements}
+            </p>
+          </Section>
 
           <MessageSection
             orderId={order.id}
@@ -95,36 +102,31 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
         <aside className="space-y-4">
           {isClient && order.status === "completed" && (
-            <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-              <h2 className="font-display text-base font-bold">{reviewText.title}</h2>
-              <div className="mt-4">
-                {existingReview ? (
-                  <p className="text-sm text-[var(--subtle)]">{reviewText.alreadyDone}</p>
-                ) : (
-                  <ReviewForm orderId={order.id} locale={locale} />
-                )}
-              </div>
-            </div>
+            <Section title={reviewText.title}>
+              {existingReview ? (
+                <p className="text-sm text-[var(--subtle)]">{reviewText.alreadyDone}</p>
+              ) : (
+                <ReviewForm orderId={order.id} locale={locale} />
+              )}
+            </Section>
           )}
 
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <h2 className="font-display text-base font-bold">{t.actions}</h2>
-            <div className="mt-4">
-              {actions.length > 0 ? (
-                <OrderControls orderId={order.id} actions={actions} locale={locale} />
-              ) : (
-                <p className="text-sm text-[var(--subtle)]">{t.noActions}</p>
-              )}
-            </div>
-          </div>
+          <Section title={t.actions}>
+            {actions.length > 0 ? (
+              <OrderControls orderId={order.id} actions={actions} locale={locale} />
+            ) : (
+              <p className="text-sm text-[var(--subtle)]">{t.noActions}</p>
+            )}
+          </Section>
           {isClient && order.status === "pending_payment" && (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              <p>{t.pendingPayment}</p>
-              <PayButton
-                orderId={order.id}
-                labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
-              />
-            </div>
+            <Notice tone="warning" title={t.pendingPayment}>
+              <div className="mt-3">
+                <PayButton
+                  orderId={order.id}
+                  labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
+                />
+              </div>
+            </Notice>
           )}
         </aside>
       </div>

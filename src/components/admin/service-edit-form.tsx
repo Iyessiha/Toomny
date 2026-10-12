@@ -90,7 +90,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
       </div>
 
       {msg && (
-        <p role="alert" className={`rounded-xl px-4 py-3 text-sm ${msg.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+        <p role="alert" className={`notice ${msg.ok ? "notice-success" : "notice-danger"}`}>
           {msg.text}
         </p>
       )}
@@ -98,7 +98,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        className="btn-primary disabled:opacity-60"
       >
         {pending ? t.saving : t.save}
       </button>

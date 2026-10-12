@@ -11,6 +11,7 @@ import {
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { EmptyState } from "@/components/dashboard/shell-ui";
+import { Pill, serviceTone } from "@/components/dashboard/pro";
 import type { Locale } from "@/i18n/dictionaries";
 import { resizeCover } from "@/lib/resize-image";
 
@@ -59,13 +60,6 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
-
-function statusBadgeClass(status: string) {
-  if (status === "active") return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-  if (status === "paused") return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
-  if (status === "removed") return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-  return "bg-[var(--surface)] text-[var(--subtle)]";
-}
 
 export function ServiceManage({
   services,
@@ -302,11 +296,9 @@ export function ServiceManage({
               <p className="truncate font-medium">{s.title}</p>
               <p className="mt-0.5 flex items-center gap-2 text-xs text-[var(--subtle)]">
                 <span>{t.delivery} {s.delivery_days} {t.days}</span>
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadgeClass(s.status)}`}
-                >
+                <Pill tone={serviceTone(s.status)}>
                   {statusLabels[s.status as keyof typeof statusLabels] ?? s.status}
-                </span>
+                </Pill>
               </p>
             </div>
             <p className="shrink-0 font-display font-bold">
@@ -316,7 +308,7 @@ export function ServiceManage({
               <button
                 onClick={() => openEdit(s)}
                 disabled={pending}
-                className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] disabled:opacity-50"
+                className="btn-ghost btn-sm disabled:opacity-50"
               >
                 {t.edit}
               </button>
@@ -324,7 +316,7 @@ export function ServiceManage({
                 <button
                   onClick={() => handleToggle(s)}
                   disabled={pending}
-                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] disabled:opacity-50"
+                  className="btn-ghost btn-sm disabled:opacity-50"
                 >
                   {s.status === "active" ? t.pause : t.activate}
                 </button>
@@ -333,7 +325,7 @@ export function ServiceManage({
                 <button
                   onClick={() => handleDelete(s)}
                   disabled={pending}
-                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 disabled:opacity-50"
+                  className="btn-ghost btn-sm text-[var(--tone-danger-fg)] disabled:opacity-50"
                 >
                   {t.delete}
                 </button>
@@ -344,7 +336,7 @@ export function ServiceManage({
       </ul>
 
       {error && (
-        <p role="alert" className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="notice notice-danger mt-3">
           {error}
         </p>
       )}
@@ -489,7 +481,7 @@ export function ServiceManage({
                     />
                   </label>
                 )}
-                {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
+                {uploadError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{uploadError}</p>}
               </div>
 
               {/* Gallery */}
@@ -537,7 +529,7 @@ export function ServiceManage({
                     </label>
                   )}
                 </div>
-                {galleryError && <p className="mt-1 text-xs text-red-600">{galleryError}</p>}
+                {galleryError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{galleryError}</p>}
               </div>
 
               {/* Tags */}
@@ -654,7 +646,7 @@ export function ServiceManage({
               </div>
 
               {error && (
-                <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                <p role="alert" className="notice notice-danger">{error}</p>
               )}
               {success && (
                 <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{success}</p>

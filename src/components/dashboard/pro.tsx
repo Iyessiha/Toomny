@@ -16,7 +16,8 @@ const PILL: Record<Tone, string> = {
 };
 
 /** Pastille de statut : bilingue par le texte qu'on lui passe, ton par le sens. */
-export function Pill({ tone = "neutral", children }: { tone?: Tone; children: React.ReactNode }) {  return (
+export function Pill({ tone = "neutral", children }: { tone?: Tone; children: React.ReactNode }) {
+  return (
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${PILL[tone]}`}
     >
@@ -42,11 +43,131 @@ export function serviceTone(status: string): Tone {
   return "neutral";
 }
 
+/** Ton d'un versement : payé, en cours, échoué, en file. */
+export function payoutTone(status: string): Tone {
+  if (status === "paid") return "success";
+  if (status === "processing") return "info";
+  if (status === "failed") return "danger";
+  return "warning";
+}
+
+/** Ton d'un litige : réglé, en attente d'une partie, ouvert. */
+export function disputeTone(status: string): Tone {
+  if (status.startsWith("resolved_")) return "success";
+  if (status.startsWith("awaiting_")) return "warning";
+  return "danger";
+}
+
+/** Ton d'une vérification d'identité : validée, rejetée, revue humaine… */
+export function kycTone(status: string): Tone {
+  if (status === "verified") return "success";
+  if (status === "rejected") return "danger";
+  if (status === "manual_review") return "info";
+  if (status === "pending") return "warning";
+  return "neutral";
+}
+
+/** Ton d'un rôle de compte : administration, prestataire, les deux, client. */
+export function roleTone(role: string): Tone {
+  if (role === "admin") return "warning";
+  if (role === "provider") return "brand";
+  if (role === "both") return "info";
+  return "neutral";
+}
+
 const TILE: Record<"brand" | "gold" | "plain", string> = {
   brand: "bg-[var(--color-brand-500)] text-white",
   gold: "bg-[var(--color-gold-500)] text-white",
   plain: "bg-[var(--surface)] text-[var(--color-brand-600)]",
 };
+
+/**
+ * Petite statistique compacte, pour les bandeaux de totaux (versements,
+ * volumes par statut). Même langage visuel que ProStat, sans icône.
+ */
+export function MiniStat({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <div className="card px-4 py-3">
+      <p className="text-xs font-medium text-[var(--subtle)]">{label}</p>
+      <p className="mt-1 font-display text-base font-bold">{value}</p>
+      {hint && <p className="mt-0.5 text-xs text-[var(--subtle)]">{hint}</p>}
+    </div>
+  );
+}
+
+/**
+ * Onglets de filtre d'une liste : des liens, jamais du JavaScript. L'état
+ * actif est porté par `aria-current`, ce qui évite de dupliquer la logique.
+ */
+export function FilterTabs({
+  items,
+  className = "",
+}: {
+  items: { href: string; label: string; current: boolean; count?: number }[];
+  className?: string;
+}) {
+  return (
+    <nav className={`mb-5 flex flex-wrap gap-2 ${className}`}>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          aria-current={item.current ? "page" : undefined}
+          className={item.current ? "chip chip-active" : "chip"}
+        >
+          {item.label}
+          {item.count !== undefined && <span className="chip-count">{item.count}</span>}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * Bandeau d'information : attention, erreur, validation, information neutre.
+ * Les couleurs viennent des tons, donc le mode sombre suit sans variante.
+ */
+export function Notice({
+  tone = "info",
+  icon,
+  title,
+  action,
+  children,
+}: {
+  tone?: Tone;
+  icon?: React.ReactNode;
+  title?: string;
+  action?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`notice notice-${tone} ${action ? "flex-col sm:flex-row sm:items-center sm:justify-between" : ""}`}
+      role={tone === "danger" ? "alert" : undefined}
+    >
+      <div className="flex items-start gap-3">
+        {icon && (
+          <span aria-hidden className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center">
+            {icon}
+          </span>
+        )}
+        <div className="min-w-0">
+          {title && <p className="font-display text-sm font-bold">{title}</p>}
+          {children && <div className={title ? "mt-1 opacity-90" : ""}>{children}</div>}
+        </div>
+      </div>
+      {action && <div className="flex-none">{action}</div>}
+    </div>
+  );
+}
 
 /** Grande statistique avec tuile d'icône, valeur, indice et variation. */
 export function ProStat({

@@ -3,9 +3,9 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { Avatar, Pill, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
-import { statusTone } from "@/lib/dashboard";
 import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
@@ -98,19 +98,16 @@ export default async function MessagesPage() {
       {conversations.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />
       ) : (
-        <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+        <ul className="card divide-y divide-[var(--border)] overflow-hidden">
           {conversations.map((c) => (
             <li key={c.id}>
               <Link
                 href={`/orders/${c.id}`}
                 className="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-[var(--surface)]"
               >
-                {/* Initiale / avatar */}
-                <span
-                  aria-hidden
-                  className="mt-0.5 flex h-9 w-9 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-bold text-[var(--color-brand-700)]"
-                >
-                  {c.counterpartInitials}
+                {/* Avatar de l'interlocuteur */}
+                <span className="mt-0.5">
+                  <Avatar name={c.counterpartName ?? c.counterpartInitials} />
                 </span>
 
                 <div className="min-w-0 flex-1">
@@ -151,10 +148,8 @@ export default async function MessagesPage() {
                     )}
                   </div>
 
-                  <span
-                    className={`mt-1.5 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusTone(c.status)}`}
-                  >
-                    {statusLabels[c.status] ?? c.status}
+                  <span className="mt-1.5 inline-block">
+                    <Pill tone={orderTone(c.status)}>{statusLabels[c.status] ?? c.status}</Pill>
                   </span>
                 </div>
               </Link>

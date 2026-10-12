@@ -49,10 +49,7 @@ export function PayoutRowActions({
     router.refresh();
   }
 
-  const btn =
-    "rounded-full px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60";
-  const ghost =
-    "rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium disabled:opacity-60";
+  const ghost = "btn-ghost btn-sm disabled:opacity-60";
 
   if (status === "paid") return null;
 
@@ -66,7 +63,7 @@ export function PayoutRowActions({
                 type="button"
                 disabled={pending}
                 onClick={() => run(() => processPayout(payoutId))}
-                className={`${btn} bg-[var(--color-brand-500)]`}
+                className="btn-primary btn-sm disabled:opacity-60"
               >
                 {t.process}
               </button>
@@ -74,7 +71,7 @@ export function PayoutRowActions({
                 type="button"
                 disabled={pending}
                 onClick={() => setMode("confirmFailed")}
-                className={`${btn} bg-red-600`}
+                className="btn-danger btn-sm disabled:opacity-60"
               >
                 {t.markFailed}
               </button>
@@ -86,7 +83,7 @@ export function PayoutRowActions({
                 type="button"
                 disabled={pending}
                 onClick={() => setMode("confirmPaid")}
-                className={`${btn} bg-green-600`}
+                className="btn-success btn-sm disabled:opacity-60"
               >
                 {t.markPaid}
               </button>
@@ -94,7 +91,7 @@ export function PayoutRowActions({
                 type="button"
                 disabled={pending}
                 onClick={() => setMode("confirmFailed")}
-                className={`${btn} bg-red-600`}
+                className="btn-danger btn-sm disabled:opacity-60"
               >
                 {t.markFailed}
               </button>
@@ -105,7 +102,7 @@ export function PayoutRowActions({
               type="button"
               disabled={pending}
               onClick={() => run(() => requeuePayout(payoutId))}
-              className={`${btn} bg-amber-500`}
+              className="btn-warn btn-sm disabled:opacity-60"
             >
               {t.requeue}
             </button>
@@ -133,7 +130,7 @@ export function PayoutRowActions({
               type="button"
               disabled={pending}
               onClick={() => run(() => markPayoutPaid(payoutId, field))}
-              className={`${btn} bg-green-600`}
+              className="btn-success btn-sm disabled:opacity-60"
             >
               {t.markPaid}
             </button>
@@ -151,7 +148,7 @@ export function PayoutRowActions({
               rows={2}
               maxLength={500}
               placeholder={t.failureReasonPlaceholder}
-              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-red-400"
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-[var(--tone-danger-fg)]"
             />
           </label>
           <div className="flex justify-end gap-2">
@@ -162,7 +159,7 @@ export function PayoutRowActions({
               type="button"
               disabled={pending}
               onClick={() => run(() => markPayoutFailed(payoutId, field))}
-              className={`${btn} bg-red-600`}
+              className="btn-danger btn-sm disabled:opacity-60"
             >
               {t.markFailed}
             </button>
@@ -171,7 +168,7 @@ export function PayoutRowActions({
       )}
 
       {error && (
-        <p role="alert" className="max-w-64 text-right text-xs text-red-600">
+        <p role="alert" className="max-w-64 text-right text-xs text-[var(--tone-danger-fg)]">
           {error}
         </p>
       )}

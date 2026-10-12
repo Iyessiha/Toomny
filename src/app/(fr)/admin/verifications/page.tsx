@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { EmptyState } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
+import { FilterTabs, Notice } from "@/components/dashboard/pro";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -64,6 +65,7 @@ export default async function AdminVerificationsPage({
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.kycPage.title}
       subtitle={t.kycPage.subtitle}
       nav={[
@@ -79,31 +81,22 @@ export default async function AdminVerificationsPage({
       ]}
     >
       {waiting > 0 && (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          <strong>{waiting}</strong> {waiting > 1 ? t.kycPage.attention : t.kycPage.attentionOne}
+        <div className="mb-6">
+          <Notice tone="warning">
+            <strong>{waiting}</strong>{" "}
+            {waiting > 1 ? t.kycPage.attention : t.kycPage.attentionOne}
+          </Notice>
         </div>
       )}
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {tabs.map((tab) => (
-          <a
-            key={tab.value}
-            href={`/admin/verifications?status=${tab.value}`}
-            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              filter === tab.value
-                ? "bg-[var(--color-brand-500)] text-white"
-                : "border border-[var(--border)] bg-[var(--background)] text-[var(--subtle)] hover:text-[var(--foreground)]"
-            }`}
-          >
-            {tab.label}
-            {tab.count !== undefined && (
-              <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${filter === tab.value ? "bg-white/20 text-white" : "bg-[var(--surface)] text-[var(--subtle)]"}`}>
-                {tab.count}
-              </span>
-            )}
-          </a>
-        ))}
-      </div>
+      <FilterTabs
+        items={tabs.map((tab) => ({
+          href: `/admin/verifications?status=${tab.value}`,
+          label: tab.label,
+          current: filter === tab.value,
+          count: tab.count,
+        }))}
+      />
 
       {!verifications || verifications.length === 0 ? (
         <EmptyState

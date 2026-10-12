@@ -1,20 +1,45 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardShell, EmptyState, StatCard } from "@/components/dashboard/shell";
+import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { Pill, ProStat, Section, TableCard, payoutTone } from "@/components/dashboard/pro";
 import { PayoutForm } from "@/components/dashboard/payout-form";
 import { PayoutRequestButton } from "@/components/dashboard/payout-request-button";
 import { formatMoney } from "@/lib/money";
 import { getPayoutTexts } from "@/i18n/payouts";
 import { getDashboardTexts } from "@/i18n/dashboard";
-import { statusTone } from "@/lib/dashboard";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const user = await requireAuth();
   return { title: getPayoutTexts(user.preferredLocale).title };
+}
+
+/** Icône de tuile, reprise du vocabulaire des statistiques du tableau de bord. */
+function TileIcon({ tone }: { tone: "brand" | "gold" | "plain" }) {
+  const cls = "h-5 w-5";
+  if (tone === "gold")
+    return (
+      <svg aria-hidden className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11.9V15a1 1 0 11-2 0v-1.1a4.5 4.5 0 01-2.4-1.3 1 1 0 011.5-1.3c.4.5 1.2.9 2 .9 1 0 1.7-.4 1.7-1 0-.5-.5-.8-1.6-1.1-1.4-.3-3-.9-3-2.7 0-1.3 1-2.3 2.4-2.6V4a1 1 0 112 0v1c.8.2 1.5.6 2 1.2a1 1 0 11-1.5 1.3 2 2 0 00-1.6-.7c-.9 0-1.5.4-1.5.9 0 .4.5.6 1.6.9 1.5.4 3 .9 3 2.8 0 1.4-1 2.4-2.6 2.6z" />
+      </svg>
+    );
+  if (tone === "brand")
+    return (
+      <svg aria-hidden className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+        <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+      </svg>
+    );
+  return (
+    <svg aria-hidden className={cls} viewBox="0 0 20 20" fill="currentColor">
+      <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+      <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+    </svg>
+  );
 }
 
 export default async function VersementsPage() {
@@ -71,17 +96,11 @@ export default async function VersementsPage() {
 
   const hasChannel = !!profile?.payout_channel && !!profile?.payout_msisdn;
 
-  function payoutStatusClass(status: string) {
-    if (status === "paid") return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-    if (status === "processing") return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400";
-    if (status === "failed") return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-    return "bg-[var(--surface)] text-[var(--subtle)]";
-  }
-
   return (
     <DashboardShell
       user={user}
       locale={locale}
+      kicker={nav.payouts}
       title={t.title}
       subtitle={t.subtitle}
       nav={[
@@ -92,25 +111,42 @@ export default async function VersementsPage() {
         { href: "/orders", label: nav.orders },
       ]}
     >
-      {/* Stat cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label={t.earned} value={formatMoney(earned, currency, locale)} hint={t.earnedHint} accent />
-        <StatCard label={t.pending} value={formatMoney(inProgress, currency, locale)} hint={t.pendingHint} />
-        <StatCard label={t.available} value={formatMoney(available, currency, locale)} hint={t.availableHint} />
+        <ProStat
+          tone="brand"
+          icon={<TileIcon tone="brand" />}
+          label={t.earned}
+          value={formatMoney(earned, currency, locale)}
+          hint={t.earnedHint}
+        />
+        <ProStat
+          icon={<TileIcon tone="plain" />}
+          label={t.pending}
+          value={formatMoney(inProgress, currency, locale)}
+          hint={t.pendingHint}
+        />
+        <ProStat
+          tone="gold"
+          icon={<TileIcon tone="gold" />}
+          label={t.available}
+          value={formatMoney(available, currency, locale)}
+          hint={t.availableHint}
+        />
       </div>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-[360px_1fr]">
-        {/* Left: canal + request button */}
+      <div className="mt-8 grid gap-6 lg:grid-cols-[360px_1fr]">
+        {/* Colonne gauche : canal de versement + demande */}
         <div className="space-y-6">
-          <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-            <h2 className="font-display text-base font-bold">{t.channel}</h2>
-            <p className="mt-1 text-xs text-[var(--subtle)]">
-              {profile?.payout_verified_at ? t.verified : t.notVerified}
-            </p>
-            <div className="mt-5">
-              <PayoutForm locale={locale} channel={profile?.payout_channel ?? null} msisdn={profile?.payout_msisdn ?? null} />
-            </div>
-          </section>
+          <Section
+            title={t.channel}
+            subtitle={profile?.payout_verified_at ? t.verified : t.notVerified}
+          >
+            <PayoutForm
+              locale={locale}
+              channel={profile?.payout_channel ?? null}
+              msisdn={profile?.payout_msisdn ?? null}
+            />
+          </Section>
 
           <PayoutRequestButton
             locale={locale}
@@ -120,62 +156,84 @@ export default async function VersementsPage() {
           />
         </div>
 
-        {/* Right: payout history + orders */}
-        <div className="space-y-8">
-          {/* Payout history */}
-          <section>
-            <h2 className="font-display text-base font-bold">{t.historyPayouts}</h2>
-            {payoutList.length === 0 ? (
-              <div className="mt-4">
-                <EmptyState title={t.emptyPayouts} body={t.emptyPayoutsBody} />
-              </div>
-            ) : (
-              <ul className="mt-4 divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+        {/* Colonne droite : historique des versements + commandes */}
+        <div className="space-y-6">
+          {payoutList.length === 0 ? (
+            <Section title={t.historyPayouts}>
+              <EmptyState title={t.emptyPayouts} body={t.emptyPayoutsBody} />
+            </Section>
+          ) : (
+            <TableCard title={t.historyPayouts}>
+              <thead>
+                <tr>
+                  <th>{t.colDate}</th>
+                  <th>{t.colChannel}</th>
+                  <th>{t.colStatus}</th>
+                  <th className="text-right">{t.colAmount}</th>
+                </tr>
+              </thead>
+              <tbody>
                 {payoutList.map((p) => (
-                  <li key={p.id} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
-                    <div>
-                      <p className="font-medium">{formatMoney(BigInt(p.amount_minor), p.currency, locale)}</p>
-                      <p className="text-xs text-[var(--subtle)]">
-                        {new Date(p.created_at).toLocaleDateString(
-                          locale === "en" ? "en-GB" : "fr-FR",
-                          { day: "2-digit", month: "short", year: "numeric" }
-                        )}
-                        {" · "}{t.channels[p.channel] ?? p.channel}
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${payoutStatusClass(p.status)}`}>
-                      {t.payoutStatus[p.status] ?? p.status}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {/* Orders history */}
-          <section>
-            <h2 className="font-display text-base font-bold">{t.historyOrders}</h2>
-            {orderList.length === 0 ? (
-              <div className="mt-4"><EmptyState title={t.empty} body={t.emptyBody} /></div>
-            ) : (
-              <ul className="mt-4 divide-y divide-[var(--border)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-                {orderList.map((o) => (
-                  <li key={o.id} className="flex items-center justify-between gap-4 px-5 py-3.5 text-sm">
-                    <div>
-                      <p className="font-medium">{o.reference}</p>
-                      <p className="text-xs text-[var(--subtle)]">{t.status[o.status] ?? o.status}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-display font-bold">{formatMoney(BigInt(o.provider_net_minor), o.currency, locale)}</p>
-                      {o.status === "completed" && queuedOrderIds.has(o.id) && (
-                        <p className="text-[11px] text-[var(--subtle)]">{t.payoutStatus.queued}</p>
+                  <tr key={p.id}>
+                    <td className="text-[var(--subtle)]">
+                      {new Date(p.created_at).toLocaleDateString(
+                        locale === "en" ? "en-GB" : "fr-FR",
+                        { day: "2-digit", month: "short", year: "numeric" },
                       )}
-                    </div>
-                  </li>
+                    </td>
+                    <td>{t.channels[p.channel] ?? p.channel}</td>
+                    <td>
+                      <Pill tone={payoutTone(p.status)}>
+                        {t.payoutStatus[p.status] ?? p.status}
+                      </Pill>
+                    </td>
+                    <td className="text-right font-display font-bold">
+                      {formatMoney(BigInt(p.amount_minor), p.currency, locale)}
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            )}
-          </section>
+              </tbody>
+            </TableCard>
+          )}
+
+          {orderList.length === 0 ? (
+            <Section title={t.historyOrders}>
+              <EmptyState title={t.empty} body={t.emptyBody} />
+            </Section>
+          ) : (
+            <TableCard title={t.historyOrders}>
+              <thead>
+                <tr>
+                  <th>{t.colOrder}</th>
+                  <th>{t.colStatus}</th>
+                  <th className="text-right">{t.colAmount}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderList.map((o) => (
+                  <tr key={o.id}>
+                    <td>
+                      <Link
+                        href={`/orders/${o.id}`}
+                        className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                      >
+                        {o.reference}
+                      </Link>
+                    </td>
+                    <td className="text-[var(--subtle)]">
+                      {t.status[o.status] ?? o.status}
+                      {o.status === "completed" && queuedOrderIds.has(o.id) && (
+                        <span className="ml-2 text-xs">{t.payoutStatus.queued}</span>
+                      )}
+                    </td>
+                    <td className="text-right font-display font-bold">
+                      {formatMoney(BigInt(o.provider_net_minor), o.currency, locale)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </TableCard>
+          )}
         </div>
       </div>
     </DashboardShell>
