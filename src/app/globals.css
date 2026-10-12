@@ -24,6 +24,17 @@
   --color-brand-800: #084322;
   --color-brand-900: #06301a;
 
+  --color-gold-50: #fbf6ea;
+  --color-gold-100: #f6ead0;
+  --color-gold-200: #ecd39e;
+  --color-gold-300: #e0b566;
+  --color-gold-400: #d29a38;
+  --color-gold-500: #b97f1f;
+  --color-gold-600: #99681a;
+  --color-gold-700: #7a5316;
+  --color-gold-800: #5c3f12;
+  --color-gold-900: #3f2c0d;
+
   --color-ink: #0a1710;
   --color-muted: #55685e;
   --color-line: #e2eae5;
@@ -39,6 +50,20 @@
   --foreground: var(--color-ink);
   --subtle: var(--color-muted);
   --border: var(--color-line);
+
+  /* Tons des pastilles de statut (composant Pill). */
+  --tone-success-bg: #e2f3ea;
+  --tone-success-fg: #0a552d;
+  --tone-warning-bg: #fbf0d7;
+  --tone-warning-fg: #7a5316;
+  --tone-danger-bg: #fbe7e4;
+  --tone-danger-fg: #a02a1e;
+  --tone-info-bg: #e3eefb;
+  --tone-info-fg: #1d4f9c;
+  --tone-neutral-bg: #edf1ee;
+  --tone-neutral-fg: #43564c;
+  --tone-brand-bg: var(--color-brand-100);
+  --tone-brand-fg: var(--color-brand-700);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,6 +74,19 @@
     --foreground: #e9f3ee;
     --subtle: #8ea79b;
     --border: #182d22;
+
+    --tone-success-bg: #0f2a1d;
+    --tone-success-fg: #7fd6a4;
+    --tone-warning-bg: #2e230f;
+    --tone-warning-fg: #e0b566;
+    --tone-danger-bg: #331512;
+    --tone-danger-fg: #f0938a;
+    --tone-info-bg: #12283f;
+    --tone-info-fg: #8db8f0;
+    --tone-neutral-bg: #1c2924;
+    --tone-neutral-fg: #a9bfb5;
+    --tone-brand-bg: #0e2f1f;
+    --tone-brand-fg: #7fd6a4;
   }
 }
 
@@ -210,4 +248,25 @@ html.lenis, html.lenis body { height: auto; }
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-5px); }
   }
+}
+
+/* ── Espaces connectés : premium ──────────────────────────────────────────── */
+
+/* Bandeau profond vert-or pour les en-têtes de dashboard. Toujours sombre,
+   en clair comme en sombre : le contenu blanc reste lisible partout. */
+.hero-band {
+  background:
+    radial-gradient(120% 170% at 88% -30%, rgba(210, 154, 56, 0.32), transparent 55%),
+    radial-gradient(110% 150% at 8% 130%, rgba(51, 164, 114, 0.35), transparent 60%),
+    linear-gradient(155deg, #0c3524 0%, #06301a 55%, #041f12 100%);
+  color: #fff;
+}
+.hero-band .hero-subtle {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Texture pointillée façon bogolan, à poser en surimpression légère. */
+.texture-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1.5px);
+  background-size: 18px 18px;
 }
