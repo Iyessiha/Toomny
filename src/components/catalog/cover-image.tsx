@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { categoryMeta, categoryGradient } from "@/lib/categories";
 
 type Props = {
@@ -6,11 +7,6 @@ type Props = {
   categorySlug: string | null | undefined;
 };
 
-/**
- * Couverture de carte service : image par-dessus un gradient de fallback.
- * Le gradient est toujours rendu ; l'image CSS le recouvre si elle charge.
- * Aucun état client, aucune gestion d'erreur JS nécessaire.
- */
 export function CoverImage({ src, alt, categorySlug }: Props) {
   const gradient = categoryGradient(categorySlug);
   const meta = categoryMeta(categorySlug ?? "");
@@ -31,15 +27,14 @@ export function CoverImage({ src, alt, categorySlug }: Props) {
         )}
       </div>
 
-      {/* Image par-dessus le gradient — si elle échoue à charger, le gradient transparaît */}
+      {/* Image par-dessus le gradient via next/image pour un chargement correct */}
       {src && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={src}
           alt={alt}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-          loading="lazy"
-          decoding="async"
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
       )}
     </div>
