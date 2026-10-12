@@ -16,14 +16,30 @@ const PILL: Record<Tone, string> = {
 };
 
 /** Pastille de statut : bilingue par le texte qu'on lui passe, ton par le sens. */
-export function Pill({ tone = "neutral", children }: { tone?: Tone; children: React.ReactNode }) {
-  return (
+export function Pill({ tone = "neutral", children }: { tone?: Tone; children: React.ReactNode }) {  return (
     <span
       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${PILL[tone]}`}
     >
       {children}
     </span>
   );
+}
+
+/** Ton d'une commande : succès, litige, clôture neutre, livraison, attente. */
+export function orderTone(status: string): Tone {
+  if (status === "completed") return "success";
+  if (status === "disputed") return "danger";
+  if (status === "cancelled" || status === "refunded") return "neutral";
+  if (status === "delivered") return "info";
+  return "warning";
+}
+
+/** Ton d'une prestation : publiée, en pause, retirée, brouillon. */
+export function serviceTone(status: string): Tone {
+  if (status === "active") return "success";
+  if (status === "paused") return "warning";
+  if (status === "removed") return "danger";
+  return "neutral";
 }
 
 const TILE: Record<"brand" | "gold" | "plain", string> = {
