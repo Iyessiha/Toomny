@@ -8,7 +8,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { ServiceManage } from "@/components/dashboard/service-manage";
-import { Section } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -66,7 +65,8 @@ export default async function PrestationsPage() {
         { href: "/demandes", label: nav.inquiries },
       ]}
     >
-      <div className="mb-6 flex items-center justify-end">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
         <Link href="/dashboard/prestations/nouveau" className="btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -74,14 +74,12 @@ export default async function PrestationsPage() {
           {t.newTitle}
         </Link>
       </div>
-      <Section title={t.listTitle} flush>
       <ServiceManage
         services={list}
         categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}
         locale={locale}
         packagesByService={packagesByService}
       />
-      </Section>
     </DashboardShell>
   );
 }
