@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Tarifs — Toomny",
     description:
-      "Dès 5 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
+      "Dès 3 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
   };
 }
 
@@ -22,13 +22,13 @@ export default async function PricingPage() {
   const highlights =
     locale === "en"
       ? [
-          { value: "From 5%", label: "Commission on the provider side" },
+          { value: "From 3%", label: "Commission on the provider side" },
           { value: "0%", label: "Fees on the client side" },
           { value: "Free", label: "Listing and applying" },
           { value: "Direct", label: "Payout to your mobile money" },
         ]
       : [
-          { value: "Dès 5 %", label: "Commission côté prestataire" },
+          { value: "Dès 3 %", label: "Commission côté prestataire" },
           { value: "0 %", label: "Frais côté client" },
           { value: "Gratuit", label: "Publication et candidature" },
           { value: "Direct", label: "Versement sur votre mobile money" },

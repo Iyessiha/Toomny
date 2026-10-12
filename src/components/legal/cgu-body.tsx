@@ -43,9 +43,9 @@ Toomny ne garantit pas la qualité, la conformité ni le résultat des services 
   {
     title: "5. Commission et plans tarifaires",
     body: `5.1. Toomny prélève une commission sur chaque commande finalisée. Le taux applicable dépend du plan souscrit par le Prestataire :
-• Plan Essentiel (10 000 FCFA/mois) : 10 % du montant de la commande ;
-• Plan Pro (35 000 FCFA/mois) : 7 % du montant de la commande ;
-• Plan Expert (45 000 FCFA/mois) : 5 % du montant de la commande.
+• Plan Essentiel (10 000 FCFA/mois) : 8 % du montant de la commande ;
+• Plan Pro (15 000 FCFA/mois) : 5 % du montant de la commande ;
+• Plan Expert (25 000 FCFA/mois) : 3 % du montant de la commande.
 
 5.2. La commission est déduite automatiquement lors du versement au Prestataire. Aucun frais n'est prélevé sur le Client.
 
@@ -194,9 +194,9 @@ Toomny does not guarantee the quality, compliance or outcome of services offered
   {
     title: "5. Commission and Pricing Plans",
     body: `5.1. Toomny charges a commission on each completed order. The applicable rate depends on the Provider's plan:
-• Essential Plan (10,000 FCFA/month): 10% of the order amount;
-• Pro Plan (35,000 FCFA/month): 7% of the order amount;
-• Expert Plan (45,000 FCFA/month): 5% of the order amount.
+• Essential Plan (10,000 FCFA/month): 8% of the order amount;
+• Pro Plan (15,000 FCFA/month): 5% of the order amount;
+• Expert Plan (25,000 FCFA/month): 3% of the order amount.
 
 5.2. The commission is automatically deducted from the Provider's payout. No fees are charged to the Client.
 

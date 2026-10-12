@@ -36,7 +36,7 @@ export const dictionaries = {
     promise: {
       provider: "Payé sur ton mobile money après validation.",
       client: "Ton paiement est conservé jusqu'à la livraison.",
-      commission: "Tu gardes entre 90 % et 95 % de ce que tu factures.",
+      commission: "Tu gardes entre 90 % et 97 % de ce que tu factures.",
     },
     order: {
       status: {
@@ -86,7 +86,7 @@ export const dictionaries = {
     promise: {
       provider: "Paid to your mobile money after approval.",
       client: "Your payment is held until delivery.",
-      commission: "You keep between 90% and 95% of what you charge.",
+      commission: "You keep between 90% and 97% of what you charge.",
     },
     order: {
       status: {
