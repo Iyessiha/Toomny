@@ -13,6 +13,7 @@ import { visitorLocale } from "@/i18n/server-locale";
 import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { ReviewsList } from "@/components/catalog/reviews-list";
+import { WishlistButton } from "@/components/catalog/wishlist-button";
 
 export const dynamic = "force-dynamic";
 
@@ -239,9 +240,14 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   {categoryName}
                 </span>
               )}
-              <h1 className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-                {service.title}
-              </h1>
+              <div className="mt-3 flex items-start gap-3">
+                <h1 className="flex-1 text-2xl font-bold leading-tight sm:text-3xl">
+                  {service.title}
+                </h1>
+                <div className="mt-1 shrink-0">
+                  <WishlistButton serviceId={service.id} size="md" />
+                </div>
+              </div>
 
               {/* Provider chip + rating */}
               <div className="mt-4 flex flex-wrap items-center gap-3">

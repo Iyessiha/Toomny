@@ -5,6 +5,7 @@ import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
 import type { Locale } from "@/i18n/dictionaries";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { CoverImage } from "./cover-image";
+import { WishlistButton } from "./wishlist-button";
 
 type Props = {
   service: ServiceCardData;
@@ -30,6 +31,10 @@ export function ServiceCard({ service: s, locale }: Props) {
           alt={s.title}
           categorySlug={s.category_slug}
         />
+        {/* Wishlist overlay */}
+        <div className="absolute right-2 top-2 z-10">
+          <WishlistButton serviceId={s.id} size="sm" />
+        </div>
       </div>
 
       {/* ── Contenu ── */}
