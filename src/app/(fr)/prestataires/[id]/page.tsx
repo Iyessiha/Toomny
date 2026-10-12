@@ -12,6 +12,17 @@ import { ServiceCard } from "@/components/catalog/service-card";
 
 export const dynamic = "force-dynamic";
 
+const LANG_LABEL: Record<string, string> = {
+  fr: "Français", en: "English", ar: "العربية", wo: "Wolof",
+  dz: "Dioula", bm: "Bambara", ff: "Pulaar", ha: "Haoussa",
+  pt: "Português", es: "Español", de: "Deutsch", zh: "中文",
+};
+const LANG_FLAG: Record<string, string> = {
+  fr: "🇫🇷", en: "🇬🇧", ar: "🌍", wo: "🇸🇳",
+  dz: "🇨🇮", bm: "🇲🇱", ff: "🌍", ha: "🇳🇬",
+  pt: "🇵🇹", es: "🇪🇸", de: "🇩🇪", zh: "🇨🇳",
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   if (!UUID_RE.test(id)) return { title: "Prestataire introuvable" };
@@ -47,7 +58,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     { data: reviews },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
-    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url").eq("profile_id", id).maybeSingle(),
+    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages").eq("profile_id", id).maybeSingle(),
     // placeholder — la vérification est lue depuis provider_directory (voir ci-dessus).
     Promise.resolve({ data: null }),
     supabase
@@ -193,6 +204,47 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <p className="relative mt-6 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">
               {profile.bio}
             </p>
+          )}
+
+          {/* Compétences */}
+          {profile?.skills && (
+            <div className="relative mt-5">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
+                {locale === "en" ? "Skills" : "Compétences"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {profile.skills.split(",").map((s) => s.trim()).filter(Boolean).map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Langues */}
+          {profile?.spoken_languages && (
+            <div className="relative mt-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
+                {locale === "en" ? "Languages" : "Langues"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {profile.spoken_languages.split(",").map((l) => l.trim()).filter(Boolean).map((code) => (
+                  <span
+                    key={code}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
+                  >
+                    <span aria-hidden className="text-sm">
+                      {LANG_FLAG[code.toLowerCase()] ?? "🌐"}
+                    </span>
+                    {LANG_LABEL[code.toLowerCase()] ?? code.toUpperCase()}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* CTA Contacter */}
