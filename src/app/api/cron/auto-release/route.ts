@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, autoReleaseCutoff } from "@/lib/escrow";
 import { recordCompletion } from "@/lib/order-ledger";
+import { notify } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export async function GET(request: Request): Promise<Response> {
 
   const { data: overdue, error } = await db
     .from("orders")
-    .select("id, provider_id, delivered_at")
+    .select("id, reference, client_id, provider_id, delivered_at")
     .eq("status", "delivered")
     .lte("delivered_at", cutoff)
     .order("delivered_at", { ascending: true })
@@ -83,6 +84,20 @@ export async function GET(request: Request): Promise<Response> {
     }
 
     await recordCompletion(db, order.id, order.provider_id);
+
+    await notify(db, {
+      recipientId: order.provider_id,
+      type: "order_completed",
+      params: { ref: order.reference },
+      link: `/orders/${order.id}`,
+    });
+    await notify(db, {
+      recipientId: order.client_id,
+      type: "order_completed",
+      params: { ref: order.reference },
+      link: `/orders/${order.id}`,
+    });
+
     completed++;
   }
 
