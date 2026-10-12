@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   integer,
+  smallint,
   bigint,
   boolean,
   date,
@@ -142,6 +143,13 @@ export const providerProfiles = pgTable("provider_profiles", {
   payoutChannel: payoutChannelEnum("payout_channel"),
   payoutMsisdn: text("payout_msisdn"), // numéro mobile money du prestataire
   payoutVerifiedAt: timestamp("payout_verified_at", { withTimezone: true }),
+  // Vitrine (0014, 0019) : avatar, compétences, langues et liens publics.
+  avatarUrl: text("avatar_url"),
+  skills: text("skills"), // tags séparés par des virgules
+  spokenLanguages: text("spoken_languages"), // ex : "fr,en,wo"
+  websiteUrl: text("website_url"),
+  linkedinUrl: text("linkedin_url"),
+  twitterUrl: text("twitter_url"),
   ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
   ratingCount: integer("rating_count").default(0).notNull(),
   completedOrders: integer("completed_orders").default(0).notNull(),
@@ -196,6 +204,10 @@ export const services = pgTable(
     deliveryDays: integer("delivery_days").notNull(),
     status: serviceStatusEnum("status").default("draft").notNull(),
     coverPath: text("cover_path"),
+    // Présentation (0011, 0016, 0017) : couverture, galerie (4 max) et tags.
+    coverUrl: text("cover_url"),
+    galleryUrls: text("gallery_urls").array().default([]).notNull(),
+    tags: text("tags").array().default([]).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -204,6 +216,26 @@ export const services = pgTable(
     index("services_provider_idx").on(t.providerId),
     index("services_status_idx").on(t.status),
   ],
+);
+
+// Forfaits Basic (1) / Standard (2) / Premium (3) d'une prestation (0018).
+// Lecture publique (prix affichés) ; écriture par la clé service uniquement.
+export const servicePackages = pgTable(
+  "service_packages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    serviceId: uuid("service_id")
+      .notNull()
+      .references(() => services.id, { onDelete: "cascade" }),
+    tier: smallint("tier").notNull(), // 1, 2 ou 3 (CHECK en base)
+    name: text("name").notNull(),
+    description: text("description"),
+    priceMinor: bigint("price_minor", { mode: "bigint" }).notNull(),
+    currency: text("currency").default("XOF").notNull(),
+    deliveryDays: smallint("delivery_days").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("service_packages_service_tier_idx").on(t.serviceId, t.tier)],
 );
 
 // --- Commandes et flux financiers -------------------------------------------
@@ -233,6 +265,9 @@ export const orders = pgTable(
     commissionRateBps: integer("commission_rate_bps").notNull(), // 1000 bps = 10 %
 
     requirements: text("requirements"),
+    // Forfait choisi, le cas échéant (0018). Les montants restent figés
+    // ci-dessus : on ne recalcule jamais depuis le forfait.
+    packageId: uuid("package_id").references(() => servicePackages.id, { onDelete: "set null" }),
     dueAt: timestamp("due_at", { withTimezone: true }),
     deliveredAt: timestamp("delivered_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -355,6 +390,37 @@ export const messages = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [index("messages_order_idx").on(t.orderId)],
+);
+
+// Demandes de contact avant commande, acheteur → prestataire (0015).
+// Pas de FK drizzle vers auth.users : les deux côtés sont des id Auth.
+export const inquiries = pgTable(
+  "inquiries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fromId: uuid("from_id").notNull(),
+    toId: uuid("to_id").notNull(),
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "set null" }),
+    message: text("message").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("inquiries_to_idx").on(t.toId), index("inquiries_from_idx").on(t.fromId)],
+);
+
+// Notifications in-app : type + paramètres JSON rendus en FR/EN à la lecture (0021).
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recipientId: uuid("recipient_id").notNull(),
+    type: text("type").notNull(),
+    params: jsonb("params").$type<Record<string, string>>().notNull().default({}),
+    link: text("link").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("notifications_recipient_idx").on(t.recipientId, t.createdAt)],
 );
 
 export const disputes = pgTable("disputes", {

@@ -14,20 +14,21 @@ import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { ReviewsList } from "@/components/catalog/reviews-list";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
+import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  if (!UUID_RE.test(id)) return { title: "Prestation introuvable" };
+  const locale = await visitorLocale();
+  const t = getCatalogTexts(locale);
+  if (!UUID_RE.test(id)) return { title: t.notFound };
   const supabase = await createClient();
   const { data } = await supabase
     .from("services")
     .select("title, description")
     .eq("id", id)
     .maybeSingle();
-  const locale = await visitorLocale();
-  const t = getCatalogTexts(locale);
   return {
     title: data?.title ?? t.notFound,
     description: data?.description ? data.description.slice(0, 160) : undefined,
@@ -73,7 +74,9 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
       supabase
         .from("reviews")
         .select("id, rating, comment, created_at, author_id")
-        .eq("target_id", service.provider_id),
+        .eq("target_id", service.provider_id)
+        .order("created_at", { ascending: false })
+        .limit(50),
       supabase
         .from("service_packages")
         .select("id, tier, name, description, price_minor, delivery_days, currency")
@@ -94,22 +97,14 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     author_id: string;
   }[];
 
-  // Profils des acheteurs (pour afficher le prénom + initiale)
+  // Noms des acheteurs (pseudo ou prénom + initiale). Résolution côté serveur :
+  // la RLS ne laisse chacun lire que sa propre ligne `profiles`.
   const authorIds = [...new Set(reviews.map((r) => r.author_id).filter(Boolean))];
-  const { data: authorProfiles } = authorIds.length
-    ? await supabase
-        .from("profiles")
-        .select("id, display_name, first_name, last_name")
-        .in("id", authorIds)
-    : { data: [] };
+  const authorNames = await resolveDisplayNames(authorIds);
 
   function authorName(authorId: string): string {
-    const p = (authorProfiles ?? []).find((x) => x.id === authorId);
-    if (!p) return locale === "en" ? "Verified Client" : "Client vérifié";
-    if (p.display_name) return p.display_name;
-    const first = p.first_name ?? "";
-    const lastInitial = p.last_name ? ` ${p.last_name.charAt(0).toUpperCase()}.` : "";
-    return (first + lastInitial).trim() || (locale === "en" ? "Verified Client" : "Client vérifié");
+    const found = authorNames.get(authorId)?.short;
+    return found && found !== "—" ? found : t.verifiedClient;
   }
   const avg =
     reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : null;
@@ -143,18 +138,11 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
   const categoryName =
     locale === "en" ? category?.name_en ?? category?.name_fr : category?.name_fr;
 
-  const trustItems =
-    locale === "en"
-      ? [
-          { icon: "🔒", label: "Payment held in escrow until you approve" },
-          { icon: "📱", label: "Pay by mobile money: Wave, Orange Money, MTN MoMo" },
-          { icon: "⭐", label: "Transparent ratings on each order" },
-        ]
-      : [
-          { icon: "🔒", label: "Paiement conservé jusqu'à votre validation" },
-          { icon: "📱", label: "Paiement mobile money : Wave, Orange Money, MTN MoMo" },
-          { icon: "⭐", label: "Notes transparentes à chaque commande" },
-        ];
+  const trustItems = [
+    { icon: "🔒", label: t.trustHeld },
+    { icon: "📱", label: t.trustMobileMoney },
+    { icon: "⭐", label: t.trustRatings },
+  ];
 
   return (
     <>
@@ -245,7 +233,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   {service.title}
                 </h1>
                 <div className="mt-1 shrink-0">
-                  <WishlistButton serviceId={service.id} size="md" />
+                  <WishlistButton serviceId={service.id} size="md" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
                 </div>
               </div>
 
@@ -313,9 +301,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
 
             {/* Description */}
             <section>
-              <h2 className="font-display text-xl font-bold">
-                {locale === "en" ? "About the service" : "À propos de cette prestation"}
-              </h2>
+              <h2 className="font-display text-xl font-bold">{t.aboutService}</h2>
               <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-[var(--subtle)]">
                 {service.description}
               </div>
@@ -325,9 +311,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             {(providerProfile?.bio || providerProfile?.headline) && (
               <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
                 <h2 className="font-display text-xl font-bold">
-                  {locale === "en"
-                    ? `About ${provider?.display_name ?? "the provider"}`
-                    : `À propos de ${provider?.display_name ?? "ce prestataire"}`}
+                  {t.aboutProvider} {provider?.display_name ?? t.detailProvider}
                 </h2>
                 <div className="mt-5 flex items-start gap-4">
                   {providerProfile?.avatar_url ? (
@@ -374,9 +358,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                       {provider?.country_code && (
                         <div>
                           <p className="font-bold">{provider.country_code}</p>
-                          <p className="text-xs text-[var(--subtle)]">
-                            {locale === "en" ? "Location" : "Localisation"}
-                          </p>
+                          <p className="text-xs text-[var(--subtle)]">{t.location}</p>
                         </div>
                       )}
                     </div>
@@ -391,7 +373,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   href={`/prestataires/${service.provider_id}`}
                   className="mt-4 inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
                 >
-                  {locale === "en" ? "View full profile →" : "Voir le profil complet →"}
+                  {t.viewFullProfile}
                 </Link>
               </section>
             )}
@@ -459,9 +441,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         {/* Recommended services */}
         {recommended.length > 0 && (
           <section className="mt-16">
-            <h2 className="font-display text-xl font-bold">
-              {locale === "en" ? "Others also viewed" : "Les clients ont aussi consulté"}
-            </h2>
+            <h2 className="font-display text-xl font-bold">{t.alsoViewed}</h2>
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {recommended.map((s) => (
                 <ServiceCard key={s.id} service={s} locale={locale} />

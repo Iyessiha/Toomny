@@ -2,15 +2,15 @@
 
 Marketplace de talents pour l'Afrique de l'Ouest. Les PME recrutent des prestataires du continent, paient en mobile money, et les fonds restent sécurisés jusqu'à la livraison.
 
-**Domaine** : toomny.com · **Statut** : structure posée, produit en attente de la Phase 0.
+**Domaine** : toomny.com · **Statut** : produit fonctionnel en français, anglais prêt sur les parcours connectés.
 
 ---
 
 ## État du projet
 
-Le code de ce dépôt est un **squelette d'architecture**, pas un produit. L'étude de marché conclut que cinq hypothèses doivent être validées en entretien avant de construire, dont deux peuvent imposer une conception entièrement différente. Ce qui est posé ici est ce qui ne changera pas quelle qu'en soit l'issue : le modèle monétaire, la machine à états du séquestre, le journal comptable et l'i18n.
+Le parcours complet tourne : catalogue public avec forfaits et avis, commande, paiement mobile money via GeniusPay (encaissement), séquestre miroir, messagerie temps réel, litiges avec arbitrage admin, KYC avec recours humain, profils prestataires, versements en file manuelle, et back-office (commandes, litiges, KYC, utilisateurs, prestations, catégories).
 
-Rien ne doit être développé au-delà avant la fin de la Phase 0.
+Ce qui est posé depuis le premier commit et ne change pas : le modèle monétaire (entiers, multi-devises), la machine à états du séquestre, le journal comptable en ajout seul, et l'i18n FR/EN sans chaîne en dur.
 
 ## Les trois règles d'architecture
 
@@ -28,12 +28,12 @@ Tout montant est un entier dans la plus petite unité de la devise, jamais un fl
 
 ### 3. Journal comptable en ajout seul
 
-`ledger_entries` n'est jamais modifié ni supprimé ; une correction se fait par une écriture inverse. Ce journal conditionne l'attestation de revenus et l'avance sur mission, les deux produits financiers qui porteront la marge réelle. Sans journal propre dès la première transaction, ils ne sont pas construisibles plus tard. Voir [`src/lib/ledger.ts`](src/lib/ledger.ts).
+`ledger_entries` n'est jamais modifié ni supprimé (trigger en base, y compris pour la clé service) ; une correction se fait par une écriture inverse. Ce journal conditionne l'attestation de revenus et l'avance sur mission, les deux produits financiers qui porteront la marge réelle. Voir [`src/lib/order-ledger.ts`](src/lib/order-ledger.ts).
 
 ## Contraintes de conception
 
-- **Mobile d'abord, réseau lent d'abord.** Plus de 90 % du trafic viendra d'un téléphone, souvent en 3G. Pas de police distante, pas d'image décorative, pas de parcours à plus de trois écrans.
-- **Bilingue FR/EN nativement.** Aucune chaîne de texte en dur dans un composant, dès le premier commit. Le français est la langue de lancement, l'anglais sert l'ouverture du marché anglophone en phase 2.
+- **Mobile d'abord, réseau lent d'abord.** Plus de 90 % du trafic viendra d'un téléphone, souvent en 3G. Polices auto-hébergées au build (zéro requête distante au runtime), pas d'image décorative, pas de parcours à plus de trois écrans.
+- **Bilingue FR/EN nativement.** Aucune chaîne de texte en dur dans un composant. Les pages connectées suivent la langue du profil ; les pages publiques suivent le cookie de langue.
 - **Wave par défaut pour les versements** : gratuit à la réception pour le prestataire.
 
 ## Modèle économique encodé
@@ -43,28 +43,28 @@ Tout montant est un entier dans la plus petite unité de la devise, jamais un fl
 | Commission prestataire | 10 % (1000 bps) | `DEFAULT_COMMISSION_BPS` |
 | Commission client | 0 % | — |
 | Délai de versement annoncé | 24 h | `PAYOUT_SLA_HOURS` |
-| Validation automatique après livraison | 72 h | `AUTO_RELEASE_AFTER_DELIVERY_HOURS` |
+| Validation automatique après livraison | 72 h | `AUTO_RELEASE_AFTER_DELIVERY_HOURS` (tâche quotidienne 06:00 UTC, délai effectif 72–96 h) |
 
 L'arrondi de la commission se fait toujours au détriment de la plateforme, jamais du prestataire.
 
 ## Stack
 
-Next.js 16 · React 19 · Tailwind 4 · TypeScript · Supabase (PostgreSQL) · Drizzle ORM · Vercel.
-
-Identique à GeniusCrea et GeniusVoice, pour mutualiser le savoir-faire et les composants.
+Next.js 16 · React 19 · Tailwind 4 · TypeScript · Supabase (PostgreSQL + Auth + Storage + Realtime) · Drizzle (DDL uniquement) · Vercel.
 
 ## Démarrage
 
 ```bash
 npm install
 cp .env.example .env.local   # puis remplir
-npm run db:push              # applique le schéma Drizzle
-# puis, dans l'éditeur SQL Supabase (projet de test d'abord) :
-#   supabase/migrations/0001_security_rls.sql   # RLS, verrous de colonnes, journal immuable, bucket KYC privé
+npm run db:push              # crée les tables depuis src/db/schema.ts
+# puis, dans l'éditeur SQL Supabase (projet de test d'abord), jouer DANS L'ORDRE :
+#   supabase/migrations/0001_security_rls.sql       # RLS, journal immuable, bucket KYC
+#   supabase/migrations/0002_…_0010_…               # stats admin, trigger, rate limits, audit, realtime…
+#   supabase/migrations/0011_…_0020_…               # couvertures, galerie, tags, forfaits, inquiries, réparations
 npm run dev
 ```
 
-> ⚠️ Sans `0001_security_rls.sql`, la base n'a aucune politique d'accès : la clé anonyme publique donnerait accès à toutes les tables.
+> ⚠️ Sans les migrations, la base n'a aucune politique d'accès : la clé anonyme publique donnerait accès à toutes les tables. Chaque fichier est rejouable sans risque (`if not exists`, `drop … if exists`).
 
 ## Scripts
 
@@ -74,34 +74,39 @@ npm run dev
 | `npm run build` | build de production |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript sans émission |
-| `npm run db:push` | pousse le schéma vers la base |
-| `npm run db:generate` | génère les migrations |
+| `npm run test` | Vitest (logique métier, i18n, sécurité) |
+| `npm run db:push` | pousse le schéma Drizzle vers la base (DDL uniquement) |
+| `npm run db:generate` | génère les migrations Drizzle |
+
+L'accès aux données passe par le client Supabase (`@/lib/supabase/server` en session, `@/lib/supabase/admin` côté serveur après contrôle explicite) ; Drizzle ne sert qu'à créer le schéma, jamais à requêter.
 
 ## Structure
 
 ```
 src/
-├── app/            routes Next.js (App Router)
-│   ├── services/   catalogue de prestations
-│   ├── orders/     commandes et séquestre
-│   ├── messages/   échange lié à une commande
-│   ├── disputes/   arbitrage de litige
-│   └── api/        connexion (webhooks paiement et versements : non encore branchés)
-├── db/
-│   ├── schema.ts   schéma Drizzle complet
-│   └── index.ts    client
-├── i18n/           dictionnaires FR/EN
-└── lib/
-    ├── money.ts    arithmétique monétaire en entiers
-    ├── escrow.ts   machine à états de la commande
-    ├── ledger.ts   journal en ajout seul
-    ├── payments/   contrat PaymentProvider + GeniusPay
-    └── supabase/   clients serveur et navigateur
+├── app/
+│   ├── (fr)/         parcours français : landing, catalogue, commandes,
+│   │                 messages, litiges, dashboard, back-office /admin
+│   ├── (en)/en       version anglaise : accueil, auth, CGU
+│   └── api/          auth, paiements, webhooks GeniusPay, uploads, export RGPD, cron 72 h
+├── components/       landing, catalogue, commandes, dashboard, admin, auth
+├── content/          contenus éditoriaux (landing, CGU)
+├── db/schema.ts      schéma Drizzle, source du DDL (jamais requêté)
+├── i18n/             dictionnaires FR/EN par domaine
+├── lib/
+│   ├── money.ts      arithmétique monétaire en entiers
+│   ├── escrow.ts     machine à états de la commande
+│   ├── order-ledger.ts  écritures du journal + compteurs prestataire
+│   ├── packages.ts   validation des forfaits
+│   ├── payments/     contrat PaymentProvider + GeniusPay
+│   └── supabase/     clients session, navigateur et service
+└── proxy.ts          CSP + langue + rafraîchissement de session
+supabase/migrations/ RLS, fonctions SQL, buckets, seeds de démo
 ```
 
-## À faire avant de coder plus loin
+## Points ouverts connus
 
-- [ ] Consultation juridique sur la qualification du séquestre (instruction BCEAO n°001-01-2024)
-- [ ] Accord écrit d'un partenaire agréé pour porter la rétention de fonds
-- [ ] 50 entretiens : 30 prestataires, 20 PME, sur une seule ville
-- [ ] Choix du trio de métiers à ouvrir, issu des entretiens
+- **Versements** : l'API marchand GeniusPay n'expose pas de payout. Les demandes créent des lignes `queued`, pilotées dans `/admin/payouts` (prise en charge → paiement mobile money hors app → marquage payé/échec, avec écritures `payout`/`refund` au journal). Reste : le payout automatique quand un partenaire l'exposera.
+- **Demandes de contact** : lues et répondues dans `/demandes` (conversations par prestation, accusés de lecture), avec notification in-app à chaque message. Reste : notifier hors app (e-mail ou push) — aucun canal externe pour l'instant.
+- **Parité EN** : toute la vitrine suit le cookie de langue (`/en*` = points d'entrée anglais garantis, `lang`/hreflang dynamiques, sitemap + robots). Le login et le sélecteur du header synchronisent `preferred_locale` dans les deux sens. Choix assumé : pas de miroirs `/en/*` pour les pages internes (coût SEO/maintenance) — réévaluer à l'expansion anglophone.
+- **Juridique** : qualification du séquestre (instruction BCEAO n°001-01-2024) et accord écrit du partenaire de rétention, toujours à obtenir.

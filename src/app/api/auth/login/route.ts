@@ -74,5 +74,17 @@ export async function POST(request: NextRequest) {
     if (error.message.includes("Email not confirmed")) return NextResponse.json({ error: m.unconfirmed }, { status: 403 });
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  // Le profil est la source de vérité : la langue suit l’utilisateur sur tous ses appareils.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("preferred_locale")
+      .eq("id", user.id)
+      .maybeSingle();
+    const preferred = profile?.preferred_locale === "en" ? "en" : ("fr" as const);
+    response.cookies.set(LOCALE_COOKIE, preferred, { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax" });
+  }
   return response;
 }

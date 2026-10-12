@@ -66,6 +66,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         { href: "/dashboard", label: nav.overview },
         { href: "/orders", label: nav.orders, current: true },
         { href: "/messages", label: nav.messages },
+        { href: "/demandes", label: nav.inquiries },
       ]}
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">

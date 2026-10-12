@@ -10,6 +10,8 @@ import { ORDER_RULES, UUID_RE, orderReference, type OrderAction } from "@/lib/or
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { recordCompletion, refreshProviderRating } from "@/lib/order-ledger";
+import { notify } from "@/lib/notifications";
+import { actorName } from "@/lib/names";
 
 type Result = { error: string } | { success: true; orderId?: string };
 
@@ -104,7 +106,7 @@ export async function advanceOrder(input: {
   const db = createAdminClient();
   const { data: order } = await db
     .from("orders")
-    .select("id, status, client_id, provider_id")
+    .select("id, status, reference, client_id, provider_id")
     .eq("id", input.orderId)
     .maybeSingle();
 
@@ -157,6 +159,30 @@ export async function advanceOrder(input: {
 
   if (rule.to === "completed") await recordCompletion(db, order.id, order.provider_id);
 
+  // Chaque transition prévient l'autre partie (jamais l'acteur lui-même).
+  if (rule.to === "in_progress" || rule.to === "delivered") {
+    await notify(db, {
+      recipientId: order.client_id,
+      type: rule.to === "delivered" ? "order_delivered" : "order_started",
+      params: { ref: order.reference },
+      link: `/orders/${order.id}`,
+    });
+  } else if (rule.to === "completed" || rule.to === "cancelled") {
+    await notify(db, {
+      recipientId: order.provider_id,
+      type: rule.to === "completed" ? "order_completed" : "order_cancelled",
+      params: { ref: order.reference },
+      link: `/orders/${order.id}`,
+    });
+  } else if (rule.to === "disputed") {
+    await notify(db, {
+      recipientId: order.provider_id,
+      type: "dispute_opened",
+      params: { ref: order.reference },
+      link: "/disputes",
+    });
+  }
+
   revalidatePath(`/orders/${order.id}`);
   revalidatePath("/orders");
   return { success: true };
@@ -180,6 +206,21 @@ export async function sendMessage(input: { orderId: string; body: string }): Pro
   });
   if (error) return { error: t.sendError };
 
+  const { data: order } = await supabase
+    .from("orders")
+    .select("client_id, provider_id, reference")
+    .eq("id", input.orderId)
+    .maybeSingle();
+  if (order) {
+    const otherId = order.client_id === user.id ? order.provider_id : order.client_id;
+    await notify(createAdminClient(), {
+      recipientId: otherId,
+      type: "order_message",
+      params: { from: await actorName(user.id, user.preferredLocale), ref: order.reference },
+      link: `/orders/${input.orderId}`,
+    });
+  }
+
   revalidatePath(`/orders/${input.orderId}`);
   return { success: true };
 }
@@ -200,7 +241,7 @@ export async function submitReview(input: { orderId: string; rating: number; com
   const db = createAdminClient();
   const { data: order } = await db
     .from("orders")
-    .select("id, status, client_id, provider_id")
+    .select("id, status, reference, client_id, provider_id")
     .eq("id", input.orderId)
     .maybeSingle();
   if (!order || order.client_id !== user.id) return { error: t.notAllowed };
@@ -216,6 +257,14 @@ export async function submitReview(input: { orderId: string; rating: number; com
   if (error) return { error: error.code === "23505" ? t.already : t.save };
 
   await refreshProviderRating(db, order.provider_id);
+
+  await notify(db, {
+    recipientId: order.provider_id,
+    type: "review_received",
+    params: { ref: order.reference, rating: String(input.rating) },
+    link: `/orders/${order.id}`,
+  });
+
   revalidatePath(`/orders/${order.id}`);
   revalidatePath(`/prestataires/${order.provider_id}`);
   return { success: true };

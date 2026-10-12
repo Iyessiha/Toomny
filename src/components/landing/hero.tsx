@@ -162,6 +162,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
               {t.railsLabel}
             </span>
             {PAYMENT_METHODS.map((m) => (
+              // eslint-disable-next-line @next/next/no-img-element -- SVG locaux 36px : next/image ne les optimise pas, <img> suffit.
               <img
                 key={m.name}
                 src={m.src}

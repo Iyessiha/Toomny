@@ -37,6 +37,7 @@ export default async function AdminCategoriesPage() {
         { href: "/admin/categories", label: nav.categories, current: true },
         { href: "/admin/users", label: nav.users },
         { href: "/admin/orders", label: nav.orders },
+        { href: "/admin/payouts", label: nav.payouts },
         { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
       ]}

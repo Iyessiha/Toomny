@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getAuthTexts, countryNames } from "@/i18n/auth";
 import { TurnstileWidget } from "@/components/auth/turnstile";
@@ -37,6 +38,7 @@ export function AuthForm({
 }) {
   const t = getAuthTexts(locale);
   const names = countryNames[locale];
+  const router = useRouter();
 
   // Pays détecté seulement s'il fait partie des pays couverts ; sinon Côte d'Ivoire.
   const defaultCountry = initialCountry && SUPPORTED.has(initialCountry as never) ? initialCountry : "CI";
@@ -69,7 +71,10 @@ export function AuthForm({
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(json.error ?? t.errors.login);
-        window.location.href = "/dashboard";
+        // Le cookie de session vient d'être posé par la route : on navigue
+        // puis on rafraîchit pour que le serveur voie la session.
+        router.push("/dashboard");
+        router.refresh();
         return;
       }
 

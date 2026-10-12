@@ -1,48 +1,69 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 
 const KEY = "toomny_wishlist";
+const EVENT = "toomny:wishlist-change";
 
-function getWishlist(): string[] {
+function snapshot(): string {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return localStorage.getItem(KEY) ?? "[]";
+  } catch {
+    return "[]";
+  }
+}
+
+function subscribe(callback: () => void): () => void {
+  // `storage` ne se déclenche que dans les AUTRES onglets : on émet aussi un
+  // événement local après chaque écriture, pour ce même onglet.
+  window.addEventListener("storage", callback);
+  window.addEventListener(EVENT, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(EVENT, callback);
+  };
+}
+
+function readIds(raw: string): string[] {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === "string") : [];
   } catch {
     return [];
   }
 }
 
-function toggleWishlist(id: string): boolean {
-  const list = getWishlist();
+function toggleWishlist(id: string): void {
+  const list = readIds(snapshot());
   const next = list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
   try {
     localStorage.setItem(KEY, JSON.stringify(next));
-  } catch {}
-  return next.includes(id);
+  } catch {
+    // Stockage indisponible (mode privé) : le bouton reste inerte, sans erreur.
+  }
+  window.dispatchEvent(new Event(EVENT));
 }
 
 export function WishlistButton({
   serviceId,
   size = "sm",
+  labels,
 }: {
   serviceId: string;
   size?: "sm" | "md";
+  labels: { add: string; remove: string };
 }) {
-  const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setSaved(getWishlist().includes(serviceId));
-  }, [serviceId]);
+  // Lecture externe synchronisée : pas de setState dans un effet (rendus en
+  // cascade), pas de flash à l'hydratation, et tous les boutons de la page
+  // reflètent le même état.
+  const raw = useSyncExternalStore(subscribe, snapshot, () => "[]");
+  const saved = readIds(raw).includes(serviceId);
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    setSaved(toggleWishlist(serviceId));
+    toggleWishlist(serviceId);
   }
-
-  if (!mounted) return null;
 
   const isSmall = size === "sm";
 
@@ -50,7 +71,7 @@ export function WishlistButton({
     <button
       type="button"
       onClick={handleClick}
-      aria-label={saved ? "Retirer des favoris" : "Ajouter aux favoris"}
+      aria-label={saved ? labels.remove : labels.add}
       aria-pressed={saved}
       className={`flex items-center justify-center rounded-full border transition-all duration-200 ${
         isSmall ? "h-7 w-7 text-sm" : "h-9 w-9 text-base"

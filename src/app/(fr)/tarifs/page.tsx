@@ -4,13 +4,11 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
+import { getPublicPageTexts } from "@/i18n/public-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Tarifs — Toomny",
-    description:
-      "Dès 3 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
-  };
+  const t = getPublicPageTexts(await visitorLocale()).titles;
+  return { title: t.pricing, description: t.pricingDescription };
 }
 
 export default async function PricingPage() {

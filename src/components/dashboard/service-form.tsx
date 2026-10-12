@@ -16,11 +16,16 @@ type PackageSlot = {
   deliveryDays: string;
 };
 
-const DEFAULT_SLOTS: [PackageSlot, PackageSlot, PackageSlot] = [
-  { enabled: false, name: "Basique", description: "", price: "", deliveryDays: "" },
-  { enabled: false, name: "Standard", description: "", price: "", deliveryDays: "" },
-  { enabled: false, name: "Premium", description: "", price: "", deliveryDays: "" },
-];
+type TierNames = { pkgBasic: string; pkgStandard: string; pkgPremium: string };
+
+/** Slots initiaux : les noms de paliers suivent la langue du prestataire. */
+function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot] {
+  return [
+    { enabled: false, name: names.pkgBasic, description: "", price: "", deliveryDays: "" },
+    { enabled: false, name: names.pkgStandard, description: "", price: "", deliveryDays: "" },
+    { enabled: false, name: names.pkgPremium, description: "", price: "", deliveryDays: "" },
+  ];
+}
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
@@ -58,8 +63,8 @@ export function ServiceForm({
   const [tagInput, setTagInput] = useState("");
 
   // Packages
-  const [pkgSlots, setPkgSlots] = useState<[PackageSlot, PackageSlot, PackageSlot]>(
-    [...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]
+  const [pkgSlots, setPkgSlots] = useState<[PackageSlot, PackageSlot, PackageSlot]>(() =>
+    defaultSlots(t.form)
   );
 
   async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
@@ -150,12 +155,13 @@ export function ServiceForm({
     fd.set("tags", tags.join(","));
 
     // Build enabled packages JSON
+    const tierFallback = [t.form.pkgBasic, t.form.pkgStandard, t.form.pkgPremium] as const;
     const enabledPackages = pkgSlots
       .map((slot, i) => ({ ...slot, tier: (i + 1) as 1 | 2 | 3 }))
       .filter((slot) => slot.enabled && slot.price && slot.deliveryDays)
       .map((slot) => ({
         tier: slot.tier,
-        name: slot.name.trim() || (slot.tier === 1 ? "Basique" : slot.tier === 2 ? "Standard" : "Premium"),
+        name: slot.name.trim() || tierFallback[slot.tier - 1],
         description: slot.description,
         price_minor: Number(slot.price.replace(/\s/g, "")),
         delivery_days: Number(slot.deliveryDays),
@@ -174,7 +180,7 @@ export function ServiceForm({
     setGalleryUrls([]);
     setTags([]);
     setTagInput("");
-    setPkgSlots([...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]);
+    setPkgSlots(defaultSlots(t.form));
     setDone(true);
     router.refresh();
   }

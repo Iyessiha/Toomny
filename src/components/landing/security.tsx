@@ -113,6 +113,7 @@ export function Security({ locale = "fr" }: { locale?: Locale }) {
           data-reveal
           className="mt-14 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-5"
         >
+          {/* eslint-disable-next-line @next/next/no-img-element -- SVG local : next/image ne l'optimise pas, <img> suffit. */}
           <img
             src="/payment/secure-payment-white.svg"
             alt="Moyens de paiement acceptés : Wave, Orange Money, MTN MoMo, Moov Money, carte bancaire"

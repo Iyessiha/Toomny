@@ -374,7 +374,7 @@ const en: LandingContent = {
       tagline: "Work together, grow together.",
       columns: [
         { title: "Platform", links: [["Catalogue", "/services"], ["How it works", "/comment-ca-marche"], ["Pricing", "/tarifs"], ["Security", "/securite"]] },
-        { title: "Providers", links: [["Offer my services", "/auth?role=provider"], ["Get paid by mobile money", "/tarifs"], ["Dashboard", "/dashboard"]] },
+        { title: "Providers", links: [["Offer my services", "/en/auth?role=provider"], ["Get paid by mobile money", "/tarifs"], ["Dashboard", "/dashboard"]] },
         { title: "Businesses", links: [["Find a provider", "/services"], ["My orders", "/orders"], ["Disputes", "/disputes"]] },
         { title: "Legal", links: [["Terms of use", "/en/cgu"], ["Legal notice", "/mentions-legales"], ["Privacy", "/confidentialite"]] },
       ],

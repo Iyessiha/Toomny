@@ -42,6 +42,50 @@ export async function recordCompletion(db: SupabaseClient, orderId: string, prov
   if (error) console.error("recordCompletion counter:", error.message);
 }
 
+/**
+ * Versement effectué au prestataire (file manuelle, marqué payé par l'admin).
+ * Sortie vue plateforme : direction `debit`. La référence opérateur, quand
+ * l'admin la renseigne, permet de recouper avec le relevé mobile money.
+ */
+export async function recordPayout(
+  db: SupabaseClient,
+  payout: {
+    orderId: string;
+    providerId: string;
+    amountMinor: number | string | bigint;
+    currency: string;
+    providerRef?: string | null;
+  },
+) {
+  const { error } = await db.from("ledger_entries").insert({
+    order_id: payout.orderId,
+    profile_id: payout.providerId,
+    kind: "payout",
+    direction: "debit",
+    amount_minor: String(payout.amountMinor),
+    currency: payout.currency,
+    external_ref: payout.providerRef ?? `payout:${payout.orderId}`,
+  });
+  if (error) console.error("recordPayout:", error.message);
+}
+
+/** Fonds rendus au client (litige tranché en sa faveur). Sortie : `debit`. */
+export async function recordRefund(
+  db: SupabaseClient,
+  refund: { orderId: string; profileId?: string; amountMinor: number | string | bigint; currency: string },
+) {
+  const { error } = await db.from("ledger_entries").insert({
+    order_id: refund.orderId,
+    profile_id: refund.profileId ?? null,
+    kind: "refund",
+    direction: "debit",
+    amount_minor: String(refund.amountMinor),
+    currency: refund.currency,
+    external_ref: `refund:${refund.orderId}`,
+  });
+  if (error) console.error("recordRefund:", error.message);
+}
+
 /** Note moyenne et nombre d'avis du prestataire, recalculés à partir de la table des avis. */
 export async function refreshProviderRating(db: SupabaseClient, providerId: string) {
   const { data: rows } = await db.from("reviews").select("rating").eq("target_id", providerId);

@@ -6,6 +6,7 @@ import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { statusTone } from "@/lib/dashboard";
+import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,8 @@ export default async function MessagesPage() {
 
   const orderIds = orders?.map((o) => o.id) ?? [];
 
-  // Nom de l'interlocuteur pour chaque commande
+  // Nom de l'interlocuteur pour chaque commande. Résolution côté serveur :
+  // la RLS ne laisse chacun lire que sa propre ligne `profiles`.
   const counterpartIds = [
     ...new Set(
       (orders ?? []).map((o) =>
@@ -39,26 +41,7 @@ export default async function MessagesPage() {
       ).filter(Boolean) as string[]
     ),
   ];
-  const { data: counterpartProfiles } = counterpartIds.length
-    ? await supabase
-        .from("profiles")
-        .select("id, display_name, first_name, last_name, email")
-        .in("id", counterpartIds)
-    : { data: [] };
-
-  const profileMap = new Map<string, { name: string | null; initials: string }>(
-    (counterpartProfiles ?? []).map((p: { id: string; display_name: string | null; first_name: string | null; last_name: string | null; email: string }) => [
-      p.id,
-      {
-        name:
-          p.display_name ??
-          ([p.first_name, p.last_name].filter(Boolean).join(" ") || p.email),
-        initials: (
-          p.display_name ?? p.first_name ?? p.email ?? "?"
-        ).slice(0, 1).toUpperCase(),
-      },
-    ])
-  );
+  const profileMap = await resolveDisplayNames(counterpartIds);
 
   // Dernier message + comptage des non-lus par commande.
   let lastMsgMap = new Map<string, { body: string; created_at: string; mine: boolean }>();
@@ -108,6 +91,7 @@ export default async function MessagesPage() {
         { href: "/dashboard", label: nav.overview },
         { href: "/orders", label: nav.orders },
         { href: "/messages", label: nav.messages, current: true },
+        { href: "/demandes", label: nav.inquiries },
         { href: "/disputes", label: getMarketplaceTexts(locale).disputes.title },
       ]}
     >

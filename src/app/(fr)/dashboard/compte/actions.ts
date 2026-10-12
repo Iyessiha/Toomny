@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { requireAuth } from "@/lib/auth";
+import { getCurrentUser, requireAuth } from "@/lib/auth";
 import { deleteAccount } from "@/lib/account";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -67,5 +67,19 @@ export async function changePassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password: newPassword });
   if (error) return { error: t.passwordFailed };
 
+  return { success: true };
+}
+
+/**
+ * Mémorise la langue choisie dans le sélecteur du header. No-op silencieux
+ * pour les visiteurs déconnectés (le cookie suffit) ; la RLS `profiles_update_own`
+ * autorise chacun à modifier sa propre langue.
+ */
+export async function setPreferredLocale(locale: "fr" | "en"): Promise<{ success: true }> {
+  if (locale !== "fr" && locale !== "en") return { success: true };
+  const user = await getCurrentUser();
+  if (!user) return { success: true };
+  const supabase = await createClient();
+  await supabase.from("profiles").update({ preferred_locale: locale }).eq("id", user.id);
   return { success: true };
 }

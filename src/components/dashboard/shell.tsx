@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { SignOutButton } from "./sign-out";
+import { NotificationBell } from "./notification-bell";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getAdminTexts } from "@/i18n/admin";
 import type { Locale } from "@/i18n/dictionaries";
 
-export type NavItem = { href: string; label: string; current?: boolean };
+import type { NavItem } from "./shell-ui";
+
+export type { NavItem } from "./shell-ui";
+export { EmptyState, StatCard } from "./shell-ui";
 
 export function DashboardShell({
   user,
@@ -56,7 +60,8 @@ export function DashboardShell({
           <Logo size={24} withWordmark={false} />
         </Link>
         <span className="font-display text-sm font-bold">{title}</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
+          <NotificationBell locale={locale} />
           <SignOutButton label={t.shell.signOut} compact />
         </div>
       </header>
@@ -89,6 +94,9 @@ export function DashboardShell({
               <Logo size={26} withWordmark={false} />
             </Link>
             <span className="font-display text-sm font-bold leading-tight">Toomny</span>
+            <div className="ml-auto">
+              <NotificationBell locale={locale} />
+            </div>
           </div>
 
           {/* Nav */}
@@ -269,64 +277,5 @@ function AdminNavIcon({ href }: { href: string }) {
     <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
     </svg>
-  );
-}
-
-// ── Utility components ───────────────────────────────────────────────────────
-
-export function StatCard({
-  label,
-  value,
-  hint,
-  accent = false,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      className={`app-lift rounded-2xl border p-5 ${
-        accent
-          ? "border-[var(--color-brand-200)] bg-[var(--color-brand-50)]"
-          : "border-[var(--border)] bg-[var(--background)]"
-      }`}
-    >
-      <p className="text-xs font-medium uppercase tracking-wide text-[var(--subtle)]">{label}</p>
-      <p
-        className={`mt-2 font-display text-2xl font-bold ${
-          accent ? "text-[var(--color-brand-700)]" : ""
-        }`}
-      >
-        {value}
-      </p>
-      {hint && <p className="mt-1 text-xs text-[var(--subtle)]">{hint}</p>}
-    </div>
-  );
-}
-
-export function EmptyState({
-  title,
-  body,
-  action,
-}: {
-  title: string;
-  body: string;
-  action?: { href: string; label: string };
-}) {
-  return (
-    <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background)] px-6 py-14 text-center">
-      <h3 className="font-display text-base font-bold">{title}</h3>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[var(--subtle)]">{body}</p>
-      {action && (
-        <Link
-          href={action.href}
-          className="mt-6 inline-flex rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-        >
-          {action.label}
-        </Link>
-      )}
-    </div>
   );
 }

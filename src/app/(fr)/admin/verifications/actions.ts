@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notify } from "@/lib/notifications";
 import { getAdminTexts } from "@/i18n/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 
@@ -44,6 +45,12 @@ export async function approveVerification(verificationId: string) {
     targetType: "verification",
     targetId: verificationId,
     details: { profileId: verif.profile_id },
+  });
+
+  await notify(db, {
+    recipientId: verif.profile_id,
+    type: "verification_approved",
+    link: "/dashboard/verification",
   });
 
   revalidatePath("/admin/verifications");
@@ -88,6 +95,12 @@ export async function rejectVerification(verificationId: string, reason: string)
     targetType: "verification",
     targetId: verificationId,
     details: { profileId: verif.profile_id, reason },
+  });
+
+  await notify(db, {
+    recipientId: verif.profile_id,
+    type: "verification_rejected",
+    link: "/dashboard/verification",
   });
 
   revalidatePath("/admin/verifications");
