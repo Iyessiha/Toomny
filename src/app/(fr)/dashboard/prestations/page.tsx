@@ -7,6 +7,7 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
@@ -56,14 +57,7 @@ export default async function PrestationsPage() {
       title={t.title}
       subtitle={t.subtitle}
       locale={locale}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/dashboard/prestations", label: nav.services, current: true },
-        { href: "/dashboard/profil", label: nav.profile },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages },
-        { href: "/demandes", label: nav.inquiries },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>

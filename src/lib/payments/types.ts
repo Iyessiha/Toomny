@@ -62,6 +62,24 @@ export type RefundResult = {
   failureReason?: string;
 };
 
+export type SubscriptionPaymentRequest = {
+  reference: string;
+  plan: string;
+  amountMinor: bigint;
+  currency: CurrencyCode;
+  payerMsisdn?: string;
+  payerEmail?: string;
+  successUrl: string;
+  errorUrl: string;
+  metadata?: Record<string, string>;
+};
+
+export type SubscriptionPaymentResult = {
+  partner: string;
+  partnerPaymentRef: string;
+  checkoutUrl: string;
+};
+
 export type WebhookEvent = {
   /** Type normalisé, indépendant du partenaire. */
   type: "hold.held" | "hold.failed" | "payout.paid" | "payout.failed" | "refund.completed";

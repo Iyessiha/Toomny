@@ -5,6 +5,7 @@ import { visitorLocale } from "@/i18n/server-locale";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import {
   Avatar,
   Pill,
@@ -82,15 +83,7 @@ function ProviderDashboard({ user, data, services }: { user: User; data: Data; s
           </Link>
         </>
       }
-      nav={[
-        { href: "/dashboard", label: t.nav.overview, current: true },
-        { href: "/dashboard/prestations", label: t.nav.services },
-        { href: "/dashboard/profil", label: t.nav.profile },
-        { href: "/dashboard/verification", label: t.nav.kyc },
-        { href: "/orders", label: t.nav.orders },
-        { href: "/messages", label: t.nav.messages },
-        { href: "/demandes", label: t.nav.inquiries },
-      ]}
+      navSections={dashboardNavSections(t.nav, user.role, "/dashboard")}
     >
       {!kycDone && !kycPending && (
         <div className="mb-8 flex flex-col gap-4 rounded-2xl bg-[var(--tone-warning-bg)] p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -325,13 +318,7 @@ function ClientDashboard({ user, data }: { user: User; data: Data }) {
           {t.client.ctaButton}
         </Link>
       }
-      nav={[
-        { href: "/dashboard", label: t.nav.home, current: true },
-        { href: "/services", label: t.nav.findProvider },
-        { href: "/orders", label: t.nav.myOrders },
-        { href: "/messages", label: t.nav.messages },
-        { href: "/demandes", label: t.nav.inquiries },
-      ]}
+      navSections={dashboardNavSections(t.nav, user.role, "/dashboard")}
     >
       <div className="hero-band relative mb-8 overflow-hidden rounded-3xl p-6 sm:p-8">
         <div aria-hidden className="texture-dots absolute inset-0" />

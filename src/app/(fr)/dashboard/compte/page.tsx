@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
+import { getDashboardTexts } from "@/i18n/dashboard";
 import { Notice, Section } from "@/components/dashboard/pro";
 import { getAccountTexts } from "@/i18n/account";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -20,12 +22,19 @@ export default async function AccountPage({
   const user = await requireAuth();
   const locale = user.preferredLocale;
   const t = getAccountTexts(locale);
+  const nav = getDashboardTexts(locale).nav;
   const { error } = await searchParams;
   const errorText =
     error === "active" ? t.errors.active : error === "email" ? t.errors.email : error === "failed" ? t.errors.failed : null;
 
   return (
-    <DashboardShell user={user} locale={locale} title={t.title} subtitle={t.subtitle} nav={[]}>
+    <DashboardShell
+      user={user}
+      locale={locale}
+      title={t.title}
+      subtitle={t.subtitle}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/compte")}
+    >
       {errorText && (
         <div className="mb-6">
           <Notice tone="danger">{errorText}</Notice>

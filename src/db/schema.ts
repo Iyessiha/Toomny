@@ -153,6 +153,9 @@ export const providerProfiles = pgTable("provider_profiles", {
   ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
   ratingCount: integer("rating_count").default(0).notNull(),
   completedOrders: integer("completed_orders").default(0).notNull(),
+  // Plan d'abonnement prestataire (0022) : essentiel | pro | expert.
+  plan: text("plan").default("essentiel").notNull(),
+  planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -462,3 +465,25 @@ export const reviews = pgTable(
   },
   (t) => [index("reviews_target_idx").on(t.targetId)],
 );
+
+// Abonnements mensuels aux plans prestataire (0022).
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    providerId: uuid("provider_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    plan: text("plan").notNull(), // essentiel | pro | expert
+    amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
+    currency: text("currency").default("XOF").notNull(),
+    status: text("status").default("pending").notNull(), // pending | active | failed | expired
+    partner: text("partner").default("geniuspay").notNull(),
+    partnerPaymentRef: text("partner_payment_ref").unique(),
+    periodStart: timestamp("period_start", { withTimezone: true }),
+    periodEnd: timestamp("period_end", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("subscriptions_provider_idx").on(t.providerId, t.createdAt)],
+);
+

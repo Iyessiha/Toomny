@@ -5,6 +5,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Pill, TableCard, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
@@ -33,12 +34,7 @@ export default async function OrdersPage() {
       title={t.orders.title}
       locale={locale}
       subtitle={t.orders.subtitle}
-      nav={[
-        { href: "/dashboard", label: t.nav.overview },
-        { href: "/orders", label: t.nav.orders, current: true },
-        { href: "/messages", label: t.nav.messages },
-        { href: "/demandes", label: t.nav.inquiries },
-      ]}
+      navSections={dashboardNavSections(t.nav, user.role, "/orders")}
     >
       {list.length === 0 ? (
         <EmptyState title={t.orders.empty} body={t.orders.emptyBody} action={{ href: "/services", label: t.orders.emptyCta }} />

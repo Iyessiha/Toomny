@@ -10,6 +10,7 @@ export type NotificationParams = {
   outcome?: "won" | "lost";
   rating?: string;
   amount?: string;
+  plan?: string;
 };
 
 export type NotificationCopy = { title: string; body: (p: NotificationParams) => string };
@@ -105,6 +106,16 @@ const fr = {
       title: "Versement échoué",
       body: () => "Votre versement a échoué. Vérifiez votre numéro et faites une nouvelle demande.",
     },
+    subscription_activated: {
+      title: "Plan activé",
+      body: (p) =>
+        `Votre abonnement au plan ${p.plan ?? ""} est actif pour 30 jours.`,
+    },
+    subscription_failed: {
+      title: "Paiement d'abonnement refusé",
+      body: (p) =>
+        `Le paiement pour le plan ${p.plan ?? ""} n'a pas abouti. Vous pouvez réessayer.`,
+    },
   } as Record<string, NotificationCopy>,
 };
 
@@ -198,6 +209,16 @@ const en: typeof fr = {
     payout_failed: {
       title: "Payout failed",
       body: () => "Your payout failed. Check your number and submit a new request.",
+    },
+    subscription_activated: {
+      title: "Plan activated",
+      body: (p) =>
+        `Your ${p.plan ?? ""} plan subscription is now active for 30 days.`,
+    },
+    subscription_failed: {
+      title: "Subscription payment declined",
+      body: (p) =>
+        `The payment for the ${p.plan ?? ""} plan did not go through. You can try again.`,
     },
   } as Record<string, NotificationCopy>,
 };

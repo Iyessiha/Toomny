@@ -6,6 +6,7 @@ import Link from "next/link";
 // pour le navigateur.
 
 export type NavItem = { href: string; label: string; current?: boolean };
+export type NavSection = { title: string; items: NavItem[] };
 
 export function EmptyState({
   title,

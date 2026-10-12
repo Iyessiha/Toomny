@@ -34,6 +34,8 @@ import type {
   ReleaseResult,
   RefundRequest,
   RefundResult,
+  SubscriptionPaymentRequest,
+  SubscriptionPaymentResult,
   WebhookEvent,
 } from "./types";
 
@@ -133,6 +135,49 @@ export class GeniusPayProvider implements PaymentProvider {
     return JSON.parse(text).data as PaymentData;
   }
 
+  /** Encaissement d'un abonnement mensuel prestataire (Essentiel / Pro / Expert). */
+  async createSubscriptionPayment(
+    req: SubscriptionPaymentRequest,
+  ): Promise<SubscriptionPaymentResult> {
+    const body: Record<string, unknown> = {
+      amount: Number(req.amountMinor),
+      currency: req.currency,
+      description: `Abonnement Toomny (${req.plan}) — ${req.reference}`,
+      customer: {
+        email: req.payerEmail,
+        phone: req.payerMsisdn,
+      },
+      success_url: req.successUrl,
+      error_url: req.errorUrl,
+      metadata: {
+        app: "toomny",
+        kind: "subscription",
+        plan: req.plan,
+        subscription_reference: req.reference,
+        ...req.metadata,
+      },
+    };
+
+    const res = await fetch(`${GP_BASE}/payments`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok) throw new Error(parseError(res.status, text));
+
+    const data = (JSON.parse(text).data ?? {}) as PaymentData;
+    const checkoutUrl = data.checkout_url ?? data.payment_url;
+    if (!checkoutUrl) throw new Error("Réponse GeniusPay sans URL de paiement.");
+
+    return {
+      partner: this.name,
+      partnerPaymentRef: data.reference,
+      checkoutUrl,
+    };
+  }
+
   async releaseHold(_req: ReleaseRequest): Promise<ReleaseResult> {
     throw new Error(
       "Versement impossible : l'API marchand GeniusPay n'expose pas d'endpoint de payout. " +
@@ -197,4 +242,4 @@ export class GeniusPayProvider implements PaymentProvider {
   }
 }
 
-export const paymentProvider: PaymentProvider = new GeniusPayProvider();
+export const paymentProvider = new GeniusPayProvider();
