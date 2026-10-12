@@ -1,10 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
-import { categoryMeta, categoryGradient } from "@/lib/categories";
+import { categoryGradient } from "@/lib/categories";
 import { formatMoney } from "@/lib/money";
 import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
 import type { Locale } from "@/i18n/dictionaries";
 import { getCatalogTexts } from "@/i18n/catalog";
+import { CoverImage } from "./cover-image";
 
 type Props = {
   service: ServiceCardData;
@@ -14,8 +14,6 @@ type Props = {
 export function ServiceCard({ service: s, locale }: Props) {
   const t = getCatalogTexts(locale);
   const gradient = categoryGradient(s.category_slug);
-  const meta = categoryMeta(s.category_slug ?? "");
-  const Icon = meta?.icon;
   const initials = (s.provider?.display_name ?? "P").slice(0, 2).toUpperCase();
   const rating = s.provider?.rating_avg ?? null;
   const ratingCount = s.provider?.rating_count ?? 0;
@@ -27,26 +25,11 @@ export function ServiceCard({ service: s, locale }: Props) {
     >
       {/* ── Image de couverture ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "56.25%" }}>
-        {s.cover_url ? (
-          <Image
-            src={s.cover_url}
-            alt={s.title}
-            fill
-            className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
-        ) : (
-          <div
-            className="absolute inset-0 flex items-center justify-center"
-            style={{ background: gradient }}
-          >
-            {Icon ? (
-              <Icon className="h-10 w-10 text-white/80" />
-            ) : (
-              <span className="text-3xl font-bold text-white/60">{initials}</span>
-            )}
-          </div>
-        )}
+        <CoverImage
+          src={s.cover_url}
+          alt={s.title}
+          categorySlug={s.category_slug}
+        />
       </div>
 
       {/* ── Contenu ── */}

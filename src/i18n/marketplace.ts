@@ -18,6 +18,11 @@ const fr = {
     emptyBody: "Vous n'avez pas de litige en cours.",
     reason: "Motif",
     order: "Commande",
+    openedOn: "Ouvert le",
+    replyButton: "Envoyer un message",
+    viewOrder: "Voir la commande",
+    awaitingYou: "En attente de votre réponse",
+    resolved: "Résolu",
     status: {
       open: "Ouvert",
       awaiting_provider: "En attente du prestataire",
@@ -92,6 +97,11 @@ const en: typeof fr = {
     emptyBody: "You have no dispute in progress.",
     reason: "Reason",
     order: "Order",
+    openedOn: "Opened on",
+    replyButton: "Send a message",
+    viewOrder: "View order",
+    awaitingYou: "Awaiting your response",
+    resolved: "Resolved",
     status: {
       open: "Open",
       awaiting_provider: "Waiting for the provider",

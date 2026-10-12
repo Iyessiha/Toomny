@@ -4,7 +4,10 @@ const nextConfig: NextConfig = {
   // Mobile-first et réseau lent : on garde les images strictement optimisées.
   images: {
     formats: ["image/avif", "image/webp"],
-    remotePatterns: [{ protocol: "https", hostname: "**.supabase.co" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "**.supabase.co" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
   },
   poweredByHeader: false,
   async headers() {

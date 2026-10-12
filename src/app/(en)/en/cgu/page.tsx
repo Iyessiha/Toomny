@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import { LegalPageView } from "@/components/legal/legal-page";
-import { getLegalTexts } from "@/content/legal";
-import { getPublicPageTexts } from "@/i18n/public-pages";
+import { CguBody } from "@/components/legal/cgu-body";
 
 export function generateMetadata(): Metadata {
-  return { title: getLegalTexts("en").cgu.metaTitle };
+  return { title: "Terms of Use — Toomny" };
 }
 
 export default function CguPageEn() {
-  const locale = "en";
-  return (
-    <LegalPageView
-      page={getLegalTexts(locale).cgu}
-      homeLabel={getPublicPageTexts(locale).notFound.home}
-    />
-  );
+  return <CguBody locale="en" />;
 }

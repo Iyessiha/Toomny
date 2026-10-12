@@ -8,13 +8,13 @@ import type { Locale } from "@/i18n/dictionaries";
 
 type Key = "client" | "provider";
 
-const RAIL_COLORS: Record<string, string> = {
-  Wave: "#FF8A00",
-  "Orange Money": "#FF6600",
-  "MTN MoMo": "#FFCB00",
-  "Moov Money": "#2980B9",
-};
-const RAILS = Object.keys(RAIL_COLORS);
+const PAYMENT_METHODS = [
+  { name: "Wave", src: "/payment/wave.svg" },
+  { name: "Orange Money", src: "/payment/orange_money.svg" },
+  { name: "MTN MoMo", src: "/payment/mtn.svg" },
+  { name: "Moov Money", src: "/payment/moov.svg" },
+  { name: "Carte bancaire", src: "/payment/card.svg" },
+];
 
 export function Hero({ locale = "fr" }: { locale?: Locale }) {
   const t = getLanding(locale).hero;
@@ -157,15 +157,20 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             </button>
           </form>
 
-          <div data-reveal style={{ transitionDelay: "200ms" }} className="mt-6 flex flex-wrap items-center gap-2">
+          <div data-reveal style={{ transitionDelay: "200ms" }} className="mt-6 flex flex-wrap items-center gap-3">
             <span className="mr-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--subtle)]">
               {t.railsLabel}
             </span>
-            {RAILS.map((r) => (
-              <span key={r} className="rail-pill">
-                <span className="rail-pill-dot" style={{ background: RAIL_COLORS[r] }} />
-                {r}
-              </span>
+            {PAYMENT_METHODS.map((m) => (
+              <img
+                key={m.name}
+                src={m.src}
+                alt={m.name}
+                title={m.name}
+                width={36}
+                height={36}
+                className="rounded-full shadow-sm ring-1 ring-black/10 transition-transform duration-200 hover:scale-110"
+              />
             ))}
           </div>
         </div>

@@ -107,6 +107,18 @@ export function Security({ locale = "fr" }: { locale?: Locale }) {
             })}
           </div>
         </div>
+
+        {/* Strip paiements sécurisés */}
+        <div
+          data-reveal
+          className="mt-14 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] px-6 py-5"
+        >
+          <img
+            src="/payment/secure-payment-white.svg"
+            alt="Moyens de paiement acceptés : Wave, Orange Money, MTN MoMo, Moov Money, carte bancaire"
+            className="mx-auto h-16 w-full max-w-lg object-contain"
+          />
+        </div>
       </div>
     </section>
   );
