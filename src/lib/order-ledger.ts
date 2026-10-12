@@ -34,11 +34,7 @@ export async function recordCompletion(db: SupabaseClient, orderId: string, prov
     if (error) console.error("recordCompletion ledger:", error.message);
   }
 
-  const { data: profile } = await db.from("provider_profiles").select("completed_orders").eq("profile_id", providerId).maybeSingle();
-  const { error } = await db
-    .from("provider_profiles")
-    .update({ completed_orders: (profile?.completed_orders ?? 0) + 1 })
-    .eq("profile_id", providerId);
+  const { error } = await db.rpc("increment_completed_orders", { provider_id: providerId });
   if (error) console.error("recordCompletion counter:", error.message);
 }
 
