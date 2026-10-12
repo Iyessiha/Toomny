@@ -157,7 +157,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                 <tr className="border-b border-[var(--border)]">
                   <th className="px-6 py-4 font-medium text-[var(--subtle)]"></th>
                   <th className="px-6 py-4 font-display text-sm font-bold">Fiverr</th>
-                  <th className="px-6 py-4 font-display text-sm font-bold">Upwork</th>
+                  <th className="px-6 py-4 font-display text-sm font-bold">ComeUp</th>
                   <th className="bg-[var(--color-brand-500)] px-6 py-4 font-display text-sm font-bold text-white">
                     Toomny
                   </th>
@@ -171,7 +171,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                   >
                     <td className="px-6 py-4 font-medium">{r.label}</td>
                     <td className="px-6 py-4 text-[var(--subtle)]">{r.fiverr}</td>
-                    <td className="px-6 py-4 text-[var(--subtle)]">{r.upwork}</td>
+                    <td className="px-6 py-4 text-[var(--subtle)]">{r.upwork as string}</td>
                     <td className="bg-[var(--color-brand-50)] px-6 py-4 font-semibold text-[var(--color-brand-700)]">
                       {r.toomny}
                     </td>
@@ -196,8 +196,8 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                     <dd className="text-right text-[var(--subtle)]">{r.fiverr}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[var(--subtle)]">Upwork</dt>
-                    <dd className="text-right text-[var(--subtle)]">{r.upwork}</dd>
+                    <dt className="text-[var(--subtle)]">ComeUp</dt>
+                    <dd className="text-right text-[var(--subtle)]">{r.upwork as string}</dd>
                   </div>
                   <div className="flex justify-between gap-4 border-t border-[var(--border)] pt-1">
                     <dt className="font-semibold text-[var(--color-brand-700)]">Toomny</dt>
