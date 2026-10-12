@@ -1,8 +1,8 @@
 -- ---------------------------------------------------------------------------
 -- 0022 — Plan d'abonnement prestataire et souscriptions mensuelles.
 --
--- 1. `provider_profiles` porte le plan actif (`essentiel` par défaut, `pro`,
---    `expert`) et son échéance (`plan_expires_at`). Ces colonnes sont en
+-- 1. `provider_profiles` porte le plan actif (`debutant` par défaut, `essentiel`,
+--    `pro`, `expert`) et son échéance (`plan_expires_at`). Ces colonnes sont en
 --    lecture publique (badge et commission), mais leur écriture reste réservée
 --    à la clé de service (webhook GeniusPay).
 -- 2. `subscriptions` trace chaque paiement mensuel auprès de GeniusPay. Le
@@ -10,8 +10,8 @@
 -- ---------------------------------------------------------------------------
 
 ALTER TABLE public.provider_profiles
-  ADD COLUMN IF NOT EXISTS plan text NOT NULL DEFAULT 'essentiel'
-    CHECK (plan IN ('essentiel', 'pro', 'expert')),
+  ADD COLUMN IF NOT EXISTS plan text NOT NULL DEFAULT 'debutant'
+    CHECK (plan IN ('debutant', 'essentiel', 'pro', 'expert')),
   ADD COLUMN IF NOT EXISTS plan_expires_at timestamptz;
 
 GRANT SELECT (plan, plan_expires_at) ON public.provider_profiles TO anon, authenticated;

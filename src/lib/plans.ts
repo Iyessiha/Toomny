@@ -3,15 +3,20 @@ import { randomUUID } from "node:crypto";
 // ---------------------------------------------------------------------------
 // Plans d'abonnement prestataire (mensuels, sans engagement).
 //
-// Les montants et taux de commission font foi côté serveur : aucune route ni
-// action ne fait confiance à un prix ou un taux envoyé par le navigateur.
+// Le plan Débutant est gratuit et sert de plan de base. Les montants et taux
+// de commission font foi côté serveur : aucune route ni action ne fait
+// confiance à un prix ou un taux envoyé par le navigateur.
 // ---------------------------------------------------------------------------
 
-export const PLAN_TIERS = ["essentiel", "pro", "expert"] as const;
+export const PAID_PLAN_TIERS = ["essentiel", "pro", "expert"] as const;
+
+export type PaidPlanTier = (typeof PAID_PLAN_TIERS)[number];
+
+export const PLAN_TIERS = ["debutant", ...PAID_PLAN_TIERS] as const;
 
 export type PlanTier = (typeof PLAN_TIERS)[number];
 
-export const DEFAULT_PLAN: PlanTier = "essentiel";
+export const DEFAULT_PLAN: PlanTier = "debutant";
 
 /** Durée d'une période d'abonnement payée : 30 jours. */
 export const SUBSCRIPTION_PERIOD_DAYS = 30;
@@ -26,6 +31,13 @@ export type PlanSpec = {
 };
 
 export const PLANS: Record<PlanTier, PlanSpec> = {
+  debutant: {
+    tier: "debutant",
+    priceMinor: 0n,
+    currency: "XOF",
+    commissionBps: 1000,
+    commissionPercent: 10,
+  },
   essentiel: {
     tier: "essentiel",
     priceMinor: 10_000n,
@@ -53,13 +65,18 @@ export function isPlanTier(value: unknown): value is PlanTier {
   return typeof value === "string" && (PLAN_TIERS as readonly string[]).includes(value);
 }
 
+export function isPaidPlanTier(value: unknown): value is PaidPlanTier {
+  return typeof value === "string" && (PAID_PLAN_TIERS as readonly string[]).includes(value);
+}
+
 export function normalizePlan(value: unknown): PlanTier {
   return isPlanTier(value) ? value : DEFAULT_PLAN;
 }
 
 /**
- * Renvoie le plan réellement actif à l'instant `now`. Un plan payant dont la
- * date d'expiration est dépassée retombe sur le plan Essentiel (8 %).
+ * Renvoie le plan réellement actif à l'instant `now`. Le plan Débutant est
+ * gratuit et sans échéance ; un plan payé sans date d'expiration reste accepté
+ * seulement lorsque cette absence est explicitement `undefined`.
  */
 export function effectivePlan(
   plan: unknown,
@@ -67,7 +84,9 @@ export function effectivePlan(
   now: Date = new Date(),
 ): PlanTier {
   const tier = normalizePlan(plan);
-  if (tier === DEFAULT_PLAN || !expiresAt) return tier;
+  if (tier === DEFAULT_PLAN || expiresAt === null) return DEFAULT_PLAN;
+  if (expiresAt === undefined) return tier;
+
   const exp = typeof expiresAt === "string" ? new Date(expiresAt) : expiresAt;
   if (Number.isNaN(exp.getTime()) || exp.getTime() <= now.getTime()) {
     return DEFAULT_PLAN;

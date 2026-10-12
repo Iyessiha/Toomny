@@ -3,7 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isProvider, type UserRole } from "@/lib/auth";
 import { paymentProvider } from "@/lib/payments/geniuspay";
-import { PLANS, isPlanTier, subscriptionReference } from "@/lib/plans";
+import {
+  PLANS,
+  isPaidPlanTier,
+  subscriptionReference,
+  type PaidPlanTier,
+} from "@/lib/plans";
 
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createClient();
@@ -14,17 +19,18 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
   }
 
-  let plan: unknown;
+  let requestedPlan: unknown;
   try {
     const body = (await request.json()) as { plan?: unknown };
-    plan = body.plan;
+    requestedPlan = body.plan;
   } catch {
     return NextResponse.json({ error: "Corps de requête invalide" }, { status: 400 });
   }
 
-  if (!isPlanTier(plan)) {
+  if (!isPaidPlanTier(requestedPlan)) {
     return NextResponse.json({ error: "Plan invalide" }, { status: 400 });
   }
+  const plan: PaidPlanTier = requestedPlan;
 
   const db = createAdminClient();
   const { data: profile } = await db

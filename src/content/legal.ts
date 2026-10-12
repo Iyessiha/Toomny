@@ -54,7 +54,7 @@ const fr = {
         heading: "6. Prix, commission et paiement",
         paragraphs: [
           "Les prix sont affichés dans la devise de la prestation, toutes taxes éventuelles à la charge du prestataire. Le client paie le montant affiché : aucune commission n'est prélevée côté client.",
-          "Toomny prélève une commission sur chaque commande finalisée, retenue sur la somme versée au prestataire. Le taux dépend du plan souscrit par le prestataire : 8 % (Plan Essentiel, 10 000 FCFA/mois), 5 % (Plan Pro, 15 000 FCFA/mois) ou 3 % (Plan Expert, 25 000 FCFA/mois). Aucune commission n'est prélevée sur le client. Le détail du calcul est affiché avant la confirmation de la commande.",
+          "Toomny prélève une commission sur chaque commande finalisée, retenue sur la somme versée au prestataire. Le taux dépend du plan du prestataire : 10 % (plan Débutant, gratuit), 8 % (plan Essentiel, 10 000 FCFA/mois), 5 % (plan Pro, 15 000 FCFA/mois) ou 3 % (plan Expert, 25 000 FCFA/mois). Aucune commission n'est prélevée sur le client. Le détail du calcul est affiché avant la confirmation de la commande.",
           "Les frais éventuels de l'opérateur de mobile money ou du partenaire de paiement sont indiqués au moment du paiement et ne sont pas conservés par Toomny.",
         ],
       },
@@ -269,7 +269,7 @@ const en: typeof fr = {
         heading: "6. Pricing, commission, and payment",
         paragraphs: [
           "Prices are displayed in the service currency, with any applicable taxes borne by the provider. The client pays the displayed amount: no commission is charged on the client side.",
-          "Toomny charges a commission on each completed order, retained from the sum paid to the provider. The rate depends on the provider's plan: 8% (Essential Plan, 10,000 FCFA/month), 5% (Pro Plan, 15,000 FCFA/month), or 3% (Expert Plan, 25,000 FCFA/month). No commission is charged to the client. The calculation detail is shown before order confirmation.",
+          "Toomny charges a commission on each completed order, retained from the sum paid to the provider. The rate depends on the provider's plan: 10% (free Starter plan), 8% (Essential plan, 10,000 FCFA/month), 5% (Pro plan, 15,000 FCFA/month), or 3% (Expert plan, 25,000 FCFA/month). No commission is charged to the client. The calculation detail is shown before order confirmation.",
           "Any fees charged by the mobile money operator or payment partner are indicated at the time of payment and are not retained by Toomny.",
         ],
       },

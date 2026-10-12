@@ -13,7 +13,7 @@ import { formatMoney } from "@/lib/money";
 import {
   DEFAULT_PLAN,
   PLANS,
-  PLAN_TIERS,
+  PAID_PLAN_TIERS,
   effectivePlan,
   normalizePlan,
   type PlanTier,
@@ -107,10 +107,11 @@ export default async function PlanPage({
 
   const now = new Date();
   const storedTier = normalizePlan(profile?.plan);
-  const activeTier = effectivePlan(profile?.plan, profile?.plan_expires_at, now);
+  const activeTier = effectivePlan(profile?.plan, profile?.plan_expires_at ?? null, now);
   const activeSpec = PLANS[activeTier];
   const landingPlans = getLanding(locale).pricing.plans;
   const planDisplayNames: Record<PlanTier, string> = {
+    debutant: p.starterName,
     essentiel: landingPlans[0]?.name ?? "Essentiel",
     pro: landingPlans[1]?.name ?? "Pro",
     expert: landingPlans[2]?.name ?? "Expert",
@@ -118,18 +119,24 @@ export default async function PlanPage({
 
   const dateTag = locale === "en" ? "en-GB" : "fr-FR";
   const expiresAt = profile?.plan_expires_at ? new Date(profile.plan_expires_at) : null;
+  const hasValidPaidExpiry =
+    activeTier !== DEFAULT_PLAN &&
+    !!expiresAt &&
+    Number.isFinite(expiresAt.getTime()) &&
+    expiresAt.getTime() > now.getTime();
   const isExpired =
-    storedTier !== DEFAULT_PLAN && !!expiresAt && expiresAt.getTime() <= now.getTime();
-  const validityValue =
-    expiresAt && !isExpired
-      ? `${p.validUntil} ${expiresAt.toLocaleDateString(dateTag, {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })}`
-      : isExpired
-        ? p.expiredValidity
-        : p.defaultValidity;
+    storedTier !== DEFAULT_PLAN &&
+    !!expiresAt &&
+    (!Number.isFinite(expiresAt.getTime()) || expiresAt.getTime() <= now.getTime());
+  const validityValue = hasValidPaidExpiry
+    ? `${p.validUntil} ${expiresAt.toLocaleDateString(dateTag, {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })}`
+    : isExpired
+      ? p.expiredValidity
+      : p.defaultValidity;
 
   const history = (subRows ?? []) as SubscriptionRow[];
 
@@ -194,7 +201,7 @@ export default async function PlanPage({
           }
           label={p.validity}
           value={
-            expiresAt && !isExpired
+            hasValidPaidExpiry
               ? expiresAt.toLocaleDateString(dateTag, {
                   day: "2-digit",
                   month: "short",
@@ -209,15 +216,11 @@ export default async function PlanPage({
       {/* Cartes des 3 plans */}
       <h2 className="mb-4 mt-10 font-display text-lg font-bold">{p.choosePlan}</h2>
       <div className="grid gap-5 sm:grid-cols-3">
-        {PLAN_TIERS.map((tier, idx) => {
+        {PAID_PLAN_TIERS.map((tier, idx) => {
           const card = landingPlans[idx];
           if (!card) return null;
           const isCurrent = tier === activeTier;
-          const buttonLabel = isCurrent
-            ? tier === DEFAULT_PLAN && !expiresAt
-              ? p.subscribeButton
-              : p.renewButton
-            : card.cta;
+          const buttonLabel = isCurrent ? p.renewButton : card.cta;
 
           return (
             <div
