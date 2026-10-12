@@ -69,7 +69,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const { data: profile } = await db
     .from("profiles")
-    .select("email")
+    .select("email, phone")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -83,6 +83,7 @@ export async function POST(request: Request): Promise<Response> {
       amountMinor: BigInt(order.amount_minor),
       currency: order.currency,
       payerEmail: profile?.email ?? undefined,
+      payerMsisdn: profile?.phone ?? undefined,
       returnUrl,
       metadata: { order_id: orderId },
     });
