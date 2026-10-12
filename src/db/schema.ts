@@ -1,6 +1,8 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
+  check,
   uuid,
   text,
   timestamp,
@@ -129,35 +131,44 @@ export const profiles = pgTable(
   (t) => [index("profiles_country_idx").on(t.countryCode), index("profiles_role_idx").on(t.role)],
 );
 
-export const providerProfiles = pgTable("provider_profiles", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  profileId: uuid("profile_id")
-    .notNull()
-    .unique()
-    .references(() => profiles.id, { onDelete: "cascade" }),
-  headline: text("headline"),
-  bio: text("bio"),
-  contentLocale: localeEnum("content_locale").default("fr").notNull(), // pour filtrer/traduire à l'ouverture anglophone
-  city: text("city"),
-  // Canal de versement. Wave est le défaut : gratuit à la réception.
-  payoutChannel: payoutChannelEnum("payout_channel"),
-  payoutMsisdn: text("payout_msisdn"), // numéro mobile money du prestataire
-  payoutVerifiedAt: timestamp("payout_verified_at", { withTimezone: true }),
-  // Vitrine (0014, 0019) : avatar, compétences, langues et liens publics.
-  avatarUrl: text("avatar_url"),
-  skills: text("skills"), // tags séparés par des virgules
-  spokenLanguages: text("spoken_languages"), // ex : "fr,en,wo"
-  websiteUrl: text("website_url"),
-  linkedinUrl: text("linkedin_url"),
-  twitterUrl: text("twitter_url"),
-  ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
-  ratingCount: integer("rating_count").default(0).notNull(),
-  completedOrders: integer("completed_orders").default(0).notNull(),
-  // Plan d'abonnement prestataire (0022) : essentiel | pro | expert.
-  plan: text("plan").default("essentiel").notNull(),
-  planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const providerProfiles = pgTable(
+  "provider_profiles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .unique()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    headline: text("headline"),
+    bio: text("bio"),
+    contentLocale: localeEnum("content_locale").default("fr").notNull(), // pour filtrer/traduire à l'ouverture anglophone
+    city: text("city"),
+    // Canal de versement. Wave est le défaut : gratuit à la réception.
+    payoutChannel: payoutChannelEnum("payout_channel"),
+    payoutMsisdn: text("payout_msisdn"), // numéro mobile money du prestataire
+    payoutVerifiedAt: timestamp("payout_verified_at", { withTimezone: true }),
+    // Vitrine (0014, 0019) : avatar, compétences, langues et liens publics.
+    avatarUrl: text("avatar_url"),
+    skills: text("skills"), // tags séparés par des virgules
+    spokenLanguages: text("spoken_languages"), // ex : "fr,en,wo"
+    websiteUrl: text("website_url"),
+    linkedinUrl: text("linkedin_url"),
+    twitterUrl: text("twitter_url"),
+    ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
+    ratingCount: integer("rating_count").default(0).notNull(),
+    completedOrders: integer("completed_orders").default(0).notNull(),
+    // Plan de base gratuit et plans mensuels payants (0022).
+    plan: text("plan").default("debutant").notNull(),
+    planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    check(
+      "provider_profiles_plan_check",
+      sql`${t.plan} in ('debutant', 'essentiel', 'pro', 'expert')`,
+    ),
+  ],
+);
 
 // Vérification d'identité — conçue pour les pièces locales, avec recours humain.
 export const verifications = pgTable("verifications", {

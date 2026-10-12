@@ -68,7 +68,7 @@ export async function createOrder(input: { serviceId: string; requirements: stri
   const now = new Date();
   const commissionBps = commissionBpsForPlan(
     providerProfile?.plan,
-    providerProfile?.plan_expires_at,
+    providerProfile?.plan_expires_at ?? null,
     now,
   );
   const split = splitOrderAmount(priceMinor, commissionBps);

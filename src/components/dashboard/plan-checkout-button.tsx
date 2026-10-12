@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { PlanTier } from "@/lib/plans";
+import type { PaidPlanTier } from "@/lib/plans";
 
 type Props = {
-  plan: PlanTier;
+  plan: PaidPlanTier;
   highlight: boolean;
   label: string;
   redirectingLabel: string;
