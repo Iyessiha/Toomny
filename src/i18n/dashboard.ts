@@ -183,6 +183,7 @@ const fr = {
       update: "La prestation n'a pas pu être mise à jour.",
       delete: "La prestation n'a pas pu être supprimée.",
       toggle: "Le statut n'a pas pu être modifié.",
+      planLimit: "Vous avez atteint la limite de prestations de votre plan. Passez au plan supérieur pour en créer davantage.",
     },
   },
   profile: {
@@ -502,6 +503,7 @@ const en: DashboardTexts = {
       update: "The service could not be updated.",
       delete: "The service could not be deleted.",
       toggle: "The status could not be changed.",
+      planLimit: "You have reached your plan's service limit. Upgrade your plan to create more.",
     },
   },
   profile: {

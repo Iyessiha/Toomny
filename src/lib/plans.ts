@@ -28,6 +28,8 @@ export type PlanSpec = {
   currency: "XOF";
   commissionBps: number;
   commissionPercent: number;
+  /** Nombre maximum de prestations actives (non retirées) simultanément. */
+  maxServices: number;
 };
 
 export const PLANS: Record<PlanTier, PlanSpec> = {
@@ -37,6 +39,7 @@ export const PLANS: Record<PlanTier, PlanSpec> = {
     currency: "XOF",
     commissionBps: 1000,
     commissionPercent: 10,
+    maxServices: 2,
   },
   essentiel: {
     tier: "essentiel",
@@ -44,6 +47,7 @@ export const PLANS: Record<PlanTier, PlanSpec> = {
     currency: "XOF",
     commissionBps: 800,
     commissionPercent: 8,
+    maxServices: 8,
   },
   pro: {
     tier: "pro",
@@ -51,6 +55,7 @@ export const PLANS: Record<PlanTier, PlanSpec> = {
     currency: "XOF",
     commissionBps: 500,
     commissionPercent: 5,
+    maxServices: 20,
   },
   expert: {
     tier: "expert",
@@ -58,6 +63,7 @@ export const PLANS: Record<PlanTier, PlanSpec> = {
     currency: "XOF",
     commissionBps: 300,
     commissionPercent: 3,
+    maxServices: 50,
   },
 };
 
@@ -106,6 +112,16 @@ export function commissionBpsForPlan(
 
 export function priceMinorForPlan(tier: PlanTier): bigint {
   return PLANS[tier].priceMinor;
+}
+
+/** Nombre maximum de prestations actives pour le plan effectif au moment `now`. */
+export function maxServicesForPlan(
+  plan: unknown,
+  expiresAt?: Date | string | null,
+  now: Date = new Date(),
+): number {
+  const tier = effectivePlan(plan, expiresAt, now);
+  return PLANS[tier].maxServices;
 }
 
 export function nextPeriodEnd(from: Date = new Date()): Date {

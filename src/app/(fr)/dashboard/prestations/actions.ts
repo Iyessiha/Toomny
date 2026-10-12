@@ -8,6 +8,7 @@ import { toMinor } from "@/lib/money";
 import { parsePackages, type ValidPackage } from "@/lib/packages";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { UUID_RE } from "@/lib/orders";
+import { maxServicesForPlan } from "@/lib/plans";
 
 /** Entrée brute venue du navigateur : toujours revalidée par `parsePackages`. */
 type PackageInput = {
@@ -76,6 +77,27 @@ export async function createService(formData: FormData) {
     const checked = parsePackages(parsed);
     if (!checked) return { error: e.packages };
     packages = checked;
+  }
+
+  const db = createAdminClient();
+
+  // Vérifier la limite de prestations du plan actuel.
+  const { data: providerPlan } = await db
+    .from("provider_profiles")
+    .select("plan, plan_expires_at")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+
+  const limit = maxServicesForPlan(providerPlan?.plan, providerPlan?.plan_expires_at);
+
+  const { count: activeCount } = await db
+    .from("services")
+    .select("id", { count: "exact", head: true })
+    .eq("provider_id", user.id)
+    .not("status", "eq", "removed");
+
+  if ((activeCount ?? 0) >= limit) {
+    return { error: e.planLimit };
   }
 
   const supabase = await createClient();
