@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Tarifs — Toomny",
     description:
-      "10 % de commission côté prestataire, 0 % côté client. Versement direct en mobile money. Comparez avec Fiverr et Upwork.",
+      "Dès 5 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
   };
 }
 
@@ -22,13 +22,13 @@ export default async function PricingPage() {
   const highlights =
     locale === "en"
       ? [
-          { value: "10%", label: "Commission on the provider side" },
+          { value: "From 5%", label: "Commission on the provider side" },
           { value: "0%", label: "Fees on the client side" },
           { value: "Free", label: "Listing and applying" },
           { value: "Direct", label: "Payout to your mobile money" },
         ]
       : [
-          { value: "10 %", label: "Commission côté prestataire" },
+          { value: "Dès 5 %", label: "Commission côté prestataire" },
           { value: "0 %", label: "Frais côté client" },
           { value: "Gratuit", label: "Publication et candidature" },
           { value: "Direct", label: "Versement sur votre mobile money" },
@@ -76,7 +76,7 @@ export default async function PricingPage() {
                 <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
                   <th className="px-5 py-4 text-left font-semibold">&nbsp;</th>
                   <th className="px-5 py-4 text-center font-semibold text-[var(--subtle)]">Fiverr</th>
-                  <th className="px-5 py-4 text-center font-semibold text-[var(--subtle)]">Upwork</th>
+                  <th className="px-5 py-4 text-center font-semibold text-[var(--subtle)]">ComeUp</th>
                   <th className="px-5 py-4 text-center font-bold text-[var(--color-brand-600)]">
                     Toomny
                   </th>

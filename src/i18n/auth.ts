@@ -13,7 +13,7 @@ const fr = {
       heading: "Travailler ensemble, grandir ensemble",
       items: [
         { title: "Versement mobile money", body: "Sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer." },
-        { title: "Vous gardez 90 %", body: "10 % de commission côté prestataire, rien côté client. Publier et postuler sont gratuits." },
+        { title: "Vous gardez jusqu'à 95 %", body: "Dès 5 % de commission côté prestataire, rien côté client. Publier et postuler sont gratuits." },
         { title: "Paiement conservé", body: "Le paiement du client sera conservé par un partenaire agréé jusqu'à la validation de la livraison." },
       ],
     },
@@ -65,7 +65,7 @@ const en: typeof fr = {
       heading: "Work together, grow together",
       items: [
         { title: "Mobile money payouts", body: "Straight to your Wave or Orange Money. No US company, no Payoneer." },
-        { title: "You keep 90%", body: "10% commission on the provider side, nothing on the buyer side. Publishing and applying are free." },
+        { title: "You keep up to 95%", body: "From 5% commission on the provider side, nothing on the buyer side. Publishing and applying are free." },
         { title: "Payment held", body: "The client's payment will be held by a licensed partner until delivery is approved." },
       ],
     },

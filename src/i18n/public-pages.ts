@@ -22,7 +22,7 @@ const fr = {
   site: {
     title: "Toomny — Recrutez les meilleurs talents d'Afrique de l'Ouest",
     description:
-      "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money, paiement conservé jusqu'à la livraison. 10 % de commission côté prestataire, 0 % côté client.",
+      "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money, paiement conservé jusqu'à la livraison. Dès 5 % de commission côté prestataire, 0 % côté client.",
     ogTitle: "Toomny — Travailler ensemble, grandir ensemble",
     ogDescription: "La marketplace de talents d'Afrique de l'Ouest. Paiement mobile money, conservé jusqu'à la livraison.",
   },
@@ -60,7 +60,7 @@ const en: typeof fr = {
   site: {
     title: "Toomny — Hire the best talent in West Africa",
     description:
-      "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery. 10% commission, 0% for buyers.",
+      "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery. From 5% commission, 0% for buyers.",
     ogTitle: "Toomny — Work together, grow together",
     ogDescription: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
   },

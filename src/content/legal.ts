@@ -54,7 +54,7 @@ const fr = {
         heading: "6. Prix, commission et paiement",
         paragraphs: [
           "Les prix sont affichés dans la devise de la prestation, toutes taxes éventuelles à la charge du prestataire. Le client paie le montant affiché : aucune commission n'est prélevée côté client.",
-          "Toomny prélève une commission de 10 % sur le montant de la commande, retenue sur la somme versée au prestataire. Le prestataire reçoit donc 90 % du montant payé par le client. Le détail du calcul est affiché avant la confirmation de la commande.",
+          "Toomny prélève une commission sur chaque commande finalisée, retenue sur la somme versée au prestataire. Le taux dépend du plan souscrit par le prestataire : 10 % (Plan Essentiel, 10 000 FCFA/mois), 7 % (Plan Pro, 35 000 FCFA/mois) ou 5 % (Plan Expert, 45 000 FCFA/mois). Aucune commission n'est prélevée sur le client. Le détail du calcul est affiché avant la confirmation de la commande.",
           "Les frais éventuels de l'opérateur de mobile money ou du partenaire de paiement sont indiqués au moment du paiement et ne sont pas conservés par Toomny.",
         ],
       },
@@ -269,7 +269,7 @@ const en: typeof fr = {
         heading: "6. Pricing, commission, and payment",
         paragraphs: [
           "Prices are displayed in the service currency, with any applicable taxes borne by the provider. The client pays the displayed amount: no commission is charged on the client side.",
-          "Toomny charges a 10% commission on the order amount, retained from the sum paid to the provider. The provider therefore receives 90% of the amount paid by the client. The calculation detail is shown before order confirmation.",
+          "Toomny charges a commission on each completed order, retained from the sum paid to the provider. The rate depends on the provider's plan: 10% (Essential Plan, 10,000 FCFA/month), 7% (Pro Plan, 35,000 FCFA/month), or 5% (Expert Plan, 45,000 FCFA/month). No commission is charged to the client. The calculation detail is shown before order confirmation.",
           "Any fees charged by the mobile money operator or payment partner are indicated at the time of payment and are not retained by Toomny.",
         ],
       },
