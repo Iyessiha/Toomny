@@ -116,6 +116,20 @@ const fr = {
       body: (p) =>
         `Le paiement pour le plan ${p.plan ?? ""} n'a pas abouti. Vous pouvez réessayer.`,
     },
+    service_approved: {
+      title: "Prestation publiée",
+      body: (p) =>
+        p.service
+          ? `Votre prestation « ${p.service} » est maintenant en ligne.`
+          : "Votre prestation est maintenant en ligne.",
+    },
+    service_removed: {
+      title: "Prestation retirée",
+      body: (p) =>
+        p.service
+          ? `Votre prestation « ${p.service} » a été retirée par notre équipe.`
+          : "Une de vos prestations a été retirée par notre équipe.",
+    },
   } as Record<string, NotificationCopy>,
 };
 
@@ -219,6 +233,20 @@ const en: typeof fr = {
       title: "Subscription payment declined",
       body: (p) =>
         `The payment for the ${p.plan ?? ""} plan did not go through. You can try again.`,
+    },
+    service_approved: {
+      title: "Service published",
+      body: (p) =>
+        p.service
+          ? `Your service "${p.service}" is now live.`
+          : "Your service is now live.",
+    },
+    service_removed: {
+      title: "Service removed",
+      body: (p) =>
+        p.service
+          ? `Your service "${p.service}" was removed by our team.`
+          : "One of your services was removed by our team.",
     },
   } as Record<string, NotificationCopy>,
 };

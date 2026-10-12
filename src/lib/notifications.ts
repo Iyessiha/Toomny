@@ -21,6 +21,8 @@ export const NOTIFICATION_TYPES = [
   "payout_failed",
   "subscription_activated",
   "subscription_failed",
+  "service_approved",
+  "service_removed",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
