@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Section } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { getNotificationTexts } from "@/i18n/notifications";
 import { renderNotification, toParams } from "@/lib/notifications";
 import { markAllNotificationsRead, openNotification } from "./actions";
@@ -50,6 +50,9 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
   payout: (
     <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+  ),
+  subscription: (
+    <path d="M2.5 5.5L6.5 9.5 10 4l3.5 5.5 4-4L16 14H4L2.5 5.5zM4 15.5h12a.75.75 0 010 1.5H4a.75.75 0 010-1.5z" />
   ),
 };
 
@@ -97,13 +100,7 @@ export default async function NotificationsPage() {
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages },
-        { href: "/demandes", label: nav.inquiries },
-        { href: "/disputes", label: getMarketplaceTexts(locale).disputes.title },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/notifications")}
     >
       {items.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />

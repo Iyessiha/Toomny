@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Notice, Pill, Section, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
@@ -62,12 +63,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       title={order.reference}
       subtitle={service?.title ?? t.detailSubtitleFallback}
       locale={locale}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/orders", label: nav.orders, current: true },
-        { href: "/messages", label: nav.messages },
-        { href: "/demandes", label: nav.inquiries },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/orders")}
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">

@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentProvider } from "@/lib/payments/geniuspay";
 import { recordFunding } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
+import { nextPeriodEnd } from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,8 @@ export async function POST(request: Request): Promise<Response> {
 
   if (event.type === "hold.held" && event.partnerHoldRef) {
     const db = createAdminClient();
-    const now = new Date().toISOString();
+    const nowDate = new Date();
+    const now = nowDate.toISOString();
 
     const { data: hold } = await db
       .from("escrow_holds")
@@ -31,7 +33,60 @@ export async function POST(request: Request): Promise<Response> {
       .maybeSingle();
 
     if (!hold) {
-      console.error("[webhook:geniuspay] rétention introuvable:", event.partnerHoldRef);
+      // Référence absente d'escrow_holds : vérifier s'il s'agit d'un abonnement.
+      const { data: sub } = await db
+        .from("subscriptions")
+        .select("id, provider_id, plan, status")
+        .eq("partner", "geniuspay")
+        .eq("partner_payment_ref", event.partnerHoldRef)
+        .maybeSingle();
+
+      if (!sub) {
+        console.error("[webhook:geniuspay] rétention ou abonnement introuvable:", event.partnerHoldRef);
+        return NextResponse.json({ ok: true });
+      }
+
+      if (sub.status === "active") {
+        return NextResponse.json({ ok: true });
+      }
+
+      const periodEnd = nextPeriodEnd(nowDate).toISOString();
+
+      await db
+        .from("subscriptions")
+        .update({ status: "expired" })
+        .eq("provider_id", sub.provider_id)
+        .eq("status", "active")
+        .neq("id", sub.id);
+
+      await db
+        .from("subscriptions")
+        .update({
+          status: "active",
+          period_start: now,
+          period_end: periodEnd,
+        })
+        .eq("id", sub.id);
+
+      await db
+        .from("provider_profiles")
+        .upsert(
+          {
+            profile_id: sub.provider_id,
+            plan: sub.plan,
+            plan_expires_at: periodEnd,
+          },
+          { onConflict: "profile_id" },
+        );
+
+      await notify(db, {
+        recipientId: sub.provider_id,
+        type: "subscription_activated",
+        params: { plan: sub.plan },
+        link: "/dashboard/plan",
+      });
+
+      console.info("[webhook:geniuspay] abonnement activé:", sub.id, sub.plan);
       return NextResponse.json({ ok: true });
     }
 
@@ -98,6 +153,25 @@ export async function POST(request: Request): Promise<Response> {
           type: "order_payment_failed",
           params: { ref: failedOrder.reference },
           link: `/orders/${failedOrder.id}`,
+        });
+      }
+    } else {
+      const { data: failedSub } = await db
+        .from("subscriptions")
+        .select("id, provider_id, plan, status")
+        .eq("partner", "geniuspay")
+        .eq("partner_payment_ref", event.partnerHoldRef)
+        .maybeSingle();
+      if (failedSub && failedSub.status !== "active") {
+        await db
+          .from("subscriptions")
+          .update({ status: "failed" })
+          .eq("id", failedSub.id);
+        await notify(db, {
+          recipientId: failedSub.provider_id,
+          type: "subscription_failed",
+          params: { plan: failedSub.plan },
+          link: "/dashboard/plan",
         });
       }
     }

@@ -5,7 +5,8 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
-import { DEFAULT_COMMISSION_BPS, splitOrderAmount } from "@/lib/money";
+import { splitOrderAmount } from "@/lib/money";
+import { commissionBpsForPlan } from "@/lib/plans";
 import { ORDER_RULES, UUID_RE, orderReference, type OrderAction } from "@/lib/orders";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -58,8 +59,19 @@ export async function createOrder(input: { serviceId: string; requirements: stri
     packageId = pkg.id;
   }
 
+  const { data: providerProfile } = await db
+    .from("provider_profiles")
+    .select("plan, plan_expires_at")
+    .eq("profile_id", service.provider_id)
+    .maybeSingle();
+
   const now = new Date();
-  const split = splitOrderAmount(priceMinor, DEFAULT_COMMISSION_BPS);
+  const commissionBps = commissionBpsForPlan(
+    providerProfile?.plan,
+    providerProfile?.plan_expires_at,
+    now,
+  );
+  const split = splitOrderAmount(priceMinor, commissionBps);
 
   const { data: order, error } = await db
     .from("orders")

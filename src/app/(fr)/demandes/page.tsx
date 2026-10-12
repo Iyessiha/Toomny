@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Avatar, Pill } from "@/components/dashboard/pro";
 import { InquiryReplyForm } from "@/components/inquiries/reply-form";
 import { MarkConversationReadButton } from "@/components/inquiries/mark-read-button";
@@ -60,13 +61,7 @@ export default async function DemandesPage() {
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages },
-        { href: "/demandes", label: t.title, current: true },
-        { href: "/disputes", label: getMarketplaceTexts(locale).disputes.title },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/demandes")}
     >
       {conversations.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />

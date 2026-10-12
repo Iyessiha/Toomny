@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Avatar, Pill, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -87,13 +88,7 @@ export default async function MessagesPage() {
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages, current: true },
-        { href: "/demandes", label: nav.inquiries },
-        { href: "/disputes", label: getMarketplaceTexts(locale).disputes.title },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/messages")}
     >
       {conversations.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />

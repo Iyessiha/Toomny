@@ -19,6 +19,8 @@ export const NOTIFICATION_TYPES = [
   "verification_rejected",
   "payout_paid",
   "payout_failed",
+  "subscription_activated",
+  "subscription_failed",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
@@ -58,7 +60,7 @@ export async function notify(
   }
 }
 
-const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount"] as const;
+const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount", "plan"] as const;
 
 /**
  * Assainit les paramètres lus en base (jsonb non typé) : seules les clés

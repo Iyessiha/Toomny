@@ -6,14 +6,14 @@ import { Avatar } from "./pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getAdminTexts } from "@/i18n/admin";
 import type { Locale } from "@/i18n/dictionaries";
-import type { NavItem } from "./shell-ui";
+import type { NavItem, NavSection } from "./shell-ui";
 
-export type { NavItem } from "./shell-ui";
+export type { NavItem, NavSection } from "./shell-ui";
 export { EmptyState } from "./shell-ui";
 
 export function DashboardShell({
   user,
-  nav,
+  navSections,
   title,
   subtitle,
   kicker,
@@ -22,7 +22,7 @@ export function DashboardShell({
   children,
 }: {
   user: { displayName: string | null; email: string | null; role: string };
-  nav: NavItem[];
+  navSections: NavSection[];
   title: string;
   subtitle?: string;
   kicker?: string;
@@ -33,7 +33,6 @@ export function DashboardShell({
   const t = getDashboardTexts(locale);
   const isAdmin = user.role === "admin";
   const tAdmin = isAdmin ? getAdminTexts(locale) : null;
-  const workspaceLabel = locale === "en" ? "Workspace" : "Mon espace";
 
   const adminNavItems: NavItem[] = tAdmin
     ? [
@@ -47,8 +46,7 @@ export function DashboardShell({
       ]
     : [];
 
-  // Nav without the legacy /admin single-link (now shown as a section)
-  const mainNav = nav.filter((n) => n.href !== "/admin");
+  const mainNav = navSections.flatMap((s) => s.items).filter((n) => n.href !== "/admin");
   const displayName = user.displayName ?? user.email ?? "?";
 
   return (
@@ -104,26 +102,30 @@ export function DashboardShell({
 
           {/* Nav */}
           <nav className="flex-1 overflow-y-auto px-3 py-5">
-            <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-[var(--subtle)]">
-              {workspaceLabel}
-            </p>
-            <ul className="space-y-0.5">
-              {mainNav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                      item.current
-                        ? "bg-[color-mix(in_srgb,var(--color-brand-500)_12%,transparent)] font-semibold text-[var(--foreground)] shadow-[inset_3px_0_0_var(--color-brand-500)]"
-                        : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <DashNavIcon href={item.href} active={!!item.current} />
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            {navSections.map((section, idx) => (
+              <div key={section.title} className={idx > 0 ? "mt-6" : ""}>
+                <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-[var(--subtle)]">
+                  {section.title}
+                </p>
+                <ul className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                          item.current
+                            ? "bg-[color-mix(in_srgb,var(--color-brand-500)_12%,transparent)] font-semibold text-[var(--foreground)] shadow-[inset_3px_0_0_var(--color-brand-500)]"
+                            : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        <DashNavIcon href={item.href} active={!!item.current} />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
             {adminNavItems.length > 0 && (
               <>
@@ -200,11 +202,27 @@ function DashNavIcon({ href, active }: { href: string; active: boolean }) {
         <path d="M2 11l8-8 8 8v7a1 1 0 01-1 1H3a1 1 0 01-1-1v-7z" />
       </svg>
     );
+  if (href === "/services")
+    return (
+      <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path
+          fillRule="evenodd"
+          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
   if (href === "/dashboard/prestations")
     return (
       <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
         <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
         <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+      </svg>
+    );
+  if (href === "/dashboard/plan")
+    return (
+      <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2.5 5.5L6.5 9.5 10 4l3.5 5.5 4-4L16 14H4L2.5 5.5zM4 15.5h12a.75.75 0 010 1.5H4a.75.75 0 010-1.5z" />
       </svg>
     );
   if (href === "/dashboard/profil")

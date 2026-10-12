@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Pill, ProStat, Section, TableCard, payoutTone } from "@/components/dashboard/pro";
 import { PayoutForm } from "@/components/dashboard/payout-form";
 import { PayoutRequestButton } from "@/components/dashboard/payout-request-button";
@@ -103,13 +104,7 @@ export default async function VersementsPage() {
       kicker={nav.payouts}
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/dashboard/prestations", label: nav.services },
-        { href: "/dashboard/profil", label: nav.profile },
-        { href: "/dashboard/versements", label: nav.payouts, current: true },
-        { href: "/orders", label: nav.orders },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/versements")}
     >
       <div className="grid gap-4 sm:grid-cols-3">
         <ProStat

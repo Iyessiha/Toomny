@@ -15,6 +15,7 @@ const SAMPLE = {
   outcome: "won",
   rating: "5",
   amount: "25 000 FCFA",
+  plan: "Pro",
 } as const;
 
 describe("renderNotification", () => {
@@ -63,9 +64,10 @@ describe("toParams", () => {
 });
 
 describe("isNotificationType", () => {
-  it("accepte les 16 types et refuse le reste", () => {
-    expect(NOTIFICATION_TYPES).toHaveLength(16);
+  it("accepte les 18 types et refuse le reste", () => {
+    expect(NOTIFICATION_TYPES).toHaveLength(18);
     expect(isNotificationType("order_funded")).toBe(true);
+    expect(isNotificationType("subscription_activated")).toBe(true);
     expect(isNotificationType("ORDER_FUNDED")).toBe(false);
   });
 });

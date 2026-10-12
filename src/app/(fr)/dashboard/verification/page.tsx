@@ -5,6 +5,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { KycForm } from "@/components/dashboard/kyc-form";
 import { Notice, Pill, Section, kycTone } from "@/components/dashboard/pro";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
@@ -43,10 +44,7 @@ export default async function VerificationPage() {
       locale={locale}
       title={t.pageTitle}
       subtitle={t.pageSubtitle}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/dashboard/verification", label: nav.kyc, current: true },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/verification")}
     >
       <div className="mx-auto max-w-2xl">
         {statusNow === "verified" ? (
