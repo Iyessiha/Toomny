@@ -213,7 +213,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 {locale === "en" ? "Skills" : "Compétences"}
               </p>
               <div className="flex flex-wrap gap-2">
-                {profile.skills.split(",").map((s) => s.trim()).filter(Boolean).map((skill) => (
+                {profile.skills.split(",").map((s: string) => s.trim()).filter(Boolean).map((skill: string) => (
                   <span
                     key={skill}
                     className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
@@ -232,7 +232,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 {locale === "en" ? "Languages" : "Langues"}
               </p>
               <div className="flex flex-wrap gap-2">
-                {profile.spoken_languages.split(",").map((l) => l.trim()).filter(Boolean).map((code) => (
+                {profile.spoken_languages.split(",").map((l: string) => l.trim()).filter(Boolean).map((code: string) => (
                   <span
                     key={code}
                     className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
