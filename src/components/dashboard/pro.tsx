@@ -241,10 +241,12 @@ export function ProgressBar({ value, tone = "brand" }: { value: number; tone?: "
  */
 export function TableCard({
   title,
+  subtitle,
   action,
   children,
 }: {
   title?: string;
+  subtitle?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
 }) {
@@ -252,7 +254,10 @@ export function TableCard({
     <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
       {(title || action) && (
         <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] px-5 py-4">
-          {title && <h2 className="truncate font-display text-base font-bold">{title}</h2>}
+          <div className="min-w-0">
+            {title && <h2 className="truncate font-display text-base font-bold">{title}</h2>}
+            {subtitle && <p className="mt-0.5 truncate text-xs text-[var(--subtle)]">{subtitle}</p>}
+          </div>
           {action}
         </div>
       )}
