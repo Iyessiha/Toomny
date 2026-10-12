@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
-import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
+import { DashboardShell, StatCard, EmptyState, NAV_ICONS } from "@/components/dashboard/shell";
 import { ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
 import { formatMoney } from "@/lib/money";
 
@@ -27,9 +27,9 @@ export default async function AdminPage() {
       title="Administration"
       subtitle="Vue d'ensemble de la plateforme"
       nav={[
-        { href: "/admin", label: "Vue d'ensemble", current: true },
-        { href: "/admin/verifications", label: "Vérifications KYC" },
-        { href: "/dashboard", label: "Mon tableau de bord" },
+        { href: "/admin", label: "Vue d'ensemble", icon: NAV_ICONS.admin, current: true },
+        { href: "/admin/verifications", label: "Vérifications KYC", icon: NAV_ICONS.shield, badge: s.pendingVerifications || undefined },
+        { href: "/dashboard", label: "Mon tableau de bord", icon: NAV_ICONS.home },
       ]}
     >
       {/* Ce qui demande une action humaine passe en premier. */}

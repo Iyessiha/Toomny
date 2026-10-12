@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardShell } from "@/components/dashboard/shell";
+import { DashboardShell, NAV_ICONS } from "@/components/dashboard/shell";
 import { KycForm } from "@/components/dashboard/kyc-form";
 import {
   VERIFICATION_STATUS_FR,
@@ -38,8 +38,12 @@ export default async function VerificationPage() {
       title="Vérification d'identité"
       subtitle="Confirmez votre identité pour débloquer toutes les fonctionnalités"
       nav={[
-        { href: "/dashboard", label: "Vue d'ensemble" },
-        { href: "/dashboard/verification", label: "Vérification KYC", current: true },
+        { href: "/dashboard", label: "Vue d'ensemble", icon: NAV_ICONS.home },
+        { href: "/dashboard/prestations", label: "Mes prestations", icon: NAV_ICONS.briefcase },
+        { href: "/orders", label: "Commandes", icon: NAV_ICONS.orders },
+        { href: "/messages", label: "Messages", icon: NAV_ICONS.message },
+        { href: "/dashboard/versements", label: "Versements", icon: NAV_ICONS.wallet },
+        { href: "/dashboard/verification", label: "Vérification KYC", icon: NAV_ICONS.shield, current: true },
       ]}
     >
       <div className="mx-auto max-w-2xl">

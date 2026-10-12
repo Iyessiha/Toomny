@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell } from "@/components/dashboard/shell";
+import { DashboardShell, NAV_ICONS } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
 import { EmptyState } from "@/components/dashboard/shell";
 import { VERIFICATION_STATUS_FR, VERIFICATION_STATUS_TONE } from "@/lib/kyc";
@@ -63,8 +63,9 @@ export default async function AdminVerificationsPage({
       title="Vérifications KYC"
       subtitle="Examinez et traitez les demandes de vérification d'identité"
       nav={[
-        { href: "/admin", label: "Vue d'ensemble" },
-        { href: "/admin/verifications", label: "Vérifications KYC", current: true },
+        { href: "/admin", label: "Vue d'ensemble", icon: NAV_ICONS.admin },
+        { href: "/admin/verifications", label: "Vérifications KYC", icon: NAV_ICONS.shield, current: true },
+        { href: "/dashboard", label: "Mon tableau de bord", icon: NAV_ICONS.home },
       ]}
     >
       {/* Alerte si dossiers urgents */}
