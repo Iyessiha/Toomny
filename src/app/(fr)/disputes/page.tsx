@@ -50,6 +50,7 @@ export default async function DisputesPage() {
         { href: "/dashboard", label: nav.overview },
         { href: "/orders", label: nav.orders },
         { href: "/messages", label: nav.messages },
+        { href: "/demandes", label: nav.inquiries },
         { href: "/disputes", label: t.title, current: true },
       ]}
     >

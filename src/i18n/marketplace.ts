@@ -11,6 +11,30 @@ const fr = {
     noMessage: "Aucun message",
     metaTitle: "Messages · Toomny",
   },
+  inquiries: {
+    title: "Demandes",
+    subtitle: "Questions reçues avant commande, et vos demandes envoyées",
+    empty: "Aucune demande",
+    emptyBody: "Les questions posées avant commande apparaîtront ici.",
+    metaTitle: "Demandes · Toomny",
+    aboutService: "À propos de",
+    directContact: "Contact direct",
+    viewService: "Voir la prestation",
+    viewProfile: "Voir le profil",
+    replyPlaceholder: "Écrivez votre réponse…",
+    reply: "Répondre",
+    replying: "Envoi…",
+    markRead: "Marquer comme lu",
+    readOn: "Lu",
+    sentState: "Envoyé",
+    you: "Vous",
+    errors: {
+      notAllowed: "Vous ne participez pas à cette conversation.",
+      notFound: "Interlocuteur introuvable.",
+      length: "Message : entre 10 et 1000 caractères.",
+      save: "Le message n'a pas pu être envoyé.",
+    },
+  },
   disputes: {
     title: "Litiges",
     subtitle: "Litiges ouverts sur vos commandes",
@@ -77,7 +101,7 @@ const fr = {
       changed: "Le litige a changé entre-temps. Actualisez la page.",
     },
   },
-  nav: { disputes: "Litiges" },
+  nav: { disputes: "Litiges", inquiries: "Demandes" },
 };
 
 const en: typeof fr = {
@@ -89,6 +113,30 @@ const en: typeof fr = {
     open: "Open conversation",
     noMessage: "No messages yet",
     metaTitle: "Messages · Toomny",
+  },
+  inquiries: {
+    title: "Inquiries",
+    subtitle: "Questions received before ordering, and your sent inquiries",
+    empty: "No inquiries",
+    emptyBody: "Questions asked before ordering will appear here.",
+    metaTitle: "Inquiries · Toomny",
+    aboutService: "About",
+    directContact: "Direct contact",
+    viewService: "View service",
+    viewProfile: "View profile",
+    replyPlaceholder: "Write your reply…",
+    reply: "Reply",
+    replying: "Sending…",
+    markRead: "Mark as read",
+    readOn: "Read",
+    sentState: "Sent",
+    you: "You",
+    errors: {
+      notAllowed: "You are not part of this conversation.",
+      notFound: "Counterpart not found.",
+      length: "Message: between 10 and 1000 characters.",
+      save: "The message could not be sent.",
+    },
   },
   disputes: {
     title: "Disputes",
@@ -156,7 +204,7 @@ const en: typeof fr = {
       changed: "The dispute changed in the meantime. Refresh the page.",
     },
   },
-  nav: { disputes: "Disputes" },
+  nav: { disputes: "Disputes", inquiries: "Inquiries" },
 };
 
 export const marketplaceTexts: Record<Locale, typeof fr> = { fr, en };

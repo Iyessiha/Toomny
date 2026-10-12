@@ -159,6 +159,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
               <div>
                 <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">{a.front}</p>
                 <a href={docs.frontUrl} target="_blank" rel="noopener noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- URL signée éphémère + repli PDF via onError : pas d'optimiseur dessus. */}
                   <img
                     src={docs.frontUrl}
                     alt={a.front}
@@ -180,6 +181,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
               <div>
                 <p className="mb-2 text-xs font-medium text-[var(--subtle)] uppercase tracking-wide">{a.selfie}</p>
                 <a href={docs.selfieUrl} target="_blank" rel="noopener noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- URL signée éphémère : pas d'optimiseur dessus. */}
                   <img
                     src={docs.selfieUrl}
                     alt={a.selfie}

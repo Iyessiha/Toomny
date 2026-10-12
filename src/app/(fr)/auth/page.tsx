@@ -23,7 +23,7 @@ export default async function AuthPage({
 
   return (
     <AuthScreen
-      locale="fr"
+      locale={await visitorLocale()}
       initialRole={role === "provider" ? "provider" : "client"}
       initialCountry={country}
       initialCity={city}

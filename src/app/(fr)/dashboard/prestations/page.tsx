@@ -61,6 +61,7 @@ export default async function PrestationsPage() {
         { href: "/dashboard/profil", label: nav.profile },
         { href: "/orders", label: nav.orders },
         { href: "/messages", label: nav.messages },
+        { href: "/demandes", label: nav.inquiries },
       ]}
     >
       <div className="flex items-center justify-between mb-6">

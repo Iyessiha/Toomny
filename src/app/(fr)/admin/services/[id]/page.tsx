@@ -58,6 +58,7 @@ export default async function AdminServiceEditPage({
         { href: "/admin/categories", label: nav.categories },
         { href: "/admin/users", label: nav.users },
         { href: "/admin/orders", label: nav.orders },
+        { href: "/admin/payouts", label: nav.payouts },
         { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: nav.myDashboard },
       ]}

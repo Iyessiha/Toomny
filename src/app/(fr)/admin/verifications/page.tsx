@@ -73,6 +73,7 @@ export default async function AdminVerificationsPage({
         { href: "/admin/categories", label: t.nav.categories },
         { href: "/admin/users", label: t.nav.users },
         { href: "/admin/orders", label: t.nav.orders },
+        { href: "/admin/payouts", label: t.nav.payouts },
         { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
         { href: "/dashboard", label: t.nav.myDashboard },
       ]}

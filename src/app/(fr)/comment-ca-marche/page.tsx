@@ -4,13 +4,11 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
+import { getPublicPageTexts } from "@/i18n/public-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Comment ça marche — Toomny",
-    description:
-      "Trois étapes pour recruter un prestataire ou vendre vos services en toute confiance, avec paiement en mobile money et séquestre automatique.",
-  };
+  const t = getPublicPageTexts(await visitorLocale()).titles;
+  return { title: t.howItWorks, description: t.howItWorksDescription };
 }
 
 export default async function HowItWorksPage() {

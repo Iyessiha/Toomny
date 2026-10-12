@@ -37,6 +37,7 @@ export default async function OrdersPage() {
         { href: "/dashboard", label: t.nav.overview },
         { href: "/orders", label: t.nav.orders, current: true },
         { href: "/messages", label: t.nav.messages },
+        { href: "/demandes", label: t.nav.inquiries },
       ]}
     >
       {list.length === 0 ? (

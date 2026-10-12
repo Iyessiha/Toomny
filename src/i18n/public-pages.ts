@@ -36,6 +36,15 @@ const fr = {
     verification: "Vérification d'identité · Toomny",
     profile: "Mon profil public · Toomny",
     services: "Mes prestations · Toomny",
+    pricing: "Tarifs — Toomny",
+    pricingDescription:
+      "Dès 3 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
+    howItWorks: "Comment ça marche — Toomny",
+    howItWorksDescription:
+      "Trois étapes pour recruter un prestataire ou vendre vos services en toute confiance, avec paiement en mobile money et séquestre automatique.",
+    security: "Sécurité — Toomny",
+    securityDescription:
+      "Votre paiement est conservé par un établissement agréé. Identité vérifiée, litige arbitré en français, versement automatique sous 72 h.",
   },
 };
 
@@ -74,6 +83,15 @@ const en: typeof fr = {
     verification: "Identity verification · Toomny",
     profile: "My public profile · Toomny",
     services: "My services · Toomny",
+    pricing: "Pricing — Toomny",
+    pricingDescription:
+      "From 3% commission on the provider side, 0% for buyers. Essential, Pro and Expert plans. Paid out directly by mobile money.",
+    howItWorks: "How it works — Toomny",
+    howItWorksDescription:
+      "Three steps to hire a provider or sell your services with confidence, with mobile money payment and automatic escrow.",
+    security: "Security — Toomny",
+    securityDescription:
+      "Your payment is held by a licensed institution. Verified identity, disputes arbitrated in French, automatic release within 72 hours.",
   },
 };
 

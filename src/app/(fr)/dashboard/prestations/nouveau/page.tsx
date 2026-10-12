@@ -31,6 +31,7 @@ export default async function NouvellePrestation() {
         { href: "/dashboard/profil", label: nav.profile },
         { href: "/orders", label: nav.orders },
         { href: "/messages", label: nav.messages },
+        { href: "/demandes", label: nav.inquiries },
       ]}
     >
       <div className="mx-auto max-w-3xl">

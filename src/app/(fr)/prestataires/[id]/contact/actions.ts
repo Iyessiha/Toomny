@@ -3,6 +3,9 @@
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogTexts } from "@/i18n/catalog";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { notify } from "@/lib/notifications";
+import { actorName } from "@/lib/names";
 
 export async function sendDirectInquiry(providerId: string, formData: FormData) {
   const user = await requireAuth();
@@ -33,6 +36,13 @@ export async function sendDirectInquiry(providerId: string, formData: FormData) 
   });
 
   if (error) return { error: t.contactErrorFailed };
+
+  await notify(createAdminClient(), {
+    recipientId: providerId,
+    type: "inquiry_received",
+    params: { from: await actorName(user.id, user.preferredLocale) },
+    link: "/demandes",
+  });
 
   return { success: true };
 }

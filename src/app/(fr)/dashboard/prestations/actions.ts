@@ -5,15 +5,17 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { toMinor } from "@/lib/money";
+import { parsePackages, type ValidPackage } from "@/lib/packages";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { UUID_RE } from "@/lib/orders";
 
+/** Entrée brute venue du navigateur : toujours revalidée par `parsePackages`. */
 type PackageInput = {
-  tier: 1 | 2 | 3;
-  name: string;
-  description: string;
-  price_minor: number;
-  delivery_days: number;
+  tier: unknown;
+  name: unknown;
+  description: unknown;
+  price_minor: unknown;
+  delivery_days: unknown;
 };
 
 /**
@@ -60,10 +62,20 @@ export async function createService(formData: FormData) {
   const tags = tagsRaw
     ? tagsRaw.split(",").map((t) => t.trim().slice(0, 30)).filter(Boolean).slice(0, 10)
     : [];
-  let packages: PackageInput[] = [];
+  // Forfaits validés AVANT toute écriture : un JSON malformé ou des valeurs
+  // hors bornes rejettent la création entière, sans prestation orpheline.
+  let packages: ValidPackage[] = [];
   const packagesJson = String(formData.get("packagesJson") ?? "").trim();
   if (packagesJson) {
-    try { packages = JSON.parse(packagesJson); } catch {}
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(packagesJson);
+    } catch {
+      return { error: e.packages };
+    }
+    const checked = parsePackages(parsed);
+    if (!checked) return { error: e.packages };
+    packages = checked;
   }
 
   const supabase = await createClient();
@@ -77,7 +89,7 @@ export async function createService(formData: FormData) {
       price_minor: priceMinor.toString(),
       currency: "XOF",
       delivery_days: deliveryDays,
-      content_locale: "fr",
+      content_locale: user.preferredLocale,
       status: "draft",
       ...(coverUrl ? { cover_url: coverUrl } : {}),
       ...(galleryUrls.length ? { gallery_urls: galleryUrls } : {}),
@@ -92,13 +104,20 @@ export async function createService(formData: FormData) {
     const rows = packages.map((p) => ({
       service_id: newService.id,
       tier: p.tier,
-      name: p.name.trim().slice(0, 60),
-      description: p.description.trim().slice(0, 500) || null,
+      name: p.name,
+      description: p.description,
       price_minor: p.price_minor,
       currency: "XOF",
       delivery_days: p.delivery_days,
     }));
-    await db.from("service_packages").insert(rows);
+    const { error: pkgErr } = await db.from("service_packages").insert(rows);
+    if (pkgErr) {
+      // Échec tardif (course, contrainte) : on retire le brouillon plutôt que
+      // de laisser une prestation sans les forfaits annoncés.
+      console.error("createService packages:", pkgErr.message);
+      await db.from("services").delete().eq("id", newService.id);
+      return { error: e.save };
+    }
   }
 
   revalidatePath("/dashboard/prestations");
@@ -201,11 +220,15 @@ export async function upsertPackages(serviceId: string, packages: PackageInput[]
   if (!isProvider(user.role)) return { error: e.notProvider };
   if (!UUID_RE.test(serviceId)) return { error: e.notOwner };
 
+  // L'argument transite par le réseau : mêmes contrôles qu'à la création.
+  const checked = parsePackages(packages);
+  if (!checked) return { error: e.packages };
+
   const db = createAdminClient();
   const { data: svc } = await db.from("services").select("provider_id").eq("id", serviceId).maybeSingle();
   if (!svc || svc.provider_id !== user.id) return { error: e.notOwner };
 
-  const enabledTiers = packages.map((p) => p.tier);
+  const enabledTiers = checked.map((p) => p.tier);
 
   // Delete packages not in the enabled list
   if (enabledTiers.length < 3) {
@@ -213,12 +236,12 @@ export async function upsertPackages(serviceId: string, packages: PackageInput[]
     await db.from("service_packages").delete().eq("service_id", serviceId).in("tier", tiersToDelete);
   }
 
-  if (packages.length > 0) {
-    const rows = packages.map((p) => ({
+  if (checked.length > 0) {
+    const rows = checked.map((p) => ({
       service_id: serviceId,
       tier: p.tier,
-      name: p.name.trim().slice(0, 60),
-      description: p.description.trim().slice(0, 500) || null,
+      name: p.name,
+      description: p.description,
       price_minor: p.price_minor,
       currency: "XOF",
       delivery_days: p.delivery_days,

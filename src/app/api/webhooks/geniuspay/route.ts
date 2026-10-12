@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentProvider } from "@/lib/payments/geniuspay";
 import { recordFunding } from "@/lib/order-ledger";
+import { notify } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 
@@ -45,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
 
     const { data: order } = await db
       .from("orders")
-      .select("id, status, amount_minor, currency")
+      .select("id, status, reference, client_id, provider_id, amount_minor, currency")
       .eq("id", hold.order_id)
       .maybeSingle();
 
@@ -57,6 +58,14 @@ export async function POST(request: Request): Promise<Response> {
         .eq("status", "pending_payment");
 
       await recordFunding(db, order);
+
+      await notify(db, {
+        recipientId: order.provider_id,
+        type: "order_funded",
+        params: { ref: order.reference },
+        link: `/orders/${order.id}`,
+      });
+
       console.info("[webhook:geniuspay] commande financée:", order.id);
     } else {
       console.warn("[webhook:geniuspay] commande pas en pending_payment:", hold.order_id, order?.status);
@@ -70,6 +79,28 @@ export async function POST(request: Request): Promise<Response> {
       .update({ status: "failed", failure_reason: "Paiement refusé par GeniusPay" })
       .eq("partner", "geniuspay")
       .eq("partner_hold_ref", event.partnerHoldRef);
+
+    const { data: failedHold } = await db
+      .from("escrow_holds")
+      .select("order_id")
+      .eq("partner", "geniuspay")
+      .eq("partner_hold_ref", event.partnerHoldRef)
+      .maybeSingle();
+    if (failedHold) {
+      const { data: failedOrder } = await db
+        .from("orders")
+        .select("id, reference, client_id")
+        .eq("id", failedHold.order_id)
+        .maybeSingle();
+      if (failedOrder) {
+        await notify(db, {
+          recipientId: failedOrder.client_id,
+          type: "order_payment_failed",
+          params: { ref: failedOrder.reference },
+          link: `/orders/${failedOrder.id}`,
+        });
+      }
+    }
 
     console.info("[webhook:geniuspay] hold.failed:", event.partnerHoldRef);
   }

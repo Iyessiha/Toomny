@@ -4,13 +4,11 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
+import { getPublicPageTexts } from "@/i18n/public-pages";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Sécurité — Toomny",
-    description:
-      "Votre paiement est conservé par un établissement agréé. Identité vérifiée, litige arbitré en français, versement automatique sous 72 h.",
-  };
+  const t = getPublicPageTexts(await visitorLocale()).titles;
+  return { title: t.security, description: t.securityDescription };
 }
 
 export default async function SecurityPage() {

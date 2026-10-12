@@ -33,7 +33,7 @@ export function ServiceCard({ service: s, locale }: Props) {
         />
         {/* Wishlist overlay */}
         <div className="absolute right-2 top-2 z-10">
-          <WishlistButton serviceId={s.id} size="sm" />
+          <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
         </div>
       </div>
 
