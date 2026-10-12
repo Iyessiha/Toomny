@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
   if (error) {
     if (error.message.includes("Invalid login credentials")) return NextResponse.json({ error: m.invalid }, { status: 401 });
     if (error.message.includes("Email not confirmed")) return NextResponse.json({ error: m.unconfirmed }, { status: 403 });
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ error: m.badRequest }, { status: 400 });
   }
 
   // Le profil est la source de vérité : la langue suit l’utilisateur sur tous ses appareils.

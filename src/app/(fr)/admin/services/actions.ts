@@ -8,7 +8,7 @@ import { notify } from "@/lib/notifications";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
-const UUID_RE = /^[0-9a-f-]{36}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Modération d'une prestation : publier, mettre en pause, retirer ou repasser en brouillon.
@@ -21,7 +21,7 @@ export async function moderateService(formData: FormData): Promise<void> {
   const id = String(formData.get("serviceId") ?? "");
   const status = String(formData.get("status") ?? "") as ModerationStatus;
 
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return;
   if (!MODERATION_STATUSES.includes(status)) return;
 
   const db = createAdminClient();

@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
+import { consumeRateLimit } from "@/lib/rate-limit";
+import { imageMimeFromBytes } from "@/lib/request-security";
 
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_BYTES = 2 * 1024 * 1024;
+const UPLOAD_MAX = 10;
+const UPLOAD_WINDOW = 3600;
 
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createClient();
@@ -11,6 +14,9 @@ export async function POST(request: Request): Promise<Response> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+
+  const allowed = await consumeRateLimit(`upload:avatar:${user.id}`, UPLOAD_MAX, UPLOAD_WINDOW);
+  if (!allowed) return NextResponse.json({ error: "Trop d'envois. Réessayez dans une heure." }, { status: 429 });
 
   let file: File;
   try {
@@ -22,20 +28,22 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "Fichier manquant" }, { status: 400 });
   }
 
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return NextResponse.json({ error: "Type non autorisé (jpeg, png, webp)" }, { status: 400 });
-  }
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: "Fichier trop volumineux (2 Mo max)" }, { status: 400 });
   }
 
-  const ext = file.type === "image/jpeg" ? "jpg" : file.type.split("/")[1];
+  const buffer = await file.arrayBuffer();
+  const detectedMime = imageMimeFromBytes(new Uint8Array(buffer));
+  if (!detectedMime) {
+    return NextResponse.json({ error: "Type non autorisé (jpeg, png, webp)" }, { status: 400 });
+  }
+
+  const ext = detectedMime === "image/jpeg" ? "jpg" : detectedMime.split("/")[1];
   const path = `${user.id}/${randomUUID()}.${ext}`;
 
-  const buffer = await file.arrayBuffer();
   const { error } = await supabase.storage
     .from("avatars")
-    .upload(path, buffer, { contentType: file.type, upsert: false });
+    .upload(path, buffer, { contentType: detectedMime, upsert: false });
 
   if (error) {
     console.error("[profile/avatar] upload:", error.message);
