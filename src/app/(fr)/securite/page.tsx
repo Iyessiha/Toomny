@@ -5,6 +5,7 @@ import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
@@ -18,8 +19,14 @@ export default async function SecurityPage() {
 
   const flowIcons = ["💳", "🔒", "📦", "✅"];
 
+  const breadcrumb =
+    locale === "en"
+      ? [{ name: "Home", href: "/en" }, { name: "Security", href: "/securite" }]
+      : [{ name: "Accueil", href: "/" }, { name: "Sécurité", href: "/securite" }];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumb} />
       <Header locale={locale} />
       <main>
         {/* Hero */}

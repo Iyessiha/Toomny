@@ -5,6 +5,7 @@ import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
@@ -16,8 +17,14 @@ export default async function HowItWorksPage() {
   const t = getLanding(locale);
   const h = t.how;
 
+  const breadcrumb =
+    locale === "en"
+      ? [{ name: "Home", href: "/en" }, { name: "How it works", href: "/comment-ca-marche" }]
+      : [{ name: "Accueil", href: "/" }, { name: "Comment ça marche", href: "/comment-ca-marche" }];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumb} />
       <Header locale={locale} />
       <main>
         {/* Hero */}

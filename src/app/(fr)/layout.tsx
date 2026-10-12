@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { RootShell } from "@/lib/root-layout";
 import { getPublicPageTexts } from "@/i18n/public-pages";
 import { visitorLocale } from "@/i18n/server-locale";
+import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import "../globals.css";
 
 /**
@@ -23,6 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t.ogTitle,
       description: t.ogDescription,
     },
+    twitter: {
+      card: "summary_large_image",
+      site: "@toomny",
+      title: t.ogTitle,
+      description: t.ogDescription,
+    },
   };
 }
 
@@ -33,5 +40,10 @@ export const viewport: Viewport = {
 };
 
 export default async function FrLayout({ children }: { children: React.ReactNode }) {
-  return <RootShell locale={await visitorLocale()}>{children}</RootShell>;
+  return (
+    <RootShell locale={await visitorLocale()}>
+      <OrganizationJsonLd />
+      {children}
+    </RootShell>
+  );
 }

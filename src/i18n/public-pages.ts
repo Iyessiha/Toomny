@@ -38,7 +38,7 @@ const fr = {
     services: "Mes prestations · Toomny",
     pricing: "Tarifs — Toomny",
     pricingDescription:
-      "Dès 3 % de commission côté prestataire, 0 % côté client. Plans Essentiel, Pro et Expert. Versement direct en mobile money.",
+      "Plan gratuit inclus. Dès 3 % de commission côté prestataire, 0 % côté client. Plans Débutant, Essentiel, Pro et Expert. Versement direct en mobile money.",
     howItWorks: "Comment ça marche — Toomny",
     howItWorksDescription:
       "Trois étapes pour recruter un prestataire ou vendre vos services en toute confiance, avec paiement en mobile money et séquestre automatique.",
@@ -85,7 +85,7 @@ const en: typeof fr = {
     services: "My services · Toomny",
     pricing: "Pricing — Toomny",
     pricingDescription:
-      "From 3% commission on the provider side, 0% for buyers. Essential, Pro and Expert plans. Paid out directly by mobile money.",
+      "Free plan included. From 3% commission on the provider side, 0% for buyers. Starter, Essential, Pro and Expert plans. Paid out directly by mobile money.",
     howItWorks: "How it works — Toomny",
     howItWorksDescription:
       "Three steps to hire a provider or sell your services with confidence, with mobile money payment and automatic escrow.",
