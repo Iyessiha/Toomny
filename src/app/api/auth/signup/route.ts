@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { clientIp, emailFingerprint, verifyTurnstile } from "@/lib/request-security";
 import { LOCALE_COOKIE } from "@/i18n/locale-detection";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const WINDOW_SECONDS = 60 * 60;
 const MAX_PER_IP = 10;
@@ -91,5 +92,8 @@ export async function POST(request: NextRequest) {
     if (error.message.includes("already registered")) return NextResponse.json({ error: m.exists }, { status: 409 });
     return NextResponse.json({ error: m.failed }, { status: 400 });
   }
+
+  void sendWelcomeEmail({ to: email, firstName, locale });
+
   return NextResponse.json({ success: true });
 }

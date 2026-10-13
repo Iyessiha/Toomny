@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getNotificationTexts, type NotificationParams } from "@/i18n/notifications";
 import type { Locale } from "@/i18n/dictionaries";
+import { sendNotificationEmail } from "@/lib/email";
 
 export const NOTIFICATION_TYPES = [
   "inquiry_received",
@@ -35,6 +36,7 @@ export function isNotificationType(type: string): type is NotificationType {
  * Insère une notification. N'échoue JAMAIS : une notification perdue vaut
  * mieux qu'une commande ou un paiement qui casse à cause d'elle.
  * `db` doit être le client admin (aucune politique INSERT côté RLS).
+ * Si `sendEmail` est true (défaut), envoie aussi un email transactionnel.
  */
 export async function notify(
   db: SupabaseClient,
@@ -43,6 +45,7 @@ export async function notify(
     type: NotificationType;
     params?: NotificationParams;
     link: string;
+    sendEmail?: boolean;
   },
 ): Promise<void> {
   if (!input.link.startsWith("/")) {
@@ -59,6 +62,39 @@ export async function notify(
     if (error) console.error("[notifications]", input.type, error.message);
   } catch (err) {
     console.error("[notifications]", input.type, (err as Error).message);
+  }
+
+  if (input.sendEmail !== false) {
+    void sendEmailForNotification(db, input);
+  }
+}
+
+async function sendEmailForNotification(
+  db: SupabaseClient,
+  input: {
+    recipientId: string;
+    type: NotificationType;
+    params?: NotificationParams;
+    link: string;
+  },
+): Promise<void> {
+  try {
+    const { data: user } = await db.auth.admin.getUserById(input.recipientId);
+    if (!user?.user?.email) return;
+    const meta = user.user.user_metadata as Record<string, unknown>;
+    const firstName = typeof meta?.first_name === "string" ? meta.first_name : "vous";
+    const locale: Locale =
+      typeof meta?.preferred_locale === "string" && meta.preferred_locale === "en" ? "en" : "fr";
+    await sendNotificationEmail({
+      to: user.user.email,
+      firstName,
+      type: input.type,
+      params: input.params ?? {},
+      link: input.link,
+      locale,
+    });
+  } catch (err) {
+    console.error("[notifications:email]", input.type, (err as Error).message);
   }
 }
 
