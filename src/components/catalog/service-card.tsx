@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { categoryGradient } from "@/lib/categories";
 import { formatMoney } from "@/lib/money";
 import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
@@ -14,27 +17,32 @@ type Props = {
 
 export function ServiceCard({ service: s, locale }: Props) {
   const t = getCatalogTexts(locale);
+  const router = useRouter();
   const gradient = categoryGradient(s.category_slug);
   const initials = (s.provider?.display_name ?? "P").slice(0, 2).toUpperCase();
   const rating = s.provider?.rating_avg ?? null;
   const ratingCount = s.provider?.rating_count ?? 0;
 
   return (
-    <Link
-      href={`/services/${s.id}`}
-      className="group block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-[var(--color-brand-300)]/60 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10"
+    // div cliquable au lieu de Link pour éviter les <a> imbriqués
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => router.push(`/services/${s.id}`)}
+      onKeyDown={(e) => e.key === "Enter" && router.push(`/services/${s.id}`)}
+      className="group block cursor-pointer overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-[var(--color-brand-300)]/60 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10"
     >
       {/* ── Image de couverture ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "56.25%" }}>
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
-        <CoverImage
-          src={s.cover_url}
-          alt={s.title}
-          categorySlug={s.category_slug}
-        />
+          <CoverImage
+            src={s.cover_url}
+            alt={s.title}
+            categorySlug={s.category_slug}
+          />
         </div>
         {/* Wishlist overlay */}
-        <div className="absolute right-2 top-2 z-10">
+        <div className="absolute right-2 top-2 z-10" onClick={(e) => e.stopPropagation()}>
           <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
         </div>
         {/* Badge boosté */}
@@ -53,7 +61,7 @@ export function ServiceCard({ service: s, locale }: Props) {
       {/* ── Contenu ── */}
       <div className="p-3">
 
-        {/* Prestataire */}
+        {/* Prestataire — lien standalone, stopPropagation pour ne pas déclencher le div parent */}
         <div className="flex items-center gap-2">
           <span
             aria-hidden
@@ -66,11 +74,11 @@ export function ServiceCard({ service: s, locale }: Props) {
             <Link
               href={`/prestataires/${s.provider.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="truncate text-xs font-medium text-[var(--subtle)] hover:text-[var(--color-brand-600)] hover:underline underline-offset-2 transition-colors"
+              className="truncate text-xs font-medium text-[var(--subtle)] transition-colors hover:text-[var(--color-brand-600)] hover:underline underline-offset-2"
             >
               {s.provider.display_name ?? t.provider}
               {s.provider.country_code && (
-                <span className="ml-1 no-underline">· {s.provider.country_code}</span>
+                <span className="ml-1">· {s.provider.country_code}</span>
               )}
             </Link>
           ) : (
@@ -114,6 +122,6 @@ export function ServiceCard({ service: s, locale }: Props) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
