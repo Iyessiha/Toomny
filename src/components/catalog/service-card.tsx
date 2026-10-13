@@ -22,15 +22,17 @@ export function ServiceCard({ service: s, locale }: Props) {
   return (
     <Link
       href={`/services/${s.id}`}
-      className="group block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-200 hover:shadow-lg hover:shadow-black/[0.08] hover:-translate-y-0.5"
+      className="group block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-[var(--color-brand-300)]/60 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10"
     >
       {/* ── Image de couverture ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
         <CoverImage
           src={s.cover_url}
           alt={s.title}
           categorySlug={s.category_slug}
         />
+        </div>
         {/* Wishlist overlay */}
         <div className="absolute right-2 top-2 z-10">
           <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
