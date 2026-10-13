@@ -30,6 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t.ogTitle,
       description: t.ogDescription,
     },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "Toomny",
+      startupImage: "/icons/apple-touch-icon.png",
+    },
+    applicationName: "Toomny",
+    manifest: "/manifest.webmanifest",
   };
 }
 

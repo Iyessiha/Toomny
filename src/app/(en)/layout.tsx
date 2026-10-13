@@ -23,6 +23,14 @@ export const metadata: Metadata = {
     title: "Toomny — Work together, grow together",
     description: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Toomny",
+    startupImage: "/icons/apple-touch-icon.png",
+  },
+  applicationName: "Toomny",
+  manifest: "/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { MotionProvider } from "@/components/motion-provider";
+import { SwRegister } from "@/components/pwa/sw-register";
+import { PwaInstallBanner } from "@/components/pwa/install-banner";
 import type { Locale } from "@/i18n/dictionaries";
 
 // next/font héberge les fichiers au build : zéro requête vers Google au
@@ -47,6 +49,8 @@ export async function RootShell({ locale, children }: { locale: Locale; children
         />
         <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
         <MotionProvider />
+        <SwRegister />
+        <PwaInstallBanner />
       </body>
     </html>
   );
