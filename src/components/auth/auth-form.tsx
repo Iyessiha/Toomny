@@ -76,6 +76,8 @@ export function AuthForm({
   // Pays détecté seulement s'il fait partie des pays couverts ; sinon Côte d'Ivoire.
   const defaultCountry = initialCountry && SUPPORTED.has(initialCountry as never) ? initialCountry : "CI";
 
+  const defaultDialCode = getCountry(defaultCountry)?.dialCode ?? "+225";
+
   const [mode, setMode] = useState<Mode>("signup");
   const [role, setRole] = useState<Role>(initialRole);
   const [pending, setPending] = useState(false);
@@ -84,6 +86,8 @@ export function AuthForm({
   const [token, setToken] = useState<string | null>(null);
   const [showPw, setShowPw] = useState(false);
   const [pwValue, setPwValue] = useState("");
+  const [dialCode, setDialCode] = useState(defaultDialCode);
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,7 +130,7 @@ export function AuthForm({
           password: String(form.get("password") ?? ""),
           first_name: firstName,
           last_name: lastName,
-          phone: String(form.get("phone") ?? "").trim(),
+          phone: phoneNumber.trim() ? `${dialCode}${phoneNumber.trim().replace(/^0/, "")}` : "",
           city: String(form.get("city") ?? "").trim(),
           country_code: String(form.get("country_code") ?? "CI"),
           role,
@@ -220,22 +224,25 @@ export function AuthForm({
               </Field>
             </div>
 
-            <Field label={t.fields.phone} htmlFor="phone">
-              <input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+225 07 00 00 00 00" className={inputClass} />
-              <p className="mt-1.5 text-xs text-[var(--subtle)]">
-                {role === "provider" ? t.fields.phoneHintProvider : t.fields.phoneHintClient}
-              </p>
-            </Field>
-
             <div className="grid grid-cols-2 gap-3">
               <Field label={t.fields.country} htmlFor="country_code">
-                <select id="country_code" name="country_code" defaultValue={defaultCountry} className={inputClass}>
+                <select
+                  id="country_code"
+                  name="country_code"
+                  defaultValue={defaultCountry}
+                  className={inputClass}
+                  onChange={(e) => {
+                    const meta = getCountry(e.target.value);
+                    if (meta) setDialCode(meta.dialCode);
+                  }}
+                >
                   {KYC_COUNTRIES.map((c) => {
                     const meta = getCountry(c.code);
-                    const label = meta
-                      ? `${meta.flag} ${meta.dialCode} — ${names[c.code] ?? c.name}`
-                      : names[c.code] ?? c.name;
-                    return <option key={c.code} value={c.code}>{label}</option>;
+                    return (
+                      <option key={c.code} value={c.code}>
+                        {meta ? `${meta.flag} ${names[c.code] ?? c.name}` : names[c.code] ?? c.name}
+                      </option>
+                    );
                   })}
                 </select>
               </Field>
@@ -243,6 +250,39 @@ export function AuthForm({
                 <input id="city" name="city" autoComplete="address-level2" defaultValue={initialCity ?? ""} placeholder={t.placeholders.city} className={inputClass} />
               </Field>
             </div>
+
+            <Field label={t.fields.phone} htmlFor="phone">
+              <div className="mt-1.5 flex gap-2">
+                <select
+                  value={dialCode}
+                  onChange={(e) => setDialCode(e.target.value)}
+                  className="w-28 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+                  aria-label="Indicatif pays"
+                >
+                  {KYC_COUNTRIES.map((c) => {
+                    const meta = getCountry(c.code);
+                    return meta ? (
+                      <option key={c.code} value={meta.dialCode}>
+                        {meta.flag} {meta.dialCode}
+                      </option>
+                    ) : null;
+                  })}
+                </select>
+                <input
+                  id="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  placeholder="07 00 00 00 00"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-[var(--subtle)]">
+                {role === "provider" ? t.fields.phoneHintProvider : t.fields.phoneHintClient}
+              </p>
+            </Field>
           </>
         )}
 
