@@ -1,37 +1,36 @@
 -- Migration 0025 : seed complet des catégories + table skills prédéfinis
--- Insère les nouvelles catégories ; ignore les doublons (ON CONFLICT DO NOTHING).
 
 -- ─── Catégories ──────────────────────────────────────────────────────────────
 
-INSERT INTO categories (name, slug, description, sort_order) VALUES
-  -- Existantes (mise à jour description si différente)
-  ('Design & Création graphique',         'design-graphique',          'Logos, flyers, charte graphique, UI/UX, packaging, illustrations.', 1),
-  ('Développement web',                   'developpement-web',          'Sites vitrines, boutiques en ligne, applications web.',             2),
-  ('Community Management',                'community-management',       'Gestion des réseaux sociaux, calendrier éditorial, modération.',    3),
-  ('Montage vidéo',                       'montage-video',              'Montage, réels, publicités, sous-titrage.',                         4),
-  ('Rédaction & Traduction',              'redaction-traduction',       'Articles, copywriting, ghostwriting, traduction, relecture.',       5),
-  ('Marketing digital',                   'marketing-digital',          'Campagnes Meta & TikTok, Google Ads, SEO, email marketing.',        6),
-  ('Comptabilité & Administration',       'comptabilite-admin',         'Saisie comptable, facturation, déclarations fiscales.',             7),
-  ('Photographie',                        'photographie',               'Photographie produits, événements, portraits, retouche.',           8),
-  -- Nouvelles catégories
-  ('Musique & Audio',                     'musique-audio',              'Production musicale, mixage, voix off, jingles, podcasts.',         9),
-  ('Mode, Textile & Artisanat',           'mode-textile-artisanat',     'Couture, broderie, teinture, stylisme, wax, bogolan.',             10),
-  ('Événementiel',                        'evenementiel',               'Mariages, conférences, décoration, DJ, MC, traiteur.',             11),
-  ('Formation & Coaching',                'formation-coaching',         'Coaching, mentorat, formations, soutien scolaire, e-learning.',    12),
-  ('Intelligence Artificielle',           'intelligence-artificielle',  'Prompt engineering, chatbots, automatisation IA.',                 13),
-  ('Business & Conseil',                  'business-conseil',           'Business plan, étude de marché, conseil juridique, pitch.',        14),
-  ('Traduction & Interprétariat',         'traduction-interpretation',  'Français-Anglais-Arabe, langues locales, interprétariat.',         15),
-  ('Voix off & Podcast',                  'voix-off-podcast',           'Voix off, doublage, production podcast, jingle radio.',            16),
-  ('Animation & Motion Design',           'animation-motion',           'Animation 2D/3D, motion design, explainer vidéo.',                 17),
-  ('Développement mobile',                'developpement-mobile',       'Applications Android, iOS, Flutter, React Native.',                18),
-  ('Maintenance & Réparation',            'maintenance-reparation',     'Réparation téléphones, informatique, électroménager.',             19),
-  ('Cours & Soutien scolaire',            'cours-soutien-scolaire',     'Soutien scolaire, cours particuliers, prépa examens.',             20),
-  ('Gastronomie & Traiteur',              'gastronomie-traiteur',       'Traiteur, cuisine, livraison repas, formation culinaire.',         21),
-  ('Bien-être & Santé',                   'bien-etre-sante',            'Coaching sportif, nutrition, méditation, beauté, soins.',          22),
-  ('Immobilier',                          'immobilier',                 'Gestion locative, transactions immobilières, home staging.',       23)
+INSERT INTO categories (slug, name_fr, name_en, position, is_active) VALUES
+  ('design-graphique',          'Design & Création graphique',    'Design & Graphic Creation',      1,  true),
+  ('developpement-web',         'Développement web',              'Web Development',                2,  true),
+  ('community-management',      'Community Management',           'Community Management',           3,  true),
+  ('montage-video',             'Montage vidéo',                  'Video Editing',                  4,  true),
+  ('redaction-traduction',      'Rédaction & Traduction',         'Writing & Translation',          5,  true),
+  ('marketing-digital',         'Marketing digital',              'Digital Marketing',              6,  true),
+  ('comptabilite-admin',        'Comptabilité & Administration',  'Accounting & Admin',             7,  true),
+  ('photographie',              'Photographie',                   'Photography',                    8,  true),
+  ('musique-audio',             'Musique & Audio',                'Music & Audio',                  9,  true),
+  ('mode-textile-artisanat',    'Mode, Textile & Artisanat',      'Fashion, Textile & Crafts',      10, true),
+  ('evenementiel',              'Événementiel',                   'Events',                         11, true),
+  ('formation-coaching',        'Formation & Coaching',           'Training & Coaching',            12, true),
+  ('intelligence-artificielle', 'Intelligence Artificielle',      'Artificial Intelligence',        13, true),
+  ('business-conseil',          'Business & Conseil',             'Business & Consulting',          14, true),
+  ('traduction-interpretation', 'Traduction & Interprétariat',    'Translation & Interpreting',     15, true),
+  ('voix-off-podcast',          'Voix off & Podcast',             'Voice-over & Podcast',           16, true),
+  ('animation-motion',          'Animation & Motion Design',      'Animation & Motion Design',      17, true),
+  ('developpement-mobile',      'Développement mobile',           'Mobile Development',             18, true),
+  ('maintenance-reparation',    'Maintenance & Réparation',       'Maintenance & Repair',           19, true),
+  ('cours-soutien-scolaire',    'Cours & Soutien scolaire',       'Tutoring & School Support',      20, true),
+  ('gastronomie-traiteur',      'Gastronomie & Traiteur',         'Catering & Food',                21, true),
+  ('bien-etre-sante',           'Bien-être & Santé',              'Wellness & Health',              22, true),
+  ('immobilier',                'Immobilier',                     'Real Estate',                    23, true)
 ON CONFLICT (slug) DO UPDATE SET
-  description = EXCLUDED.description,
-  sort_order  = EXCLUDED.sort_order;
+  name_fr   = EXCLUDED.name_fr,
+  name_en   = EXCLUDED.name_en,
+  position  = EXCLUDED.position,
+  is_active = true;
 
 -- ─── Table des skills prédéfinis ─────────────────────────────────────────────
 -- Crée la table si elle n'existe pas, puis insère les skills.
