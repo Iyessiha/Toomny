@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { completeOnboarding } from "@/app/(fr)/dashboard/onboarding/actions";
 import type { UserRole } from "@/lib/auth";
 import type { Locale } from "@/i18n/dictionaries";
@@ -118,6 +118,13 @@ export function OnboardingModal({
   const [step, setStep] = useState(0);
   const [closed, setClosed] = useState(false);
   const [, startTransition] = useTransition();
+
+  // Marquer comme vu dès l'affichage : si l'user ferme l'onglet sans cliquer
+  // "C'est parti", le modal ne réapparaît pas à la prochaine visite.
+  useEffect(() => {
+    startTransition(async () => { await completeOnboarding(); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isLast = step === steps.length - 1;
   const current = steps[step];
