@@ -7,6 +7,7 @@ import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getKycTexts } from "@/i18n/kyc";
 import { countryNames } from "@/i18n/auth";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
+import { KycSelfieGuide } from "@/components/dashboard/kyc-selfie-guide";
 import type { Locale } from "@/i18n/dictionaries";
 
 const COUNTRIES = KYC_COUNTRIES;
@@ -262,17 +263,20 @@ export function KycForm({
             fileName={frontFile?.name ?? null}
             preview={frontPreview}
           />
-          <FileInput
-            texts={t}
-            id="selfie"
-            label={t.selfie}
-            hint={t.selfieHint}
-            accept="image/jpeg,image/png,image/webp"
-            required
-            onChange={handleFileChange(setSelfieFile, setSelfiePreview)}
-            fileName={selfieFile?.name ?? null}
-            preview={selfiePreview}
-          />
+          <div className="flex flex-col gap-3">
+            <KycSelfieGuide locale={locale} />
+            <FileInput
+              texts={t}
+              id="selfie"
+              label={t.selfie}
+              hint={t.selfieHint}
+              accept="image/jpeg,image/png,image/webp"
+              required
+              onChange={handleFileChange(setSelfieFile, setSelfiePreview)}
+              fileName={selfieFile?.name ?? null}
+              preview={selfiePreview}
+            />
+          </div>
         </div>
 
         {/* Tips qualité photo */}
