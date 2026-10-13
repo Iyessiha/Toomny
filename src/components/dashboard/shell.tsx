@@ -14,6 +14,9 @@ export type NavItem = {
   current?: boolean;
 };
 
+// Grouped nav sections (new API used by remote pages via dashboard-nav.ts)
+export type NavSection = { title: string; items: NavItem[] };
+
 // ─── Icons ─────────────────────────────────────────────────────────────────
 
 function IcHome() {
@@ -109,16 +112,48 @@ export const NAV_ICONS: Record<string, React.ReactNode> = {
   admin: <IcAdmin />,
 };
 
+// ─── NavLink helper ────────────────────────────────────────────────────────
+
+function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
+  const active = item.current ?? pathname === item.href;
+  return (
+    <li>
+      <Link
+        href={item.href}
+        onClick={onClose}
+        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+          active
+            ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
+            : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+        }`}
+      >
+        {item.icon && (
+          <span className={active ? "text-[var(--color-brand-500)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}>
+            {item.icon}
+          </span>
+        )}
+        <span className="flex-1">{item.label}</span>
+        {item.badge !== undefined && item.badge > 0 && (
+          <span className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white">
+            {item.badge}
+          </span>
+        )}
+      </Link>
+    </li>
+  );
+}
+
 // ─── Shell ──────────────────────────────────────────────────────────────────
 
 export function DashboardShell({
   user,
-  nav,
+  nav = [],
+  navSections,
   title,
+  kicker,
   subtitle,
   actions,
   children,
-  // locale is accepted but unused — kept for compat with remote pages
   locale: _locale,
 }: {
   user: {
@@ -129,8 +164,10 @@ export function DashboardShell({
     firstName?: string | null;
     lastName?: string | null;
   };
-  nav: NavItem[];
+  nav?: NavItem[];
+  navSections?: NavSection[];
   title: string;
+  kicker?: string;
   subtitle?: string;
   actions?: React.ReactNode;
   locale?: string;
@@ -194,32 +231,27 @@ export function DashboardShell({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
-          {nav.map((item) => {
-            const active = item.current ?? pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
-                    : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                <span className={active ? "text-[var(--color-brand-500)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}>
-                  {item.icon}
-                </span>
-                <span className="flex-1">{item.label}</span>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto px-3 py-3">
+          {navSections ? (
+            // Grouped nav (new API)
+            <div className="space-y-5">
+              {navSections.map((section) => (
+                <div key={section.title}>
+                  <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--subtle)]">
+                    {section.title}
+                  </p>
+                  <ul className="space-y-0.5">
+                    {section.items.map((item) => <NavLink key={item.href} item={item} pathname={pathname} onClose={() => setSidebarOpen(false)} />)}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : (
+            // Flat nav (legacy API)
+            <ul className="space-y-0.5">
+              {nav.map((item) => <NavLink key={item.href} item={item} pathname={pathname} onClose={() => setSidebarOpen(false)} />)}
+            </ul>
+          )}
         </nav>
 
         {/* Sign out */}
@@ -277,6 +309,11 @@ export function DashboardShell({
           {/* Page header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
+              {kicker && (
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-600)]">
+                  {kicker}
+                </p>
+              )}
               <h1 className="font-display text-2xl font-bold sm:text-3xl">{title}</h1>
               {subtitle && <p className="mt-1 text-sm text-[var(--subtle)]">{subtitle}</p>}
             </div>
