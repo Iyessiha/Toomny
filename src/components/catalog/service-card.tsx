@@ -62,12 +62,22 @@ export function ServiceCard({ service: s, locale }: Props) {
           >
             {initials}
           </span>
-          <p className="truncate text-xs font-medium text-[var(--subtle)]">
-            {s.provider?.display_name ?? t.provider}
-            {s.provider?.country_code && (
-              <span className="ml-1">· {s.provider.country_code}</span>
-            )}
-          </p>
+          {s.provider?.id ? (
+            <Link
+              href={`/prestataires/${s.provider.id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="truncate text-xs font-medium text-[var(--subtle)] hover:text-[var(--color-brand-600)] hover:underline underline-offset-2 transition-colors"
+            >
+              {s.provider.display_name ?? t.provider}
+              {s.provider.country_code && (
+                <span className="ml-1 no-underline">· {s.provider.country_code}</span>
+              )}
+            </Link>
+          ) : (
+            <p className="truncate text-xs font-medium text-[var(--subtle)]">
+              {s.provider?.display_name ?? t.provider}
+            </p>
+          )}
         </div>
 
         {/* Titre du service */}

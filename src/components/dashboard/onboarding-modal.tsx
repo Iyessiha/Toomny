@@ -145,8 +145,7 @@ export function OnboardingModal({
             </span>
             <button
               onClick={finish}
-              disabled={isPending}
-              className="text-xs text-[var(--subtle)] hover:text-[var(--foreground)] disabled:opacity-50"
+              className="text-xs text-[var(--subtle)] hover:text-[var(--foreground)]"
             >
               {t.skip}
             </button>
@@ -196,10 +195,9 @@ export function OnboardingModal({
           {isLast ? (
             <button
               onClick={finish}
-              disabled={isPending}
-              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95 disabled:opacity-60"
+              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95"
             >
-              {isPending ? "…" : t.finish}
+              {t.finish}
             </button>
           ) : (
             <button
