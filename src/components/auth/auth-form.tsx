@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getAuthTexts, countryNames } from "@/i18n/auth";
+import { getCountry } from "@/lib/countries";
 import { TurnstileWidget } from "@/components/auth/turnstile";
 import type { Locale } from "@/i18n/dictionaries";
 
@@ -229,9 +230,13 @@ export function AuthForm({
             <div className="grid grid-cols-2 gap-3">
               <Field label={t.fields.country} htmlFor="country_code">
                 <select id="country_code" name="country_code" defaultValue={defaultCountry} className={inputClass}>
-                  {KYC_COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>{names[c.code] ?? c.name}</option>
-                  ))}
+                  {KYC_COUNTRIES.map((c) => {
+                    const meta = getCountry(c.code);
+                    const label = meta
+                      ? `${meta.flag} ${meta.dialCode} — ${names[c.code] ?? c.name}`
+                      : names[c.code] ?? c.name;
+                    return <option key={c.code} value={c.code}>{label}</option>;
+                  })}
                 </select>
               </Field>
               <Field label={t.fields.city} htmlFor="city">

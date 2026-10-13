@@ -116,12 +116,20 @@ export const authTexts: Record<Locale, AuthTexts> = { fr, en };
 
 export const countryNames: Record<Locale, Record<string, string>> = {
   fr: {
-    CI: "Côte d'Ivoire", SN: "Sénégal", BF: "Burkina Faso", ML: "Mali", BJ: "Bénin",
-    TG: "Togo", NE: "Niger", GW: "Guinée-Bissau", CM: "Cameroun", GH: "Ghana", NG: "Nigeria",
+    CI: "Côte d'Ivoire", SN: "Sénégal", ML: "Mali", BF: "Burkina Faso",
+    GN: "Guinée", TG: "Togo", BJ: "Bénin", NE: "Niger", GW: "Guinée-Bissau",
+    CM: "Cameroun", NG: "Nigeria", GH: "Ghana", SL: "Sierra Leone", LR: "Liberia",
+    GM: "Gambie", MR: "Mauritanie", MA: "Maroc", DZ: "Algérie", TN: "Tunisie",
+    FR: "France", BE: "Belgique", CH: "Suisse", LU: "Luxembourg",
+    CA: "Canada", US: "États-Unis",
   },
   en: {
-    CI: "Côte d'Ivoire", SN: "Senegal", BF: "Burkina Faso", ML: "Mali", BJ: "Benin",
-    TG: "Togo", NE: "Niger", GW: "Guinea-Bissau", CM: "Cameroon", GH: "Ghana", NG: "Nigeria",
+    CI: "Côte d'Ivoire", SN: "Senegal", ML: "Mali", BF: "Burkina Faso",
+    GN: "Guinea", TG: "Togo", BJ: "Benin", NE: "Niger", GW: "Guinea-Bissau",
+    CM: "Cameroon", NG: "Nigeria", GH: "Ghana", SL: "Sierra Leone", LR: "Liberia",
+    GM: "Gambia", MR: "Mauritania", MA: "Morocco", DZ: "Algeria", TN: "Tunisia",
+    FR: "France", BE: "Belgium", CH: "Switzerland", LU: "Luxembourg",
+    CA: "Canada", US: "United States",
   },
 };
 
