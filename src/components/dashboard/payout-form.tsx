@@ -55,7 +55,7 @@ export function PayoutForm({
         <input id="msisdn" name="msisdn" inputMode="tel" required defaultValue={msisdn ?? ""} placeholder="+225 07 00 00 00 00" className={inputClass} />
         <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.numberHint}</p>
       </div>
-      {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="notice notice-danger">{error}</p>}
       {saved && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.saved}</p>}
       <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.saving : t.save}

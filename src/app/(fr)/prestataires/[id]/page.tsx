@@ -9,6 +9,7 @@ import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
 
@@ -25,14 +26,14 @@ const LANG_FLAG: Record<string, string> = {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  if (!UUID_RE.test(id)) return { title: "Prestataire introuvable" };
+  const locale = await visitorLocale();
+  const t = getCatalogTexts(locale);
+  if (!UUID_RE.test(id)) return { title: t.providerNotFound };
   const supabase = await createClient();
   const [{ data: person }, { data: profile }] = await Promise.all([
     supabase.from("provider_directory").select("display_name").eq("id", id).maybeSingle(),
     supabase.from("provider_profiles").select("headline").eq("profile_id", id).maybeSingle(),
   ]);
-  const locale = await visitorLocale();
-  const t = getCatalogTexts(locale);
   return {
     title: person?.display_name ?? t.providerNotFound,
     description: profile?.headline ?? undefined,
@@ -87,6 +88,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       category_slug: cat?.slug ?? null,
       cover_url: s.cover_url ?? null,
       tags: (s.tags as string[]) ?? [],
+      boosted: false,
       provider: {
         id,
         display_name: person?.display_name ?? null,
@@ -98,18 +100,14 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   });
   const reviewList = (reviews ?? []) as { id: string; rating: number; comment: string | null; created_at: string; author_id: string }[];
 
+  // Noms des acheteurs (pseudo ou prénom + initiale). Résolution côté serveur :
+  // la RLS ne laisse chacun lire que sa propre ligne `profiles`.
   const authorIds = [...new Set(reviewList.map((r) => r.author_id).filter(Boolean))];
-  const { data: authorProfiles } = authorIds.length
-    ? await supabase.from("profiles").select("id, display_name, first_name, last_name").in("id", authorIds)
-    : { data: [] };
+  const authorNames = await resolveDisplayNames(authorIds);
 
   function authorName(authorId: string): string {
-    const p = (authorProfiles ?? []).find((x) => x.id === authorId);
-    if (!p) return locale === "en" ? "Verified Client" : "Client vérifié";
-    if (p.display_name) return p.display_name;
-    const first = p.first_name ?? "";
-    const lastInitial = p.last_name ? ` ${p.last_name.charAt(0).toUpperCase()}.` : "";
-    return (first + lastInitial).trim() || (locale === "en" ? "Verified Client" : "Client vérifié");
+    const found = authorNames.get(authorId)?.short;
+    return found && found !== "—" ? found : t.verifiedClient;
   }
   const avg = profile?.rating_avg ? Number(profile.rating_avg) : null;
   const initials = (person.display_name ?? "P").slice(0, 2).toUpperCase();
@@ -156,14 +154,14 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-extrabold sm:text-3xl">
-                  {person.display_name ?? "Prestataire"}
+                  {person.display_name ?? t.detailProvider}
                 </h1>
                 {isVerified && (
                   <span
-                    title={locale === "en" ? "Identity verified" : "Identité vérifiée"}
+                    title={t.identityVerified}
                     className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-500)] px-2.5 py-0.5 text-[11px] font-bold text-white"
                   >
-                    ✓ {locale === "en" ? "Verified" : "Vérifié"}
+                    ✓ {t.badgeVerified}
                   </span>
                 )}
               </div>
@@ -210,7 +208,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           {profile?.skills && (
             <div className="relative mt-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
-                {locale === "en" ? "Skills" : "Compétences"}
+                {t.skillsTitle}
               </p>
               <div className="flex flex-wrap gap-2">
                 {profile.skills.split(",").map((s: string) => s.trim()).filter(Boolean).map((skill: string) => (
@@ -229,7 +227,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
           {profile?.spoken_languages && (
             <div className="relative mt-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
-                {locale === "en" ? "Languages" : "Langues"}
+                {t.languagesTitle}
               </p>
               <div className="flex flex-wrap gap-2">
                 {profile.spoken_languages.split(",").map((l: string) => l.trim()).filter(Boolean).map((code: string) => (
@@ -257,7 +255,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
-                {locale === "en" ? "Contact" : "Contacter"}
+                {t.contactCta}
               </Link>
             </div>
           )}
@@ -267,7 +265,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 href="/auth"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
               >
-                {locale === "en" ? "Sign in to contact" : "Se connecter pour contacter"}
+                {t.loginToContact}
               </Link>
             </div>
           )}

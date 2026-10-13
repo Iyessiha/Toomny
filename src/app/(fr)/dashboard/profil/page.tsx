@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
+import { Section } from "@/components/dashboard/pro";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
@@ -29,17 +31,14 @@ export default async function ProfilPage() {
   return (
     <DashboardShell
       user={user}
+      kicker={t.nav.profile}
       title={t.profile.title}
       subtitle={t.profile.subtitle}
       locale={locale}
-      nav={[
-        { href: "/dashboard", label: t.nav.overview },
-        { href: "/dashboard/prestations", label: t.nav.services },
-        { href: "/dashboard/profil", label: t.nav.profile, current: true },
-        { href: "/orders", label: t.nav.orders },
-      ]}
+      navSections={dashboardNavSections(t.nav, user.role, "/dashboard/profil")}
     >
-      <div className="max-w-2xl rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
+      <div className="max-w-2xl">
+        <Section title={t.profile.title} subtitle={t.profile.subtitle}>
         <ProfileForm
           defaults={{
             headline: profile?.headline ?? "",
@@ -56,6 +55,7 @@ export default async function ProfilPage() {
           publicPath={`/prestataires/${user.id}`}
           locale={locale}
         />
+        </Section>
       </div>
     </DashboardShell>
   );

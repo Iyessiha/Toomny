@@ -42,7 +42,7 @@ export function PayButton({ orderId, labels }: Props) {
       >
         {loading ? labels.paying : labels.payNow}
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-[var(--tone-danger-fg)]">{error}</p>}
     </div>
   );
 }

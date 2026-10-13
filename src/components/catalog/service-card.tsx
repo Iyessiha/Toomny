@@ -22,19 +22,32 @@ export function ServiceCard({ service: s, locale }: Props) {
   return (
     <Link
       href={`/services/${s.id}`}
-      className="group block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-200 hover:shadow-lg hover:shadow-black/[0.08] hover:-translate-y-0.5"
+      className="group block overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.015] hover:border-[var(--color-brand-300)]/60 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10"
     >
       {/* ── Image de couverture ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
         <CoverImage
           src={s.cover_url}
           alt={s.title}
           categorySlug={s.category_slug}
         />
+        </div>
         {/* Wishlist overlay */}
         <div className="absolute right-2 top-2 z-10">
-          <WishlistButton serviceId={s.id} size="sm" />
+          <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
         </div>
+        {/* Badge boosté */}
+        {s.boosted && (
+          <div className="absolute left-2 top-2 z-10">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+              </svg>
+              Boosté
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Contenu ── */}

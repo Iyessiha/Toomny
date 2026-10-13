@@ -3,17 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notify } from "@/lib/notifications";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { UUID_RE } from "@/lib/orders";
-import { recordCompletion } from "@/lib/order-ledger";
+import { recordCompletion, recordRefund } from "@/lib/order-ledger";
 import { recordAdminAction } from "@/lib/admin-audit";
 
 const OPEN_STATUSES = ["open", "awaiting_provider", "awaiting_client"];
 
 /**
- * Trancher un litige : en faveur du client (commande remboursée) ou du prestataire
- * (commande validée). Met à jour les statuts seulement ; l'argent est déplacé chez
- * le partenaire agréé, et le journal n'enregistre pas de remboursement ici.
+ * Trancher un litige : en faveur du client (commande remboursée, écriture
+ * `refund` au journal) ou du prestataire (commande validée). L'argent est
+ * déplacé chez le partenaire agréé ; le journal reflète la décision.
  */
 export async function resolveDispute(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
@@ -32,7 +33,7 @@ export async function resolveDispute(formData: FormData): Promise<void> {
 
   const { data: order } = await db
     .from("orders")
-    .select("id, status, provider_id")
+    .select("id, status, reference, client_id, provider_id, amount_minor, currency")
     .eq("id", dispute.order_id)
     .maybeSingle();
   if (!order || order.status !== "disputed") return;
@@ -73,6 +74,14 @@ export async function resolveDispute(formData: FormData): Promise<void> {
   }
 
   if (target === "completed") await recordCompletion(db, order.id, order.provider_id);
+  if (target === "refunded") {
+    await recordRefund(db, {
+      orderId: order.id,
+      profileId: order.client_id,
+      amountMinor: order.amount_minor,
+      currency: order.currency,
+    });
+  }
 
   await recordAdminAction(db, {
     actorId: admin.id,
@@ -80,6 +89,20 @@ export async function resolveDispute(formData: FormData): Promise<void> {
     targetType: "dispute",
     targetId: dispute.id,
     details: { decision, orderId: order.id, orderStatus: target },
+  });
+
+  const clientWon = decision === "client";
+  await notify(db, {
+    recipientId: order.client_id,
+    type: "dispute_resolved",
+    params: { ref: order.reference, outcome: clientWon ? "won" : "lost" },
+    link: "/disputes",
+  });
+  await notify(db, {
+    recipientId: order.provider_id,
+    type: "dispute_resolved",
+    params: { ref: order.reference, outcome: clientWon ? "lost" : "won" },
+    link: "/disputes",
   });
 
   revalidatePath("/admin/disputes");

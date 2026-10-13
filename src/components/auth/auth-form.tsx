@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getAuthTexts, countryNames } from "@/i18n/auth";
 import { TurnstileWidget } from "@/components/auth/turnstile";
@@ -11,7 +12,39 @@ type Mode = "signup" | "login";
 type Role = "client" | "provider";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20";
+
+function passwordStrength(pw: string): 0 | 1 | 2 | 3 {
+  if (pw.length < 8) return 0;
+  let score = 0;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score <= 1) return 1;
+  if (score === 2) return 2;
+  return 3;
+}
+
+const STRENGTH_COLORS = ["bg-red-500", "bg-red-500", "bg-amber-400", "bg-emerald-500"];
+const STRENGTH_LABELS: Record<Locale, string[]> = {
+  fr: ["", "Faible", "Moyen", "Fort"],
+  en: ["", "Weak", "Fair", "Strong"],
+};
+
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
 
 const SUPPORTED = new Set(KYC_COUNTRIES.map((c) => c.code));
 
@@ -37,6 +70,7 @@ export function AuthForm({
 }) {
   const t = getAuthTexts(locale);
   const names = countryNames[locale];
+  const router = useRouter();
 
   // Pays détecté seulement s'il fait partie des pays couverts ; sinon Côte d'Ivoire.
   const defaultCountry = initialCountry && SUPPORTED.has(initialCountry as never) ? initialCountry : "CI";
@@ -47,6 +81,8 @@ export function AuthForm({
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [token, setToken] = useState<string | null>(null);
+  const [showPw, setShowPw] = useState(false);
+  const [pwValue, setPwValue] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -69,7 +105,10 @@ export function AuthForm({
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(json.error ?? t.errors.login);
-        window.location.href = "/dashboard";
+        // Le cookie de session vient d'être posé par la route : on navigue
+        // puis on rafraîchit pour que le serveur voie la session.
+        router.push("/dashboard");
+        router.refresh();
         return;
       }
 
@@ -134,6 +173,8 @@ export function AuthForm({
             onClick={() => {
               setMode(m);
               setError(null);
+              setShowPw(false);
+              setPwValue("");
             }}
             className={`flex-1 rounded-full px-4 py-2 font-medium transition-colors ${
               mode === m ? "bg-[var(--background)] shadow-sm" : "text-[var(--subtle)]"
@@ -205,24 +246,62 @@ export function AuthForm({
         </Field>
 
         <Field label={t.fields.password} htmlFor="password">
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            className={inputClass}
-          />
-          {mode === "signup" && <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.fields.passwordHint}</p>}
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPw ? "text" : "password"}
+              required
+              minLength={8}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              className={`${inputClass} pr-11`}
+              value={pwValue}
+              onChange={(e) => setPwValue(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw((v) => !v)}
+              className="absolute right-3 top-1/2 mt-[3px] -translate-y-1/2 text-[var(--subtle)] hover:text-[var(--foreground)] transition-colors"
+              aria-label={showPw ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+            >
+              <EyeIcon open={showPw} />
+            </button>
+          </div>
+          {mode === "signup" && pwValue.length > 0 && (() => {
+            const strength = passwordStrength(pwValue);
+            const label = STRENGTH_LABELS[locale][strength];
+            return (
+              <div className="mt-2">
+                <div className="flex gap-1">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                        strength >= i ? STRENGTH_COLORS[strength] : "bg-[var(--border)]"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className={`mt-1 text-xs ${strength === 3 ? "text-emerald-600" : strength === 2 ? "text-amber-500" : "text-red-500"}`}>
+                  {label}
+                </p>
+              </div>
+            );
+          })()}
+          {mode === "signup" && pwValue.length === 0 && (
+            <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.fields.passwordHint}</p>
+          )}
         </Field>
 
         <TurnstileWidget onToken={setToken} />
 
         {error && (
-          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
+          <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400">
+            <svg className="mt-0.5 shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <span>{error}</span>
+          </div>
         )}
 
         <button

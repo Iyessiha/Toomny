@@ -1,10 +1,13 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   pgEnum,
+  check,
   uuid,
   text,
   timestamp,
   integer,
+  smallint,
   bigint,
   boolean,
   date,
@@ -128,25 +131,44 @@ export const profiles = pgTable(
   (t) => [index("profiles_country_idx").on(t.countryCode), index("profiles_role_idx").on(t.role)],
 );
 
-export const providerProfiles = pgTable("provider_profiles", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  profileId: uuid("profile_id")
-    .notNull()
-    .unique()
-    .references(() => profiles.id, { onDelete: "cascade" }),
-  headline: text("headline"),
-  bio: text("bio"),
-  contentLocale: localeEnum("content_locale").default("fr").notNull(), // pour filtrer/traduire à l'ouverture anglophone
-  city: text("city"),
-  // Canal de versement. Wave est le défaut : gratuit à la réception.
-  payoutChannel: payoutChannelEnum("payout_channel"),
-  payoutMsisdn: text("payout_msisdn"), // numéro mobile money du prestataire
-  payoutVerifiedAt: timestamp("payout_verified_at", { withTimezone: true }),
-  ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
-  ratingCount: integer("rating_count").default(0).notNull(),
-  completedOrders: integer("completed_orders").default(0).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const providerProfiles = pgTable(
+  "provider_profiles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    profileId: uuid("profile_id")
+      .notNull()
+      .unique()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    headline: text("headline"),
+    bio: text("bio"),
+    contentLocale: localeEnum("content_locale").default("fr").notNull(), // pour filtrer/traduire à l'ouverture anglophone
+    city: text("city"),
+    // Canal de versement. Wave est le défaut : gratuit à la réception.
+    payoutChannel: payoutChannelEnum("payout_channel"),
+    payoutMsisdn: text("payout_msisdn"), // numéro mobile money du prestataire
+    payoutVerifiedAt: timestamp("payout_verified_at", { withTimezone: true }),
+    // Vitrine (0014, 0019) : avatar, compétences, langues et liens publics.
+    avatarUrl: text("avatar_url"),
+    skills: text("skills"), // tags séparés par des virgules
+    spokenLanguages: text("spoken_languages"), // ex : "fr,en,wo"
+    websiteUrl: text("website_url"),
+    linkedinUrl: text("linkedin_url"),
+    twitterUrl: text("twitter_url"),
+    ratingAvg: numeric("rating_avg", { precision: 3, scale: 2 }),
+    ratingCount: integer("rating_count").default(0).notNull(),
+    completedOrders: integer("completed_orders").default(0).notNull(),
+    // Plan de base gratuit et plans mensuels payants (0022).
+    plan: text("plan").default("debutant").notNull(),
+    planExpiresAt: timestamp("plan_expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    check(
+      "provider_profiles_plan_check",
+      sql`${t.plan} in ('debutant', 'essentiel', 'pro', 'expert')`,
+    ),
+  ],
+);
 
 // Vérification d'identité — conçue pour les pièces locales, avec recours humain.
 export const verifications = pgTable("verifications", {
@@ -196,6 +218,10 @@ export const services = pgTable(
     deliveryDays: integer("delivery_days").notNull(),
     status: serviceStatusEnum("status").default("draft").notNull(),
     coverPath: text("cover_path"),
+    // Présentation (0011, 0016, 0017) : couverture, galerie (4 max) et tags.
+    coverUrl: text("cover_url"),
+    galleryUrls: text("gallery_urls").array().default([]).notNull(),
+    tags: text("tags").array().default([]).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -204,6 +230,26 @@ export const services = pgTable(
     index("services_provider_idx").on(t.providerId),
     index("services_status_idx").on(t.status),
   ],
+);
+
+// Forfaits Basic (1) / Standard (2) / Premium (3) d'une prestation (0018).
+// Lecture publique (prix affichés) ; écriture par la clé service uniquement.
+export const servicePackages = pgTable(
+  "service_packages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    serviceId: uuid("service_id")
+      .notNull()
+      .references(() => services.id, { onDelete: "cascade" }),
+    tier: smallint("tier").notNull(), // 1, 2 ou 3 (CHECK en base)
+    name: text("name").notNull(),
+    description: text("description"),
+    priceMinor: bigint("price_minor", { mode: "bigint" }).notNull(),
+    currency: text("currency").default("XOF").notNull(),
+    deliveryDays: smallint("delivery_days").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex("service_packages_service_tier_idx").on(t.serviceId, t.tier)],
 );
 
 // --- Commandes et flux financiers -------------------------------------------
@@ -233,6 +279,9 @@ export const orders = pgTable(
     commissionRateBps: integer("commission_rate_bps").notNull(), // 1000 bps = 10 %
 
     requirements: text("requirements"),
+    // Forfait choisi, le cas échéant (0018). Les montants restent figés
+    // ci-dessus : on ne recalcule jamais depuis le forfait.
+    packageId: uuid("package_id").references(() => servicePackages.id, { onDelete: "set null" }),
     dueAt: timestamp("due_at", { withTimezone: true }),
     deliveredAt: timestamp("delivered_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
@@ -357,6 +406,37 @@ export const messages = pgTable(
   (t) => [index("messages_order_idx").on(t.orderId)],
 );
 
+// Demandes de contact avant commande, acheteur → prestataire (0015).
+// Pas de FK drizzle vers auth.users : les deux côtés sont des id Auth.
+export const inquiries = pgTable(
+  "inquiries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fromId: uuid("from_id").notNull(),
+    toId: uuid("to_id").notNull(),
+    serviceId: uuid("service_id").references(() => services.id, { onDelete: "set null" }),
+    message: text("message").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("inquiries_to_idx").on(t.toId), index("inquiries_from_idx").on(t.fromId)],
+);
+
+// Notifications in-app : type + paramètres JSON rendus en FR/EN à la lecture (0021).
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recipientId: uuid("recipient_id").notNull(),
+    type: text("type").notNull(),
+    params: jsonb("params").$type<Record<string, string>>().notNull().default({}),
+    link: text("link").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("notifications_recipient_idx").on(t.recipientId, t.createdAt)],
+);
+
 export const disputes = pgTable("disputes", {
   id: uuid("id").defaultRandom().primaryKey(),
   orderId: uuid("order_id")
@@ -396,3 +476,25 @@ export const reviews = pgTable(
   },
   (t) => [index("reviews_target_idx").on(t.targetId)],
 );
+
+// Abonnements mensuels aux plans prestataire (0022).
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    providerId: uuid("provider_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    plan: text("plan").notNull(), // essentiel | pro | expert
+    amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
+    currency: text("currency").default("XOF").notNull(),
+    status: text("status").default("pending").notNull(), // pending | active | failed | expired
+    partner: text("partner").default("geniuspay").notNull(),
+    partnerPaymentRef: text("partner_payment_ref").unique(),
+    periodStart: timestamp("period_start", { withTimezone: true }),
+    periodEnd: timestamp("period_end", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("subscriptions_provider_idx").on(t.providerId, t.createdAt)],
+);
+

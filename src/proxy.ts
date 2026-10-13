@@ -30,7 +30,9 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    // Les aperçus de développement sont encadrés par le bac à sable distant.
+    // En production, aucun cadre n'est autorisé.
+    isDev ? "frame-ancestors 'self' https://*.e2b.app" : "frame-ancestors 'none'",
   ];
   if (!isDev) directives.push("upgrade-insecure-requests");
 

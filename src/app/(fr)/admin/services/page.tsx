@@ -3,11 +3,12 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
+import { Avatar, FilterTabs, Pill, TableCard, serviceTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const dynamic = "force-dynamic";
-
 
 export default async function AdminServicesPage({
   searchParams,
@@ -25,7 +25,6 @@ export default async function AdminServicesPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).servicesPage;
-  const nav = getAdminTexts(locale).nav;
   const tabKeys = Object.keys(t.tabs);
   const { status: rawStatus } = await searchParams;
   const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "draft";
@@ -50,88 +49,77 @@ export default async function AdminServicesPage({
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services, current: true },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/services")}
     >
-      <div className="mb-6 flex flex-wrap gap-2">
-        {tabKeys.map((key) => (
-          <a
-            key={key}
-            href={`/admin/services?status=${key}`}
-            className={`rounded-full px-4 py-2 text-sm font-medium ${
-              status === key
-                ? "bg-[var(--color-brand-500)] text-white"
-                : "border border-[var(--border)] bg-[var(--background)] text-[var(--subtle)]"
-            }`}
-          >
-            {t.tabs[key as keyof typeof t.tabs]}
-          </a>
-        ))}
-      </div>
+      <FilterTabs
+        items={tabKeys.map((key) => ({
+          href: `/admin/services?status=${key}`,
+          label: t.tabs[key as keyof typeof t.tabs],
+          current: status === key,
+        }))}
+      />
 
       {list.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--subtle)]">
-              <tr>
-                <th className="px-5 py-3 font-medium">{t.colService}</th>
-                <th className="px-5 py-3 font-medium">{t.colProvider}</th>
-                <th className="px-5 py-3 text-right font-medium">{t.colPrice}</th>
-                <th className="px-5 py-3 text-right font-medium">{t.colActions}</th>
+        <TableCard>
+          <thead>
+            <tr>
+              <th>{t.colService}</th>
+              <th>{t.colProvider}</th>
+              <th className="text-right">{t.colPrice}</th>
+              <th className="text-right">{t.colActions}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((s) => (
+              <tr key={s.id}>
+                <td className="whitespace-normal!">
+                  <span className="block font-semibold">{s.title}</span>
+                  <span className="mt-1 flex items-center gap-2">
+                    <Pill tone={serviceTone(s.status)}>{t.status[s.status] ?? s.status}</Pill>
+                    <span className="text-xs text-[var(--subtle)]">
+                      {s.category?.name_fr ?? "—"} · {s.delivery_days} {t.days}
+                    </span>
+                  </span>
+                </td>
+                <td className="whitespace-normal!">
+                  <span className="flex items-center gap-2">
+                    <Avatar name={s.provider?.display_name ?? s.provider?.email} size="sm" />
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm">{s.provider?.display_name ?? "—"}</span>
+                      <span className="block truncate text-xs text-[var(--subtle)]">
+                        {s.provider?.email}
+                      </span>
+                    </span>
+                  </span>
+                </td>
+                <td className="text-right font-display font-bold">
+                  {formatMoney(BigInt(s.price_minor), s.currency, locale)}
+                </td>
+                <td>
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Link href={`/admin/services/${s.id}`} className="btn-ghost btn-sm">
+                      {t.edit}
+                    </Link>
+                    {s.status !== "active" && (
+                      <ModerationButton serviceId={s.id} status="active" label={t.publish} primary />
+                    )}
+                    {s.status === "active" && (
+                      <ModerationButton serviceId={s.id} status="paused" label={t.pause} />
+                    )}
+                    {s.status !== "removed" && (
+                      <ModerationButton serviceId={s.id} status="removed" label={t.remove} />
+                    )}
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {list.map((s, i) => (
-                <tr key={s.id} className={i < list.length - 1 ? "border-b border-[var(--border)]" : ""}>
-                  <td className="px-5 py-4">
-                    <p className="font-medium">{s.title}</p>
-                    <p className="text-xs text-[var(--subtle)]">
-                      {s.category?.name_fr ?? "—"} · {s.delivery_days} {t.days} · {t.status[s.status] ?? s.status}
-                    </p>
-                  </td>
-                  <td className="px-5 py-4 text-[var(--subtle)]">
-                    {s.provider?.display_name ?? "—"}
-                    <p className="text-xs">{s.provider?.email}</p>
-                  </td>
-                  <td className="px-5 py-4 text-right font-display font-bold">
-                    {formatMoney(BigInt(s.price_minor), s.currency, locale)}
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <Link
-                        href={`/admin/services/${s.id}`}
-                        className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold text-[var(--subtle)] hover:text-[var(--foreground)]"
-                      >
-                        {t.edit}
-                      </Link>
-                      {s.status !== "active" && (
-                        <ModerationButton serviceId={s.id} status="active" label={t.publish} primary />
-                      )}
-                      {s.status === "active" && (
-                        <ModerationButton serviceId={s.id} status="paused" label={t.pause} />
-                      )}
-                      {s.status !== "removed" && (
-                        <ModerationButton serviceId={s.id} status="removed" label={t.remove} />
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </TableCard>
       )}
     </AdminShell>
   );
@@ -154,11 +142,7 @@ function ModerationButton({
       <input type="hidden" name="status" value={status} />
       <button
         type="submit"
-        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-          primary
-            ? "bg-[var(--color-brand-500)] text-white"
-            : "border border-[var(--border)] text-[var(--subtle)] hover:text-[var(--foreground)]"
-        }`}
+        className={`${primary ? "btn-primary" : status === "removed" ? "btn-danger" : "btn-ghost"} btn-sm`}
       >
         {label}
       </button>

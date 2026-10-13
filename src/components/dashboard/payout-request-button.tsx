@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { requestPayout } from "@/app/(fr)/dashboard/versements/actions";
 import { getPayoutTexts } from "@/i18n/payouts";
+import { Section } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import type { Locale } from "@/i18n/dictionaries";
 
@@ -40,9 +41,8 @@ export function PayoutRequestButton({
   }
 
   return (
-    <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-      <h2 className="font-display text-base font-bold">{t.request}</h2>
-      <p className="mt-1 text-sm text-[var(--subtle)]">
+    <Section title={t.request}>
+      <p className="text-sm text-[var(--subtle)]">
         {!hasChannel
           ? t.noChannel
           : availableBig === 0n
@@ -51,13 +51,7 @@ export function PayoutRequestButton({
       </p>
 
       {message && (
-        <p
-          className={`mt-3 rounded-xl px-4 py-3 text-sm ${
-            message.type === "ok"
-              ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
-              : "bg-red-50 text-red-700"
-          }`}
-        >
+        <p className={`notice ${message.type === "ok" ? "notice-success" : "notice-danger"} mt-3`}>
           {message.text}
         </p>
       )}
@@ -65,10 +59,10 @@ export function PayoutRequestButton({
       <button
         onClick={handleRequest}
         disabled={!canRequest || pending}
-        className="mt-4 w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+        className="btn-primary mt-4 w-full"
       >
         {pending ? t.requesting : t.request}
       </button>
-    </section>
+    </Section>
   );
 }

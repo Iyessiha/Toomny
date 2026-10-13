@@ -24,6 +24,17 @@
   --color-brand-800: #084322;
   --color-brand-900: #06301a;
 
+  --color-gold-50: #fbf6ea;
+  --color-gold-100: #f6ead0;
+  --color-gold-200: #ecd39e;
+  --color-gold-300: #e0b566;
+  --color-gold-400: #d29a38;
+  --color-gold-500: #b97f1f;
+  --color-gold-600: #99681a;
+  --color-gold-700: #7a5316;
+  --color-gold-800: #5c3f12;
+  --color-gold-900: #3f2c0d;
+
   --color-ink: #0a1710;
   --color-muted: #55685e;
   --color-line: #e2eae5;
@@ -39,6 +50,30 @@
   --foreground: var(--color-ink);
   --subtle: var(--color-muted);
   --border: var(--color-line);
+
+  /* Tons des pastilles de statut (composant Pill). */
+  --tone-success-bg: #e2f3ea;
+  --tone-success-fg: #0a552d;
+  --tone-warning-bg: #fbf0d7;
+  --tone-warning-fg: #7a5316;
+  --tone-danger-bg: #fbe7e4;
+  --tone-danger-fg: #a02a1e;
+  --tone-info-bg: #e3eefb;
+  --tone-info-fg: #1d4f9c;
+  --tone-neutral-bg: #edf1ee;
+  --tone-neutral-fg: #43564c;
+  --tone-brand-bg: var(--color-brand-100);
+  --tone-brand-fg: var(--color-brand-700);
+
+  /* Couleurs des boutons d'engagement (destructif, confirmation, remise en
+     file). Volontairement fixes, y compris en mode sombre : le texte y est
+     toujours blanc ou presque noir, donc lisible sur les deux fonds. */
+  --action-danger: #a02a1e;
+  --action-danger-hover: #8b2419;
+  --action-success: #0d6b38;
+  --action-success-hover: #0a552d;
+  --action-warning: #b97f1f;
+  --action-warning-hover: #a06e1a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -49,6 +84,19 @@
     --foreground: #e9f3ee;
     --subtle: #8ea79b;
     --border: #182d22;
+
+    --tone-success-bg: #0f2a1d;
+    --tone-success-fg: #7fd6a4;
+    --tone-warning-bg: #2e230f;
+    --tone-warning-fg: #e0b566;
+    --tone-danger-bg: #331512;
+    --tone-danger-fg: #f0938a;
+    --tone-info-bg: #12283f;
+    --tone-info-fg: #8db8f0;
+    --tone-neutral-bg: #1c2924;
+    --tone-neutral-fg: #a9bfb5;
+    --tone-brand-bg: #0e2f1f;
+    --tone-brand-fg: #7fd6a4;
   }
 }
 
@@ -211,3 +259,226 @@ html.lenis, html.lenis body { height: auto; }
     50%       { transform: translateY(-5px); }
   }
 }
+
+/* ── Espaces connectés : premium ──────────────────────────────────────────── */
+
+/* Bandeau profond vert-or pour les en-têtes de dashboard. Toujours sombre,
+   en clair comme en sombre : le contenu blanc reste lisible partout. */
+.hero-band {
+  background:
+    radial-gradient(120% 170% at 88% -30%, rgba(210, 154, 56, 0.32), transparent 55%),
+    radial-gradient(110% 150% at 8% 130%, rgba(51, 164, 114, 0.35), transparent 60%),
+    linear-gradient(155deg, #0c3524 0%, #06301a 55%, #041f12 100%);
+  color: #fff;
+}
+.hero-band .hero-subtle {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Texture pointillée façon bogolan, à poser en surimpression légère. */
+.texture-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+
+/* ── Boutons des espaces connectés ─────────────────────────────────────────── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: var(--color-brand-600); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-gold-400);
+  color: #231600;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-gold:hover { background: var(--color-gold-300); }
+.btn-gold:active { transform: scale(0.97); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: border-color 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-secondary:hover { border-color: var(--color-brand-400); }
+.btn-secondary:active { transform: scale(0.97); }
+
+/* Bouton discret : même gabarit que les précédents, sans fond ni couleur
+   d'accent. Sert aux actions secondaires des tableaux et des formulaires. */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--subtle);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--color-brand-400); color: var(--foreground); }
+.btn-ghost:active { transform: scale(0.97); }
+
+/* Boutons d'engagement : solides, jamais en couleur brute Tailwind, pour que
+   le mode sombre reste lisible et la palette cohérente avec les tons. */
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-danger);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-danger:hover { background: var(--action-danger-hover); }
+.btn-danger:active { transform: scale(0.97); }
+
+.btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-success);
+  color: #fff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-success:hover { background: var(--action-success-hover); }
+.btn-success:active { transform: scale(0.97); }
+
+.btn-warn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: var(--action-warning);
+  color: #231600;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+.btn-warn:hover { background: var(--action-warning-hover); }
+.btn-warn:active { transform: scale(0.97); }
+
+/* Taille compacte, à combiner avec n'importe quel bouton ci-dessus. */
+.btn-sm { padding: 0.375rem 0.875rem; font-size: 0.75rem; }
+
+/* ── Cartes ───────────────────────────────────────────────────────────────── */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+}
+.card-pad { padding: 1.25rem; }
+@media (min-width: 640px) { .card-pad { padding: 1.5rem; } }
+
+/* ── Puces de filtre ─────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  color: var(--subtle);
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.chip:hover { border-color: var(--color-brand-400); color: var(--foreground); }
+.chip-active,
+.chip-active:hover {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-500);
+  color: #fff;
+}
+.chip-count {
+  border-radius: 9999px;
+  background: var(--surface);
+  padding: 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--subtle);
+}
+.chip-active .chip-count { background: rgb(255 255 255 / 22%); color: #fff; }
+
+/* ── Bandeaux d'information ──────────────────────────────────────────────── */
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+.notice-warning { background: var(--tone-warning-bg); color: var(--tone-warning-fg); }
+.notice-danger { background: var(--tone-danger-bg); color: var(--tone-danger-fg); }
+.notice-success { background: var(--tone-success-bg); color: var(--tone-success-fg); }
+.notice-info { background: var(--tone-info-bg); color: var(--tone-info-fg); }
+.notice strong { font-weight: 700; }
+
+/* ── Champs de formulaire ────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus { border-color: var(--color-brand-500); }
+.input::placeholder { color: var(--subtle); }

@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
+import { notify } from "@/lib/notifications";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
-const UUID_RE = /^[0-9a-f-]{36}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Modération d'une prestation : publier, mettre en pause, retirer ou repasser en brouillon.
@@ -20,10 +21,16 @@ export async function moderateService(formData: FormData): Promise<void> {
   const id = String(formData.get("serviceId") ?? "");
   const status = String(formData.get("status") ?? "") as ModerationStatus;
 
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return;
   if (!MODERATION_STATUSES.includes(status)) return;
 
   const db = createAdminClient();
+  const { data: service } = await db
+    .from("services")
+    .select("provider_id, title")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await db
     .from("services")
     .update({ status, updated_at: new Date().toISOString() })
@@ -32,6 +39,15 @@ export async function moderateService(formData: FormData): Promise<void> {
   if (error) {
     console.error("moderateService:", error.message);
     return;
+  }
+
+  if (service && (status === "active" || status === "removed")) {
+    await notify(db, {
+      recipientId: service.provider_id,
+      type: status === "active" ? "service_approved" : "service_removed",
+      params: { service: service.title ?? undefined },
+      link: "/dashboard/prestations",
+    });
   }
 
   await recordAdminAction(db, {

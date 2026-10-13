@@ -10,7 +10,8 @@ import {
   upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
-import { EmptyState } from "@/components/dashboard/shell";
+import { EmptyState } from "@/components/dashboard/shell-ui";
+import { Pill, serviceTone } from "@/components/dashboard/pro";
 import type { Locale } from "@/i18n/dictionaries";
 import { resizeCover } from "@/lib/resize-image";
 
@@ -46,21 +47,19 @@ type PackageSlot = {
   deliveryDays: string;
 };
 
-const DEFAULT_SLOTS: [PackageSlot, PackageSlot, PackageSlot] = [
-  { enabled: false, name: "Basique", description: "", price: "", deliveryDays: "" },
-  { enabled: false, name: "Standard", description: "", price: "", deliveryDays: "" },
-  { enabled: false, name: "Premium", description: "", price: "", deliveryDays: "" },
-];
+type TierNames = { pkgBasic: string; pkgStandard: string; pkgPremium: string };
+
+/** Slots initiaux : les noms de paliers suivent la langue du prestataire. */
+function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot] {
+  return [
+    { enabled: false, name: names.pkgBasic, description: "", price: "", deliveryDays: "" },
+    { enabled: false, name: names.pkgStandard, description: "", price: "", deliveryDays: "" },
+    { enabled: false, name: names.pkgPremium, description: "", price: "", deliveryDays: "" },
+  ];
+}
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
-
-function statusBadgeClass(status: string) {
-  if (status === "active") return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400";
-  if (status === "paused") return "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400";
-  if (status === "removed") return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400";
-  return "bg-[var(--surface)] text-[var(--subtle)]";
-}
 
 export function ServiceManage({
   services,
@@ -100,7 +99,7 @@ export function ServiceManage({
   const [tagInput, setTagInput] = useState("");
 
   // Packages (3 slots: Basic, Standard, Premium)
-  const [pkgSlots, setPkgSlots] = useState<[PackageSlot, PackageSlot, PackageSlot]>([...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]);
+  const [pkgSlots, setPkgSlots] = useState<[PackageSlot, PackageSlot, PackageSlot]>(() => defaultSlots(t.form));
 
   function openEdit(s: Service) {
     setEditing(s);
@@ -125,7 +124,7 @@ export function ServiceManage({
       const multiplierDays = tier === 1 ? 0.8 : tier === 2 ? 1.0 : 1.4;
       const suggestedPrice = Math.round((basePrice * multiplierPrice) / 5000) * 5000 || basePrice;
       const suggestedDays = Math.max(1, Math.round(baseDays * multiplierDays));
-      const defaultName = tier === 1 ? (locale === "en" ? "Basic" : "Essentiel") : tier === 2 ? "Standard" : "Premium";
+      const defaultName = tier === 1 ? t.form.pkgBasic : tier === 2 ? t.form.pkgStandard : t.form.pkgPremium;
       return { enabled: true, name: defaultName, description: "", price: String(suggestedPrice), deliveryDays: String(suggestedDays) };
     }) as [PackageSlot, PackageSlot, PackageSlot]);
   }
@@ -137,7 +136,7 @@ export function ServiceManage({
     setGalleryUrls([]);
     setTags([]);
     setTagInput("");
-    setPkgSlots([...DEFAULT_SLOTS] as [PackageSlot, PackageSlot, PackageSlot]);
+    setPkgSlots(defaultSlots(t.form));
     setGalleryError(null);
     setError(null);
     setSuccess(null);
@@ -229,12 +228,13 @@ export function ServiceManage({
     const fd = new FormData(e.currentTarget);
 
     // Build enabled packages
+    const tierFallback = [t.form.pkgBasic, t.form.pkgStandard, t.form.pkgPremium] as const;
     const enabledPackages = pkgSlots
       .map((slot, i) => ({ ...slot, tier: (i + 1) as 1 | 2 | 3 }))
       .filter((slot) => slot.enabled && slot.price && slot.deliveryDays)
       .map((slot) => ({
         tier: slot.tier,
-        name: slot.name.trim() || (slot.tier === 1 ? "Basique" : slot.tier === 2 ? "Standard" : "Premium"),
+        name: slot.name.trim() || tierFallback[slot.tier - 1],
         description: slot.description,
         price_minor: Number(slot.price.replace(/\s/g, "")),
         delivery_days: Number(slot.deliveryDays),
@@ -296,11 +296,9 @@ export function ServiceManage({
               <p className="truncate font-medium">{s.title}</p>
               <p className="mt-0.5 flex items-center gap-2 text-xs text-[var(--subtle)]">
                 <span>{t.delivery} {s.delivery_days} {t.days}</span>
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${statusBadgeClass(s.status)}`}
-                >
+                <Pill tone={serviceTone(s.status)}>
                   {statusLabels[s.status as keyof typeof statusLabels] ?? s.status}
-                </span>
+                </Pill>
               </p>
             </div>
             <p className="shrink-0 font-display font-bold">
@@ -310,7 +308,7 @@ export function ServiceManage({
               <button
                 onClick={() => openEdit(s)}
                 disabled={pending}
-                className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] disabled:opacity-50"
+                className="btn-ghost btn-sm disabled:opacity-50"
               >
                 {t.edit}
               </button>
@@ -318,7 +316,7 @@ export function ServiceManage({
                 <button
                   onClick={() => handleToggle(s)}
                   disabled={pending}
-                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] disabled:opacity-50"
+                  className="btn-ghost btn-sm disabled:opacity-50"
                 >
                   {s.status === "active" ? t.pause : t.activate}
                 </button>
@@ -327,7 +325,7 @@ export function ServiceManage({
                 <button
                   onClick={() => handleDelete(s)}
                   disabled={pending}
-                  className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-50 disabled:opacity-50"
+                  className="btn-ghost btn-sm text-[var(--tone-danger-fg)] disabled:opacity-50"
                 >
                   {t.delete}
                 </button>
@@ -338,7 +336,7 @@ export function ServiceManage({
       </ul>
 
       {error && (
-        <p role="alert" className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="notice notice-danger mt-3">
           {error}
         </p>
       )}
@@ -483,7 +481,7 @@ export function ServiceManage({
                     />
                   </label>
                 )}
-                {uploadError && <p className="mt-1 text-xs text-red-600">{uploadError}</p>}
+                {uploadError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{uploadError}</p>}
               </div>
 
               {/* Gallery */}
@@ -531,7 +529,7 @@ export function ServiceManage({
                     </label>
                   )}
                 </div>
-                {galleryError && <p className="mt-1 text-xs text-red-600">{galleryError}</p>}
+                {galleryError && <p className="mt-1 text-xs text-[var(--tone-danger-fg)]">{galleryError}</p>}
               </div>
 
               {/* Tags */}
@@ -648,7 +646,7 @@ export function ServiceManage({
               </div>
 
               {error && (
-                <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                <p role="alert" className="notice notice-danger">{error}</p>
               )}
               {success && (
                 <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{success}</p>

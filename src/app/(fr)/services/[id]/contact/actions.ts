@@ -3,6 +3,9 @@
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCatalogTexts } from "@/i18n/catalog";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { notify } from "@/lib/notifications";
+import { actorName } from "@/lib/names";
 
 export async function sendInquiry(serviceId: string, formData: FormData) {
   const user = await requireAuth();
@@ -16,7 +19,7 @@ export async function sendInquiry(serviceId: string, formData: FormData) {
 
   const { data: service } = await supabase
     .from("services")
-    .select("provider_id, status")
+    .select("provider_id, status, title")
     .eq("id", serviceId)
     .maybeSingle();
 
@@ -31,6 +34,13 @@ export async function sendInquiry(serviceId: string, formData: FormData) {
   });
 
   if (error) return { error: t.contactErrorFailed };
+
+  await notify(createAdminClient(), {
+    recipientId: service.provider_id,
+    type: "inquiry_received",
+    params: { from: await actorName(user.id, user.preferredLocale), service: service.title ?? undefined },
+    link: "/demandes",
+  });
 
   return { success: true };
 }

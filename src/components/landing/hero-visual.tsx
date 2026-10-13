@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
 
-/** Star rating row */
+type Mode = "client" | "provider";
+
 function Stars({ n = 5 }: { n?: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -18,12 +21,31 @@ function Stars({ n = 5 }: { n?: number }) {
   );
 }
 
-export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
-  const t = getLanding(locale).visual;
-
+/* ── Visual client : carte service + mini-cards en stagger ── */
+function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
   return (
     <div className="relative select-none" aria-hidden>
-      {/* ── Badge flottant haut-droite : identité vérifiée ── */}
+      <style>{`
+        @keyframes slideInRight {
+          from { opacity: 0; transform: translateX(32px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-6px); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(5px); }
+        }
+        .float-a { animation: floatA 3.6s ease-in-out infinite; }
+        .float-b { animation: floatB 4.2s ease-in-out infinite; }
+        .slide-in-1 { animation: slideInRight 0.5s ease both 0.1s; }
+        .slide-in-2 { animation: slideInRight 0.5s ease both 0.28s; }
+        .slide-in-3 { animation: slideInRight 0.5s ease both 0.46s; }
+      `}</style>
+
+      {/* Badge flottant haut-droite : identité vérifiée */}
       <div className="float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -37,25 +59,11 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
         </div>
       </div>
 
-      {/* ── Carte service principale ── */}
-      <div className="w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
-
-        {/* Cover photo réelle + overlay gradient */}
+      {/* Carte service principale */}
+      <div className="slide-in-1 w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
         <div className="relative flex h-36 items-end p-4">
-          <Image
-            src="/images/hero-provider.jpg"
-            alt=""
-            fill
-            className="object-cover object-top"
-            priority
-            sizes="340px"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{ background: "linear-gradient(160deg, rgba(107,70,193,0.55) 0%, rgba(8,145,178,0.7) 100%)" }}
-          />
-          {/* Watermark SVG Toomny mark en fond */}
+          <Image src="/images/hero-provider.jpg" alt="" fill className="object-cover object-top" priority sizes="340px" />
+          <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(160deg, rgba(107,70,193,0.55) 0%, rgba(8,145,178,0.7) 100%)" }} />
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10">
             <svg viewBox="0 0 120 120" width="100" height="100" fill="none">
               <circle cx="43" cy="22" r="11.5" fill="white"/>
@@ -66,27 +74,20 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
               </g>
             </svg>
           </div>
-
-          {/* Category pill */}
           <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-white/20 px-2.5 py-1 backdrop-blur-sm">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="13.5" cy="6.5" r="3.5"/><circle cx="6.5" cy="17.5" r="3.5"/><path d="m4 4 16 16"/>
             </svg>
             <span className="text-[10px] font-semibold text-white">Design graphique</span>
           </div>
-
-          {/* Badge "En vedette" */}
           <div className="absolute right-4 top-4 rounded-full bg-[#FFCB00] px-2.5 py-0.5">
             <span className="text-[10px] font-bold text-amber-900">✦ Vedette</span>
           </div>
-
-          {/* Title at bottom */}
           <div className="relative z-10">
             <p className="text-sm font-bold leading-tight text-white drop-shadow">{t.serviceTitle}</p>
           </div>
         </div>
 
-        {/* Infos prestataire */}
         <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3.5">
           <div className="relative">
             <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--background)]">
@@ -110,7 +111,6 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
           </div>
         </div>
 
-        {/* Prix + CTA */}
         <div className="flex items-center justify-between gap-3 px-4 py-3.5">
           <div>
             <p className="text-[10px] text-[var(--subtle)]">À partir de</p>
@@ -126,7 +126,6 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
           </div>
         </div>
 
-        {/* Escrow progress bar */}
         <div className="border-t border-[var(--border)] px-4 py-3">
           <div className="flex items-center justify-between text-[10px] text-[var(--subtle)] mb-1.5">
             <span className="flex items-center gap-1">
@@ -143,7 +142,32 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
         </div>
       </div>
 
-      {/* ── Badge flottant bas-gauche : versement ── */}
+      {/* Mini-cards résultats de recherche en stagger */}
+      <div className="slide-in-2 absolute -right-16 top-[60px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 text-sm font-bold">DK</div>
+        <div className="min-w-0">
+          <p className="truncate text-xs font-semibold">Dev Kouyaté</p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Stars n={5} />
+            <span className="text-[10px] text-[var(--subtle)]">4.8</span>
+          </div>
+        </div>
+        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">75k</p>
+      </div>
+
+      <div className="slide-in-3 absolute -right-16 top-[142px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 text-sm font-bold">MB</div>
+        <div className="min-w-0">
+          <p className="truncate text-xs font-semibold">Marie Bamba</p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Stars n={4} />
+            <span className="text-[10px] text-[var(--subtle)]">4.6</span>
+          </div>
+        </div>
+        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">60k</p>
+      </div>
+
+      {/* Badge flottant bas-gauche */}
       <div className="float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 shadow-[var(--shadow-lg)] sm:-left-10">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white shadow-md">
@@ -163,4 +187,187 @@ export function HeroVisual({ locale = "fr" }: { locale?: Locale }) {
       </div>
     </div>
   );
+}
+
+/* ── Visual prestataire : dashboard revenus + notification commande ── */
+function ProviderVisual({ locale }: { locale: Locale }) {
+  const isEn = locale === "en";
+
+  return (
+    <div className="relative select-none" aria-hidden>
+      <style>{`
+        @keyframes floatA {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-6px); }
+        }
+        @keyframes floatB {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(5px); }
+        }
+        @keyframes pulseRing {
+          0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+          70%  { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+        @keyframes countUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .float-a { animation: floatA 3.6s ease-in-out infinite; }
+        .float-b { animation: floatB 4.2s ease-in-out infinite; }
+        .pulse-ring { animation: pulseRing 2s ease-out infinite; }
+        .count-up-1 { animation: countUp 0.5s ease both 0.2s; }
+        .count-up-2 { animation: countUp 0.5s ease both 0.35s; }
+        .count-up-3 { animation: countUp 0.5s ease both 0.5s; }
+        .slide-up-1 { animation: slideUp 0.45s ease both 0.15s; }
+        .slide-up-2 { animation: slideUp 0.45s ease both 0.3s; }
+        .slide-up-3 { animation: slideUp 0.45s ease both 0.45s; }
+        .slide-up-4 { animation: slideUp 0.45s ease both 0.6s; }
+      `}</style>
+
+      {/* Badge flottant haut-droite : nouvelle commande pulsante */}
+      <div className="float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
+        <div className="pulse-ring flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-500 text-white">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        <div>
+          <p className="text-xs font-bold text-green-700">{isEn ? "New order!" : "Nouvelle commande !"}</p>
+          <p className="text-[10px] text-[var(--subtle)]">{isEn ? "2 min ago" : "Il y a 2 min"}</p>
+        </div>
+      </div>
+
+      {/* Dashboard principal */}
+      <div className="w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
+
+        {/* Header dashboard */}
+        <div className="slide-up-1 flex items-center justify-between border-b border-[var(--border)] px-4 py-3.5">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--subtle)]">{isEn ? "Dashboard" : "Tableau de bord"}</p>
+            <p className="text-sm font-bold">{isEn ? "Your performance" : "Vos performances"}</p>
+          </div>
+          <div className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            {isEn ? "Active" : "Actif"}
+          </div>
+        </div>
+
+        {/* Stats 3 colonnes */}
+        <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-b border-[var(--border)]">
+          <div className="count-up-1 px-3 py-3.5 text-center">
+            <p className="font-display text-base font-extrabold text-[var(--color-brand-600)]">347k</p>
+            <p className="mt-0.5 text-[10px] text-[var(--subtle)]">FCFA</p>
+            <p className="text-[10px] font-semibold">{isEn ? "Revenue" : "Revenus"}</p>
+          </div>
+          <div className="count-up-2 px-3 py-3.5 text-center">
+            <p className="font-display text-base font-extrabold">12</p>
+            <p className="mt-0.5 text-[10px] text-[var(--subtle)]">{isEn ? "total" : "total"}</p>
+            <p className="text-[10px] font-semibold">{isEn ? "Orders" : "Commandes"}</p>
+          </div>
+          <div className="count-up-3 px-3 py-3.5 text-center">
+            <p className="font-display text-base font-extrabold text-amber-500">4.9</p>
+            <div className="mt-0.5 flex justify-center">
+              <Stars n={5} />
+            </div>
+            <p className="text-[10px] font-semibold">{isEn ? "Rating" : "Note"}</p>
+          </div>
+        </div>
+
+        {/* Barre revenus mensuelle */}
+        <div className="slide-up-2 px-4 py-3.5">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[11px] font-semibold">{isEn ? "This month" : "Ce mois"}</p>
+            <p className="text-[11px] font-bold text-green-600">+23%</p>
+          </div>
+          <div className="flex items-end gap-1 h-10">
+            {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-sm"
+                style={{
+                  height: `${h}%`,
+                  background: i === 5
+                    ? "var(--color-brand-500)"
+                    : "var(--surface)",
+                  animation: `slideUp 0.4s ease both ${0.1 + i * 0.06}s`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Dernière commande */}
+        <div className="slide-up-3 border-t border-[var(--border)] px-4 py-3.5">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--subtle)]">
+            {isEn ? "Latest order" : "Dernière commande"}
+          </p>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-brand-50)] text-[var(--color-brand-600)] text-xs font-bold">
+              SK
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-xs font-semibold">{isEn ? "Logo redesign" : "Refonte logo"}</p>
+              <p className="text-[10px] text-[var(--subtle)]">Seydou Konaté</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-xs font-bold text-[var(--color-brand-600)]">85 000</p>
+              <p className="text-[9px] text-[var(--subtle)]">FCFA</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Escrow progress */}
+        <div className="slide-up-4 border-t border-[var(--border)] px-4 py-3">
+          <div className="flex items-center justify-between text-[10px] text-[var(--subtle)] mb-1.5">
+            <span className="flex items-center gap-1">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              {isEn ? "Funds secured" : "Fonds sécurisés"}
+            </span>
+            <span className="font-semibold text-[var(--color-brand-600)]">{isEn ? "Delivery" : "Livraison"}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
+            <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Badge flottant bas-gauche : versement reçu */}
+      <div className="float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 shadow-[var(--shadow-lg)] sm:-left-10">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500 text-white shadow-md">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 13 4 4L19 7" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="font-display text-xs font-bold text-green-700">
+              {isEn ? "Payment received" : "Paiement reçu"}
+            </p>
+            <p className="truncate text-[10px] text-[var(--subtle)]">85 000 FCFA</p>
+          </div>
+        </div>
+        <div className="mt-2.5 flex items-center gap-1.5 rounded-xl bg-[var(--surface)] px-2.5 py-1.5">
+          <span className="h-2 w-2 rounded-full bg-[#FF8A00]" />
+          <span className="text-[10px] font-semibold text-[var(--subtle)]">Wave · Mobile Money</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HeroVisual({ locale = "fr", mode = "client" }: { locale?: Locale; mode?: Mode }) {
+  const t = getLanding(locale).visual;
+
+  if (mode === "provider") {
+    return <ProviderVisual locale={locale} />;
+  }
+
+  return <ClientVisual t={t} />;
 }

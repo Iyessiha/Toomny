@@ -4,10 +4,11 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/catalog";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceEditForm } from "@/components/admin/service-edit-form";
+import { Avatar, Notice, Section } from "@/components/dashboard/pro";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).serviceEditPage.metaTitle };
@@ -22,7 +23,6 @@ export default async function AdminServiceEditPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).serviceEditPage;
-  const nav = getAdminTexts(locale).nav;
   const { id } = await params;
 
   const db = createAdminClient();
@@ -37,8 +37,8 @@ export default async function AdminServiceEditPage({
 
   if (!service) {
     return (
-      <AdminShell user={user} locale={locale} title="404" subtitle="" nav={[]}>
-        <p>Prestation introuvable.</p>
+      <AdminShell user={user} locale={locale} title="404" subtitle="" nav={getAdminNavGroups(locale, "/admin/services")}>
+        <Notice tone="danger">Prestation introuvable.</Notice>
       </AdminShell>
     );
   }
@@ -49,28 +49,26 @@ export default async function AdminServiceEditPage({
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services, current: true },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/services")}
     >
       <div className="max-w-2xl">
-        <Link href="/admin/services" className="mb-6 inline-block text-sm text-[var(--subtle)] hover:text-[var(--foreground)]">
-          {t.back}
+        <Link href="/admin/services" className="btn-ghost btn-sm mb-6">
+          ← {t.back}
         </Link>
 
-        <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-          <p className="text-xs uppercase tracking-wide text-[var(--subtle)] font-semibold mb-1">Prestataire</p>
-          <p className="font-medium">{provider?.display_name ?? "—"}</p>
-          <p className="text-sm text-[var(--subtle)]">{provider?.email}</p>
+        <div className="mb-6">
+          <Section title={locale === "en" ? "Provider" : "Prestataire"}>
+            <div className="flex items-center gap-3">
+              <Avatar name={provider?.display_name ?? provider?.email} />
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{provider?.display_name ?? "—"}</p>
+                <p className="truncate text-sm text-[var(--subtle)]">{provider?.email}</p>
+              </div>
+            </div>
+          </Section>
         </div>
 
         <ServiceEditForm

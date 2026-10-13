@@ -168,7 +168,7 @@ export function KycForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="notice notice-danger">
           {error}
         </div>
       )}
@@ -289,7 +289,7 @@ export function KycForm({
       </div>
 
       {/* Mentions légales */}
-      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+      <div className="notice notice-info">
         <strong>{t.privacyTitle}</strong> {t.privacy}
       </div>
 

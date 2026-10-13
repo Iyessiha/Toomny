@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { createCategory, updateCategory, toggleCategoryActive, deleteCategory } from "@/app/(fr)/admin/categories/actions";
 import { getAdminTexts } from "@/i18n/admin";
+import { Pill, Section, TableCard } from "@/components/dashboard/pro";
 import type { Locale } from "@/i18n/dictionaries";
 
 type Category = {
@@ -78,32 +79,31 @@ export function CategoryManager({ categories: initial, locale }: { categories: C
     setBusy(null);
   }
 
-  const inputCls = "rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--color-brand-500)]";
-  const btnPrimary = "rounded-full bg-[var(--color-brand-500)] px-4 py-1.5 text-xs font-semibold text-white disabled:opacity-60";
-  const btnSecondary = "rounded-full border border-[var(--border)] px-4 py-1.5 text-xs font-semibold text-[var(--subtle)] hover:text-[var(--foreground)]";
+  const inputCls = "input";
+  const btnPrimary = "btn-primary btn-sm disabled:opacity-60";
+  const btnSecondary = "btn-ghost btn-sm";
 
   return (
     <div className="space-y-6">
       {error && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+        <p role="alert" className="notice notice-danger mb-6">{error}</p>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-[var(--border)] text-xs uppercase tracking-wide text-[var(--subtle)]">
+      <TableCard>
+          <thead>
             <tr>
-              <th className="px-5 py-3 font-medium">{t.colNameFr} / {t.colNameEn}</th>
-              <th className="px-5 py-3 font-medium">{t.colSlug}</th>
-              <th className="px-4 py-3 font-medium text-center">{t.colPosition}</th>
-              <th className="px-4 py-3 font-medium text-center">{t.colActive}</th>
-              <th className="px-5 py-3 font-medium text-right">{t.colActions}</th>
+              <th>{t.colNameFr} / {t.colNameEn}</th>
+              <th>{t.colSlug}</th>
+              <th className="text-center">{t.colPosition}</th>
+              <th className="text-center">{t.colActive}</th>
+              <th className="text-right">{t.colActions}</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((cat, i) => (
-              <tr key={cat.id} className={i < categories.length - 1 ? "border-b border-[var(--border)]" : ""}>
+            {categories.map((cat) => (
+              <tr key={cat.id}>
                 {editingId === cat.id ? (
-                  <td colSpan={5} className="px-4 py-3">
+                  <td colSpan={5}>
                     <form onSubmit={(e) => handleUpdate(e, cat.id)} className="flex flex-wrap items-end gap-3">
                       <input type="hidden" name="id" value={cat.id} />
                       <div className="flex flex-col gap-1">
@@ -132,32 +132,30 @@ export function CategoryManager({ categories: initial, locale }: { categories: C
                   </td>
                 ) : (
                   <>
-                    <td className="px-5 py-4">
+                    <td>
                       <p className="font-medium">{cat.name_fr}</p>
                       <p className="text-xs text-[var(--subtle)]">{cat.name_en}</p>
                     </td>
-                    <td className="px-5 py-4 text-[var(--subtle)] font-mono text-xs">{cat.slug}</td>
-                    <td className="px-4 py-4 text-center text-[var(--subtle)]">{cat.position}</td>
-                    <td className="px-4 py-4 text-center">
+                    <td className="font-mono text-xs text-[var(--subtle)]">{cat.slug}</td>
+                    <td className="text-center text-[var(--subtle)]">{cat.position}</td>
+                    <td className="text-center">
                       <button
                         onClick={() => handleToggle(cat.id, cat.is_active)}
                         disabled={busy === cat.id + "-toggle"}
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          cat.is_active
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-[var(--surface)] text-[var(--subtle)]"
-                        }`}
+                        className="disabled:opacity-50"
                       >
-                        {cat.is_active ? "✓" : "—"}
+                        <Pill tone={cat.is_active ? "success" : "neutral"}>
+                          {cat.is_active ? "✓" : "—"}
+                        </Pill>
                       </button>
                     </td>
-                    <td className="px-5 py-4">
+                    <td>
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setEditingId(cat.id)} className={btnSecondary}>{t.edit}</button>
                         <button
                           onClick={() => handleDelete(cat.id)}
                           disabled={!!busy}
-                          className="rounded-full px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 disabled:opacity-40"
+                          className="btn-ghost btn-sm text-[var(--tone-danger-fg)] disabled:opacity-40"
                         >
                           {t.delete}
                         </button>
@@ -168,12 +166,10 @@ export function CategoryManager({ categories: initial, locale }: { categories: C
               </tr>
             ))}
           </tbody>
-        </table>
-      </div>
+      </TableCard>
 
       {/* New category */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-        <h3 className="font-display text-sm font-bold mb-4">{t.newTitle}</h3>
+      <Section title={t.newTitle}>
         {showNew ? (
           <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col gap-1">
@@ -202,7 +198,7 @@ export function CategoryManager({ categories: initial, locale }: { categories: C
         ) : (
           <button onClick={() => setShowNew(true)} className={btnPrimary}>+ {t.newTitle}</button>
         )}
-      </div>
+      </Section>
     </div>
   );
 }

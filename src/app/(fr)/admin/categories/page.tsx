@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 import { CategoryManager } from "@/components/admin/category-manager";
 
@@ -16,7 +16,6 @@ export default async function AdminCategoriesPage() {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).categoriesPage;
-  const nav = getAdminTexts(locale).nav;
 
   const db = createAdminClient();
   const { data: categories } = await db
@@ -28,18 +27,10 @@ export default async function AdminCategoriesPage() {
     <AdminShell
       user={user}
       locale={locale}
+      kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories, current: true },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/categories")}
     >
       <CategoryManager categories={categories ?? []} locale={locale} />
     </AdminShell>

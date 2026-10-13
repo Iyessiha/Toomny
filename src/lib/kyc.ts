@@ -20,14 +20,6 @@ export const DOCUMENT_TYPES = [
 
 export type DocumentType = (typeof DOCUMENT_TYPES)[number]["value"];
 
-export const VERIFICATION_STATUS_TONE: Record<string, string> = {
-  unverified: "bg-neutral-100 text-neutral-600",
-  pending: "bg-amber-50 text-amber-700",
-  verified: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
-  rejected: "bg-red-50 text-red-700",
-  manual_review: "bg-blue-50 text-blue-700",
-};
-
 export const KYC_COUNTRIES = [
   { code: "CI", name: "Côte d'Ivoire" },
   { code: "SN", name: "Sénégal" },

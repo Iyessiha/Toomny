@@ -131,7 +131,7 @@ export function MessageSection({
           }}
         />
         {error && (
-          <p role="alert" className="text-sm text-red-700">
+          <p role="alert" className="notice notice-danger">
             {error}
           </p>
         )}

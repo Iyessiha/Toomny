@@ -39,7 +39,7 @@ export function OrderControls({ orderId, actions, locale = "fr" }: { orderId: st
           rows={3}
           maxLength={2000}
           placeholder={t.disputePlaceholder}
-          className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
+          className="input"
         />
       )}
       <div className="flex flex-wrap gap-2">
@@ -49,17 +49,15 @@ export function OrderControls({ orderId, actions, locale = "fr" }: { orderId: st
             type="button"
             disabled={pending !== null}
             onClick={() => run(a)}
-            className={`rounded-full px-5 py-2.5 text-sm font-semibold disabled:opacity-60 ${
-              "danger" in ORDER_RULES[a] && ORDER_RULES[a].danger
-                ? "border border-red-200 bg-red-50 text-red-700"
-                : "bg-[var(--color-brand-500)] text-white"
-            }`}
+            className={`${
+              "danger" in ORDER_RULES[a] && ORDER_RULES[a].danger ? "btn-danger" : "btn-primary"
+            } disabled:opacity-60`}
           >
             {pending === a ? t.inProgress : t.actionLabels[a]}
           </button>
         ))}
       </div>
-      {error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {error && <p role="alert" className="notice notice-danger">{error}</p>}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceForm } from "@/components/dashboard/service-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
@@ -25,13 +26,7 @@ export default async function NouvellePrestation() {
       user={user}
       title={t.services.newTitle}
       locale={locale}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/dashboard/prestations", label: nav.services },
-        { href: "/dashboard/profil", label: nav.profile },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
       <div className="mx-auto max-w-3xl">
         <Link

@@ -7,6 +7,7 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
@@ -52,23 +53,15 @@ export default async function PrestationsPage() {
   return (
     <DashboardShell
       user={user}
+      kicker={nav.services}
       title={t.title}
       subtitle={t.subtitle}
       locale={locale}
-      nav={[
-        { href: "/dashboard", label: nav.overview },
-        { href: "/dashboard/prestations", label: nav.services, current: true },
-        { href: "/dashboard/profil", label: nav.profile },
-        { href: "/orders", label: nav.orders },
-        { href: "/messages", label: nav.messages },
-      ]}
+      navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
-        <Link
-          href="/dashboard/prestations/nouveau"
-          className="flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
-        >
+        <Link href="/dashboard/prestations/nouveau" className="btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden>
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>

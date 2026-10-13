@@ -1,18 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { getLanding } from "@/content/landing";
 import { createClient } from "@/lib/supabase/client";
 import type { Locale } from "@/i18n/dictionaries";
 import type { User } from "@supabase/supabase-js";
+import { setPreferredLocale } from "@/app/(fr)/dashboard/compte/actions";
 
 export function Header({ locale = "fr" }: { locale?: Locale }) {
   const t = getLanding(locale).nav;
   const home = locale === "en" ? "/en" : "/";
   const other = locale === "en" ? "/" : "/en";
+  const authPath = locale === "en" ? "/en/auth" : "/auth";
   const router = useRouter();
 
   const [scrolled, setScrolled] = useState(false);
@@ -43,6 +45,15 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
     setUser(null);
     setSigningOut(false);
     router.push("/");
+    router.refresh();
+  }
+
+  async function handleLocaleSwitch(e: MouseEvent<HTMLAnchorElement>) {
+    setOpen(false);
+    if (!user) return; // visiteur : le proxy synchronise le cookie
+    e.preventDefault();
+    await setPreferredLocale(locale === "en" ? "fr" : "en");
+    router.push(other);
     router.refresh();
   }
 
@@ -79,6 +90,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
           <Link
             href={other}
             hrefLang={locale === "en" ? "fr" : "en"}
+            onClick={handleLocaleSwitch}
             className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
           >
             {locale === "en" ? "FR" : "EN"}
@@ -113,13 +125,13 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
           ) : (
             <>
               <Link
-                href="/auth"
+                href={authPath}
                 className="rounded-full px-4 py-2 text-sm font-medium text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
               >
                 {t.login}
               </Link>
               <Link
-                href="/auth"
+                href={authPath}
                 className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
               >
                 {t.signup}
@@ -161,7 +173,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
             ))}
             <Link
               href={other}
-              onClick={() => setOpen(false)}
+              onClick={handleLocaleSwitch}
               className="rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)]"
             >
               {locale === "en" ? "Français" : "English"}
@@ -191,7 +203,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
               </>
             ) : (
               <Link
-                href="/auth"
+                href={authPath}
                 onClick={() => setOpen(false)}
                 className="mt-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white"
               >

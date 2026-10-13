@@ -20,6 +20,7 @@ export type ServiceCard = {
   category_slug: string | null;
   cover_url: string | null;
   tags: string[];
+  boosted: boolean;
   provider: {
     id: string;
     display_name: string | null;
@@ -42,6 +43,79 @@ export type ServiceFilters = {
 
 export function categoryName(c: Category, locale: Locale): string {
   return locale === "en" ? c.name_en : c.name_fr;
+}
+
+export type FeaturedProvider = {
+  id: string;
+  display_name: string | null;
+  country_code: string | null;
+  avatar_url: string | null;
+  headline: string | null;
+  rating_avg: number | null;
+  rating_count: number;
+  completed_orders: number;
+  skills: string[];
+};
+
+export async function getFeaturedProviders(): Promise<FeaturedProvider[]> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: boosts } = await supabase
+    .from("boosts")
+    .select("provider_id")
+    .eq("status", "active")
+    .eq("tier", "elite")
+    .gt("period_end", now)
+    .limit(8);
+
+  const ids = ((boosts ?? []) as { provider_id: string }[]).map((b) => b.provider_id);
+  if (ids.length === 0) return [];
+
+  const [dirs, profs] = await Promise.all([
+    supabase
+      .from("provider_directory")
+      .select("id, display_name, country_code")
+      .in("id", ids),
+    supabase
+      .from("provider_profiles")
+      .select("profile_id, avatar_url, headline, rating_avg, rating_count, completed_orders, skills")
+      .in("profile_id", ids),
+  ]);
+
+  const dirById = new Map(
+    ((dirs.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((d) => [d.id, d]),
+  );
+  const profById = new Map(
+    ((profs.data ?? []) as {
+      profile_id: string;
+      avatar_url: string | null;
+      headline: string | null;
+      rating_avg: number | null;
+      rating_count: number;
+      completed_orders: number;
+      skills: string[] | null;
+    }[]).map((p) => [p.profile_id, p]),
+  );
+
+  return ids
+    .map((id) => {
+      const dir = dirById.get(id);
+      const prof = profById.get(id);
+      if (!dir) return null;
+      return {
+        id,
+        display_name: dir.display_name,
+        country_code: dir.country_code,
+        avatar_url: prof?.avatar_url ?? null,
+        headline: prof?.headline ?? null,
+        rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null,
+        rating_count: prof?.rating_count ?? 0,
+        completed_orders: prof?.completed_orders ?? 0,
+        skills: (prof?.skills ?? []).slice(0, 3),
+      };
+    })
+    .filter(Boolean) as FeaturedProvider[];
 }
 
 export async function getCategories(): Promise<Category[]> {
@@ -103,30 +177,41 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
     return [];
   }
 
-  const rows = (data ?? []) as (Omit<ServiceCard, "provider" | "category_slug"> & { provider_id: string })[];
+  const rows = (data ?? []) as (Omit<ServiceCard, "provider" | "category_slug" | "boosted"> & { provider_id: string })[];
   if (rows.length === 0) return [];
 
-  const [allCategories, providers, profiles] = await Promise.all([
+  const providerIds = [...new Set(rows.map((r) => r.provider_id))];
+  const now = new Date().toISOString();
+
+  const [allCategories, providers, profiles, boosts] = await Promise.all([
     supabase.from("categories").select("id, slug"),
     supabase
       .from("provider_directory")
       .select("id, display_name, country_code")
-      .in("id", [...new Set(rows.map((r) => r.provider_id))]),
+      .in("id", providerIds),
     supabase
       .from("provider_profiles")
       .select("profile_id, rating_avg, rating_count")
-      .in("profile_id", [...new Set(rows.map((r) => r.provider_id))]),
+      .in("profile_id", providerIds),
+    supabase
+      .from("boosts")
+      .select("provider_id")
+      .eq("status", "active")
+      .gt("period_end", now)
+      .in("provider_id", providerIds),
   ]);
 
   const catById = new Map(((allCategories.data ?? []) as { id: string; slug: string }[]).map((c) => [c.id, c.slug]));
   const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((p) => [p.id, p]));
   const profById = new Map(((profiles.data ?? []) as { profile_id: string; rating_avg: number | null; rating_count: number }[]).map((p) => [p.profile_id, p]));
+  const boostedProviders = new Set(((boosts.data ?? []) as { provider_id: string }[]).map((b) => b.provider_id));
 
-  return rows.map(({ provider_id, ...r }) => {
+  const mapped = rows.map(({ provider_id, ...r }) => {
     const dir = dirById.get(provider_id);
     const prof = profById.get(provider_id);
     return {
       ...r,
+      boosted: boostedProviders.has(provider_id),
       category_slug: catById.get(r.category_id) ?? null,
       provider: dir
         ? {
@@ -139,4 +224,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
         : null,
     };
   });
+
+  // Les services boostés remontent en tête
+  return mapped.sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0));
 }

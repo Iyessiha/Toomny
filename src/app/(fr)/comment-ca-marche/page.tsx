@@ -4,13 +4,12 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Comment ça marche — Toomny",
-    description:
-      "Trois étapes pour recruter un prestataire ou vendre vos services en toute confiance, avec paiement en mobile money et séquestre automatique.",
-  };
+  const t = getPublicPageTexts(await visitorLocale()).titles;
+  return { title: t.howItWorks, description: t.howItWorksDescription };
 }
 
 export default async function HowItWorksPage() {
@@ -18,8 +17,14 @@ export default async function HowItWorksPage() {
   const t = getLanding(locale);
   const h = t.how;
 
+  const breadcrumb =
+    locale === "en"
+      ? [{ name: "Home", href: "/en" }, { name: "How it works", href: "/comment-ca-marche" }]
+      : [{ name: "Accueil", href: "/" }, { name: "Comment ça marche", href: "/comment-ca-marche" }];
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumb} />
       <Header locale={locale} />
       <main>
         {/* Hero */}

@@ -11,12 +11,16 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   async headers() {
+    // En développement, les aperçus sont affichés dans une iframe (bac à sable
+    // distant) : on n'y interdit pas l'encadrement, sinon l'aperçu reste blanc.
+    // La production garde le refus, ici et dans la CSP (voir src/proxy.ts).
+    const devFrameAncestors = process.env.NODE_ENV !== "production";
     return [
       {
         source: "/:path*",
         headers: [
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          { key: "X-Frame-Options", value: "DENY" },
+          ...(devFrameAncestors ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },

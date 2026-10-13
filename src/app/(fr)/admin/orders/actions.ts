@@ -7,6 +7,7 @@ import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { UUID_RE } from "@/lib/orders";
 import { recordFunding, recordCompletion } from "@/lib/order-ledger";
 import { recordAdminAction } from "@/lib/admin-audit";
+import { notify } from "@/lib/notifications";
 
 /**
  * Confirmer un paiement reçu chez le partenaire agréé : pending_payment -> funded.
@@ -22,7 +23,7 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
   const db = createAdminClient();
   const { data: order } = await db
     .from("orders")
-    .select("id, status, amount_minor, currency")
+    .select("id, status, reference, amount_minor, currency, provider_id")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return;
@@ -44,6 +45,12 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
     return;
   }
   await recordFunding(db, order);
+  await notify(db, {
+    recipientId: order.provider_id,
+    type: "order_funded",
+    params: { ref: order.reference },
+    link: `/orders/${orderId}`,
+  });
   await recordAdminAction(db, {
     actorId: admin.id,
     action: "order.confirm_payment",
@@ -75,7 +82,7 @@ export async function forceOrderTransition(formData: FormData): Promise<void> {
   const db = createAdminClient();
   const { data: order } = await db
     .from("orders")
-    .select("id, status, provider_id, amount_minor, currency")
+    .select("id, status, reference, client_id, provider_id, amount_minor, currency")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return;
@@ -102,6 +109,29 @@ export async function forceOrderTransition(formData: FormData): Promise<void> {
 
   if (targetStatus === "completed" && order.provider_id) {
     await recordCompletion(db, orderId, order.provider_id);
+  }
+
+  // Notify relevant party of the forced transition.
+  if (targetStatus === "in_progress" || targetStatus === "delivered") {
+    await notify(db, {
+      recipientId: order.client_id,
+      type: targetStatus === "delivered" ? "order_delivered" : "order_started",
+      params: { ref: order.reference },
+      link: `/orders/${orderId}`,
+    });
+  } else if (targetStatus === "completed") {
+    await notify(db, {
+      recipientId: order.provider_id,
+      type: "order_completed",
+      params: { ref: order.reference },
+      link: `/orders/${orderId}`,
+    });
+    await notify(db, {
+      recipientId: order.client_id,
+      type: "order_completed",
+      params: { ref: order.reference },
+      link: `/orders/${orderId}`,
+    });
   }
 
   const actionKey = `order.force_${targetStatus}` as

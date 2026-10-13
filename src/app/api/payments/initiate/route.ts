@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentProvider } from "@/lib/payments/geniuspay";
+import { isSupportedCurrency } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
 
 export async function POST(request: Request): Promise<Response> {
@@ -39,10 +40,36 @@ export async function POST(request: Request): Promise<Response> {
   if (order.status !== "pending_payment") {
     return NextResponse.json({ error: "Paiement non attendu pour cette commande" }, { status: 409 });
   }
+  if (!isSupportedCurrency(order.currency)) {
+    console.error("[payments:initiate] devise non prise en charge:", order.currency, order.id);
+    return NextResponse.json({ error: "Devise non prise en charge" }, { status: 422 });
+  }
+
+  // Idempotence : un double-clic ou un rafraîchissement ne doit pas créer deux
+  // rétentions. Une tentative `requested` antérieure est périmée avant d'en
+  // créer une nouvelle ; un paiement déjà confirmé bloque tout nouvel essai.
+  const { data: existingHolds } = await db
+    .from("escrow_holds")
+    .select("id, status")
+    .eq("order_id", orderId)
+    .in("status", ["requested", "held"]);
+  if (existingHolds?.some((h) => h.status === "held")) {
+    return NextResponse.json(
+      { error: "Paiement déjà confirmé, en cours de traitement" },
+      { status: 409 },
+    );
+  }
+  if (existingHolds && existingHolds.length > 0) {
+    await db
+      .from("escrow_holds")
+      .update({ status: "failed", failure_reason: "Tentative remplacée par un nouvel essai de paiement" })
+      .eq("order_id", orderId)
+      .eq("status", "requested");
+  }
 
   const { data: profile } = await db
     .from("profiles")
-    .select("email")
+    .select("email, phone")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -54,8 +81,9 @@ export async function POST(request: Request): Promise<Response> {
     holdResult = await paymentProvider.createHold({
       orderReference: order.reference,
       amountMinor: BigInt(order.amount_minor),
-      currency: order.currency as "XOF",
+      currency: order.currency,
       payerEmail: profile?.email ?? undefined,
+      payerMsisdn: profile?.phone ?? undefined,
       returnUrl,
       metadata: { order_id: orderId },
     });
