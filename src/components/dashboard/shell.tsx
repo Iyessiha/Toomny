@@ -9,7 +9,7 @@ import { SignOutButton } from "./sign-out";
 export type NavItem = {
   href: string;
   label: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   badge?: number;
   current?: boolean;
 };
@@ -118,6 +118,8 @@ export function DashboardShell({
   subtitle,
   actions,
   children,
+  // locale is accepted but unused — kept for compat with remote pages
+  locale: _locale,
 }: {
   user: {
     displayName: string | null;
@@ -131,6 +133,7 @@ export function DashboardShell({
   title: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  locale?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -221,7 +224,7 @@ export function DashboardShell({
 
         {/* Sign out */}
         <div className="shrink-0 border-t border-[var(--border)] px-5 py-4">
-          <SignOutButton />
+          <SignOutButton label="Se déconnecter" />
         </div>
       </div>
     );

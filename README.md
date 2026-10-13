@@ -59,8 +59,12 @@ Identique à GeniusCrea et GeniusVoice, pour mutualiser le savoir-faire et les c
 npm install
 cp .env.example .env.local   # puis remplir
 npm run db:push              # applique le schéma Drizzle
+# puis, dans l'éditeur SQL Supabase (projet de test d'abord) :
+#   supabase/migrations/0001_security_rls.sql   # RLS, verrous de colonnes, journal immuable, bucket KYC privé
 npm run dev
 ```
+
+> ⚠️ Sans `0001_security_rls.sql`, la base n'a aucune politique d'accès : la clé anonyme publique donnerait accès à toutes les tables.
 
 ## Scripts
 
@@ -82,7 +86,7 @@ src/
 │   ├── orders/     commandes et séquestre
 │   ├── messages/   échange lié à une commande
 │   ├── disputes/   arbitrage de litige
-│   └── api/        webhooks paiement, versements
+│   └── api/        connexion (webhooks paiement et versements : non encore branchés)
 ├── db/
 │   ├── schema.ts   schéma Drizzle complet
 │   └── index.ts    client

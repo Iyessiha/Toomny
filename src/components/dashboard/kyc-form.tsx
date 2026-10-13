@@ -3,19 +3,18 @@
 import { useState, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { submitVerification } from "@/app/(fr)/dashboard/verification/actions";
+import { KYC_COUNTRIES } from "@/lib/kyc";
+import { getKycTexts } from "@/i18n/kyc";
+import { countryNames } from "@/i18n/auth";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
+import type { Locale } from "@/i18n/dictionaries";
 
-const COUNTRIES = [
-  { code: "CI", name: "Côte d'Ivoire" },
-  { code: "SN", name: "Sénégal" },
-  { code: "BF", name: "Burkina Faso" },
-  { code: "ML", name: "Mali" },
-  { code: "BJ", name: "Bénin" },
-  { code: "TG", name: "Togo" },
-  { code: "NE", name: "Niger" },
-  { code: "GW", name: "Guinée-Bissau" },
-  { code: "CM", name: "Cameroun" },
-];
+const COUNTRIES = KYC_COUNTRIES;
+
+// Calculée au chargement du module : évite un appel impur pendant le rendu.
+const MAX_DOB = new Date(Date.UTC(new Date().getUTCFullYear() - 18, new Date().getUTCMonth(), new Date().getUTCDate()))
+  .toISOString()
+  .split("T")[0];
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
@@ -39,7 +38,9 @@ function FileInput({
   onChange,
   fileName,
   preview,
+  texts,
 }: {
+  texts: { chooseFile: string; fileSelected: string; preview: string };
   id: string;
   label: string;
   hint: string;
@@ -61,7 +62,7 @@ function FileInput({
       >
         {preview ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="Aperçu" className="h-14 w-14 rounded-lg object-cover shrink-0 border border-[var(--border)]" />
+          <img src={preview} alt={texts.preview} className="h-14 w-14 rounded-lg object-cover shrink-0 border border-[var(--border)]" />
         ) : (
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--border)]">
             <svg className="h-5 w-5 text-[var(--subtle)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -70,8 +71,8 @@ function FileInput({
           </div>
         )}
         <span className={`text-left text-sm ${fileName ? "text-[var(--foreground)]" : "text-[var(--subtle)]"}`}>
-          {fileName ?? "Cliquez pour choisir un fichier"}
-          {fileName && <span className="block text-xs text-[var(--color-brand-600)]">✓ Fichier sélectionné</span>}
+          {fileName ?? texts.chooseFile}
+          {fileName && <span className="block text-xs text-[var(--color-brand-600)]">{texts.fileSelected}</span>}
         </span>
       </button>
       <input
@@ -94,10 +95,14 @@ function FileInput({
 export function KycForm({
   defaultFirstName,
   defaultLastName,
+  locale = "fr",
 }: {
   defaultFirstName?: string | null;
   defaultLastName?: string | null;
+  locale?: Locale;
 }) {
+  const t = getKycTexts(locale).form;
+  const names = countryNames[locale];
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,10 +157,9 @@ export function KycForm({
             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
           </svg>
         </div>
-        <h3 className="mt-5 font-display text-lg font-bold">Documents envoyés ✓</h3>
+        <h3 className="mt-5 font-display text-lg font-bold">{t.sentTitle}</h3>
         <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">
-          Notre équipe va examiner vos documents et comparer les informations sous 24 à 48 heures.
-          Vous recevrez une notification une fois la vérification terminée.
+          {t.sentBody}
         </p>
       </div>
     );
@@ -172,26 +176,26 @@ export function KycForm({
       {/* Identité civile déclarée */}
       <div>
         <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">
-          1. Informations d&apos;identité
+          {t.sectionIdentity}
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Prénom (tel qu'il apparaît sur le document)" htmlFor="declared_first_name">
+          <Field label={t.firstName} htmlFor="declared_first_name">
             <input
               id="declared_first_name"
               name="declared_first_name"
               required
               defaultValue={defaultFirstName ?? ""}
-              placeholder="Kofi"
+              placeholder={t.firstPlaceholder}
               className={inputClass}
             />
           </Field>
-          <Field label="Nom de famille" htmlFor="declared_last_name">
+          <Field label={t.lastName} htmlFor="declared_last_name">
             <input
               id="declared_last_name"
               name="declared_last_name"
               required
               defaultValue={defaultLastName ?? ""}
-              placeholder="Asante"
+              placeholder={t.lastPlaceholder}
               className={inputClass}
             />
           </Field>
@@ -199,8 +203,8 @@ export function KycForm({
 
         <div className="mt-4">
           <Field
-            label="Date de naissance"
-            hint="Telle qu'elle figure sur votre pièce d'identité"
+            label={t.dob}
+            hint={t.dobHint}
             htmlFor="declared_dob"
           >
             <input
@@ -208,7 +212,7 @@ export function KycForm({
               name="declared_dob"
               type="date"
               required
-              max={new Date(Date.now() - 18 * 365.25 * 24 * 3600 * 1000).toISOString().split("T")[0]}
+              max={MAX_DOB}
               className={inputClass}
             />
           </Field>
@@ -218,22 +222,22 @@ export function KycForm({
       {/* Type et pays du document */}
       <div>
         <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">
-          2. Type de document
+          {t.sectionDocument}
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Type de document" htmlFor="documentType">
+          <Field label={t.docType} htmlFor="documentType">
             <select id="documentType" name="documentType" required className={inputClass}>
-              <option value="">Choisir...</option>
+              <option value="">{t.choose}</option>
               {DOCUMENT_TYPES.map((d) => (
-                <option key={d.value} value={d.value}>{d.label}</option>
+                <option key={d.value} value={d.value}>{getKycTexts(locale).docTypes[d.value] ?? d.label}</option>
               ))}
             </select>
           </Field>
-          <Field label="Pays de délivrance" htmlFor="documentCountry">
+          <Field label={t.country} htmlFor="documentCountry">
             <select id="documentCountry" name="documentCountry" required className={inputClass}>
-              <option value="">Choisir...</option>
+              <option value="">{t.choose}</option>
               {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>{c.name}</option>
+                <option key={c.code} value={c.code}>{names[c.code] ?? c.name}</option>
               ))}
             </select>
           </Field>
@@ -243,14 +247,15 @@ export function KycForm({
       {/* Upload des photos */}
       <div>
         <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">
-          3. Photos
+          {t.sectionPhotos}
         </p>
 
         <div className="grid gap-6 sm:grid-cols-2">
           <FileInput
+            texts={t}
             id="front"
-            label="Recto de votre pièce d'identité"
-            hint="Photo nette, bien éclairée. Toutes les informations doivent être lisibles. JPEG, PNG ou PDF · max 10 Mo."
+            label={t.front}
+            hint={t.frontHint}
             accept="image/jpeg,image/png,image/webp,application/pdf"
             required
             onChange={handleFileChange(setFrontFile, setFrontPreview)}
@@ -258,9 +263,10 @@ export function KycForm({
             preview={frontPreview}
           />
           <FileInput
+            texts={t}
             id="selfie"
-            label="Selfie avec le document"
-            hint="Tenez votre pièce d'identité à côté de votre visage. Visage et document doivent être nets et bien éclairés."
+            label={t.selfie}
+            hint={t.selfieHint}
             accept="image/jpeg,image/png,image/webp"
             required
             onChange={handleFileChange(setSelfieFile, setSelfiePreview)}
@@ -272,9 +278,7 @@ export function KycForm({
         {/* Tips qualité photo */}
         <div className="mt-4 grid gap-2 sm:grid-cols-3 text-xs text-[var(--subtle)]">
           {[
-            { icon: "☀️", text: "Bonne luminosité (lumière naturelle si possible)" },
-            { icon: "📄", text: "Document entier visible, sans reflet ni flou" },
-            { icon: "🤳", text: "Visage dégagé sur le selfie, pas de lunettes de soleil" },
+            ...t.tips,
           ].map((tip) => (
             <div key={tip.text} className="flex items-start gap-2 rounded-lg bg-[var(--surface)] px-3 py-2">
               <span>{tip.icon}</span>
@@ -286,10 +290,7 @@ export function KycForm({
 
       {/* Mentions légales */}
       <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-        <strong>Confidentialité garantie.</strong> Vos documents sont chiffrés et accessibles
-        uniquement à notre équipe de vérification. Ils ne sont jamais partagés ni vendus. Nous
-        vérifions visuellement que le visage sur le selfie correspond au document, et que les
-        informations déclarées concordent.
+        <strong>{t.privacyTitle}</strong> {t.privacy}
       </div>
 
       <button
@@ -297,7 +298,7 @@ export function KycForm({
         disabled={loading || !frontFile || !selfieFile}
         className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Envoi en cours..." : "Envoyer mes documents pour vérification"}
+        {loading ? t.submitting : t.submit}
       </button>
     </form>
   );

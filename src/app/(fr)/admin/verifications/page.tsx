@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { DashboardShell, NAV_ICONS } from "@/components/dashboard/shell";
-import { KycReviewCard } from "@/components/admin/kyc-review-card";
+import { AdminShell } from "@/components/admin/admin-shell";
 import { EmptyState } from "@/components/dashboard/shell";
-import { VERIFICATION_STATUS_FR, VERIFICATION_STATUS_TONE } from "@/lib/kyc";
+import { KycReviewCard } from "@/components/admin/kyc-review-card";
+import { getAdminTexts } from "@/i18n/admin";
+import { visitorLocale } from "@/i18n/server-locale";
+import { getMarketplaceTexts } from "@/i18n/marketplace";
 
-export const metadata: Metadata = { title: "Vérifications KYC · Admin Toomny" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: getAdminTexts(await visitorLocale()).kycPage.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 type FilterStatus = "pending" | "manual_review" | "verified" | "rejected" | "all";
@@ -17,12 +21,13 @@ export default async function AdminVerificationsPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const user = await requireAdmin();
+  const locale = user.preferredLocale;
+  const t = getAdminTexts(locale);
   const db = createAdminClient();
 
   const params = await searchParams;
   const filter: FilterStatus = (params.status as FilterStatus) ?? "pending";
 
-  // Charger les demandes avec le profil de l'utilisateur
   let query = db
     .from("verifications")
     .select(`
@@ -36,46 +41,48 @@ export default async function AdminVerificationsPage({
     .order("created_at", { ascending: false })
     .limit(50);
 
-  if (filter !== "all") {
-    query = query.eq("status", filter);
-  }
+  if (filter !== "all") query = query.eq("status", filter);
 
   const { data: verifications } = await query;
 
-  // Compteurs par statut
   const [{ count: pending }, { count: manual }, { count: total }] = await Promise.all([
     db.from("verifications").select("id", { count: "exact", head: true }).eq("status", "pending"),
     db.from("verifications").select("id", { count: "exact", head: true }).eq("status", "manual_review"),
     db.from("verifications").select("id", { count: "exact", head: true }),
   ]);
 
+  const waiting = (pending ?? 0) + (manual ?? 0);
   const tabs: { label: string; value: FilterStatus; count?: number }[] = [
-    { label: "En attente", value: "pending", count: pending ?? 0 },
-    { label: "Revue manuelle", value: "manual_review", count: manual ?? 0 },
-    { label: "Approuvés", value: "verified" },
-    { label: "Rejetés", value: "rejected" },
-    { label: "Tous", value: "all", count: total ?? 0 },
+    { label: t.kycPage.tabs.pending, value: "pending", count: pending ?? 0 },
+    { label: t.kycPage.tabs.manual_review, value: "manual_review", count: manual ?? 0 },
+    { label: t.kycPage.tabs.verified, value: "verified" },
+    { label: t.kycPage.tabs.rejected, value: "rejected" },
+    { label: t.kycPage.tabs.all, value: "all", count: total ?? 0 },
   ];
 
   return (
-    <DashboardShell
+    <AdminShell
       user={user}
-      title="Vérifications KYC"
-      subtitle="Examinez et traitez les demandes de vérification d'identité"
+      locale={locale}
+      title={t.kycPage.title}
+      subtitle={t.kycPage.subtitle}
       nav={[
-        { href: "/admin", label: "Vue d'ensemble", icon: NAV_ICONS.admin },
-        { href: "/admin/verifications", label: "Vérifications KYC", icon: NAV_ICONS.shield, current: true },
-        { href: "/dashboard", label: "Mon tableau de bord", icon: NAV_ICONS.home },
+        { href: "/admin", label: t.nav.overview },
+        { href: "/admin/verifications", label: t.nav.kyc, current: true },
+        { href: "/admin/services", label: t.nav.services },
+        { href: "/admin/categories", label: t.nav.categories },
+        { href: "/admin/users", label: t.nav.users },
+        { href: "/admin/orders", label: t.nav.orders },
+        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
+        { href: "/dashboard", label: t.nav.myDashboard },
       ]}
     >
-      {/* Alerte si dossiers urgents */}
-      {(pending ?? 0) + (manual ?? 0) > 0 && (
+      {waiting > 0 && (
         <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          <strong>{(pending ?? 0) + (manual ?? 0)} dossier{((pending ?? 0) + (manual ?? 0)) > 1 ? "s" : ""}</strong> nécessitent votre attention.
+          <strong>{waiting}</strong> {waiting > 1 ? t.kycPage.attention : t.kycPage.attentionOne}
         </div>
       )}
 
-      {/* Filtres */}
       <div className="mb-6 flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <a
@@ -89,11 +96,7 @@ export default async function AdminVerificationsPage({
           >
             {tab.label}
             {tab.count !== undefined && (
-              <span
-                className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${
-                  filter === tab.value ? "bg-white/20 text-white" : "bg-[var(--surface)] text-[var(--subtle)]"
-                }`}
-              >
+              <span className={`rounded-full px-1.5 py-0.5 text-xs font-bold ${filter === tab.value ? "bg-white/20 text-white" : "bg-[var(--surface)] text-[var(--subtle)]"}`}>
                 {tab.count}
               </span>
             )}
@@ -101,28 +104,40 @@ export default async function AdminVerificationsPage({
         ))}
       </div>
 
-      {/* Liste des dossiers */}
       {!verifications || verifications.length === 0 ? (
         <EmptyState
-          title="Aucun dossier"
-          body={`Aucune demande ${filter === "all" ? "" : `avec le statut « ${VERIFICATION_STATUS_FR[filter] ?? filter} »`} pour l'instant.`}
+          title={t.kycPage.emptyTitle}
+          body={filter === "all" ? t.kycPage.emptyBody : t.kycPage.emptyBodyStatus.replace("{status}", t.kycPage.tabs[filter] ?? filter)}
         />
       ) : (
         <div className="space-y-4">
-          {verifications.map((v) => (
+          {(verifications as {
+            id: string; status: string; document_type: string; document_country: string;
+            storage_path: string; rejection_reason: string | null;
+            declared_first_name?: string | null; declared_last_name?: string | null; declared_dob?: string | null;
+            created_at: string;
+            profile: { id: string; display_name: string | null; email: string; country_code: string; role: string } | { id: string; display_name: string | null; email: string; country_code: string; role: string }[] | null;
+          }[]).map((v) => (
             <KycReviewCard
               key={v.id}
+              locale={locale}
               verif={{
-                ...v,
-                declared_first_name: (v as { declared_first_name?: string | null }).declared_first_name ?? null,
-                declared_last_name: (v as { declared_last_name?: string | null }).declared_last_name ?? null,
-                declared_dob: (v as { declared_dob?: string | null }).declared_dob ?? null,
+                id: v.id,
+                status: v.status,
+                document_type: v.document_type,
+                document_country: v.document_country,
+                storage_path: v.storage_path,
+                rejection_reason: v.rejection_reason,
+                declared_first_name: v.declared_first_name ?? null,
+                declared_last_name: v.declared_last_name ?? null,
+                declared_dob: v.declared_dob ?? null,
+                created_at: v.created_at,
                 profile: Array.isArray(v.profile) ? v.profile[0] ?? null : v.profile,
               }}
             />
           ))}
         </div>
       )}
-    </DashboardShell>
+    </AdminShell>
   );
 }

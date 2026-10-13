@@ -1,25 +1,30 @@
 import type { Metadata, Viewport } from "next";
 import { RootShell } from "@/lib/root-layout";
+import { getPublicPageTexts } from "@/i18n/public-pages";
+import { visitorLocale } from "@/i18n/server-locale";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: {
-    default: "Toomny — Recrutez les meilleurs talents d'Afrique de l'Ouest",
-    template: "%s · Toomny",
-  },
-  description:
-    "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money, fonds sécurisés jusqu'à la livraison, versement sous 24 h. 10 % de commission, 0 % pour le client.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"),
-  alternates: { canonical: "/", languages: { "fr-FR": "/", "en-US": "/en" } },
-  openGraph: {
-    type: "website",
-    locale: "fr_FR",
-    siteName: "Toomny",
-    title: "Toomny — Travailler ensemble, grandir ensemble",
-    description:
-      "La marketplace de talents d'Afrique de l'Ouest. Paiement mobile money, fonds sécurisés, versement sous 24 h.",
-  },
-};
+/**
+ * Le groupe (fr) sert les deux langues selon le cookie du visiteur : `lang` et
+ * les métadonnées suivent la langue réelle de la page, et non un libellé figé.
+ * Les URL /en restent dans le groupe (en).
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = getPublicPageTexts(await visitorLocale()).site;
+  return {
+    title: { default: t.title, template: "%s · Toomny" },
+    description: t.description,
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"),
+    alternates: { canonical: "/", languages: { "fr-FR": "/", "en-US": "/en" } },
+    openGraph: {
+      type: "website",
+      locale: "fr_FR",
+      siteName: "Toomny",
+      title: t.ogTitle,
+      description: t.ogDescription,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -27,6 +32,6 @@ export const viewport: Viewport = {
   themeColor: "#108043",
 };
 
-export default function FrLayout({ children }: { children: React.ReactNode }) {
-  return <RootShell locale="fr">{children}</RootShell>;
+export default async function FrLayout({ children }: { children: React.ReactNode }) {
+  return <RootShell locale={await visitorLocale()}>{children}</RootShell>;
 }
