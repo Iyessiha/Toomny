@@ -110,13 +110,13 @@ export function ServiceCard({ service: s, locale }: Props) {
         <div className="mt-2.5 border-t border-[var(--border)]" />
 
         {/* Prix */}
-        <div className="mt-2 flex items-end justify-between gap-1">
-          <span className="min-w-0 truncate text-[10px] text-[var(--subtle)]">
+        <div className="mt-2 flex items-end justify-between gap-2">
+          <span className="min-w-0 flex-1 truncate text-[10px] text-[var(--subtle)]">
             {t.delivery} {s.delivery_days} {s.delivery_days > 1 ? t.days : t.day}
           </span>
-          <div className="min-w-0 text-right">
+          <div className="shrink-0 text-right">
             <p className="text-[10px] text-[var(--subtle)]">{t.from}</p>
-            <p className="font-display text-sm font-bold text-[var(--color-brand-600)] sm:text-base">
+            <p className="whitespace-nowrap font-display text-xs font-bold text-[var(--color-brand-600)] sm:text-sm">
               {formatMoney(BigInt(s.price_minor), s.currency, locale)}
             </p>
           </div>
