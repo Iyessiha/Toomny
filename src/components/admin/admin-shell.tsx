@@ -6,8 +6,10 @@ import { Avatar } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getAdminTexts } from "@/i18n/admin";
 import type { Locale } from "@/i18n/dictionaries";
+import type { NavItem, NavGroup } from "@/lib/admin-nav";
+import { flattenNavGroups } from "@/lib/admin-nav";
 
-export type NavItem = { href: string; label: string; current?: boolean };
+export type { NavItem, NavGroup };
 
 export function AdminShell({
   user,
@@ -20,7 +22,7 @@ export function AdminShell({
   children,
 }: {
   user: { displayName: string | null; email: string | null; role: string };
-  nav: NavItem[];
+  nav: NavGroup[];
   title: string;
   subtitle?: string;
   kicker?: string;
@@ -30,7 +32,9 @@ export function AdminShell({
 }) {
   const tDash = getDashboardTexts(locale);
   const tAdmin = getAdminTexts(locale);
+  const adminNav = getAdminTexts(locale).nav;
   const displayName = user.displayName ?? user.email ?? "?";
+  const flatNav = flattenNavGroups(nav);
 
   return (
     <div className="min-h-dvh bg-[var(--surface)]">
@@ -49,9 +53,9 @@ export function AdminShell({
       </header>
 
       {/* ── Mobile pill nav ── */}
-      {nav.length > 0 && (
+      {flatNav.length > 0 && (
         <nav className="flex gap-2 overflow-x-auto border-b border-[var(--border)] bg-[var(--background)] px-4 py-2.5 sm:hidden">
-          {nav.map((n) => (
+          {flatNav.map((n) => (
             <Link
               key={n.href}
               href={n.href}
@@ -88,28 +92,47 @@ export function AdminShell({
             </div>
           </div>
 
-          {/* Nav */}
-          <nav className="flex-1 overflow-y-auto px-3 py-5">
-            <p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-[var(--subtle)]">
-              Administration
-            </p>
-            <ul className="space-y-0.5">
-              {nav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                      item.current
-                        ? "bg-[color-mix(in_srgb,var(--color-gold-500)_14%,transparent)] font-semibold text-[var(--foreground)] shadow-[inset_3px_0_0_var(--color-gold-500)]"
-                        : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <NavIcon href={item.href} />
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Nav grouped */}
+          <nav className="flex-1 overflow-y-auto px-3 py-4">
+            {nav.map((group, gi) => (
+              <div key={gi} className={gi > 0 ? "mt-5" : ""}>
+                {group.label && (
+                  <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-[var(--subtle)]">
+                    {group.label}
+                  </p>
+                )}
+                <ul className="space-y-0.5">
+                  {group.items.map((item) => (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                          item.current
+                            ? "bg-[color-mix(in_srgb,var(--color-gold-500)_14%,transparent)] font-semibold text-[var(--foreground)] shadow-[inset_3px_0_0_var(--color-gold-500)]"
+                            : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+                        }`}
+                      >
+                        <NavIcon href={item.href} />
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+            {/* Back to dashboard — always at bottom */}
+            <div className="mt-6 border-t border-[var(--border)] pt-4">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+              >
+                <svg className="h-[18px] w-[18px] shrink-0 text-[var(--color-gold-500)]" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 11l8-8 8 8v7a1 1 0 01-1 1H3a1 1 0 01-1-1v-7z" />
+                </svg>
+                {adminNav.myDashboard}
+              </Link>
+            </div>
           </nav>
 
           {/* User footer */}
@@ -206,6 +229,12 @@ function NavIcon({ href }: { href: string }) {
     return (
       <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+      </svg>
+    );
+  if (href === "/admin/plans")
+    return (
+      <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zm-5.447.894A1 1 0 004 17v-5.764a1 1 0 01.553-.894l4-2A1 1 0 0110 9.236V15a1 1 0 01-.553.894l-4 2zM15 5a3 3 0 11-6 0 3 3 0 016 0zM7 8a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     );
   // fallback

@@ -3,10 +3,10 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { Avatar, FilterTabs, Pill, TableCard, roleTone } from "@/components/dashboard/pro";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 import { UserRoleManager } from "@/components/admin/user-role-manager";
 
@@ -23,7 +23,6 @@ export default async function AdminUsersPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).usersPage;
-  const nav = getAdminTexts(locale).nav;
   const roles = getAdminTexts(locale).roles;
   const { role: rawRole } = await searchParams;
 
@@ -60,17 +59,7 @@ export default async function AdminUsersPage({
       kicker="Administration"
       title={t.title}
       subtitle={`${t.subtitle} — ${list.length} compte${list.length !== 1 ? "s" : ""}`}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users, current: true },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/users")}
     >
       <FilterTabs
         items={filters.map((f) => ({

@@ -4,8 +4,8 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/catalog";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceEditForm } from "@/components/admin/service-edit-form";
 import { Avatar, Notice, Section } from "@/components/dashboard/pro";
@@ -23,7 +23,6 @@ export default async function AdminServiceEditPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).serviceEditPage;
-  const nav = getAdminTexts(locale).nav;
   const { id } = await params;
 
   const db = createAdminClient();
@@ -38,7 +37,7 @@ export default async function AdminServiceEditPage({
 
   if (!service) {
     return (
-      <AdminShell user={user} locale={locale} title="404" subtitle="" nav={[]}>
+      <AdminShell user={user} locale={locale} title="404" subtitle="" nav={getAdminNavGroups(locale, "/admin/services")}>
         <Notice tone="danger">Prestation introuvable.</Notice>
       </AdminShell>
     );
@@ -53,17 +52,7 @@ export default async function AdminServiceEditPage({
       kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services, current: true },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/services")}
     >
       <div className="max-w-2xl">
         <Link href="/admin/services" className="btn-ghost btn-sm mb-6">

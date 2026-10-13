@@ -5,6 +5,7 @@ import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { OrderTrendChart } from "@/components/admin/order-trend-chart";
 import {
@@ -20,7 +21,6 @@ import {
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { getDashboardTexts } from "@/i18n/dashboard";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -62,17 +62,7 @@ export default async function AdminPage() {
           </Link>
         ) : undefined
       }
-      nav={[
-        { href: "/admin", label: nav.overview, current: true },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin")}
     >
       {needsAttention > 0 && (
         <div className="mb-8 flex flex-col gap-4 rounded-2xl bg-[var(--tone-warning-bg)] p-5 sm:flex-row sm:items-center sm:justify-between">

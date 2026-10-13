@@ -3,12 +3,12 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { Avatar, FilterTabs, Pill, TableCard, serviceTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,7 +25,6 @@ export default async function AdminServicesPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).servicesPage;
-  const nav = getAdminTexts(locale).nav;
   const tabKeys = Object.keys(t.tabs);
   const { status: rawStatus } = await searchParams;
   const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "draft";
@@ -53,17 +52,7 @@ export default async function AdminServicesPage({
       kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services, current: true },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/services")}
     >
       <FilterTabs
         items={tabKeys.map((key) => ({

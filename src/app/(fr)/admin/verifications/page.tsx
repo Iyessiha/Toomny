@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
 import { FilterTabs, Notice } from "@/components/dashboard/pro";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).kycPage.metaTitle };
@@ -68,17 +68,7 @@ export default async function AdminVerificationsPage({
       kicker="Administration"
       title={t.kycPage.title}
       subtitle={t.kycPage.subtitle}
-      nav={[
-        { href: "/admin", label: t.nav.overview },
-        { href: "/admin/verifications", label: t.nav.kyc, current: true },
-        { href: "/admin/services", label: t.nav.services },
-        { href: "/admin/categories", label: t.nav.categories },
-        { href: "/admin/users", label: t.nav.users },
-        { href: "/admin/orders", label: t.nav.orders },
-        { href: "/admin/payouts", label: t.nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: t.nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/verifications")}
     >
       {waiting > 0 && (
         <div className="mb-6">

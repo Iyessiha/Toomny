@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { Pill, Section, disputeTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
@@ -23,7 +24,6 @@ export default async function AdminDisputesPage() {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getMarketplaceTexts(locale).adminDisputes;
-  const nav = getAdminTexts(locale).nav;
   const statusLabels = getMarketplaceTexts(locale).disputes.status;
   const db = createAdminClient();
 
@@ -84,17 +84,7 @@ export default async function AdminDisputesPage() {
       kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: t.title, current: true },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/disputes")}
     >
       {rows.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />

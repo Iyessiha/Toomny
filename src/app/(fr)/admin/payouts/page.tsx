@@ -3,13 +3,13 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { PayoutRowActions } from "@/components/admin/payout-row-actions";
 import { FilterTabs, MiniStat, Pill, TableCard, payoutTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { getPayoutTexts } from "@/i18n/payouts";
-import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +29,6 @@ export default async function AdminPayoutsPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).payoutsPage;
-  const nav = getAdminTexts(locale).nav;
   const pt = getPayoutTexts(locale);
   const { status: statusParam } = await searchParams;
 
@@ -114,17 +113,7 @@ export default async function AdminPayoutsPage({
       kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders },
-        { href: "/admin/payouts", label: nav.payouts, current: true },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/payouts")}
     >
       {/* Totaux par statut */}
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">

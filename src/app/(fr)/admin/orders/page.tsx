@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
+import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { FilterTabs, Pill, TableCard, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -28,7 +29,6 @@ export default async function AdminOrdersPage({
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).ordersPage;
-  const nav = getAdminTexts(locale).nav;
   const { status: statusParam } = await searchParams;
 
   const activeFilter: ActiveStatus | "all" =
@@ -73,17 +73,7 @@ export default async function AdminOrdersPage({
       kicker="Administration"
       title={t.title}
       subtitle={t.subtitle}
-      nav={[
-        { href: "/admin", label: nav.overview },
-        { href: "/admin/verifications", label: nav.kyc },
-        { href: "/admin/services", label: nav.services },
-        { href: "/admin/categories", label: nav.categories },
-        { href: "/admin/users", label: nav.users },
-        { href: "/admin/orders", label: nav.orders, current: true },
-        { href: "/admin/payouts", label: nav.payouts },
-        { href: "/admin/disputes", label: getMarketplaceTexts(locale).nav.disputes },
-        { href: "/dashboard", label: nav.myDashboard },
-      ]}
+      nav={getAdminNavGroups(locale, "/admin/orders")}
     >
       <FilterTabs
         items={filters.map(({ key, label }) => ({
