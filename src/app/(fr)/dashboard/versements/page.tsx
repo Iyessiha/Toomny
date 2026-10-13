@@ -11,6 +11,7 @@ import { PayoutRequestButton } from "@/components/dashboard/payout-request-butto
 import { formatMoney } from "@/lib/money";
 import { getPayoutTexts } from "@/i18n/payouts";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -106,6 +107,7 @@ export default async function VersementsPage() {
       subtitle={t.subtitle}
       navSections={dashboardNavSections(nav, user.role, "/dashboard/versements")}
     >
+      <AutoRefresh />
       <div className="grid gap-4 sm:grid-cols-3">
         <ProStat
           tone="brand"

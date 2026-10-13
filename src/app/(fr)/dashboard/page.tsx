@@ -20,6 +20,7 @@ import { formatMoney } from "@/lib/money";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import type { Locale } from "@/i18n/dictionaries";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.dashboard };
@@ -46,9 +47,19 @@ export default async function DashboardPage() {
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false })
       .limit(5);
-    return <ProviderDashboard user={user} data={data} services={(services ?? []) as ServicePreview[]} />;
+    return (
+      <>
+        <AutoRefresh />
+        <ProviderDashboard user={user} data={data} services={(services ?? []) as ServicePreview[]} />
+      </>
+    );
   }
-  return <ClientDashboard user={user} data={data} />;
+  return (
+    <>
+      <AutoRefresh />
+      <ClientDashboard user={user} data={data} />
+    </>
+  );
 }
 
 type User = Awaited<ReturnType<typeof requireAuth>>;

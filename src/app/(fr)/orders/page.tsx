@@ -9,6 +9,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Pill, TableCard, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.orders };
@@ -36,6 +37,7 @@ export default async function OrdersPage() {
       subtitle={t.orders.subtitle}
       navSections={dashboardNavSections(t.nav, user.role, "/orders")}
     >
+      <AutoRefresh />
       {list.length === 0 ? (
         <EmptyState title={t.orders.empty} body={t.orders.emptyBody} action={{ href: "/services", label: t.orders.emptyCta }} />
       ) : (
