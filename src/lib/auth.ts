@@ -21,7 +21,7 @@ export type CurrentUser = {
 };
 
 const PROFILE_COLUMNS =
-  "id, display_name, first_name, last_name, phone, city, country_code, role, verification_status, preferred_locale, onboarding_done";
+  "id, display_name, first_name, last_name, phone, city, country_code, role, verification_status, preferred_locale";
 
 /**
  * Crée le profil d'un compte authentifié qui n'en a pas encore (inscription faite
@@ -97,7 +97,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     role: profile.role as UserRole,
     verificationStatus: profile.verification_status,
     preferredLocale: profile.preferred_locale === "en" ? "en" : "fr",
-    onboardingDone: profile.onboarding_done ?? false,
+    onboardingDone: (profile as Record<string, unknown>).onboarding_done === true,
   };
 }
 
