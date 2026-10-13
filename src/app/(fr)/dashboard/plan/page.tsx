@@ -110,11 +110,12 @@ export default async function PlanPage({
   const activeTier = effectivePlan(profile?.plan, profile?.plan_expires_at ?? null, now);
   const activeSpec = PLANS[activeTier];
   const landingPlans = getLanding(locale).pricing.plans;
+  // landingPlans[0] = Débutant (gratuit), [1] = Essentiel, [2] = Pro, [3] = Expert
   const planDisplayNames: Record<PlanTier, string> = {
-    debutant: p.starterName,
-    essentiel: landingPlans[0]?.name ?? "Essentiel",
-    pro: landingPlans[1]?.name ?? "Pro",
-    expert: landingPlans[2]?.name ?? "Expert",
+    debutant: landingPlans[0]?.name ?? p.starterName,
+    essentiel: landingPlans[1]?.name ?? "Essentiel",
+    pro: landingPlans[2]?.name ?? "Pro",
+    expert: landingPlans[3]?.name ?? "Expert",
   };
 
   const dateTag = locale === "en" ? "en-GB" : "fr-FR";
@@ -217,7 +218,8 @@ export default async function PlanPage({
       <h2 className="mb-4 mt-10 font-display text-lg font-bold">{p.choosePlan}</h2>
       <div className="grid gap-5 sm:grid-cols-3">
         {PAID_PLAN_TIERS.map((tier, idx) => {
-          const card = landingPlans[idx];
+          // +1 : landingPlans[0] est Débutant (gratuit, non affiché ici)
+          const card = landingPlans[idx + 1];
           if (!card) return null;
           const isCurrent = tier === activeTier;
           const buttonLabel = isCurrent ? p.renewButton : card.cta;
