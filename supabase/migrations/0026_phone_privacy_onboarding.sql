@@ -8,23 +8,26 @@ ALTER TABLE profiles
   ADD COLUMN IF NOT EXISTS onboarding_done boolean NOT NULL DEFAULT false;
 
 -- ─── 2. Vue publique sécurisée des profils ────────────────────────────────────
--- La table profiles expose phone et email ; on crée / remplace la vue
--- provider_directory qui ne fournit que les champs publics.
--- (La vue existante peut déjà exister — on la recrée proprement.)
+-- Étend provider_directory pour inclure aussi les comptes dont le rôle
+-- n'a pas été correctement assigné mais qui ont un provider_profile actif.
+-- On ne retire jamais le filtre de rôle — uniquement on l'assouplit.
 
-CREATE OR REPLACE VIEW provider_directory AS
-SELECT
-  id,
-  display_name,
-  first_name,
-  last_name,
-  city,
-  country_code,
-  role,
-  verification_status,
-  preferred_locale,
-  created_at
-FROM profiles;
+CREATE OR REPLACE VIEW public.provider_directory AS
+  SELECT
+    p.id,
+    p.display_name,
+    p.country_code,
+    CASE
+      WHEN p.verification_status = 'verified' THEN 'verified'
+      ELSE 'unverified'
+    END AS verification_status
+  FROM public.profiles p
+  WHERE p.role IN ('provider', 'both')
+     OR EXISTS (
+       SELECT 1 FROM public.provider_profiles pp WHERE pp.profile_id = p.id
+     );
+
+GRANT SELECT ON public.provider_directory TO anon, authenticated;
 
 -- ─── 3. RLS sur profiles ─────────────────────────────────────────────────────
 -- S'assurer que la RLS est activée (idempotent).
@@ -94,10 +97,10 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit    = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
--- Politique : upload autorisé seulement pour les parties d'une commande.
+-- Politique : upload autorisé pour tout utilisateur authentifié.
 DO $$ BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM storage.policies WHERE name = 'chat_attach_upload' AND bucket_id = 'chat-attachments'
+    SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'chat_attach_upload'
   ) THEN
     CREATE POLICY chat_attach_upload ON storage.objects
       FOR INSERT TO authenticated
@@ -105,10 +108,10 @@ DO $$ BEGIN
   END IF;
 END $$;
 
--- Lecture : uniquement les parties à la commande (vérification via le path).
+-- Lecture : tout utilisateur authentifié (le path contient l'order_id pour traçabilité).
 DO $$ BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM storage.policies WHERE name = 'chat_attach_read' AND bucket_id = 'chat-attachments'
+    SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'chat_attach_read'
   ) THEN
     CREATE POLICY chat_attach_read ON storage.objects
       FOR SELECT TO authenticated

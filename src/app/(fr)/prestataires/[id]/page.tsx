@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -52,16 +53,13 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
   } = await supabase.auth.getUser();
 
   const [
-    { data: person },
+    { data: personFromView },
     { data: profile },
-    ,
     { data: services },
     { data: reviews },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
     supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages").eq("profile_id", id).maybeSingle(),
-    // placeholder — la vérification est lue depuis provider_directory (voir ci-dessus).
-    Promise.resolve({ data: null }),
     supabase
       .from("services")
       .select("id, title, description, price_minor, currency, delivery_days, cover_url, tags, category:categories(slug)")
@@ -71,6 +69,26 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .limit(24),
     supabase.from("reviews").select("id, rating, comment, created_at, author_id").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
   ]);
+
+  // Fallback : si le prestataire n'est pas dans la vue (role mal assigné),
+  // on le cherche via le client admin tant qu'il a un provider_profile actif.
+  let person = personFromView;
+  if (!person && profile) {
+    const admin = createAdminClient();
+    const { data: raw } = await admin
+      .from("profiles")
+      .select("id, display_name, country_code, verification_status")
+      .eq("id", id)
+      .maybeSingle();
+    if (raw) {
+      person = {
+        id: raw.id,
+        display_name: raw.display_name,
+        country_code: raw.country_code,
+        verification_status: raw.verification_status === "verified" ? "verified" : "unverified",
+      };
+    }
+  }
 
   if (!person) notFound();
 
