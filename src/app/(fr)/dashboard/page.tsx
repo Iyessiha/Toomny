@@ -4,6 +4,7 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { getDashboardData, ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
 import { DashboardShell, StatCard, EmptyState, NAV_ICONS } from "@/components/dashboard/shell";
 import { formatMoney } from "@/lib/money";
+import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -13,9 +14,16 @@ export default async function DashboardPage() {
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
 
-  return provider
-    ? <ProviderDashboard user={user} data={data} />
-    : <ClientDashboard user={user} data={data} />;
+  return (
+    <>
+      {!user.onboardingDone && (
+        <OnboardingModal role={user.role} locale={user.preferredLocale} />
+      )}
+      {provider
+        ? <ProviderDashboard user={user} data={data} />
+        : <ClientDashboard user={user} data={data} />}
+    </>
+  );
 }
 
 // ─── Dashboard PRESTATAIRE ──────────────────────────────────────────────────

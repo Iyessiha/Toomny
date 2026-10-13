@@ -201,7 +201,11 @@ export async function advanceOrder(input: {
 }
 
 /** Message dans le fil d'une commande. La politique RLS n'autorise que les parties concernées. */
-export async function sendMessage(input: { orderId: string; body: string }): Promise<Result> {
+export async function sendMessage(input: {
+  orderId: string;
+  body: string;
+  attachmentPath?: string;
+}): Promise<Result> {
   const user = await requireAuth();
   const e = getDashboardTexts(user.preferredLocale).orders.errors;
   const t = getDashboardTexts(user.preferredLocale).orders;
@@ -215,6 +219,7 @@ export async function sendMessage(input: { orderId: string; body: string }): Pro
     order_id: input.orderId,
     sender_id: user.id,
     body,
+    ...(input.attachmentPath ? { attachment_path: input.attachmentPath } : {}),
   });
   if (error) return { error: t.sendError };
 
