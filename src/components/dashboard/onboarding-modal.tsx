@@ -116,7 +116,8 @@ export function OnboardingModal({
 }) {
   const steps = role === "provider" ? PROVIDER_STEPS : CLIENT_STEPS;
   const [step, setStep] = useState(0);
-  const [isPending, startTransition] = useTransition();
+  const [closed, setClosed] = useState(false);
+  const [, startTransition] = useTransition();
 
   const isLast = step === steps.length - 1;
   const current = steps[step];
@@ -125,10 +126,13 @@ export function OnboardingModal({
     : { next: "Suivant", finish: "C'est parti !", skip: "Passer" };
 
   function finish() {
+    setClosed(true);
     startTransition(async () => {
       await completeOnboarding();
     });
   }
+
+  if (closed) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
