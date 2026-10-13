@@ -45,6 +45,79 @@ export function categoryName(c: Category, locale: Locale): string {
   return locale === "en" ? c.name_en : c.name_fr;
 }
 
+export type FeaturedProvider = {
+  id: string;
+  display_name: string | null;
+  country_code: string | null;
+  avatar_url: string | null;
+  headline: string | null;
+  rating_avg: number | null;
+  rating_count: number;
+  completed_orders: number;
+  skills: string[];
+};
+
+export async function getFeaturedProviders(): Promise<FeaturedProvider[]> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: boosts } = await supabase
+    .from("boosts")
+    .select("provider_id")
+    .eq("status", "active")
+    .eq("tier", "elite")
+    .gt("period_end", now)
+    .limit(8);
+
+  const ids = ((boosts ?? []) as { provider_id: string }[]).map((b) => b.provider_id);
+  if (ids.length === 0) return [];
+
+  const [dirs, profs] = await Promise.all([
+    supabase
+      .from("provider_directory")
+      .select("id, display_name, country_code")
+      .in("id", ids),
+    supabase
+      .from("provider_profiles")
+      .select("profile_id, avatar_url, headline, rating_avg, rating_count, completed_orders, skills")
+      .in("profile_id", ids),
+  ]);
+
+  const dirById = new Map(
+    ((dirs.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((d) => [d.id, d]),
+  );
+  const profById = new Map(
+    ((profs.data ?? []) as {
+      profile_id: string;
+      avatar_url: string | null;
+      headline: string | null;
+      rating_avg: number | null;
+      rating_count: number;
+      completed_orders: number;
+      skills: string[] | null;
+    }[]).map((p) => [p.profile_id, p]),
+  );
+
+  return ids
+    .map((id) => {
+      const dir = dirById.get(id);
+      const prof = profById.get(id);
+      if (!dir) return null;
+      return {
+        id,
+        display_name: dir.display_name,
+        country_code: dir.country_code,
+        avatar_url: prof?.avatar_url ?? null,
+        headline: prof?.headline ?? null,
+        rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null,
+        rating_count: prof?.rating_count ?? 0,
+        completed_orders: prof?.completed_orders ?? 0,
+        skills: (prof?.skills ?? []).slice(0, 3),
+      };
+    })
+    .filter(Boolean) as FeaturedProvider[];
+}
+
 export async function getCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
