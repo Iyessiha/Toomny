@@ -18,7 +18,7 @@ import {
  * Soumettre une demande de vérification KYC.
  *
  * Le formulaire envoie : documentType, documentCountry, declared_first_name,
- * declared_last_name, declared_dob (AAAA-MM-JJ), front (recto), selfie.
+ * declared_last_name, declared_dob (AAAA-MM-JJ), front (recto), back (verso), selfie.
  *
  * Tout est revalidé ici : le navigateur n'est jamais une garantie. Les fichiers
  * vont dans le bucket privé kyc-documents/<userId>/... (politique RLS : seul le
@@ -42,9 +42,10 @@ export async function submitVerification(formData: FormData) {
   const lastName = String(formData.get("declared_last_name") ?? "").trim();
   const dob = String(formData.get("declared_dob") ?? "").trim();
   const front = formData.get("front");
+  const back = formData.get("back");
   const selfie = formData.get("selfie");
 
-  if (!firstName || !lastName || !dob || !(front instanceof File) || !(selfie instanceof File)) {
+  if (!firstName || !lastName || !dob || !(front instanceof File) || !(back instanceof File) || !(selfie instanceof File)) {
     return { error: e.required };
   }
 
@@ -61,7 +62,7 @@ export async function submitVerification(formData: FormData) {
     return { error: e.dob };
   }
 
-  for (const file of [front, selfie]) {
+  for (const file of [front, back, selfie]) {
     if (file.size === 0 || file.size > KYC_MAX_BYTES) {
       return { error: e.size };
     }
@@ -84,12 +85,18 @@ export async function submitVerification(formData: FormData) {
 
   // Contrôle des octets réels : un fichier renommé ou forgé est refusé.
   const frontBuf = new Uint8Array(await front.arrayBuffer());
+  const backBuf = new Uint8Array(await back.arrayBuffer());
   const selfieBuf = new Uint8Array(await selfie.arrayBuffer());
-  if (!matchesMagicBytes(frontBuf, front.type) || !matchesMagicBytes(selfieBuf, selfie.type)) {
+  if (
+    !matchesMagicBytes(frontBuf, front.type) ||
+    !matchesMagicBytes(backBuf, back.type) ||
+    !matchesMagicBytes(selfieBuf, selfie.type)
+  ) {
     return { error: e.magic };
   }
 
   const frontPath = kycStoragePath(user.id, KYC_MIME_EXT[front.type], "front");
+  const backPath = kycStoragePath(user.id, KYC_MIME_EXT[back.type], "back");
   const selfiePath = kycStoragePath(user.id, KYC_MIME_EXT[selfie.type], "selfie");
 
   const { error: frontErr } = await supabase.storage
@@ -97,11 +104,19 @@ export async function submitVerification(formData: FormData) {
     .upload(frontPath, frontBuf, { contentType: front.type, upsert: false });
   if (frontErr) return { error: e.front };
 
+  const { error: backErr } = await supabase.storage
+    .from("kyc-documents")
+    .upload(backPath, backBuf, { contentType: back.type, upsert: false });
+  if (backErr) {
+    await supabase.storage.from("kyc-documents").remove([frontPath]);
+    return { error: e.back };
+  }
+
   const { error: selfieErr } = await supabase.storage
     .from("kyc-documents")
     .upload(selfiePath, selfieBuf, { contentType: selfie.type, upsert: false });
   if (selfieErr) {
-    await supabase.storage.from("kyc-documents").remove([frontPath]);
+    await supabase.storage.from("kyc-documents").remove([frontPath, backPath]);
     return { error: e.selfie };
   }
 
@@ -112,11 +127,11 @@ export async function submitVerification(formData: FormData) {
     declared_first_name: firstName,
     declared_last_name: lastName,
     declared_dob: dob,
-    storage_path: JSON.stringify({ front: frontPath, selfie: selfiePath }),
+    storage_path: JSON.stringify({ front: frontPath, back: backPath, selfie: selfiePath }),
     status: "pending",
   });
   if (insertErr) {
-    await supabase.storage.from("kyc-documents").remove([frontPath, selfiePath]);
+    await supabase.storage.from("kyc-documents").remove([frontPath, backPath, selfiePath]);
     return { error: e.save };
   }
 

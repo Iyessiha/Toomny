@@ -110,8 +110,10 @@ export function KycForm({
   const [success, setSuccess] = useState(false);
 
   const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
 
   function handleFileChange(
@@ -136,6 +138,7 @@ export function KycForm({
 
     const form = new FormData(e.currentTarget);
     if (frontFile) form.set("front", frontFile);
+    if (backFile) form.set("back", backFile);
     if (selfieFile) form.set("selfie", selfieFile);
 
     const result = await submitVerification(form);
@@ -263,20 +266,34 @@ export function KycForm({
             fileName={frontFile?.name ?? null}
             preview={frontPreview}
           />
+          <FileInput
+            texts={t}
+            id="back"
+            label={t.back}
+            hint={t.backHint}
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            required
+            onChange={handleFileChange(setBackFile, setBackPreview)}
+            fileName={backFile?.name ?? null}
+            preview={backPreview}
+          />
+        </div>
+
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-3">
             <KycSelfieGuide locale={locale} />
-            <FileInput
-              texts={t}
-              id="selfie"
-              label={t.selfie}
-              hint={t.selfieHint}
-              accept="image/jpeg,image/png,image/webp"
-              required
-              onChange={handleFileChange(setSelfieFile, setSelfiePreview)}
-              fileName={selfieFile?.name ?? null}
-              preview={selfiePreview}
-            />
           </div>
+          <FileInput
+            texts={t}
+            id="selfie"
+            label={t.selfie}
+            hint={t.selfieHint}
+            accept="image/jpeg,image/png,image/webp"
+            required
+            onChange={handleFileChange(setSelfieFile, setSelfiePreview)}
+            fileName={selfieFile?.name ?? null}
+            preview={selfiePreview}
+          />
         </div>
 
         {/* Tips qualité photo */}
@@ -299,7 +316,7 @@ export function KycForm({
 
       <button
         type="submit"
-        disabled={loading || !frontFile || !selfieFile}
+        disabled={loading || !frontFile || !backFile || !selfieFile}
         className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? t.submitting : t.submit}
