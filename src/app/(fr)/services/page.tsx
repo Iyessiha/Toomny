@@ -152,10 +152,10 @@ export default async function ServicesPage({
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           {/* Onglets catégories */}
-          <nav className="flex flex-wrap gap-2" aria-label={t.filterLabel}>
+          <nav className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0" style={{ scrollbarWidth: "none" }} aria-label={t.filterLabel}>
             <Link
               href={buildUrl({ q, sort, budget, jours }, { categorie: undefined })}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 !categorie
                   ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
                   : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)]"
@@ -170,7 +170,7 @@ export default async function ServicesPage({
                 <Link
                   key={c.id}
                   href={buildUrl({ q, sort, budget, jours }, { categorie: c.slug })}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
                       : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)]"
