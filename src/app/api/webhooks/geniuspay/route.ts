@@ -4,6 +4,7 @@ import { paymentProvider } from "@/lib/payments/geniuspay";
 import { recordFunding } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
 import { nextPeriodEnd } from "@/lib/plans";
+import { BOOST_PERIOD_MS } from "@/lib/boost";
 
 export const runtime = "nodejs";
 
@@ -42,7 +43,36 @@ export async function POST(request: Request): Promise<Response> {
         .maybeSingle();
 
       if (!sub) {
-        console.error("[webhook:geniuspay] rétention ou abonnement introuvable:", event.partnerHoldRef);
+        // Vérifier si c'est un boost.
+        const { data: boost } = await db
+          .from("boosts")
+          .select("id, provider_id, tier, status")
+          .eq("partner", "geniuspay")
+          .eq("partner_payment_ref", event.partnerHoldRef)
+          .maybeSingle();
+
+        if (!boost) {
+          console.error("[webhook:geniuspay] rétention, abonnement ou boost introuvable:", event.partnerHoldRef);
+          return NextResponse.json({ ok: true });
+        }
+
+        if (boost.status === "active") return NextResponse.json({ ok: true });
+
+        const periodEnd = new Date(nowDate.getTime() + BOOST_PERIOD_MS).toISOString();
+
+        await db
+          .from("boosts")
+          .update({ status: "active", period_start: now, period_end: periodEnd })
+          .eq("id", boost.id);
+
+        await notify(db, {
+          recipientId: boost.provider_id,
+          type: "boost_activated",
+          params: { plan: boost.tier },
+          link: "/dashboard/boost",
+        });
+
+        console.info("[webhook:geniuspay] boost activé:", boost.id, boost.tier);
         return NextResponse.json({ ok: true });
       }
 
@@ -173,6 +203,22 @@ export async function POST(request: Request): Promise<Response> {
           params: { plan: failedSub.plan },
           link: "/dashboard/plan",
         });
+      } else if (!failedSub) {
+        const { data: failedBoost } = await db
+          .from("boosts")
+          .select("id, provider_id, tier")
+          .eq("partner", "geniuspay")
+          .eq("partner_payment_ref", event.partnerHoldRef)
+          .maybeSingle();
+        if (failedBoost) {
+          await db.from("boosts").update({ status: "failed" }).eq("id", failedBoost.id);
+          await notify(db, {
+            recipientId: failedBoost.provider_id,
+            type: "boost_failed",
+            params: { plan: failedBoost.tier },
+            link: "/dashboard/boost",
+          });
+        }
       }
     }
 

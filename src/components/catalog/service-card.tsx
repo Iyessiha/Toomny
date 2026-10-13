@@ -35,6 +35,17 @@ export function ServiceCard({ service: s, locale }: Props) {
         <div className="absolute right-2 top-2 z-10">
           <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
         </div>
+        {/* Badge boosté */}
+        {s.boosted && (
+          <div className="absolute left-2 top-2 z-10">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+              </svg>
+              Boosté
+            </span>
+          </div>
+        )}
       </div>
 
       {/* ── Contenu ── */}

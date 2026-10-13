@@ -20,6 +20,7 @@ export type ServiceCard = {
   category_slug: string | null;
   cover_url: string | null;
   tags: string[];
+  boosted: boolean;
   provider: {
     id: string;
     display_name: string | null;
@@ -103,30 +104,41 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
     return [];
   }
 
-  const rows = (data ?? []) as (Omit<ServiceCard, "provider" | "category_slug"> & { provider_id: string })[];
+  const rows = (data ?? []) as (Omit<ServiceCard, "provider" | "category_slug" | "boosted"> & { provider_id: string })[];
   if (rows.length === 0) return [];
 
-  const [allCategories, providers, profiles] = await Promise.all([
+  const providerIds = [...new Set(rows.map((r) => r.provider_id))];
+  const now = new Date().toISOString();
+
+  const [allCategories, providers, profiles, boosts] = await Promise.all([
     supabase.from("categories").select("id, slug"),
     supabase
       .from("provider_directory")
       .select("id, display_name, country_code")
-      .in("id", [...new Set(rows.map((r) => r.provider_id))]),
+      .in("id", providerIds),
     supabase
       .from("provider_profiles")
       .select("profile_id, rating_avg, rating_count")
-      .in("profile_id", [...new Set(rows.map((r) => r.provider_id))]),
+      .in("profile_id", providerIds),
+    supabase
+      .from("boosts")
+      .select("provider_id")
+      .eq("status", "active")
+      .gt("period_end", now)
+      .in("provider_id", providerIds),
   ]);
 
   const catById = new Map(((allCategories.data ?? []) as { id: string; slug: string }[]).map((c) => [c.id, c.slug]));
   const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((p) => [p.id, p]));
   const profById = new Map(((profiles.data ?? []) as { profile_id: string; rating_avg: number | null; rating_count: number }[]).map((p) => [p.profile_id, p]));
+  const boostedProviders = new Set(((boosts.data ?? []) as { provider_id: string }[]).map((b) => b.provider_id));
 
-  return rows.map(({ provider_id, ...r }) => {
+  const mapped = rows.map(({ provider_id, ...r }) => {
     const dir = dirById.get(provider_id);
     const prof = profById.get(provider_id);
     return {
       ...r,
+      boosted: boostedProviders.has(provider_id),
       category_slug: catById.get(r.category_id) ?? null,
       provider: dir
         ? {
@@ -139,4 +151,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
         : null,
     };
   });
+
+  // Les services boostés remontent en tête
+  return mapped.sort((a, b) => (b.boosted ? 1 : 0) - (a.boosted ? 1 : 0));
 }

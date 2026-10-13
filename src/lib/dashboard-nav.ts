@@ -43,6 +43,7 @@ export function dashboardNavSections(
             { href: "/dashboard/prestations", label: nav.services },
             { href: "/dashboard/versements", label: nav.payouts },
             { href: "/dashboard/plan", label: nav.plan },
+            { href: "/dashboard/boost", label: nav.boost },
           ],
           current,
         ),

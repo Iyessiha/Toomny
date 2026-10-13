@@ -130,6 +130,16 @@ const fr = {
           ? `Votre prestation « ${p.service} » a été retirée par notre équipe.`
           : "Une de vos prestations a été retirée par notre équipe.",
     },
+    boost_activated: {
+      title: "Boost activé",
+      body: (p) =>
+        `Votre Boost ${p.plan ?? ""} est actif pour 30 jours. Vos services sont maintenant mis en avant.`,
+    },
+    boost_failed: {
+      title: "Paiement Boost refusé",
+      body: (p) =>
+        `Le paiement pour le Boost ${p.plan ?? ""} n'a pas abouti. Vous pouvez réessayer.`,
+    },
   } as Record<string, NotificationCopy>,
 };
 
@@ -247,6 +257,16 @@ const en: typeof fr = {
         p.service
           ? `Your service "${p.service}" was removed by our team.`
           : "One of your services was removed by our team.",
+    },
+    boost_activated: {
+      title: "Boost activated",
+      body: (p) =>
+        `Your ${p.plan ?? ""} Boost is active for 30 days. Your services are now featured.`,
+    },
+    boost_failed: {
+      title: "Boost payment declined",
+      body: (p) =>
+        `The payment for the ${p.plan ?? ""} Boost did not go through. You can try again.`,
     },
   } as Record<string, NotificationCopy>,
 };

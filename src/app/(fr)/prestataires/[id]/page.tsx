@@ -88,6 +88,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       category_slug: cat?.slug ?? null,
       cover_url: s.cover_url ?? null,
       tags: (s.tags as string[]) ?? [],
+      boosted: false,
       provider: {
         id,
         display_name: person?.display_name ?? null,
