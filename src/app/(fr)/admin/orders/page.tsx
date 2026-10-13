@@ -9,6 +9,7 @@ import { FilterTabs, Pill, TableCard, orderTone } from "@/components/dashboard/p
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { confirmPaymentReceived, forceOrderTransition } from "./actions";
+import { ResetOrdersButton } from "@/components/admin/reset-orders-button";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -75,6 +76,10 @@ export default async function AdminOrdersPage({
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/orders")}
     >
+      <div className="mb-6 flex justify-end">
+        <ResetOrdersButton />
+      </div>
+
       <FilterTabs
         items={filters.map(({ key, label }) => ({
           href: filterHref(key),
