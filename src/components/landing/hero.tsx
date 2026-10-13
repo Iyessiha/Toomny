@@ -187,7 +187,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             ref={cardRef}
             style={{ transition: "transform 0.08s linear", willChange: "transform" }}
           >
-            <HeroVisual locale={locale} />
+            <HeroVisual locale={locale} mode={key} />
           </div>
         </div>
       </div>
