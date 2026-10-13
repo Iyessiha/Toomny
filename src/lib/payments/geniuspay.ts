@@ -106,16 +106,24 @@ export class GeniusPayProvider implements PaymentProvider {
       },
     };
 
-    const res = await fetch(`${GP_BASE}/payments`, {
+    const endpoint = `${GP_BASE}/payments`;
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: headers(),
       body: JSON.stringify(body),
     });
 
     const text = await res.text();
+    console.info(`[geniuspay] POST ${endpoint} → ${res.status} (${text.slice(0, 120)})`);
     if (!res.ok) throw new Error(parseError(res.status, text));
 
-    const data = (JSON.parse(text).data ?? {}) as PaymentData;
+    let parsed: { data?: unknown };
+    try {
+      parsed = JSON.parse(text) as { data?: unknown };
+    } catch {
+      throw new Error(`Réponse non-JSON de GeniusPay (HTTP ${res.status}) : ${text.slice(0, 300)}`);
+    }
+    const data = (parsed.data ?? {}) as PaymentData;
     const checkoutUrl = data.checkout_url ?? data.payment_url;
     if (!checkoutUrl) throw new Error("Réponse GeniusPay sans URL de paiement.");
 
@@ -158,16 +166,24 @@ export class GeniusPayProvider implements PaymentProvider {
       },
     };
 
-    const res = await fetch(`${GP_BASE}/payments`, {
+    const endpoint = `${GP_BASE}/payments`;
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: headers(),
       body: JSON.stringify(body),
     });
 
     const text = await res.text();
+    console.info(`[geniuspay] POST ${endpoint} (sub) → ${res.status} (${text.slice(0, 120)})`);
     if (!res.ok) throw new Error(parseError(res.status, text));
 
-    const data = (JSON.parse(text).data ?? {}) as PaymentData;
+    let parsed: { data?: unknown };
+    try {
+      parsed = JSON.parse(text) as { data?: unknown };
+    } catch {
+      throw new Error(`Réponse non-JSON de GeniusPay (HTTP ${res.status}) : ${text.slice(0, 300)}`);
+    }
+    const data = (parsed.data ?? {}) as PaymentData;
     const checkoutUrl = data.checkout_url ?? data.payment_url;
     if (!checkoutUrl) throw new Error("Réponse GeniusPay sans URL de paiement.");
 
