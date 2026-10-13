@@ -250,7 +250,8 @@ export function ServiceManage({
     } else if ("error" in pkgResult && pkgResult.error) {
       setError(pkgResult.error);
     } else {
-      setSuccess(t.updated);
+      const msg = "pendingReview" in result && result.pendingReview ? t.pendingReview : t.updated;
+      setSuccess(msg);
       router.refresh();
       setTimeout(closeEdit, 1200);
     }

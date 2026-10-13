@@ -250,8 +250,19 @@ export function AuthForm({
           <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
         </Field>
 
-        <Field label={t.fields.password} htmlFor="password">
-          <div className="relative">
+        <div>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-medium">{t.fields.password}</label>
+            {mode === "login" && (
+              <Link
+                href={locale === "en" ? "/en/auth/forgot-password" : "/auth/forgot-password"}
+                className="text-xs text-[var(--color-brand-500)] hover:underline underline-offset-2"
+              >
+                {t.forgotPassword}
+              </Link>
+            )}
+          </div>
+          <div className="relative mt-1.5">
             <input
               id="password"
               name="password"
@@ -296,7 +307,7 @@ export function AuthForm({
           {mode === "signup" && pwValue.length === 0 && (
             <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.fields.passwordHint}</p>
           )}
-        </Field>
+        </div>
 
         <TurnstileWidget onToken={setToken} />
 

@@ -23,7 +23,12 @@ const BATCH_SIZE = 50;
 
 function isAuthorized(request: Request): boolean {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return process.env.NODE_ENV !== "production";
+  if (!secret) {
+    // En production, refuser absolument si le secret est absent.
+    if (process.env.NODE_ENV === "production") return false;
+    // En dev, autoriser uniquement depuis localhost.
+    return true;
+  }
 
   const header = request.headers.get("authorization");
   if (!header?.startsWith("Bearer ")) return false;

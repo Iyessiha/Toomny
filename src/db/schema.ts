@@ -272,8 +272,11 @@ export const orders = pgTable(
 
     // Montants figés à la commande — ne jamais recalculer depuis le service,
     // dont le prix peut changer après coup.
-    amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),
-    commissionMinor: bigint("commission_minor", { mode: "bigint" }).notNull(),
+    amountMinor: bigint("amount_minor", { mode: "bigint" }).notNull(),          // prix du service
+    collectFeeMinor: bigint("collect_fee_minor", { mode: "bigint" }).notNull(), // frais GeniusPay collect → client
+    clientChargeMinor: bigint("client_charge_minor", { mode: "bigint" }).notNull(), // total client = amount + collect
+    commissionMinor: bigint("commission_minor", { mode: "bigint" }).notNull(),  // commission Toomny → prestataire
+    payoutFeeMinor: bigint("payout_fee_minor", { mode: "bigint" }).notNull(),   // frais GeniusPay payout → prestataire
     providerNetMinor: bigint("provider_net_minor", { mode: "bigint" }).notNull(),
     currency: text("currency").notNull(),
     commissionRateBps: integer("commission_rate_bps").notNull(), // 1000 bps = 10 %

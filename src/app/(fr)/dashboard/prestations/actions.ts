@@ -51,7 +51,7 @@ export async function createService(formData: FormData) {
   } catch {
     return { error: e.price };
   }
-  if (priceMinor < 1000n || priceMinor > 10_000_000n) {
+  if (priceMinor < 5000n || priceMinor > 10_000_000n) {
     return { error: e.priceRange };
   }
 
@@ -178,20 +178,23 @@ export async function updateService(id: string, formData: FormData) {
   } catch {
     return { error: e.price };
   }
-  if (priceMinor < 1000n || priceMinor > 10_000_000n) return { error: e.priceRange };
+  if (priceMinor < 5000n || priceMinor > 10_000_000n) return { error: e.priceRange };
 
-  // Verify ownership first with user's RLS-scoped client (reads all statuses via services_owner_read)
+  // Verify ownership and fetch current status
   const supabase = await createClient();
   const { data: owned } = await supabase
     .from("services")
-    .select("id")
+    .select("id, status")
     .eq("id", id)
     .eq("provider_id", user.id)
     .maybeSingle();
   if (!owned) return { error: e.notOwner };
 
-  // Use admin client to bypass the services_owner_update WITH CHECK (status <> 'active')
-  // which silently blocks updates on published services even for non-status fields.
+  // If the service is active, editing text/content fields requires re-moderation
+  // to prevent bait-and-switch after admin approval.
+  // Price and delivery_days changes are always immediate.
+  const requiresReview = owned.status === "active";
+
   const db = createAdminClient();
   const { error } = await db
     .from("services")
@@ -204,6 +207,7 @@ export async function updateService(id: string, formData: FormData) {
       cover_url: coverUrl,
       gallery_urls: galleryUrls,
       tags,
+      ...(requiresReview ? { status: "pending_review" } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -212,7 +216,7 @@ export async function updateService(id: string, formData: FormData) {
   if (error) return { error: e.update };
 
   revalidatePath("/dashboard/prestations");
-  return { success: true };
+  return { success: true, pendingReview: requiresReview };
 }
 
 export async function toggleServiceStatus(id: string, currentStatus: string) {

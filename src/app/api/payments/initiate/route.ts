@@ -27,7 +27,7 @@ export async function POST(request: Request): Promise<Response> {
 
   const { data: order } = await db
     .from("orders")
-    .select("id, reference, status, amount_minor, currency, client_id")
+    .select("id, reference, status, amount_minor, client_charge_minor, currency, client_id")
     .eq("id", orderId)
     .maybeSingle();
 
@@ -78,9 +78,15 @@ export async function POST(request: Request): Promise<Response> {
 
   let holdResult;
   try {
+    // client_charge_minor = prix service + frais GeniusPay collect (à la charge du client).
+    // Pour les commandes créées avant la migration 0028, fallback sur amount_minor.
+    const chargeMinor = order.client_charge_minor
+      ? BigInt(order.client_charge_minor)
+      : BigInt(order.amount_minor);
+
     holdResult = await paymentProvider.createHold({
       orderReference: order.reference,
-      amountMinor: BigInt(order.amount_minor),
+      amountMinor: chargeMinor,
       currency: order.currency,
       payerEmail: profile?.email ?? undefined,
       payerMsisdn: profile?.phone ?? undefined,
@@ -97,7 +103,7 @@ export async function POST(request: Request): Promise<Response> {
     partner: holdResult.partner,
     partner_hold_ref: holdResult.partnerHoldRef,
     status: holdResult.status,
-    amount_minor: order.amount_minor,
+    amount_minor: order.client_charge_minor ?? order.amount_minor,
     currency: order.currency,
   });
 

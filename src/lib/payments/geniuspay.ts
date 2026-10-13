@@ -114,7 +114,7 @@ export class GeniusPayProvider implements PaymentProvider {
     });
 
     const text = await res.text();
-    console.info(`[geniuspay] POST ${endpoint} → ${res.status} (${text.slice(0, 120)})`);
+    console.info(`[geniuspay] POST ${endpoint} → ${res.status}`);
     if (!res.ok) throw new Error(parseError(res.status, text));
 
     let parsed: { data?: unknown };

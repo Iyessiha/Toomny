@@ -15,7 +15,8 @@ export async function consumeRateLimit(key: string, max: number, windowSeconds: 
   });
   if (error) {
     console.error("consumeRateLimit:", error.message);
-    return true;
+    // Fail-closed : en cas d'erreur DB, on bloque plutôt que de laisser passer.
+    return false;
   }
   return data === true;
 }

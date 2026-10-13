@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { splitOrderAmount, toMinor, DEFAULT_COMMISSION_BPS } from "./money";
+import { splitOrderAmount, toMinor, DEFAULT_COMMISSION_BPS, GP_COLLECT_BPS, GP_COLLECT_FIXED, GP_PAYOUT_BPS } from "./money";
 
 describe("toMinor", () => {
   it("lit le XOF sans décimale, espaces de milliers compris", () => {
@@ -23,25 +23,43 @@ describe("toMinor", () => {
 });
 
 describe("splitOrderAmount", () => {
-  it("commission + net égalent toujours le montant, sans centime perdu", () => {
+  it("commission + net égalent toujours amountMinor, sans centime perdu", () => {
     for (const amount of [1n, 7n, 999n, 12_345n, 1_000_003n]) {
       const s = splitOrderAmount(amount);
-      expect(s.commissionMinor + s.providerNetMinor).toBe(amount);
+      expect(s.commissionMinor + s.payoutFeeMinor + s.providerNetMinor).toBe(amount);
     }
   });
 
+  it("clientChargeMinor = amountMinor + collectFeeMinor", () => {
+    for (const amount of [5_000n, 10_000n, 50_000n]) {
+      const s = splitOrderAmount(amount);
+      expect(s.clientChargeMinor).toBe(s.amountMinor + s.collectFeeMinor);
+    }
+  });
+
+  it("collectFeeMinor = 2,5 % + 100 XOF (arrondi bas)", () => {
+    const s = splitOrderAmount(10_000n);
+    const expected = (10_000n * BigInt(GP_COLLECT_BPS)) / 10_000n + GP_COLLECT_FIXED;
+    expect(s.collectFeeMinor).toBe(expected); // 250 + 100 = 350 XOF
+  });
+
   it("arrondit la commission vers le bas : le prestataire ne perd jamais", () => {
-    // 7 FCFA à 10 % = 0,7 FCFA : la commission tombe à 0, le prestataire garde 7.
+    // 7 FCFA à 10 % = 0,7 FCFA → commission 0, payout 0, net 7
     const s = splitOrderAmount(7n);
     expect(s.commissionMinor).toBe(0n);
+    expect(s.payoutFeeMinor).toBe(0n);
     expect(s.providerNetMinor).toBe(7n);
   });
 
-  it("applique la commission par défaut de 1000 bps", () => {
+  it("applique la commission par défaut de 1000 bps (10 %)", () => {
     const s = splitOrderAmount(50_000n);
     expect(s.commissionRateBps).toBe(DEFAULT_COMMISSION_BPS);
     expect(s.commissionMinor).toBe(5_000n);
-    expect(s.providerNetMinor).toBe(45_000n);
+    // net avant payout = 45 000 ; payout 1 % = 450 ; net final = 44 550
+    const netBeforePayout = 45_000n;
+    const payoutFee = (netBeforePayout * BigInt(GP_PAYOUT_BPS)) / 10_000n;
+    expect(s.payoutFeeMinor).toBe(payoutFee);
+    expect(s.providerNetMinor).toBe(netBeforePayout - payoutFee);
   });
 
   it("rejette un montant nul ou négatif", () => {

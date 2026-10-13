@@ -13,7 +13,7 @@ const fr = {
       heading: "Travailler ensemble, grandir ensemble",
       items: [
         { title: "Versement mobile money", body: "Sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer." },
-        { title: "Vous gardez jusqu'à 97 %", body: "Dès 3 % de commission côté prestataire, rien côté client. Publier et postuler sont gratuits." },
+        { title: "Vous gardez jusqu'à 96 %", body: "Dès 3 % de commission Toomny côté prestataire. 0 % de commission côté client. Publier et postuler sont gratuits." },
         { title: "Paiement conservé", body: "Le paiement du client sera conservé par un partenaire agréé jusqu'à la validation de la livraison." },
       ],
     },
@@ -56,6 +56,36 @@ const fr = {
       title: "Vérifiez votre boîte mail",
       body: "Nous vous avons envoyé un lien de confirmation. Cliquez dessus pour activer votre compte Toomny.",
     },
+    forgotPassword: "Mot de passe oublié ?",
+    forgot: {
+      title: "Réinitialiser le mot de passe",
+      lead: "Entrez votre adresse e-mail, nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      submit: "Envoyer le lien",
+      pending: "Envoi…",
+      sent: {
+        title: "Lien envoyé",
+        body: "Si cette adresse existe dans notre base, vous recevrez un e-mail sous quelques minutes.",
+      },
+      errors: { generic: "Une erreur est survenue. Réessayez." },
+      backToLogin: "Retour à la connexion",
+    },
+    reset: {
+      title: "Choisir un nouveau mot de passe",
+      lead: "Votre lien est valide. Entrez votre nouveau mot de passe.",
+      newPassword: "Nouveau mot de passe",
+      submit: "Enregistrer le mot de passe",
+      pending: "Enregistrement…",
+      success: {
+        title: "Mot de passe mis à jour",
+        body: "Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        cta: "Se connecter",
+      },
+      errors: {
+        invalid: "Le lien est expiré ou invalide. Recommencez.",
+        generic: "Une erreur est survenue. Réessayez.",
+        minLength: "8 caractères minimum.",
+      },
+    },
 };
 
 const en: typeof fr = {
@@ -65,7 +95,7 @@ const en: typeof fr = {
       heading: "Work together, grow together",
       items: [
         { title: "Mobile money payouts", body: "Straight to your Wave or Orange Money. No US company, no Payoneer." },
-        { title: "You keep up to 97%", body: "From 3% commission on the provider side, nothing on the buyer side. Publishing and applying are free." },
+        { title: "You keep up to 96%", body: "From 3% Toomny commission on the provider side. 0% commission on the client side. Publishing and applying are free." },
         { title: "Payment held", body: "The client's payment will be held by a licensed partner until delivery is approved." },
       ],
     },
@@ -107,6 +137,36 @@ const en: typeof fr = {
     sent: {
       title: "Check your inbox",
       body: "We sent you a confirmation link. Click it to activate your Toomny account.",
+    },
+    forgotPassword: "Forgot password?",
+    forgot: {
+      title: "Reset your password",
+      lead: "Enter your email address and we'll send you a link to choose a new password.",
+      submit: "Send link",
+      pending: "Sending…",
+      sent: {
+        title: "Link sent",
+        body: "If that address exists in our system, you will receive an email within a few minutes.",
+      },
+      errors: { generic: "Something went wrong. Try again." },
+      backToLogin: "Back to login",
+    },
+    reset: {
+      title: "Choose a new password",
+      lead: "Your link is valid. Enter your new password.",
+      newPassword: "New password",
+      submit: "Save password",
+      pending: "Saving…",
+      success: {
+        title: "Password updated",
+        body: "You can now log in with your new password.",
+        cta: "Log in",
+      },
+      errors: {
+        invalid: "The link has expired or is invalid. Please try again.",
+        generic: "Something went wrong. Try again.",
+        minLength: "8 characters minimum.",
+      },
     },
 };
 

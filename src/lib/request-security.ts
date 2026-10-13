@@ -55,12 +55,18 @@ export function emailFingerprint(email: string): string {
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
- * Vérification Cloudflare Turnstile. Sans TURNSTILE_SECRET_KEY, le contrôle est
- * désactivé : à configurer en production (voir .env.example).
+ * Vérification Cloudflare Turnstile.
+ * En production, TURNSTILE_SECRET_KEY est obligatoire — son absence lève une erreur
+ * au lieu de laisser passer silencieusement toutes les requêtes.
  */
 export async function verifyTurnstile(token: string | null, ip: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return true;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("TURNSTILE_SECRET_KEY manquante en production");
+    }
+    return true; // dev uniquement
+  }
   if (!token) return false;
 
   const body = new URLSearchParams({ secret, response: token, remoteip: ip });
