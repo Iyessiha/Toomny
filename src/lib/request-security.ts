@@ -56,16 +56,22 @@ const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
  * Vérification Cloudflare Turnstile.
- * En production, TURNSTILE_SECRET_KEY est obligatoire — son absence lève une erreur
- * au lieu de laisser passer silencieusement toutes les requêtes.
+ * - Si aucune des deux variables Turnstile n'est définie → Turnstile non activé, on passe.
+ * - Si NEXT_PUBLIC_TURNSTILE_SITE_KEY est définie mais pas TURNSTILE_SECRET_KEY
+ *   → erreur de configuration (widget actif sans vérification serveur).
  */
 export async function verifyTurnstile(token: string | null, ip: string): Promise<boolean> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
   if (!secret) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("TURNSTILE_SECRET_KEY manquante en production");
+    if (siteKey) {
+      // Widget actif côté client sans clé secrète côté serveur : mauvaise config.
+      console.error("[turnstile] TURNSTILE_SECRET_KEY manquante alors que NEXT_PUBLIC_TURNSTILE_SITE_KEY est définie");
+      return false; // fail-closed
     }
-    return true; // dev uniquement
+    // Turnstile non activé du tout → on passe (feature optionnelle).
+    return true;
   }
   if (!token) return false;
 
