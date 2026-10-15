@@ -54,7 +54,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
   }, []);
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="hero-video relative overflow-hidden">
       {/* Vidéo de fond — muette, en boucle, sans audio */}
       <video
         autoPlay
@@ -155,7 +155,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             </Link>
             <a
               href="#fonctionnement"
-              className="rounded-full border border-[var(--color-brand-200)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:bg-[var(--color-brand-50)] sm:px-7 sm:py-3.5"
+              className="rounded-full border border-white/30 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/20 sm:px-7 sm:py-3.5"
             >
               {t.secondaryCta}
             </a>
