@@ -208,12 +208,65 @@ html.lenis, html.lenis body { height: auto; }
 
 /* ── Premium landing ──────────────────────────────────────────────────────── */
 
-/* Texte en dégradé vert pour les titres hero. */
+/* Texte en dégradé vert pour les titres hero — vibrant emerald. */
 .gradient-text {
-  background: linear-gradient(145deg, var(--color-brand-500), var(--color-brand-400) 60%, var(--color-brand-300));
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #86efac 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Panneau glassmorphisme : fond semi-transparent + flou */
+.glass-panel {
+  background: rgba(11, 25, 18, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(34, 197, 94, 0.14);
+}
+
+/* Orbe décoratif pour les fonds hero */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(72px);
+  opacity: 0.45;
+}
+
+/* Bouton primaire landing — émeraude vif avec halo */
+.btn-landing-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  background: #22c55e;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  box-shadow: 0 0 24px rgba(34, 197, 94, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+.btn-landing-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 36px rgba(34, 197, 94, 0.45);
+}
+.btn-landing-primary:active { transform: scale(0.97); }
+
+/* Animation pour le point "en ligne" */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.online-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 
 /* Variables ombre premium. */

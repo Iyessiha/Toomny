@@ -12,7 +12,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
   const t = getLanding(locale).pricing;
 
   return (
-    <section id="tarifs" className="border-t border-[var(--border)] bg-[var(--surface)]">
+    <section id="tarifs" className="border-t border-[rgba(34,197,94,0.06)] bg-[var(--surface)]">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
 
         {/* Header */}
@@ -49,65 +49,45 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
             <div
               key={plan.name}
               data-reveal
-              className={`relative flex flex-col rounded-2xl border p-6 transition-shadow duration-200 hover:shadow-lg hover:shadow-black/[0.07] ${
+              className={`relative flex flex-col rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 ${
                 plan.highlight
-                  ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)]"
-                  : "border-[var(--border)] bg-[var(--background)]"
+                  ? "border border-[rgba(34,197,94,0.35)] bg-[linear-gradient(160deg,rgba(22,163,74,0.22)_0%,rgba(11,25,18,0.92)_60%)] shadow-[0_0_0_1px_rgba(34,197,94,0.15),0_24px_56px_rgba(0,0,0,0.35)]"
+                  : "border border-[rgba(255,255,255,0.07)] bg-[rgba(11,25,18,0.7)] backdrop-blur-md"
               }`}
             >
               {plan.badge && (
                 <span
-                  className={`absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1 text-xs font-semibold ${
-                    plan.highlight
-                      ? "bg-white text-[var(--color-brand-600)]"
-                      : "bg-[var(--color-brand-500)] text-white"
-                  }`}
+                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#22c55e] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(34,197,94,0.4)]"
                 >
                   {plan.badge}
                 </span>
               )}
 
               {/* Plan name */}
-              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-white" : ""}`}>
+              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[#4ade80]" : ""}`}>
                 {plan.name}
               </p>
 
               {/* Commission pill */}
               <div
                 className={`mt-4 inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 ${
-                  plan.highlight ? "bg-white/20" : "bg-[var(--color-brand-50)]"
+                  plan.highlight ? "bg-[rgba(34,197,94,0.15)]" : "bg-[rgba(34,197,94,0.07)]"
                 }`}
               >
-                <span
-                  className={`font-display text-2xl font-bold ${
-                    plan.highlight ? "text-white" : "text-[var(--color-brand-600)]"
-                  }`}
-                >
+                <span className="font-display text-2xl font-bold text-[#22c55e]">
                   {plan.commission}
                 </span>
-                <span
-                  className={`text-sm ${
-                    plan.highlight ? "text-white/75" : "text-[var(--color-brand-500)]"
-                  }`}
-                >
+                <span className="text-sm text-[var(--subtle)]">
                   commission
                 </span>
               </div>
 
               {/* Price */}
               <div className="mt-5">
-                <span
-                  className={`font-display text-2xl font-bold ${
-                    plan.highlight ? "text-white" : ""
-                  }`}
-                >
+                <span className="font-display text-2xl font-bold">
                   {plan.price}
                 </span>
-                <span
-                  className={`ml-1.5 text-sm ${
-                    plan.highlight ? "text-white/70" : "text-[var(--subtle)]"
-                  }`}
-                >
+                <span className="ml-1.5 text-sm text-[var(--subtle)]">
                   {plan.priceNote}
                 </span>
               </div>
@@ -116,14 +96,10 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               <ul className="mt-5 flex-1 space-y-2.5">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm">
-                    <span
-                      className={`shrink-0 ${
-                        plan.highlight ? "text-white/80" : "text-[var(--color-brand-500)]"
-                      }`}
-                    >
+                    <span className="shrink-0 font-bold text-[#22c55e]">
                       <CheckIcon />
                     </span>
-                    <span className={plan.highlight ? "text-white/90" : ""}>{f}</span>
+                    <span className="text-[var(--subtle)]">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -131,10 +107,10 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               {/* CTA */}
               <Link
                 href={plan.href}
-                className={`mt-7 block rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors duration-150 ${
+                className={`mt-7 block rounded-full px-4 py-3 text-center text-sm font-semibold transition-all duration-150 ${
                   plan.highlight
-                    ? "bg-white text-[var(--color-brand-600)] hover:bg-white/90"
-                    : "bg-[var(--color-brand-500)] text-white hover:bg-[var(--color-brand-600)]"
+                    ? "bg-[#22c55e] text-white shadow-[0_4px_16px_rgba(34,197,94,0.35)] hover:bg-[#16a34a] hover:-translate-y-px"
+                    : "border border-[rgba(34,197,94,0.3)] text-[#22c55e] hover:bg-[rgba(34,197,94,0.08)]"
                 }`}
               >
                 {plan.cta}

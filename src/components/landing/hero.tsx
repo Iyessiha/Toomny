@@ -55,32 +55,52 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Halo de marque */}
+      {/* Fond dégradé sombre émeraude */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 -top-40 h-[520px] opacity-[0.55]"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 55% at 55% 40%, var(--color-brand-200) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% -10%, #0f2e1a 0%, transparent 70%), var(--background)",
+        }}
+      />
+      {/* Orbe gauche — vert forêt profond */}
+      <div
+        aria-hidden
+        className="hero-orb"
+        style={{
+          width: 560, height: 440,
+          background: "radial-gradient(circle, #0c4d27 0%, transparent 70%)",
+          top: -140, left: -100,
+        }}
+      />
+      {/* Orbe droite — bleu-vert */}
+      <div
+        aria-hidden
+        className="hero-orb"
+        style={{
+          width: 380, height: 380,
+          background: "radial-gradient(circle, #1a3d4a 0%, transparent 70%)",
+          top: 30, right: -80,
         }}
       />
       {/* Dot grid décoratif côté visuel */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-25"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle, var(--border) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
+          backgroundImage: "radial-gradient(circle, rgba(34,197,94,0.10) 1px, transparent 1px)",
+          backgroundSize: "36px 36px",
           maskImage: "radial-gradient(ellipse 55% 65% at 75% 40%, black, transparent)",
         }}
       />
 
       <div className="relative mx-auto grid max-w-6xl gap-16 px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
         <div>
-          {/* Sélecteur d'audience */}
+          {/* Sélecteur d'audience — glassmorphisme */}
           <div
             data-reveal
-            className="inline-flex rounded-full border border-[var(--border)] bg-[var(--surface)] p-1 text-sm shadow-sm"
+            className="glass-panel inline-flex rounded-full p-1 text-sm"
             role="tablist"
           >
             {(["client", "provider"] as Key[]).map((k) => (
@@ -91,7 +111,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
                 onClick={() => setKey(k)}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-200 ${
                   key === k
-                    ? "bg-[var(--background)] text-[var(--color-brand-700)] shadow-sm"
+                    ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
                     : "text-[var(--subtle)] hover:text-[var(--foreground)]"
                 }`}
               >
@@ -116,7 +136,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           <div data-reveal style={{ transitionDelay: "150ms" }} className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href={a.href}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[var(--color-brand-500)]/20 transition-all duration-200 hover:-translate-y-px hover:bg-[var(--color-brand-600)] active:scale-95 sm:px-7 sm:py-3.5"
+              className="btn-landing-primary"
             >
               {a.cta}
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
@@ -125,30 +145,29 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             </Link>
             <a
               href="#fonctionnement"
-              className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:bg-[var(--surface)] sm:px-7 sm:py-3.5"
+              className="rounded-full border border-[rgba(34,197,94,0.25)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[rgba(34,197,94,0.5)] hover:bg-[rgba(34,197,94,0.06)] sm:px-7 sm:py-3.5"
             >
               {t.secondaryCta}
             </a>
           </div>
 
-          {/* Rail pills — preuve sociale immédiate, sans logos flottants. */}
-          {/* Barre de recherche */}
+          {/* Barre de recherche — glassmorphisme */}
           <form
             data-reveal
             style={{ transitionDelay: "175ms" }}
             method="GET"
             action="/services"
-            className="mt-8 flex w-full max-w-lg overflow-hidden rounded-full border border-[var(--border)] bg-[var(--background)] shadow-lg shadow-black/[0.06] focus-within:border-[var(--color-brand-400)] focus-within:ring-2 focus-within:ring-[var(--color-brand-400)]/20"
+            className="glass-panel mt-8 flex w-full max-w-lg overflow-hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] focus-within:border-[rgba(34,197,94,0.35)]"
           >
             <input
               type="search"
               name="q"
               placeholder={locale === "fr" ? "Que recherchez-vous ?" : "What are you looking for?"}
-              className="flex-1 bg-transparent px-5 py-3 text-sm outline-none"
+              className="flex-1 bg-transparent px-5 py-3 text-sm outline-none placeholder:text-[var(--subtle)]"
             />
             <button
               type="submit"
-              className="m-1.5 flex shrink-0 items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)]"
+              className="m-1.5 flex shrink-0 items-center gap-2 rounded-full bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#16a34a]"
             >
               <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                 <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />

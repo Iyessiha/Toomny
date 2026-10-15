@@ -164,7 +164,7 @@ export const CATEGORY_COLORS: Record<string, { from: string; to: string }> = {
   immobilier:                  { from: "#1e40af", to: "#1d4ed8" },
 };
 
-export const DEFAULT_COLORS = { from: "#6366f1", to: "#8b5cf6" };
+export const DEFAULT_COLORS = { from: "#052e16", to: "#14532d" };
 
 export function categoryGradient(slug?: string | null): string {
   const c = (slug ? CATEGORY_COLORS[slug] : null) ?? DEFAULT_COLORS;
