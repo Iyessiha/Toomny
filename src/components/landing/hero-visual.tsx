@@ -6,13 +6,20 @@ import type { Locale } from "@/i18n/dictionaries";
 
 type Mode = "client" | "provider";
 
+// Constantes partagées pour le style dark-card cohérent avec pricing/boost
+const CARD_BG    = "bg-[rgba(11,25,18,0.90)]";
+const CARD_BORDER = "border-[rgba(255,255,255,0.08)]";
+const DIVIDER    = "divide-[rgba(255,255,255,0.08)]";
+const INNER_BG   = "bg-[rgba(255,255,255,0.06)]";
+const SUBTLE     = "text-white/55";
+
 function Stars({ n = 5 }: { n?: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }).map((_, i) => (
         <svg key={i} width="11" height="11" viewBox="0 0 24 24" aria-hidden>
           <path
-            fill={i < n ? "#FFCB00" : "#e2e8f0"}
+            fill={i < n ? "#FFCB00" : "rgba(255,255,255,0.2)"}
             d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z"
           />
         </svg>
@@ -46,21 +53,21 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
       `}</style>
 
       {/* Badge flottant haut-droite : identité vérifiée */}
-      <div className="float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600">
+      <div className={`float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border ${CARD_BORDER} ${CARD_BG} px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex`}>
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[rgba(34,197,94,0.15)] text-green-400">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
             <path d="m9 12 2 2 4-4" />
           </svg>
         </div>
         <div>
-          <p className="text-xs font-bold text-green-700">{t.verified}</p>
-          <p className="text-[10px] text-[var(--subtle)]">KYC approuvé</p>
+          <p className="text-xs font-bold text-green-400">{t.verified}</p>
+          <p className={`text-[10px] ${SUBTLE}`}>KYC approuvé</p>
         </div>
       </div>
 
       {/* Carte service principale */}
-      <div className="slide-in-1 w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
+      <div className={`slide-in-1 w-[300px] overflow-hidden rounded-3xl border ${CARD_BORDER} ${CARD_BG} shadow-[var(--shadow-xl)] sm:w-[340px]`}>
         <div className="relative flex h-36 items-end p-4">
           <Image src="/images/hero-provider.jpg" alt="" fill className="object-cover object-top" priority sizes="340px" />
           <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(160deg, rgba(107,70,193,0.55) 0%, rgba(8,145,178,0.7) 100%)" }} />
@@ -88,34 +95,34 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3.5">
+        <div className={`flex items-center gap-3 border-b border-[rgba(255,255,255,0.08)] px-4 py-3.5`}>
           <div className="relative">
-            <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--background)]">
+            <div className={`relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[rgba(255,255,255,0.08)]`}>
               <Image src="/images/hero-provider.jpg" alt="Awa Konaté" fill className="object-cover object-top" sizes="40px" />
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--background)] bg-green-500 text-[8px] text-white">✓</span>
+            <span className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[rgba(255,255,255,0.08)] bg-green-500 text-[8px] text-white`}>✓</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
-              <p className="truncate text-sm font-semibold">Awa Konaté</p>
+              <p className="truncate text-sm font-semibold text-white">Awa Konaté</p>
               <span className="text-[11px]">🇨🇮</span>
             </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <Stars n={5} />
-              <span className="text-[11px] text-[var(--subtle)]">4.9 · 47 avis</span>
+              <span className={`text-[11px] ${SUBTLE}`}>4.9 · 47 avis</span>
             </div>
           </div>
           <div className="shrink-0 text-right">
-            <p className="text-[10px] text-[var(--subtle)]">Délai</p>
-            <p className="text-xs font-bold">5 jours</p>
+            <p className={`text-[10px] ${SUBTLE}`}>Délai</p>
+            <p className="text-xs font-bold text-white">5 jours</p>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 px-4 py-3.5">
           <div>
-            <p className="text-[10px] text-[var(--subtle)]">À partir de</p>
-            <p className="font-display text-lg font-extrabold text-[var(--color-brand-600)]">
-              150 000 <span className="text-sm font-semibold text-[var(--subtle)]">FCFA</span>
+            <p className={`text-[10px] ${SUBTLE}`}>À partir de</p>
+            <p className="font-display text-lg font-extrabold text-[#22c55e]">
+              150 000 <span className={`text-sm font-semibold ${SUBTLE}`}>FCFA</span>
             </p>
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[var(--color-brand-500)]/25">
@@ -126,49 +133,49 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
           </div>
         </div>
 
-        <div className="border-t border-[var(--border)] px-4 py-3">
-          <div className="flex items-center justify-between text-[10px] text-[var(--subtle)] mb-1.5">
+        <div className="border-t border-[rgba(255,255,255,0.08)] px-4 py-3">
+          <div className={`flex items-center justify-between text-[10px] ${SUBTLE} mb-1.5`}>
             <span className="flex items-center gap-1">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
               {t.escrowBadge}
             </span>
-            <span className="font-semibold text-[var(--color-brand-600)]">{t.step}</span>
+            <span className="font-semibold text-[#22c55e]">{t.step}</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
+          <div className={`h-1.5 w-full overflow-hidden rounded-full ${INNER_BG}`}>
             <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)]" />
           </div>
         </div>
       </div>
 
       {/* Mini-cards résultats de recherche en stagger */}
-      <div className="slide-in-2 absolute -right-16 top-[60px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 text-sm font-bold">DK</div>
+      <div className={`slide-in-2 absolute -right-16 top-[60px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border ${CARD_BORDER} ${CARD_BG} px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex`}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-500/20 text-violet-300 text-sm font-bold">DK</div>
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold">Dev Kouyaté</p>
+          <p className="truncate text-xs font-semibold text-white">Dev Kouyaté</p>
           <div className="flex items-center gap-1 mt-0.5">
             <Stars n={5} />
-            <span className="text-[10px] text-[var(--subtle)]">4.8</span>
+            <span className={`text-[10px] ${SUBTLE}`}>4.8</span>
           </div>
         </div>
-        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">75k</p>
+        <p className="shrink-0 text-[11px] font-bold text-[#22c55e]">75k</p>
       </div>
 
-      <div className="slide-in-3 absolute -right-16 top-[142px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 text-sm font-bold">MB</div>
+      <div className={`slide-in-3 absolute -right-16 top-[142px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border ${CARD_BORDER} ${CARD_BG} px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex`}>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 text-sm font-bold">MB</div>
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold">Marie Bamba</p>
+          <p className="truncate text-xs font-semibold text-white">Marie Bamba</p>
           <div className="flex items-center gap-1 mt-0.5">
             <Stars n={4} />
-            <span className="text-[10px] text-[var(--subtle)]">4.6</span>
+            <span className={`text-[10px] ${SUBTLE}`}>4.6</span>
           </div>
         </div>
-        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">60k</p>
+        <p className="shrink-0 text-[11px] font-bold text-[#22c55e]">60k</p>
       </div>
 
       {/* Badge flottant bas-gauche */}
-      <div className="float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 shadow-[var(--shadow-lg)] sm:-left-10">
+      <div className={`float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border ${CARD_BORDER} ${CARD_BG} p-3.5 shadow-[var(--shadow-lg)] sm:-left-10`}>
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white shadow-md">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -176,13 +183,13 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="font-display text-xs font-bold text-[var(--color-brand-700)]">{t.payoutTitle}</p>
-            <p className="truncate text-[10px] text-[var(--subtle)]">{t.payoutMeta}</p>
+            <p className="font-display text-xs font-bold text-[#22c55e]">{t.payoutTitle}</p>
+            <p className={`truncate text-[10px] ${SUBTLE}`}>{t.payoutMeta}</p>
           </div>
         </div>
-        <div className="mt-2.5 flex items-center gap-1.5 rounded-xl bg-[var(--surface)] px-2.5 py-1.5">
+        <div className={`mt-2.5 flex items-center gap-1.5 rounded-xl ${INNER_BG} px-2.5 py-1.5`}>
           <span className="h-2 w-2 rounded-full bg-[#FF8A00]" />
-          <span className="text-[10px] font-semibold text-[var(--subtle)]">Wave · Mobile Money</span>
+          <span className={`text-[10px] font-semibold ${SUBTLE}`}>Wave · Mobile Money</span>
         </div>
       </div>
     </div>
@@ -230,59 +237,59 @@ function ProviderVisual({ locale }: { locale: Locale }) {
       `}</style>
 
       {/* Badge flottant haut-droite : nouvelle commande pulsante */}
-      <div className="float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
+      <div className={`float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border ${CARD_BORDER} ${CARD_BG} px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex`}>
         <div className="pulse-ring flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-500 text-white">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
           </svg>
         </div>
         <div>
-          <p className="text-xs font-bold text-green-700">{isEn ? "New order!" : "Nouvelle commande !"}</p>
-          <p className="text-[10px] text-[var(--subtle)]">{isEn ? "2 min ago" : "Il y a 2 min"}</p>
+          <p className="text-xs font-bold text-green-400">{isEn ? "New order!" : "Nouvelle commande !"}</p>
+          <p className={`text-[10px] ${SUBTLE}`}>{isEn ? "2 min ago" : "Il y a 2 min"}</p>
         </div>
       </div>
 
       {/* Dashboard principal */}
-      <div className="w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
+      <div className={`w-[300px] overflow-hidden rounded-3xl border ${CARD_BORDER} ${CARD_BG} shadow-[var(--shadow-xl)] sm:w-[340px]`}>
 
         {/* Header dashboard */}
-        <div className="slide-up-1 flex items-center justify-between border-b border-[var(--border)] px-4 py-3.5">
+        <div className={`slide-up-1 flex items-center justify-between border-b border-[rgba(255,255,255,0.08)] px-4 py-3.5`}>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--subtle)]">{isEn ? "Dashboard" : "Tableau de bord"}</p>
-            <p className="text-sm font-bold">{isEn ? "Your performance" : "Vos performances"}</p>
+            <p className={`text-[10px] font-semibold uppercase tracking-widest ${SUBTLE}`}>{isEn ? "Dashboard" : "Tableau de bord"}</p>
+            <p className="text-sm font-bold text-white">{isEn ? "Your performance" : "Vos performances"}</p>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-bold text-green-700">
+          <div className="flex items-center gap-1.5 rounded-full bg-[rgba(34,197,94,0.15)] px-2.5 py-1 text-[11px] font-bold text-green-400">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
             {isEn ? "Active" : "Actif"}
           </div>
         </div>
 
         {/* Stats 3 colonnes */}
-        <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-b border-[var(--border)]">
+        <div className={`grid grid-cols-3 ${DIVIDER} divide-x border-b border-[rgba(255,255,255,0.08)]`}>
           <div className="count-up-1 px-3 py-3.5 text-center">
-            <p className="font-display text-base font-extrabold text-[var(--color-brand-600)]">347k</p>
-            <p className="mt-0.5 text-[10px] text-[var(--subtle)]">FCFA</p>
-            <p className="text-[10px] font-semibold">{isEn ? "Revenue" : "Revenus"}</p>
+            <p className="font-display text-base font-extrabold text-[#22c55e]">347k</p>
+            <p className={`mt-0.5 text-[10px] ${SUBTLE}`}>FCFA</p>
+            <p className="text-[10px] font-semibold text-white">{isEn ? "Revenue" : "Revenus"}</p>
           </div>
           <div className="count-up-2 px-3 py-3.5 text-center">
-            <p className="font-display text-base font-extrabold">12</p>
-            <p className="mt-0.5 text-[10px] text-[var(--subtle)]">{isEn ? "total" : "total"}</p>
-            <p className="text-[10px] font-semibold">{isEn ? "Orders" : "Commandes"}</p>
+            <p className="font-display text-base font-extrabold text-white">12</p>
+            <p className={`mt-0.5 text-[10px] ${SUBTLE}`}>{isEn ? "total" : "total"}</p>
+            <p className="text-[10px] font-semibold text-white">{isEn ? "Orders" : "Commandes"}</p>
           </div>
           <div className="count-up-3 px-3 py-3.5 text-center">
-            <p className="font-display text-base font-extrabold text-amber-500">4.9</p>
+            <p className="font-display text-base font-extrabold text-amber-400">4.9</p>
             <div className="mt-0.5 flex justify-center">
               <Stars n={5} />
             </div>
-            <p className="text-[10px] font-semibold">{isEn ? "Rating" : "Note"}</p>
+            <p className="text-[10px] font-semibold text-white">{isEn ? "Rating" : "Note"}</p>
           </div>
         </div>
 
         {/* Barre revenus mensuelle */}
         <div className="slide-up-2 px-4 py-3.5">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[11px] font-semibold">{isEn ? "This month" : "Ce mois"}</p>
-            <p className="text-[11px] font-bold text-green-600">+23%</p>
+            <p className="text-[11px] font-semibold text-white">{isEn ? "This month" : "Ce mois"}</p>
+            <p className="text-[11px] font-bold text-green-400">+23%</p>
           </div>
           <div className="flex items-end gap-1 h-10">
             {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
@@ -293,7 +300,7 @@ function ProviderVisual({ locale }: { locale: Locale }) {
                   height: `${h}%`,
                   background: i === 5
                     ? "var(--color-brand-500)"
-                    : "var(--surface)",
+                    : "rgba(255,255,255,0.08)",
                   animation: `slideUp 0.4s ease both ${0.1 + i * 0.06}s`,
                 }}
               />
@@ -302,44 +309,44 @@ function ProviderVisual({ locale }: { locale: Locale }) {
         </div>
 
         {/* Dernière commande */}
-        <div className="slide-up-3 border-t border-[var(--border)] px-4 py-3.5">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-[var(--subtle)]">
+        <div className="slide-up-3 border-t border-[rgba(255,255,255,0.08)] px-4 py-3.5">
+          <p className={`mb-2 text-[10px] font-semibold uppercase tracking-widest ${SUBTLE}`}>
             {isEn ? "Latest order" : "Dernière commande"}
           </p>
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-brand-50)] text-[var(--color-brand-600)] text-xs font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[rgba(34,197,94,0.12)] text-[#22c55e] text-xs font-bold">
               SK
             </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-xs font-semibold">{isEn ? "Logo redesign" : "Refonte logo"}</p>
-              <p className="text-[10px] text-[var(--subtle)]">Seydou Konaté</p>
+              <p className="truncate text-xs font-semibold text-white">{isEn ? "Logo redesign" : "Refonte logo"}</p>
+              <p className={`text-[10px] ${SUBTLE}`}>Seydou Konaté</p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-xs font-bold text-[var(--color-brand-600)]">85 000</p>
-              <p className="text-[9px] text-[var(--subtle)]">FCFA</p>
+              <p className="text-xs font-bold text-[#22c55e]">85 000</p>
+              <p className={`text-[9px] ${SUBTLE}`}>FCFA</p>
             </div>
           </div>
         </div>
 
         {/* Escrow progress */}
-        <div className="slide-up-4 border-t border-[var(--border)] px-4 py-3">
-          <div className="flex items-center justify-between text-[10px] text-[var(--subtle)] mb-1.5">
+        <div className="slide-up-4 border-t border-[rgba(255,255,255,0.08)] px-4 py-3">
+          <div className={`flex items-center justify-between text-[10px] ${SUBTLE} mb-1.5`}>
             <span className="flex items-center gap-1">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
               {isEn ? "Funds secured" : "Fonds sécurisés"}
             </span>
-            <span className="font-semibold text-[var(--color-brand-600)]">{isEn ? "Delivery" : "Livraison"}</span>
+            <span className="font-semibold text-[#22c55e]">{isEn ? "Delivery" : "Livraison"}</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
+          <div className={`h-1.5 w-full overflow-hidden rounded-full ${INNER_BG}`}>
             <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)]" />
           </div>
         </div>
       </div>
 
       {/* Badge flottant bas-gauche : versement reçu */}
-      <div className="float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 shadow-[var(--shadow-lg)] sm:-left-10">
+      <div className={`float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border ${CARD_BORDER} ${CARD_BG} p-3.5 shadow-[var(--shadow-lg)] sm:-left-10`}>
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green-500 text-white shadow-md">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -347,15 +354,15 @@ function ProviderVisual({ locale }: { locale: Locale }) {
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="font-display text-xs font-bold text-green-700">
+            <p className="font-display text-xs font-bold text-[#22c55e]">
               {isEn ? "Payment received" : "Paiement reçu"}
             </p>
-            <p className="truncate text-[10px] text-[var(--subtle)]">85 000 FCFA</p>
+            <p className={`truncate text-[10px] ${SUBTLE}`}>85 000 FCFA</p>
           </div>
         </div>
-        <div className="mt-2.5 flex items-center gap-1.5 rounded-xl bg-[var(--surface)] px-2.5 py-1.5">
+        <div className={`mt-2.5 flex items-center gap-1.5 rounded-xl ${INNER_BG} px-2.5 py-1.5`}>
           <span className="h-2 w-2 rounded-full bg-[#FF8A00]" />
-          <span className="text-[10px] font-semibold text-[var(--subtle)]">Wave · Mobile Money</span>
+          <span className={`text-[10px] font-semibold ${SUBTLE}`}>Wave · Mobile Money</span>
         </div>
       </div>
     </div>
