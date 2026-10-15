@@ -1,5 +1,6 @@
 import { Header } from "./header";
 import { Hero } from "./hero";
+import { TrustBar } from "./trust-bar";
 import { Categories } from "./categories";
 import { FeaturedProviders } from "./featured-providers";
 import { FeaturedServices } from "./featured-services";
@@ -20,6 +21,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <Header locale={locale} />
       <main>
         <Hero locale={locale} />
+        <TrustBar locale={locale} />
         <FeaturedProviders locale={locale} />
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />

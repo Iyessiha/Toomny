@@ -133,6 +133,23 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             {a.lead}
           </p>
 
+          {a.points && a.points.length > 0 && (
+            <ul
+              data-reveal
+              style={{ transitionDelay: "125ms" }}
+              className="mt-4 flex flex-wrap gap-x-5 gap-y-2"
+            >
+              {a.points.map((pt) => (
+                <li key={pt} className="flex items-center gap-1.5 text-sm font-semibold text-[#4ade80]">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
+                    <path d="M11.854 3.646a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 9.293l5.646-5.647a.5.5 0 0 1 .708 0Z"/>
+                  </svg>
+                  {pt}
+                </li>
+              ))}
+            </ul>
+          )}
+
           <div data-reveal style={{ transitionDelay: "150ms" }} className="mt-8 flex flex-wrap items-center gap-3">
             <Link
               href={a.href}

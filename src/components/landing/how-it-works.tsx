@@ -116,7 +116,7 @@ export function HowItWorks({ locale = "fr" }: { locale?: Locale }) {
                 {/* Connecteur entre les étapes (desktop) */}
                 {i < 2 && (
                   <div className="pointer-events-none absolute -right-4 top-1/2 hidden -translate-y-1/2 md:block" aria-hidden>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--border)" strokeWidth="1.5" strokeLinecap="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-300)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M5 12h14M13 5l7 7-7 7" />
                     </svg>
                   </div>
