@@ -32,6 +32,7 @@ export function dashboardNavSections(
             { href: "/demandes", label: nav.inquiries },
             { href: "/disputes", label: nav.disputes },
             { href: "/notifications", label: nav.notifications },
+            { href: "/dashboard/favoris", label: nav.wishlist },
           ],
           current,
         ),
@@ -69,6 +70,7 @@ export function dashboardNavSections(
         [
           { href: "/dashboard", label: nav.home },
           { href: "/services", label: nav.findProvider },
+          { href: "/dashboard/favoris", label: nav.wishlist },
           { href: "/orders", label: nav.myOrders },
           { href: "/messages", label: nav.messages },
           { href: "/demandes", label: nav.inquiries },
