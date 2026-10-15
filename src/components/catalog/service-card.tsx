@@ -48,11 +48,11 @@ export function ServiceCard({ service: s, locale }: Props) {
         {/* Badge boosté */}
         {s.boosted && (
           <div className="absolute left-2 top-2 z-10">
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-amber-950 shadow-md shadow-amber-500/30">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
               </svg>
-              Boosté
+              Vedette
             </span>
           </div>
         )}
@@ -93,18 +93,25 @@ export function ServiceCard({ service: s, locale }: Props) {
           {s.title}
         </p>
 
-        {/* Note */}
-        {rating != null && ratingCount > 0 ? (
-          <div className="mt-1.5 flex items-center gap-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden>
-              <path fill="#FFCB00" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
-            </svg>
-            <span className="text-xs font-bold text-amber-500">{rating.toFixed(1)}</span>
-            <span className="text-xs text-[var(--subtle)]">({ratingCount})</span>
-          </div>
-        ) : (
-          <div className="mt-1.5 h-[18px]" aria-hidden />
-        )}
+        {/* Note / badge Nouveau */}
+        <div className="mt-1.5 flex items-center gap-1.5">
+          {rating != null && ratingCount > 0 ? (
+            <>
+              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden>
+                <path fill="#FFCB00" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+              </svg>
+              <span className="text-xs font-bold text-amber-500">{rating.toFixed(1)}</span>
+              <span className="text-xs text-[var(--subtle)]">
+                ({ratingCount} {ratingCount > 1 ? (locale === "fr" ? "avis" : "reviews") : (locale === "fr" ? "avis" : "review")})
+              </span>
+            </>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-brand-700)]">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-500)]" />
+              {locale === "fr" ? "Nouveau" : "New"}
+            </span>
+          )}
+        </div>
 
         {/* Séparateur */}
         <div className="mt-2.5 border-t border-[var(--border)]" />

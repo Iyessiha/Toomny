@@ -6,6 +6,7 @@ import { FeaturedProviders } from "./featured-providers";
 import { FeaturedServices } from "./featured-services";
 import { HowItWorks } from "./how-it-works";
 import { BoostSection } from "./boost-section";
+import { MarketingPopup } from "./marketing-popup";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { ProvidersCarousel } from "./providers-carousel-server";
@@ -34,6 +35,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <FinalCta locale={locale} />
       </main>
       <Footer locale={locale} />
+      <MarketingPopup locale={locale} />
     </>
   );
 }

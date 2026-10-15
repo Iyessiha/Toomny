@@ -91,9 +91,11 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
             href={other}
             hrefLang={locale === "en" ? "fr" : "en"}
             onClick={handleLocaleSwitch}
-            className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)] transition-colors hover:text-[var(--foreground)]"
+            title={locale === "en" ? "Passer en français" : "Switch to English"}
+            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm font-semibold text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--foreground)]"
           >
-            {locale === "en" ? "FR" : "EN"}
+            <span aria-hidden>{locale === "en" ? "🇫🇷" : "🇬🇧"}</span>
+            <span className="text-xs uppercase tracking-wide">{locale === "en" ? "FR" : "EN"}</span>
           </Link>
 
           {user ? (
@@ -174,8 +176,9 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
             <Link
               href={other}
               onClick={handleLocaleSwitch}
-              className="rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)]"
+              className="flex items-center gap-2 rounded-lg px-2 py-2.5 text-sm text-[var(--subtle)] hover:text-[var(--foreground)]"
             >
+              <span aria-hidden>{locale === "en" ? "🇫🇷" : "🇬🇧"}</span>
               {locale === "en" ? "Français" : "English"}
             </Link>
 
