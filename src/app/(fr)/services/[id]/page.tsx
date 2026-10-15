@@ -14,6 +14,7 @@ import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { ReviewsList } from "@/components/catalog/reviews-list";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
+import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
@@ -232,7 +233,8 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                 <h1 className="flex-1 text-2xl font-bold leading-tight sm:text-3xl">
                   {service.title}
                 </h1>
-                <div className="mt-1 shrink-0">
+                <div className="mt-1 flex shrink-0 items-center gap-2">
+                  <ShareButton title={service.title} locale={locale} size="sm" />
                   <WishlistButton serviceId={service.id} size="md" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
                 </div>
               </div>

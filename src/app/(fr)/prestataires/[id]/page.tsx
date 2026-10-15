@@ -10,6 +10,7 @@ import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
 
 export const dynamic = "force-dynamic";
@@ -193,7 +194,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               </p>
             </div>
 
-            {/* Stats */}
+            {/* Stats + partage */}
             <dl className="grid grid-cols-3 gap-4 text-center sm:gap-6 flex-none">
               <div>
                 <dt className="text-xs text-[var(--subtle)]">{t.rating}</dt>
@@ -214,6 +215,10 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 </dd>
               </div>
             </dl>
+          </div>
+
+          <div className="relative mt-4 flex items-center gap-3">
+            <ShareButton title={person.display_name ?? "Prestataire Toomny"} locale={locale} />
           </div>
 
           {profile?.bio && (
