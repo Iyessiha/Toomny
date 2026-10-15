@@ -1,3 +1,4 @@
+import type React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAuth, isProvider } from "@/lib/auth";
@@ -69,49 +70,50 @@ function ProviderDashboard({
     >
       {/* ── KYC Banner ─────────────────────────────────────────────────── */}
       {!kycDone && !kycPending && (
-        <div className="mb-6 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50">
+        <div className="mb-6 overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50">
           <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-                  <path d="M12 8v4M12 16h.01" />
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 shadow-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/>
+                  <path d="M12 8v4M12 16h.01"/>
                 </svg>
               </div>
               <div>
                 <p className="font-semibold text-amber-900">
                   {kycRejected ? "Vérification rejetée — nouvelle soumission possible" : "Vérifiez votre identité pour encaisser"}
                 </p>
-                <p className="mt-0.5 text-sm text-amber-800">
+                <p className="mt-0.5 text-sm text-amber-800/80">
                   {kycRejected
-                    ? "Votre demande précédente a été rejetée. Consultez le motif et soumettez un nouveau document."
-                    : "La vérification KYC est obligatoire avant de recevoir des versements mobile money (Wave, Orange Money…)."}
+                    ? "Votre demande a été rejetée. Consultez le motif et soumettez un nouveau document."
+                    : "La vérification KYC est obligatoire avant de recevoir des versements mobile money."}
                 </p>
               </div>
             </div>
             <Link
               href="/dashboard/verification"
-              className="shrink-0 rounded-full bg-amber-800 px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-amber-900"
+              className="shrink-0 rounded-xl bg-amber-700 px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-800 active:scale-95"
             >
               {kycRejected ? "Resoumettre" : "Vérifier mon identité"}
             </Link>
           </div>
-          <div className="h-1 bg-amber-200">
-            <div className="h-full w-0 bg-amber-400" />
+          {/* Progress bar */}
+          <div className="h-0.5 bg-amber-100">
+            <div className="h-full bg-gradient-to-r from-amber-400 to-orange-400" style={{ width: "30%" }} />
           </div>
         </div>
       )}
 
       {kycPending && (
-        <div className="mb-6 flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100">
-            <svg className="animate-spin text-blue-600" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" opacity=".25" /><path d="M21 12a9 9 0 0 0-9-9" />
+        <div className="mb-6 flex items-center gap-4 rounded-2xl border border-sky-200 bg-gradient-to-r from-sky-50 to-blue-50 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 shadow-sm">
+            <svg className="animate-spin text-sky-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" opacity=".25"/><path d="M21 12a9 9 0 0 0-9-9"/>
             </svg>
           </div>
           <div>
-            <p className="text-sm font-semibold text-blue-900">Vérification en cours d&apos;examen</p>
-            <p className="mt-0.5 text-xs text-blue-700">Notre équipe examine vos documents. Résultat sous 24-48 h ouvrées.</p>
+            <p className="text-sm font-semibold text-sky-900">Vérification en cours d&apos;examen</p>
+            <p className="mt-0.5 text-xs text-sky-700">Notre équipe examine vos documents. Résultat sous 24-48 h ouvrées.</p>
           </div>
         </div>
       )}
@@ -146,15 +148,16 @@ function ProviderDashboard({
       </div>
 
       {/* ── Corps principal ─────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_300px]">
+      <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_280px]">
 
         {/* Commandes récentes */}
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-base font-bold">Commandes reçues</h2>
             {data.orders.length > 0 && (
-              <Link href="/orders" className="text-sm font-medium text-[var(--color-brand-600)] hover:underline">
-                Voir tout →
+              <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+                Voir tout
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             )}
           </div>
@@ -167,32 +170,32 @@ function ProviderDashboard({
               icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>}
             />
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+            <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[var(--border)]">
-                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Référence</th>
-                    <th className="hidden px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)] sm:table-cell">Date</th>
-                    <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Statut</th>
-                    <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Net</th>
+                  <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Référence</th>
+                    <th className="hidden px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)] sm:table-cell">Date</th>
+                    <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Statut</th>
+                    <th className="px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Net reçu</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
                   {data.orders.slice(0, 10).map((o) => (
-                    <tr key={o.id} className="transition-colors hover:bg-[var(--surface)]">
+                    <tr key={o.id} className="group transition-colors hover:bg-[var(--surface)]">
                       <td className="px-5 py-4">
-                        <span className="font-mono text-xs font-medium text-[var(--subtle)]">{o.reference}</span>
+                        <span className="font-mono text-xs font-semibold text-[var(--subtle)] group-hover:text-[var(--foreground)]">{o.reference}</span>
                       </td>
                       <td className="hidden px-5 py-4 text-xs text-[var(--subtle)] sm:table-cell">
                         {new Date(o.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
                       </td>
                       <td className="px-5 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusTone(o.status)}`}>
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusTone(o.status)}`}>
                           {ORDER_STATUS_FR[o.status] ?? o.status}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-right font-display font-bold">
-                        {formatMoney(BigInt(o.provider_net_minor), o.currency, "fr")}
+                      <td className="px-5 py-4 text-right">
+                        <span className="font-display text-sm font-bold">{formatMoney(BigInt(o.provider_net_minor), o.currency, "fr")}</span>
                       </td>
                     </tr>
                   ))}
@@ -204,54 +207,77 @@ function ProviderDashboard({
 
         {/* Sidebar droite */}
         <aside className="flex flex-col gap-4">
-          {/* Profil */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Mon profil</p>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--color-brand-100)] font-display text-sm font-bold text-[var(--color-brand-700)]">
-                {(user.displayName ?? user.email ?? "?")[0]?.toUpperCase()}
-              </div>
-              <div>
-                <p className="font-semibold">{user.displayName ?? "—"}</p>
-                <p className="text-xs text-[var(--subtle)]">{user.city ? `${user.city}, ` : ""}{user.countryCode ?? ""}</p>
-              </div>
+          {/* Profil completion */}
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
+            <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Mon profil</p>
             </div>
-            {user.phone && (
-              <p className="mt-2.5 text-xs text-[var(--subtle)]">{user.phone}</p>
-            )}
-            <div className="mt-4 space-y-2">
-              <ProfileRow label="Nom" done={!!user.displayName} />
-              <ProfileRow label="Téléphone" done={!!user.phone} />
-              <ProfileRow label="Ville" done={!!user.city} />
-              <ProfileRow label="Identité vérifiée" done={kycDone} />
+            <div className="p-5">
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl font-display text-sm font-extrabold text-white shadow-md"
+                  style={{ background: "linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%)" }}
+                >
+                  {(user.displayName ?? user.email ?? "?")[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold">{user.displayName ?? "—"}</p>
+                  <p className="truncate text-xs text-[var(--subtle)]">{user.city ? `${user.city}${user.countryCode ? `, ${user.countryCode}` : ""}` : (user.countryCode ?? "")}</p>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2.5">
+                <ProfileRow label="Nom complet" done={!!user.displayName} />
+                <ProfileRow label="Téléphone" done={!!user.phone} />
+                <ProfileRow label="Ville" done={!!user.city} />
+                <ProfileRow label="Identité vérifiée" done={kycDone} />
+              </div>
+              <Link href="/dashboard/profil" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+                Compléter mon profil
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
             </div>
           </div>
 
           {/* Actions rapides */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Actions rapides</p>
-            <div className="mt-3 space-y-2">
-              <QuickLink href="/dashboard/prestations" label="Publier une prestation" icon="+" />
-              <QuickLink href="/dashboard/versements" label="Configurer les versements" icon="→" />
-              {!kycDone && <QuickLink href="/dashboard/verification" label="Vérifier mon identité" icon="🛡" warn />}
-              <QuickLink href="/services" label="Explorer le catalogue" icon="↗" />
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
+            <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Actions rapides</p>
+            </div>
+            <div className="p-3 space-y-1">
+              <QuickLink href="/dashboard/prestations" label="Publier une prestation" icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
+              } />
+              <QuickLink href="/dashboard/versements" label="Configurer les versements" icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
+              } />
+              {!kycDone && <QuickLink href="/dashboard/verification" label="Vérifier mon identité" icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+              } warn />}
+              <QuickLink href="/services" label="Explorer le catalogue" icon={
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              } />
             </div>
           </div>
 
-          {/* Versements info */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">Modes de paiement</p>
-            <div className="mt-3 space-y-2 text-sm">
-              {["Wave", "Orange Money", "MTN MoMo", "Moov Money"].map((m) => (
-                <div key={m} className="flex items-center gap-2 text-[var(--subtle)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-400)]" />
-                  {m}
-                </div>
-              ))}
+          {/* Modes de paiement */}
+          <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
+            <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Modes de paiement</p>
             </div>
-            <Link href="/dashboard/versements" className="mt-4 block text-xs font-medium text-[var(--color-brand-600)] hover:underline">
-              Configurer mon numéro →
-            </Link>
+            <div className="p-5">
+              <div className="grid grid-cols-2 gap-2">
+                {["Wave", "Orange Money", "MTN MoMo", "Moov Money"].map((m) => (
+                  <div key={m} className="flex items-center gap-2 rounded-xl bg-[var(--surface)] px-3 py-2.5 text-xs font-medium text-[var(--foreground)]">
+                    <span className="h-2 w-2 rounded-full bg-[var(--color-brand-400)]" />
+                    {m}
+                  </div>
+                ))}
+              </div>
+              <Link href="/dashboard/versements" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+                Configurer mon numéro
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </Link>
+            </div>
           </div>
         </aside>
       </div>
@@ -478,7 +504,7 @@ function ProfileRow({ label, done }: { label: string; done: boolean }) {
   );
 }
 
-function QuickLink({ href, label, icon, warn = false }: { href: string; label: string; icon: string; warn?: boolean }) {
+function QuickLink({ href, label, icon, warn = false }: { href: string; label: string; icon: React.ReactNode; warn?: boolean }) {
   return (
     <Link
       href={href}
@@ -488,7 +514,7 @@ function QuickLink({ href, label, icon, warn = false }: { href: string; label: s
           : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
       }`}
     >
-      <span className="w-4 text-center text-xs">{icon}</span>
+      <span className="shrink-0">{icon}</span>
       {label}
     </Link>
   );
