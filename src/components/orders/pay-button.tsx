@@ -26,8 +26,8 @@ export function PayButton({ orderId, labels }: Props) {
         setLoading(false);
         return;
       }
-      if (typeof window !== "undefined" && typeof (window as { gtag?: (...args: unknown[]) => void }).gtag === "function") {
-        (window as { gtag: (...args: unknown[]) => void }).gtag("event", "ads_conversion_Paiement_initi__1", {});
+      if (typeof window !== "undefined" && typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === "function") {
+        (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "ads_conversion_Paiement_initi__1", {});
       }
       window.location.href = data.checkoutUrl;
     } catch {
