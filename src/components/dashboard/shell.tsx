@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
-import { SignOutButton } from "./sign-out";
+import { createClient } from "@/lib/supabase/client";
+import { setPreferredLocale } from "@/app/(fr)/dashboard/compte/actions";
 
 export type NavItem = {
   href: string;
@@ -145,7 +146,7 @@ export function DashboardShell({
   subtitle,
   actions,
   children,
-  locale: _locale,
+  locale = "fr",
 }: {
   user: {
     displayName: string | null;
@@ -165,7 +166,33 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  const [signingOut, setSigningOut] = useState(false);
+  const otherLocale = locale === "en" ? "fr" : "en";
+  const otherPath = locale === "en" ? "/dashboard" : "/en/dashboard";
+
+  async function handleSignOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    await createClient().auth.signOut();
+    router.push("/");
+    router.refresh();
+  }
+
+  async function handleLocaleSwitch() {
+    if (switching) return;
+    setSwitching(true);
+    try {
+      await setPreferredLocale(otherLocale as "fr" | "en");
+      router.push(otherPath);
+      router.refresh();
+    } finally {
+      setSwitching(false);
+    }
+  }
 
   const initials = (user.displayName ?? user.email ?? "?")
     .split(/[\s@.]+/)
@@ -187,11 +214,24 @@ export function DashboardShell({
   function SidebarContent() {
     return (
       <div className="flex h-full flex-col overflow-hidden">
-        {/* Logo area */}
-        <div className="relative flex h-[60px] shrink-0 items-center px-5">
-          <Link href="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2">
-            <span className="text-[var(--color-brand-500)]"><Logo size={26} /></span>
+        {/* Logo area + sign out top-right */}
+        <div className="relative flex h-[60px] shrink-0 items-center justify-between px-4">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--color-brand-500)]">
+            <Logo size={26} />
           </Link>
+          {/* Sign out — icône en haut à droite */}
+          <button
+            onClick={handleSignOut}
+            disabled={signingOut}
+            title="Se déconnecter"
+            aria-label="Se déconnecter"
+            className="rounded-lg p-1.5 text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:opacity-50"
+          >
+            {signingOut
+              ? <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12a9 9 0 0 0-9-9" strokeLinecap="round"/></svg>
+              : <IcOut />
+            }
+          </button>
           {/* Thin brand line at bottom */}
           <div className="absolute bottom-0 inset-x-4 h-px bg-gradient-to-r from-[var(--color-brand-200)] via-[var(--color-brand-100)] to-transparent" />
         </div>
@@ -261,12 +301,23 @@ export function DashboardShell({
           )}
         </nav>
 
-        {/* Sign out */}
+        {/* Locale switcher */}
         <div className="shrink-0 border-t border-[var(--border)] px-3 py-3">
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)] cursor-pointer">
-            <span className="shrink-0"><IcOut /></span>
-            <SignOutButton label="Se déconnecter" />
-          </div>
+          <button
+            onClick={handleLocaleSwitch}
+            disabled={switching}
+            className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:opacity-50"
+          >
+            <span aria-hidden className="text-base leading-none">
+              {locale === "en" ? "🇫🇷" : "🇬🇧"}
+            </span>
+            <span>{locale === "en" ? "Passer en français" : "Switch to English"}</span>
+            {switching && (
+              <svg className="ml-auto animate-spin text-[var(--subtle)]" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 12a9 9 0 0 0-9-9" strokeLinecap="round"/>
+              </svg>
+            )}
+          </button>
         </div>
       </div>
     );
@@ -297,11 +348,22 @@ export function DashboardShell({
             {sidebarOpen ? <IcX /> : <IcMenu />}
           </button>
           <Link href="/" className="text-[var(--color-brand-500)]"><Logo size={22} /></Link>
-          <div
-            className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-xs font-bold text-white shadow"
-            style={{ background: "linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%)" }}
-          >
-            {initials}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleLocaleSwitch}
+              disabled={switching}
+              title={locale === "en" ? "Passer en français" : "Switch to English"}
+              className="flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)] disabled:opacity-50"
+            >
+              <span aria-hidden>{locale === "en" ? "🇫🇷" : "🇬🇧"}</span>
+              <span className="uppercase tracking-wide">{otherLocale}</span>
+            </button>
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-xs font-bold text-white shadow"
+              style={{ background: "linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%)" }}
+            >
+              {initials}
+            </div>
           </div>
         </div>
 
