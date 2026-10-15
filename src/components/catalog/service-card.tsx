@@ -76,23 +76,6 @@ export function ServiceCard({ service: s, locale }: Props) {
           <WishlistButton serviceId={s.id} size="sm" labels={{ add: t.wishlistAdd, remove: t.wishlistRemove }} />
         </div>
 
-        {/* Prix en surimpression bas-droite */}
-        <div className="absolute bottom-2.5 right-3 z-10 text-right">
-          <p className="text-[9px] font-medium text-white/70">{t.from}</p>
-          <p className="font-display text-base font-extrabold leading-none text-white drop-shadow">
-            {formatMoney(BigInt(s.price_minor), s.currency, locale)}
-          </p>
-        </div>
-
-        {/* Délai — bas gauche */}
-        <div className="absolute bottom-2.5 left-3 z-10 flex items-center gap-1">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.80)" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-          </svg>
-          <span className="text-[11px] font-semibold text-white/80">
-            {s.delivery_days} {s.delivery_days > 1 ? t.days : t.day}
-          </span>
-        </div>
       </div>
 
       {/* ── Contenu ── */}
@@ -115,33 +98,16 @@ export function ServiceCard({ service: s, locale }: Props) {
                 className="block truncate text-xs font-semibold text-[var(--foreground)] transition-colors hover:text-[var(--color-brand-600)] hover:underline underline-offset-2"
               >
                 {s.provider.display_name ?? t.provider}
-                {s.provider.country_code && (
-                  <span className="ml-1 font-normal text-[var(--subtle)]">· {s.provider.country_code}</span>
-                )}
               </Link>
             ) : (
               <p className="truncate text-xs font-semibold text-[var(--foreground)]">
                 {s.provider?.display_name ?? t.provider}
               </p>
             )}
-
-            {/* Stars + count OU badge Nouveau */}
-            <div className="mt-0.5 flex items-center gap-1.5">
-              {rating != null && ratingCount > 0 ? (
-                <>
-                  <Stars n={rating} />
-                  <span className="text-[11px] font-bold text-amber-500">{rating.toFixed(1)}</span>
-                  <span className="text-[10px] text-[var(--subtle)]">
-                    ({ratingCount} {locale === "fr" ? "avis" : ratingCount > 1 ? "reviews" : "review"})
-                  </span>
-                </>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-brand-700)]">
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-500)]" />
-                  {locale === "fr" ? "Nouveau" : "New"}
-                </span>
-              )}
-            </div>
+            <p className="mt-0.5 text-[10px] text-[var(--subtle)]">
+              {[s.provider?.country_code, `${s.delivery_days} ${s.delivery_days > 1 ? t.days : t.day}`]
+                .filter(Boolean).join(" · ")}
+            </p>
           </div>
         </div>
 
@@ -150,14 +116,37 @@ export function ServiceCard({ service: s, locale }: Props) {
           {s.title}
         </p>
 
-        {/* Escrow indicator */}
-        <div className="mt-3 flex items-center gap-1.5 rounded-xl bg-[var(--surface)] px-3 py-2">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--color-brand-500)" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
-            <rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        {/* Étoiles + avis (remplace le bandeau escrow) */}
+        <div className="mt-2.5 flex items-center gap-2">
+          {rating != null && ratingCount > 0 ? (
+            <>
+              <Stars n={rating} size={13} />
+              <span className="text-sm font-bold text-amber-500">{rating.toFixed(1)}</span>
+              <span className="text-xs text-[var(--subtle)]">
+                · {ratingCount} {locale === "fr" ? "avis" : ratingCount > 1 ? "reviews" : "review"}
+              </span>
+            </>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-brand-50)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-brand-700)]">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[var(--color-brand-500)]" />
+              {locale === "fr" ? "Nouveau · Pas encore d'avis" : "New · No reviews yet"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* ── Prix mis en évidence — fond couleur marque ── */}
+      <div className="flex items-center justify-between gap-3 border-t border-[var(--color-brand-100)] bg-[var(--color-brand-50)] px-3.5 py-3">
+        <div>
+          <p className="text-[10px] font-medium text-[var(--color-brand-600)]">{t.from}</p>
+          <p className="font-display text-base font-extrabold leading-tight text-[var(--color-brand-700)]">
+            {formatMoney(BigInt(s.price_minor), s.currency, locale)}
+          </p>
+        </div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white shadow-md shadow-[var(--color-brand-500)]/30 transition-transform group-hover:scale-110">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-[10px] font-medium text-[var(--subtle)]">
-            {locale === "fr" ? "Paiement sécurisé jusqu'à la livraison" : "Payment secured until delivery"}
-          </span>
         </div>
       </div>
     </div>
