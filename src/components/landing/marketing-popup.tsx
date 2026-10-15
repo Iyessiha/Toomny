@@ -59,11 +59,22 @@ const PERKS = {
   en: ["0% client commission", "Secure payment until delivery", "Wave · Orange · MTN payout"],
 };
 
+function detectLocale(fallback: Locale): Locale {
+  if (typeof navigator === "undefined") return fallback;
+  return navigator.language?.toLowerCase().startsWith("fr") ? "fr" : "en";
+}
+
 export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
   const [variant, setVariant] = useState<PopupVariant>(null);
   const [visible, setVisible] = useState(false);
+  // Langue basée sur le navigateur du visiteur (pas seulement la route)
+  const [effectiveLocale, setEffectiveLocale] = useState<Locale>(locale);
   const shownRef = useRef(false);
   const entryTimeRef = useRef(Date.now());
+
+  useEffect(() => {
+    setEffectiveLocale(detectLocale(locale));
+  }, [locale]);
 
   const show = useCallback((v: PopupVariant) => {
     if (shownRef.current || !v) return;
@@ -108,8 +119,8 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
 
   if (!variant) return null;
 
-  const c = CONTENT[variant][locale];
-  const perks = PERKS[locale];
+  const c = CONTENT[variant][effectiveLocale];
+  const perks = PERKS[effectiveLocale];
 
   return (
     <>
@@ -121,16 +132,15 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
         aria-hidden
       />
 
-      {/* Modal */}
+      {/* Modal — centrage via inset-x-0 + mx-auto (pas de translateX → compatible mobile) */}
       <div
         role="dialog"
         aria-modal
         aria-label={c.title}
-        className="fixed inset-x-4 bottom-4 z-[101] mx-auto max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-2xl shadow-black/40 transition-all duration-350 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:bottom-8"
+        className="fixed inset-x-4 bottom-4 z-[101] mx-auto max-w-lg rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-2xl shadow-black/40 sm:inset-x-0 sm:bottom-8"
         style={{
-          transform: visible
-            ? "translateX(-50%) translateY(0) scale(1)"
-            : "translateX(-50%) translateY(24px) scale(0.97)",
+          transition: "transform 0.3s ease, opacity 0.3s ease",
+          transform: visible ? "translateY(0) scale(1)" : "translateY(24px) scale(0.97)",
           opacity: visible ? 1 : 0,
         }}
       >
@@ -202,7 +212,7 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
 
           {/* Note légère */}
           <p className="mt-4 text-center text-[10px] text-[var(--subtle)]">
-            {locale === "fr" ? "Inscription gratuite · Pas de carte bancaire requise" : "Free signup · No credit card required"}
+            {effectiveLocale === "fr" ? "Inscription gratuite · Pas de carte bancaire requise" : "Free signup · No credit card required"}
           </p>
         </div>
       </div>
