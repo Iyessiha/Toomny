@@ -49,45 +49,45 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
             <div
               key={plan.name}
               data-reveal
-              className={`relative flex flex-col rounded-2xl p-6 text-white transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 ${
+              className={`relative flex flex-col rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.08] ${
                 plan.highlight
-                  ? "border border-[rgba(34,197,94,0.35)] bg-[linear-gradient(160deg,rgba(22,163,74,0.22)_0%,rgba(11,25,18,0.92)_60%)] shadow-[0_0_0_1px_rgba(34,197,94,0.15),0_24px_56px_rgba(0,0,0,0.35)]"
-                  : "border border-[rgba(255,255,255,0.07)] bg-[rgba(11,25,18,0.85)]"
+                  ? "border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] shadow-[0_0_0_1px_var(--color-brand-200)]"
+                  : "border border-[var(--border)] bg-[var(--background)]"
               }`}
             >
               {plan.badge && (
                 <span
-                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#22c55e] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(34,197,94,0.4)]"
+                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--color-brand-500)] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(16,128,67,0.35)]"
                 >
                   {plan.badge}
                 </span>
               )}
 
               {/* Plan name */}
-              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[#4ade80]" : "text-white"}`}>
+              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[var(--color-brand-700)]" : ""}`}>
                 {plan.name}
               </p>
 
               {/* Commission pill */}
               <div
                 className={`mt-4 inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 ${
-                  plan.highlight ? "bg-[rgba(34,197,94,0.15)]" : "bg-[rgba(34,197,94,0.07)]"
+                  plan.highlight ? "bg-[var(--color-brand-100)]" : "bg-[var(--surface)]"
                 }`}
               >
-                <span className="font-display text-2xl font-bold text-[#22c55e]">
+                <span className="font-display text-2xl font-bold text-[var(--color-brand-600)]">
                   {plan.commission}
                 </span>
-                <span className="text-sm text-white/60">
+                <span className="text-sm text-[var(--subtle)]">
                   commission
                 </span>
               </div>
 
               {/* Price */}
               <div className="mt-5">
-                <span className="font-display text-2xl font-bold text-white">
+                <span className="font-display text-2xl font-bold">
                   {plan.price}
                 </span>
-                <span className="ml-1.5 text-sm text-white/55">
+                <span className="ml-1.5 text-sm text-[var(--subtle)]">
                   {plan.priceNote}
                 </span>
               </div>
@@ -96,10 +96,10 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               <ul className="mt-5 flex-1 space-y-2.5">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm">
-                    <span className="shrink-0 font-bold text-[#22c55e]">
+                    <span className="shrink-0 font-bold text-[var(--color-brand-500)]">
                       <CheckIcon />
                     </span>
-                    <span className="text-white/70">{f}</span>
+                    <span className="text-[var(--subtle)]">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -109,8 +109,8 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                 href={plan.href}
                 className={`mt-7 block rounded-full px-4 py-3 text-center text-sm font-semibold transition-all duration-150 ${
                   plan.highlight
-                    ? "bg-[#22c55e] text-white shadow-[0_4px_16px_rgba(34,197,94,0.35)] hover:bg-[#16a34a] hover:-translate-y-px"
-                    : "border border-[rgba(34,197,94,0.3)] text-[#22c55e] hover:bg-[rgba(34,197,94,0.08)]"
+                    ? "bg-[var(--color-brand-500)] text-white shadow-[0_4px_16px_rgba(16,128,67,0.3)] hover:bg-[var(--color-brand-600)] hover:-translate-y-px"
+                    : "border border-[var(--color-brand-300)] text-[var(--color-brand-600)] hover:bg-[var(--color-brand-50)]"
                 }`}
               >
                 {plan.cta}
