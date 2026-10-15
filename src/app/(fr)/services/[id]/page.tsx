@@ -30,9 +30,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .select("title, description")
     .eq("id", id)
     .maybeSingle();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
   return {
     title: data?.title ?? t.notFound,
     description: data?.description ? data.description.slice(0, 160) : undefined,
+    alternates: { canonical: `${siteUrl}/services/${id}` },
+    openGraph: {
+      title: data?.title ?? "Toomny",
+      description: data?.description ? data.description.slice(0, 200) : undefined,
+      url: `${siteUrl}/services/${id}`,
+    },
   };
 }
 

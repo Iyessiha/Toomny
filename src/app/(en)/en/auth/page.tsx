@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Create an account",
   description:
     "Join Toomny: hire a vetted provider in West Africa, or sell your services and get paid by mobile money.",
+  robots: { index: false, follow: false },
 };
 
 export default async function AuthPageEn({

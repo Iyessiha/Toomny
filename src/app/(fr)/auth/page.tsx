@@ -6,7 +6,11 @@ import { AuthScreen } from "@/components/auth/auth-screen";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
-  return { title: t.auth, description: t.authDescription };
+  return {
+    title: t.auth,
+    description: t.authDescription,
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function AuthPage({

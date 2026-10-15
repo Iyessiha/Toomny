@@ -36,9 +36,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     supabase.from("provider_directory").select("display_name").eq("id", id).maybeSingle(),
     supabase.from("provider_profiles").select("headline").eq("profile_id", id).maybeSingle(),
   ]);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
   return {
     title: person?.display_name ?? t.providerNotFound,
     description: profile?.headline ?? undefined,
+    alternates: { canonical: `${siteUrl}/prestataires/${id}` },
+    openGraph: {
+      title: person?.display_name ?? "Prestataire Toomny",
+      description: profile?.headline ?? undefined,
+      url: `${siteUrl}/prestataires/${id}`,
+    },
   };
 }
 
