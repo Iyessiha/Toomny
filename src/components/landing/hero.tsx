@@ -55,32 +55,32 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Fond dégradé sombre émeraude */}
+      {/* Fond teinté vert marque */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, #0f2e1a 0%, transparent 70%), var(--background)",
+            "radial-gradient(ellipse 80% 60% at 50% -10%, var(--color-brand-50) 0%, transparent 70%), var(--background)",
         }}
       />
-      {/* Orbe gauche — vert forêt profond */}
+      {/* Orbe gauche */}
       <div
         aria-hidden
         className="hero-orb"
         style={{
           width: 560, height: 440,
-          background: "radial-gradient(circle, #0c4d27 0%, transparent 70%)",
+          background: "radial-gradient(circle, var(--color-brand-100) 0%, transparent 70%)",
           top: -140, left: -100,
         }}
       />
-      {/* Orbe droite — bleu-vert */}
+      {/* Orbe droite */}
       <div
         aria-hidden
         className="hero-orb"
         style={{
           width: 380, height: 380,
-          background: "radial-gradient(circle, #1a3d4a 0%, transparent 70%)",
+          background: "radial-gradient(circle, var(--color-brand-50) 0%, transparent 70%)",
           top: 30, right: -80,
         }}
       />
@@ -140,7 +140,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
               className="mt-4 flex flex-wrap gap-x-5 gap-y-2"
             >
               {a.points.map((pt) => (
-                <li key={pt} className="flex items-center gap-1.5 text-sm font-semibold text-[#4ade80]">
+                <li key={pt} className="flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-600)]">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
                     <path d="M11.854 3.646a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 9.293l5.646-5.647a.5.5 0 0 1 .708 0Z"/>
                   </svg>
@@ -162,7 +162,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             </Link>
             <a
               href="#fonctionnement"
-              className="rounded-full border border-[rgba(34,197,94,0.25)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[rgba(34,197,94,0.5)] hover:bg-[rgba(34,197,94,0.06)] sm:px-7 sm:py-3.5"
+              className="rounded-full border border-[var(--color-brand-200)] px-5 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:bg-[var(--color-brand-50)] sm:px-7 sm:py-3.5"
             >
               {t.secondaryCta}
             </a>
@@ -174,7 +174,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             style={{ transitionDelay: "175ms" }}
             method="GET"
             action="/services"
-            className="glass-panel mt-8 flex w-full max-w-lg overflow-hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.25)] focus-within:border-[rgba(34,197,94,0.35)]"
+            className="glass-panel mt-8 flex w-full max-w-lg overflow-hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.10)] focus-within:border-[var(--color-brand-400)]"
           >
             <input
               type="search"
@@ -184,7 +184,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             />
             <button
               type="submit"
-              className="m-1.5 flex shrink-0 items-center gap-2 rounded-full bg-[#22c55e] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#16a34a]"
+              className="m-1.5 flex shrink-0 items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)]"
             >
               <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
                 <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />

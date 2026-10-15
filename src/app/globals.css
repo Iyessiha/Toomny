@@ -216,12 +216,18 @@ html.lenis, html.lenis body { height: auto; }
   background-clip: text;
 }
 
-/* Panneau glassmorphisme : fond semi-transparent + flou */
+/* Panneau glassmorphisme : adaptatif clair/sombre */
 .glass-panel {
-  background: rgba(11, 25, 18, 0.72);
+  background: color-mix(in srgb, var(--background) 85%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(34, 197, 94, 0.14);
+  border: 1px solid var(--border);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .glass-panel {
+    background: rgba(11, 25, 18, 0.72);
+    border-color: rgba(34, 197, 94, 0.14);
+  }
 }
 
 /* Orbe décoratif pour les fonds hero */
