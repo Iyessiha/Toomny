@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { getDashboardData, ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
-import { DashboardShell, StatCard, EmptyState, NAV_ICONS } from "@/components/dashboard/shell";
+import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
+import { dashboardNavSections } from "@/lib/dashboard-nav";
+import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
 
@@ -35,6 +37,8 @@ function ProviderDashboard({
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
 }) {
+  const locale = user.preferredLocale;
+  const t = getDashboardTexts(locale);
   const cur = data.currency;
   const kycDone = user.verificationStatus === "verified";
   const kycPending = user.verificationStatus === "pending" || user.verificationStatus === "manual_review";
@@ -46,22 +50,13 @@ function ProviderDashboard({
     ["funded", "in_progress", "delivered"].includes(o.status)
   ).length;
 
-  const nav = [
-    { href: "/dashboard", label: "Vue d'ensemble", icon: NAV_ICONS.home, current: true },
-    { href: "/dashboard/prestations", label: "Mes prestations", icon: NAV_ICONS.briefcase },
-    { href: "/orders", label: "Commandes", icon: NAV_ICONS.orders, badge: activeOrders || undefined },
-    { href: "/messages", label: "Messages", icon: NAV_ICONS.message },
-    { href: "/dashboard/versements", label: "Versements", icon: NAV_ICONS.wallet },
-    { href: "/dashboard/verification", label: "Vérification KYC", icon: NAV_ICONS.shield },
-    ...(user.role === "admin" ? [{ href: "/admin", label: "Administration", icon: NAV_ICONS.admin }] : []),
-  ];
-
   return (
     <DashboardShell
       user={user}
       title={`Bonjour, ${firstName}`}
-      subtitle={new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-      nav={nav}
+      subtitle={new Date().toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      locale={locale}
+      navSections={dashboardNavSections(t.nav, user.role, "/dashboard")}
       actions={
         <Link
           href="/dashboard/prestations"
@@ -273,6 +268,8 @@ function ClientDashboard({
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
 }) {
+  const locale = user.preferredLocale;
+  const t = getDashboardTexts(locale);
   const cur = data.currency;
   const firstName = user.firstName ?? user.displayName?.split(" ")[0] ?? "vous";
   const activeOrders = data.orders.filter((o) =>
@@ -281,20 +278,13 @@ function ClientDashboard({
   const completedOrders = data.orders.filter((o) => o.status === "completed");
   const disputedOrders = data.orders.filter((o) => o.status === "disputed");
 
-  const nav = [
-    { href: "/dashboard", label: "Accueil", icon: NAV_ICONS.home, current: true },
-    { href: "/services", label: "Explorer", icon: NAV_ICONS.search },
-    { href: "/orders", label: "Mes commandes", icon: NAV_ICONS.orders, badge: activeOrders.length || undefined },
-    { href: "/messages", label: "Messages", icon: NAV_ICONS.message },
-    ...(user.role === "admin" ? [{ href: "/admin", label: "Administration", icon: NAV_ICONS.admin }] : []),
-  ];
-
   return (
     <DashboardShell
       user={user}
       title={`Bonjour, ${firstName}`}
-      subtitle={new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-      nav={nav}
+      subtitle={new Date().toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      locale={locale}
+      navSections={dashboardNavSections(t.nav, user.role, "/dashboard")}
       actions={
         <Link
           href="/services"
