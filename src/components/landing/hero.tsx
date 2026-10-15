@@ -55,48 +55,41 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
 
   return (
     <section className="relative overflow-hidden">
-      {/* Fond teinté vert marque */}
+      {/* Vidéo de fond — muette, en boucle, sans audio */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="/video/hero-poster.jpg"
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden
+      >
+        <source src="/video/hero.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay couleur marque — rend le texte lisible */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, var(--color-brand-50) 0%, transparent 70%), var(--background)",
+          background: "linear-gradient(160deg, rgba(8,67,35,0.78) 0%, rgba(6,15,11,0.85) 100%)",
         }}
       />
-      {/* Orbe gauche */}
-      <div
-        aria-hidden
-        className="hero-orb"
-        style={{
-          width: 560, height: 440,
-          background: "radial-gradient(circle, var(--color-brand-100) 0%, transparent 70%)",
-          top: -140, left: -100,
-        }}
-      />
-      {/* Orbe droite */}
-      <div
-        aria-hidden
-        className="hero-orb"
-        style={{
-          width: 380, height: 380,
-          background: "radial-gradient(circle, var(--color-brand-50) 0%, transparent 70%)",
-          top: 30, right: -80,
-        }}
-      />
-      {/* Dot grid décoratif côté visuel */}
+      {/* Dot grid décoratif */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: "radial-gradient(circle, rgba(34,197,94,0.10) 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, rgba(34,197,94,0.12) 1px, transparent 1px)",
           backgroundSize: "36px 36px",
           maskImage: "radial-gradient(ellipse 55% 65% at 75% 40%, black, transparent)",
         }}
       />
 
       <div className="relative mx-auto grid max-w-6xl gap-16 px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
-        <div>
+        {/* Contenu toujours sur fond sombre (vidéo + overlay) → text-white */}
+        <div className="text-white">
           {/* Sélecteur d'audience — glassmorphisme */}
           <div
             data-reveal
@@ -111,8 +104,8 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
                 onClick={() => setKey(k)}
                 className={`rounded-full px-4 py-2 font-semibold transition-all duration-200 ${
                   key === k
-                    ? "bg-[var(--surface)] text-[var(--foreground)] shadow-sm"
-                    : "text-[var(--subtle)] hover:text-[var(--foreground)]"
+                    ? "bg-white/15 text-white shadow-sm"
+                    : "text-white/60 hover:text-white"
                 }`}
               >
                 {t.audiences[k].label}
@@ -129,7 +122,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             <em className="not-italic gradient-text">{a.title[1]}</em>
           </h1>
 
-          <p data-reveal style={{ transitionDelay: "100ms" }} className="mt-6 max-w-xl text-lg leading-relaxed text-[var(--subtle)]">
+          <p data-reveal style={{ transitionDelay: "100ms" }} className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
             {a.lead}
           </p>
 
@@ -140,7 +133,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
               className="mt-4 flex flex-wrap gap-x-5 gap-y-2"
             >
               {a.points.map((pt) => (
-                <li key={pt} className="flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-600)]">
+                <li key={pt} className="flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-300)]">
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
                     <path d="M11.854 3.646a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 9.293l5.646-5.647a.5.5 0 0 1 .708 0Z"/>
                   </svg>
@@ -174,13 +167,13 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
             style={{ transitionDelay: "175ms" }}
             method="GET"
             action="/services"
-            className="glass-panel mt-8 flex w-full max-w-lg overflow-hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.10)] focus-within:border-[var(--color-brand-400)]"
+            className="glass-panel mt-8 flex w-full max-w-lg overflow-hidden rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.30)] focus-within:border-[rgba(34,197,94,0.5)]"
           >
             <input
               type="search"
               name="q"
               placeholder={locale === "fr" ? "Que recherchez-vous ?" : "What are you looking for?"}
-              className="flex-1 bg-transparent px-5 py-3 text-sm outline-none placeholder:text-[var(--subtle)]"
+              className="flex-1 bg-transparent px-5 py-3 text-sm text-white outline-none placeholder:text-white/50"
             />
             <button
               type="submit"
@@ -194,7 +187,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           </form>
 
           <div data-reveal style={{ transitionDelay: "200ms" }} className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="mr-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--subtle)]">
+            <span className="mr-1 text-xs font-semibold uppercase tracking-[0.12em] text-white/55">
               {t.railsLabel}
             </span>
             {PAYMENT_METHODS.map((m) => (
