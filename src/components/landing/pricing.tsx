@@ -49,10 +49,10 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
             <div
               key={plan.name}
               data-reveal
-              className={`relative flex flex-col rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 ${
+              className={`relative flex flex-col rounded-2xl p-6 text-white transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 ${
                 plan.highlight
                   ? "border border-[rgba(34,197,94,0.35)] bg-[linear-gradient(160deg,rgba(22,163,74,0.22)_0%,rgba(11,25,18,0.92)_60%)] shadow-[0_0_0_1px_rgba(34,197,94,0.15),0_24px_56px_rgba(0,0,0,0.35)]"
-                  : "border border-[rgba(255,255,255,0.07)] bg-[rgba(11,25,18,0.7)] backdrop-blur-md"
+                  : "border border-[rgba(255,255,255,0.07)] bg-[rgba(11,25,18,0.85)]"
               }`}
             >
               {plan.badge && (
@@ -64,7 +64,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               )}
 
               {/* Plan name */}
-              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[#4ade80]" : ""}`}>
+              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[#4ade80]" : "text-white"}`}>
                 {plan.name}
               </p>
 
@@ -77,17 +77,17 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                 <span className="font-display text-2xl font-bold text-[#22c55e]">
                   {plan.commission}
                 </span>
-                <span className="text-sm text-[var(--subtle)]">
+                <span className="text-sm text-white/60">
                   commission
                 </span>
               </div>
 
               {/* Price */}
               <div className="mt-5">
-                <span className="font-display text-2xl font-bold">
+                <span className="font-display text-2xl font-bold text-white">
                   {plan.price}
                 </span>
-                <span className="ml-1.5 text-sm text-[var(--subtle)]">
+                <span className="ml-1.5 text-sm text-white/55">
                   {plan.priceNote}
                 </span>
               </div>
@@ -99,7 +99,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                     <span className="shrink-0 font-bold text-[#22c55e]">
                       <CheckIcon />
                     </span>
-                    <span className="text-[var(--subtle)]">{f}</span>
+                    <span className="text-white/70">{f}</span>
                   </li>
                 ))}
               </ul>

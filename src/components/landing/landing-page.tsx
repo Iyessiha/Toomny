@@ -5,7 +5,7 @@ import { Categories } from "./categories";
 import { FeaturedProviders } from "./featured-providers";
 import { FeaturedServices } from "./featured-services";
 import { HowItWorks } from "./how-it-works";
-import { Testimonials } from "./testimonials";
+import { BoostSection } from "./boost-section";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { ProvidersCarousel } from "./providers-carousel-server";
@@ -26,7 +26,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />
         <HowItWorks locale={locale} />
-        <Testimonials locale={locale} />
+        <BoostSection locale={locale} />
         <Pricing locale={locale} />
         <Security locale={locale} />
         <ProvidersCarousel locale={locale} />
