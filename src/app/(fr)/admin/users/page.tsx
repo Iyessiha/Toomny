@@ -18,15 +18,16 @@ export const dynamic = "force-dynamic";
 export default async function AdminUsersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string }>;
+  searchParams: Promise<{ role?: string; q?: string }>;
 }) {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).usersPage;
   const roles = getAdminTexts(locale).roles;
-  const { role: rawRole } = await searchParams;
+  const { role: rawRole, q: rawQ } = await searchParams;
+  const searchQuery = rawQ?.trim() ?? "";
 
-  const VALID_ROLES = ["client", "provider", "admin"];
+  const VALID_ROLES = ["client", "provider", "both", "admin"];
   const filterRole = VALID_ROLES.includes(rawRole ?? "") ? rawRole! : null;
 
   const db = createAdminClient();
@@ -34,22 +35,33 @@ export default async function AdminUsersPage({
     .from("profiles")
     .select("id, display_name, email, role, country_code, created_at")
     .order("created_at", { ascending: false })
-    .limit(200);
+    .limit(500);
 
   if (filterRole) query = query.eq("role", filterRole);
 
   const { data: users } = await query;
-  const list = users ?? [];
+  let list = users ?? [];
+
+  if (searchQuery) {
+    const lower = searchQuery.toLowerCase();
+    list = list.filter(
+      (u) =>
+        u.display_name?.toLowerCase().includes(lower) ||
+        u.email?.toLowerCase().includes(lower),
+    );
+  }
 
   const filters = [
     { key: null, label: t.filterAll },
     { key: "client", label: t.filterClient },
     { key: "provider", label: t.filterProvider },
+    { key: "both", label: t.filterBoth },
     { key: "admin", label: t.filterAdmin },
   ];
 
   function filterHref(key: string | null) {
-    return key ? `/admin/users?role=${key}` : "/admin/users";
+    const base = key ? `/admin/users?role=${key}` : "/admin/users";
+    return searchQuery ? `${base}${key ? "&" : "?"}q=${encodeURIComponent(searchQuery)}` : base;
   }
 
   return (
@@ -61,6 +73,20 @@ export default async function AdminUsersPage({
       subtitle={`${t.subtitle} — ${list.length} compte${list.length !== 1 ? "s" : ""}`}
       nav={getAdminNavGroups(locale, "/admin/users")}
     >
+      <form method="GET" action="/admin/users" className="mb-4 flex items-center gap-2">
+        {filterRole && <input type="hidden" name="role" value={filterRole} />}
+        <input
+          type="search"
+          name="q"
+          defaultValue={searchQuery}
+          placeholder={t.searchPlaceholder}
+          className="input flex-1 max-w-sm"
+        />
+        <button type="submit" className="btn-primary btn-sm">
+          {locale === "en" ? "Search" : "Rechercher"}
+        </button>
+      </form>
+
       <FilterTabs
         items={filters.map((f) => ({
           href: filterHref(f.key),
@@ -86,13 +112,13 @@ export default async function AdminUsersPage({
             {list.map((u) => (
               <tr key={u.id}>
                 <td className="whitespace-normal!">
-                  <span className="flex items-center gap-3">
+                  <Link href={`/admin/users/${u.id}`} className="flex items-center gap-3 hover:underline">
                     <Avatar name={u.display_name ?? u.email} size="sm" />
                     <span className="min-w-0">
-                      <span className="block truncate font-semibold">{u.display_name ?? "—"}</span>
+                      <span className="block truncate font-semibold text-[var(--color-brand-600)]">{u.display_name ?? "—"}</span>
                       <span className="block truncate text-xs text-[var(--subtle)]">{u.email}</span>
                     </span>
-                  </span>
+                  </Link>
                 </td>
                 <td>
                   <Pill tone={roleTone(u.role)}>{roles[u.role] ?? u.role}</Pill>

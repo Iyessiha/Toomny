@@ -131,6 +131,8 @@ function PlanRow({ provider, t }: { provider: Provider; t: ReturnType<typeof get
   );
 }
 
+type FilterKey = "all" | "free" | "paid" | "expired";
+
 export function PlanManager({
   providers,
   locale,
@@ -139,6 +141,25 @@ export function PlanManager({
   locale: Locale;
 }) {
   const t = getAdminTexts(locale).plansPage;
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
+
+  const now = Date.now();
+
+  const filtered = providers.filter((p) => {
+    if (activeFilter === "all") return true;
+    if (activeFilter === "free") return !p.plan || p.plan === "debutant";
+    if (activeFilter === "paid") return !!p.plan && p.plan !== "debutant";
+    if (activeFilter === "expired")
+      return !!p.plan_expires_at && new Date(p.plan_expires_at).getTime() < now;
+    return true;
+  });
+
+  const filterItems: { key: FilterKey; label: string }[] = [
+    { key: "all", label: t.filterAll },
+    { key: "free", label: t.filterFree },
+    { key: "paid", label: t.filterPaid },
+    { key: "expired", label: t.filterExpired },
+  ];
 
   if (providers.length === 0) {
     return (
@@ -150,22 +171,43 @@ export function PlanManager({
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colProvider}</th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colPlan}</th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colExpiry}</th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colActions}</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-[var(--border)]">
-          {providers.map((p) => (
-            <PlanRow key={p.id} provider={p} t={t} />
-          ))}
-        </tbody>
-      </table>
+    <div className="space-y-4">
+      <nav className="mb-5 flex flex-wrap gap-2">
+        {filterItems.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setActiveFilter(f.key)}
+            className={activeFilter === f.key ? "chip chip-active" : "chip"}
+          >
+            {f.label}
+          </button>
+        ))}
+      </nav>
+
+      {filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[var(--border)] p-12 text-center">
+          <p className="font-semibold">{t.emptyTitle}</p>
+          <p className="mt-1 text-sm text-[var(--subtle)]">{t.emptyBody}</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colProvider}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colPlan}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colExpiry}</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.colActions}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {filtered.map((p) => (
+                <PlanRow key={p.id} provider={p} t={t} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

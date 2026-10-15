@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-const ALL_STATUSES = ["pending_payment", "funded", "in_progress", "delivered", "disputed"] as const;
+const ALL_STATUSES = ["pending_payment", "funded", "in_progress", "delivered", "disputed", "completed", "refunded"] as const;
 type ActiveStatus = (typeof ALL_STATUSES)[number];
 
 export default async function AdminOrdersPage({
@@ -61,6 +61,8 @@ export default async function AdminOrdersPage({
     { key: "in_progress", label: t.filterProgress },
     { key: "delivered", label: t.filterDelivered },
     { key: "disputed", label: t.filterDisputed },
+    { key: "completed", label: t.filterCompleted },
+    { key: "refunded", label: t.filterRefunded },
   ];
 
   function filterHref(key: string) {
@@ -76,9 +78,11 @@ export default async function AdminOrdersPage({
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/orders")}
     >
-      <div className="mb-6 flex justify-end">
-        <ResetOrdersButton />
-      </div>
+      {process.env.NODE_ENV !== "production" && (
+        <div className="mb-6 flex justify-end">
+          <ResetOrdersButton />
+        </div>
+      )}
 
       <FilterTabs
         items={filters.map(({ key, label }) => ({

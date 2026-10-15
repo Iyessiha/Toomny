@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { createCategory, updateCategory, toggleCategoryActive, deleteCategory } from "@/app/(fr)/admin/categories/actions";
 import { getAdminTexts } from "@/i18n/admin";
 import { Pill, Section, TableCard } from "@/components/dashboard/pro";
@@ -17,6 +18,7 @@ type Category = {
 
 export function CategoryManager({ categories: initial, locale }: { categories: Category[]; locale: Locale }) {
   const t = getAdminTexts(locale).categoriesPage;
+  const router = useRouter();
   const [categories, setCategories] = useState<Category[]>(initial);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export function CategoryManager({ categories: initial, locale }: { categories: C
     (e.currentTarget as HTMLFormElement).reset();
     setShowNew(false);
     setBusy(null);
-    window.location.reload();
+    router.refresh();
   }
 
   async function handleToggle(id: string, current: boolean) {

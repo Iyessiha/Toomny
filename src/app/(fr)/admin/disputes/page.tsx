@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
-import { Pill, Section, disputeTone } from "@/components/dashboard/pro";
+import { FilterTabs, Pill, Section, disputeTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -18,14 +18,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-const OPEN = ["open", "awaiting_provider", "awaiting_client"];
+const OPEN_STATUSES = ["open", "awaiting_provider", "awaiting_client"];
+const RESOLVED_STATUSES = ["resolved_client", "resolved_provider", "resolved_split"];
 
-export default async function AdminDisputesPage() {
+export default async function AdminDisputesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getMarketplaceTexts(locale).adminDisputes;
   const statusLabels = getMarketplaceTexts(locale).disputes.status;
   const db = createAdminClient();
+  const { tab } = await searchParams;
+  const showResolved = tab === "resolved";
+  const activeStatuses = showResolved ? RESOLVED_STATUSES : OPEN_STATUSES;
 
   // Disputes avec données commande (client_id + provider_id pour labelliser les messages)
   const { data } = await db
@@ -34,8 +42,8 @@ export default async function AdminDisputesPage() {
       id, reason, status, created_at, order_id,
       order:orders(id, reference, amount_minor, currency, client_id, provider_id)
     `)
-    .in("status", OPEN)
-    .order("created_at", { ascending: true })
+    .in("status", activeStatuses)
+    .order("created_at", { ascending: showResolved ? false : true })
     .limit(100);
 
   const rows = (data ?? []).map((d) => ({
@@ -77,6 +85,9 @@ export default async function AdminDisputesPage() {
     messagesByOrder.set(m.order_id, list);
   }
 
+  const openLabel = locale === "en" ? "Open" : "Ouverts";
+  const resolvedLabel = locale === "en" ? "Resolved" : "Résolus";
+
   return (
     <AdminShell
       user={user}
@@ -86,6 +97,13 @@ export default async function AdminDisputesPage() {
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/disputes")}
     >
+      <FilterTabs
+        items={[
+          { href: "/admin/disputes", label: openLabel, current: !showResolved },
+          { href: "/admin/disputes?tab=resolved", label: resolvedLabel, current: showResolved },
+        ]}
+      />
+
       {rows.length === 0 ? (
         <EmptyState title={t.empty} body={t.emptyBody} />
       ) : (
@@ -142,20 +160,24 @@ export default async function AdminDisputesPage() {
                       <Link href={`/orders/${d.order_id}`} className="btn-ghost btn-sm">
                         {t.viewOrder}
                       </Link>
-                      <form action={resolveDispute}>
-                        <input type="hidden" name="disputeId" value={d.id} />
-                        <input type="hidden" name="decision" value="client" />
-                        <button type="submit" className="btn-danger btn-sm">
-                          {t.refund}
-                        </button>
-                      </form>
-                      <form action={resolveDispute}>
-                        <input type="hidden" name="disputeId" value={d.id} />
-                        <input type="hidden" name="decision" value="provider" />
-                        <button type="submit" className="btn-success btn-sm">
-                          {t.release}
-                        </button>
-                      </form>
+                      {!showResolved && (
+                        <>
+                          <form action={resolveDispute}>
+                            <input type="hidden" name="disputeId" value={d.id} />
+                            <input type="hidden" name="decision" value="client" />
+                            <button type="submit" className="btn-danger btn-sm">
+                              {t.refund}
+                            </button>
+                          </form>
+                          <form action={resolveDispute}>
+                            <input type="hidden" name="disputeId" value={d.id} />
+                            <input type="hidden" name="decision" value="provider" />
+                            <button type="submit" className="btn-success btn-sm">
+                              {t.release}
+                            </button>
+                          </form>
+                        </>
+                      )}
                     </div>
                   </Section>
                 </li>
