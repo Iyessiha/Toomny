@@ -118,6 +118,63 @@ export async function getFeaturedProviders(): Promise<FeaturedProvider[]> {
     .filter(Boolean) as FeaturedProvider[];
 }
 
+export type BoostedProvider = {
+  id: string;
+  display_name: string | null;
+  country_code: string | null;
+  headline: string | null;
+  rating_avg: number | null;
+  skills: string[];
+  tier: string;
+};
+
+export async function getBoostedProviders(): Promise<BoostedProvider[]> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: boosts } = await supabase
+    .from("boosts")
+    .select("provider_id, tier")
+    .eq("status", "active")
+    .gt("period_end", now)
+    .limit(20);
+
+  const rows = (boosts ?? []) as { provider_id: string; tier: string }[];
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((b) => b.provider_id);
+  const tierById = new Map(rows.map((b) => [b.provider_id, b.tier]));
+
+  const [dirs, profs] = await Promise.all([
+    supabase.from("provider_directory").select("id, display_name, country_code").in("id", ids),
+    supabase.from("provider_profiles").select("profile_id, headline, rating_avg, skills").in("profile_id", ids),
+  ]);
+
+  const dirById = new Map(
+    ((dirs.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((d) => [d.id, d]),
+  );
+  const profById = new Map(
+    ((profs.data ?? []) as { profile_id: string; headline: string | null; rating_avg: number | null; skills: string[] | null }[]).map((p) => [p.profile_id, p]),
+  );
+
+  return ids
+    .map((id) => {
+      const dir = dirById.get(id);
+      const prof = profById.get(id);
+      if (!dir) return null;
+      return {
+        id,
+        display_name: dir.display_name,
+        country_code: dir.country_code,
+        headline: prof?.headline ?? null,
+        rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null,
+        skills: (prof?.skills ?? []).slice(0, 2),
+        tier: tierById.get(id) ?? "pro",
+      };
+    })
+    .filter(Boolean) as BoostedProvider[];
+}
+
 export async function getCategories(): Promise<Category[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
