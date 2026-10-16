@@ -546,3 +546,53 @@ html.lenis, html.lenis body { height: auto; }
 }
 .input:focus { border-color: var(--color-brand-500); }
 .input::placeholder { color: var(--subtle); }
+
+/* ── Talent Strip ────────────────────────────────────────────────────────── */
+@keyframes talent-scroll {
+  from { transform: translateX(0) }
+  to   { transform: translateX(-50%) }
+}
+.talent-track {
+  display: flex;
+  gap: 0.875rem;
+  animation: talent-scroll 42s linear infinite;
+}
+.talent-track:hover { animation-play-state: paused; }
+
+/* ── Pricing 3D cards ────────────────────────────────────────────────────── */
+.pricing-scene { perspective: 1400px; }
+.pricing-card {
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+}
+.pricing-card:hover {
+  transform: rotateX(5deg) rotateY(-5deg) translateZ(12px) translateY(-8px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 8px 24px rgba(0,0,0,0.5),
+    0 40px 80px rgba(0,0,0,0.45),
+    0 0 0 1px rgba(34,197,94,0.08);
+}
+.pricing-card-hl {
+  transform-style: preserve-3d;
+  transform: rotateX(0deg) rotateY(0deg) translateZ(10px) translateY(-5px);
+  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+}
+.pricing-card-hl:hover {
+  transform: rotateX(5deg) rotateY(-5deg) translateZ(24px) translateY(-12px);
+  box-shadow:
+    0 1px 0 rgba(34,197,94,0.12) inset,
+    0 8px 28px rgba(0,0,0,0.5),
+    0 48px 96px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(34,197,94,0.2),
+    0 0 80px rgba(34,197,94,0.1);
+}
+.pricing-card-gloss::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(160deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.018) 30%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}

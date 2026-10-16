@@ -44,21 +44,19 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
         <p data-reveal className="mb-5 mt-14 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--subtle)]">
           {t.plansFor}
         </p>
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="pricing-scene grid gap-5 sm:grid-cols-3">
           {t.plans.map((plan) => (
             <div
               key={plan.name}
               data-reveal
-              className={`relative flex flex-col rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/[0.08] ${
+              className={`pricing-card-gloss relative flex flex-col rounded-2xl p-6 ${
                 plan.highlight
-                  ? "border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] shadow-[0_0_0_1px_var(--color-brand-200)]"
-                  : "border border-[var(--border)] bg-[var(--background)]"
+                  ? "pricing-card-hl border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] shadow-[0_0_0_1px_var(--color-brand-200),0_20px_60px_rgba(0,0,0,0.15)]"
+                  : "pricing-card border border-[var(--border)] bg-[var(--background)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
               }`}
             >
               {plan.badge && (
-                <span
-                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[var(--color-brand-500)] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(16,128,67,0.35)]"
-                >
+                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-brand-500)] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(16,128,67,0.4)]">
                   {plan.badge}
                 </span>
               )}
@@ -71,35 +69,30 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               {/* Commission pill */}
               <div
                 className={`mt-4 inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 ${
-                  plan.highlight ? "bg-[var(--color-brand-100)]" : "bg-[var(--surface)]"
+                  plan.highlight ? "bg-[var(--color-brand-100)] border border-[var(--color-brand-200)]" : "bg-[var(--surface)] border border-[var(--border)]"
                 }`}
               >
                 <span className="font-display text-2xl font-bold text-[var(--color-brand-600)]">
                   {plan.commission}
                 </span>
-                <span className="text-sm text-[var(--subtle)]">
-                  commission
-                </span>
+                <span className="text-sm text-[var(--subtle)]">commission</span>
               </div>
 
               {/* Price */}
               <div className="mt-5">
-                <span className="font-display text-2xl font-bold">
-                  {plan.price}
-                </span>
-                <span className="ml-1.5 text-sm text-[var(--subtle)]">
-                  {plan.priceNote}
-                </span>
+                <span className="font-display text-2xl font-bold">{plan.price}</span>
+                <span className="ml-1.5 text-sm text-[var(--subtle)]">{plan.priceNote}</span>
               </div>
 
+              {/* Separator */}
+              <hr className="my-5 border-white/[0.06]" />
+
               {/* Features */}
-              <ul className="mt-5 flex-1 space-y-2.5">
+              <ul className="flex-1 space-y-2.5">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm">
-                    <span className="shrink-0 font-bold text-[var(--color-brand-500)]">
-                      <CheckIcon />
-                    </span>
-                    <span className="text-[var(--subtle)]">{f}</span>
+                    <span className="shrink-0 font-bold text-[var(--color-brand-500)]"><CheckIcon /></span>
+                    <span className={plan.highlight ? "text-[var(--foreground)]" : "text-[var(--subtle)]"}>{f}</span>
                   </li>
                 ))}
               </ul>
@@ -107,9 +100,9 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               {/* CTA */}
               <Link
                 href={plan.href}
-                className={`mt-7 block rounded-full px-4 py-3 text-center text-sm font-semibold transition-all duration-150 ${
+                className={`relative z-[2] mt-7 block rounded-full px-4 py-3 text-center text-sm font-semibold transition-all duration-150 ${
                   plan.highlight
-                    ? "bg-[var(--color-brand-500)] text-white shadow-[0_4px_16px_rgba(16,128,67,0.3)] hover:bg-[var(--color-brand-600)] hover:-translate-y-px"
+                    ? "bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-brand-500)] text-white shadow-[0_4px_16px_rgba(16,128,67,0.35),0_1px_0_rgba(255,255,255,0.15)_inset] hover:opacity-90 hover:-translate-y-px"
                     : "border border-[var(--color-brand-300)] text-[var(--color-brand-600)] hover:bg-[var(--color-brand-50)]"
                 }`}
               >
