@@ -19,6 +19,7 @@ import {
   type Tone,
 } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
+import { countryLabel } from "@/i18n/auth";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -296,7 +297,7 @@ export default async function AdminPage() {
                 const pct = s.users > 0 ? Math.round((row.total / s.users) * 100) : 0;
                 return (
                   <li key={row.country_code} className="flex items-center gap-3">
-                    <span className="w-8 text-sm font-bold">{row.country_code}</span>
+                    <span className="w-36 truncate text-sm font-bold">{countryLabel(row.country_code, locale)}</span>
                     <div className="flex-1">
                       <ProgressBar value={pct} />
                     </div>
@@ -345,7 +346,7 @@ export default async function AdminPage() {
                   <td>
                     <Pill tone={roleTone(u.role)}>{getAdminTexts(locale).roles[u.role] ?? u.role}</Pill>
                   </td>
-                  <td className="text-[var(--subtle)]">{u.country_code}</td>
+                  <td className="text-[var(--subtle)]">{countryLabel(u.country_code, locale)}</td>
                 </tr>
               ))}
             </tbody>

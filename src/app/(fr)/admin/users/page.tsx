@@ -9,6 +9,7 @@ import { Avatar, FilterTabs, Pill, TableCard, roleTone } from "@/components/dash
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { UserRoleManager } from "@/components/admin/user-role-manager";
+import { countryLabel, formatSubmittedAt } from "@/i18n/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).usersPage.metaTitle };
@@ -123,7 +124,7 @@ export default async function AdminUsersPage({
                 <td>
                   <Pill tone={roleTone(u.role)}>{roles[u.role] ?? u.role}</Pill>
                 </td>
-                <td className="text-[var(--subtle)]">{u.country_code ?? "—"}</td>
+                <td className="text-[var(--subtle)]">{countryLabel(u.country_code, locale)}</td>
                 <td className="text-xs text-[var(--subtle)]">
                   {new Date(u.created_at).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB")}
                 </td>
