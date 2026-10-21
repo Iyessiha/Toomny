@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createService } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import type { Locale } from "@/i18n/dictionaries";
-import { resizeCover } from "@/lib/resize-image";
+import { CoverNotLandscapeError, resizeCover } from "@/lib/resize-image";
 
 type PackageSlot = {
   enabled: boolean;
@@ -71,7 +71,15 @@ export function ServiceForm({
     const raw = e.target.files?.[0];
     if (!raw) return;
     let file: File;
-    try { file = await resizeCover(raw); } catch { file = raw; }
+    try {
+      file = await resizeCover(raw);
+    } catch (err) {
+      if (err instanceof CoverNotLandscapeError) {
+        setUploadError(t.form.coverNotLandscape);
+        return;
+      }
+      file = raw;
+    }
     const preview = URL.createObjectURL(file);
     setCoverPreview(preview);
     setCoverUrl(null);
