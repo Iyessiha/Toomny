@@ -81,6 +81,26 @@ const fr = {
       clientNote: "Clients : 0 % de commission Toomny",
       clientNoteDetail: "Toomny ne vous facture rien. Des frais de traitement mobile money (2,5 % + 100 XOF par transaction) s'appliquent pour couvrir le coût du paiement.",
       plansFor: "Pour les prestataires",
+      levelWord: "Niveau",
+      levels: ["Départ", "Croissance", "Accélération", "Sommet"],
+      taglines: [
+        "Recevez vos premiers clients gratuitement",
+        "Publiez 4 fois plus pour être vu davantage",
+        "Pilotez vos ventes avec un tableau de bord complet",
+        "Le niveau le plus haut : visibilité maximale et accompagnement dédié",
+      ],
+      clientKicker: "Pour nos clients",
+      clientTitle: "Zéro commission. Nous ne prenons rien sur leurs commandes.",
+      clientBody: "Les frais de paiement mobile money (2,5 % + 100 XOF) restent affichés avant validation.",
+      feeLabel: "Commission Toomny",
+      perOrder: "par commande",
+      receiveLabel: "Sur 100 000 FCFA de commande, vous touchez",
+      howTitle: "Ce que veut dire « commission »",
+      howSteps: [
+        "Un client commande votre service, par exemple pour 100 000 FCFA.",
+        "Toomny prélève un pourcentage de ce montant, selon votre plan. C'est sa part de la vente : ni une taxe, ni des frais ajoutés au prix. Elle n'est prélevée qu'une fois la commande terminée.",
+        "Un frais de versement de 1 % est retenu au moment du retrait sur votre mobile money. Le client ne paie aucune commission en plus du prix.",
+      ],
       plans: [
         {
           name: "Débutant",
@@ -279,6 +299,26 @@ const en: LandingContent = {
       clientNote: "Clients: 0% Toomny commission",
       clientNoteDetail: "Toomny charges you nothing. A mobile money processing fee (2.5% + 100 XOF per transaction) applies to cover the cost of the payment.",
       plansFor: "For providers",
+      levelWord: "Level",
+      levels: ["Start", "Growth", "Acceleration", "Summit"],
+      taglines: [
+        "Get your first clients for free",
+        "Publish 4 times more to be seen more often",
+        "Run your sales with a full dashboard",
+        "The highest level: maximum visibility and dedicated support",
+      ],
+      clientKicker: "For our clients",
+      clientTitle: "Zero commission. We take nothing from their orders.",
+      clientBody: "Mobile money payment fees (2.5% + 100 XOF) are shown before checkout.",
+      feeLabel: "Toomny commission",
+      perOrder: "per order",
+      receiveLabel: "On a 100,000 FCFA order, you receive",
+      howTitle: "What “commission” means",
+      howSteps: [
+        "A client orders your service, for example for 100,000 FCFA.",
+        "Toomny takes a percentage of that amount, based on your plan. It is Toomny's share of the sale: not a tax, and not a fee added on top of the price. It is only taken once the order is completed.",
+        "A 1% payout fee is deducted when you withdraw to your mobile money. The client pays no commission on top of the price.",
+      ],
       plans: [
         {
           name: "Starter",

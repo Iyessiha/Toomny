@@ -44,8 +44,20 @@ export function ServiceCard({ service: s, locale }: Props) {
       tabIndex={0}
       onClick={() => router.push(`/services/${s.id}`)}
       onKeyDown={(e) => e.key === "Enter" && router.push(`/services/${s.id}`)}
-      className="group block cursor-pointer overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10 hover:border-[var(--color-brand-200)]"
+      className="group relative block cursor-pointer overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-transparent hover:shadow-2xl hover:shadow-[var(--color-brand-500)]/25"
     >
+      {/* Anneau dégradé qui s'allume au survol */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-20 rounded-3xl p-[1.5px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        style={{
+          background: "linear-gradient(135deg, var(--color-brand-400), #FFCB00, var(--color-brand-600))",
+          WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+          WebkitMaskComposite: "xor",
+          mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+        }}
+      />
+
       {/* ── Image avec overlay gradient ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "58%" }}>
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
@@ -151,11 +163,12 @@ export function ServiceCard({ service: s, locale }: Props) {
             {formatMoney(BigInt(s.price_minor), s.currency, locale)}
           </p>
         </div>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white shadow-md shadow-[var(--color-brand-500)]/30 transition-transform group-hover:scale-110">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden>
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-brand-500)] px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-[var(--color-brand-500)]/30 transition-transform duration-300 group-hover:scale-105">
+          {locale === "fr" ? "Voir l'offre" : "View offer"}
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden className="transition-transform duration-300 group-hover:translate-x-0.5">
             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </div>
+        </span>
       </div>
     </div>
   );

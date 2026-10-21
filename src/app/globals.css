@@ -560,39 +560,133 @@ html.lenis, html.lenis body { height: auto; }
 .talent-track:hover { animation-play-state: paused; }
 
 /* ── Pricing 3D cards ────────────────────────────────────────────────────── */
-.pricing-scene { perspective: 1400px; }
-.pricing-card {
+/* Pricing staircase: four 3D plates, one colour per level, rising toward the viewer.
+   Each plate carries its own dark palette, so it reads the same in light and dark themes. */
+.tier-scene { perspective: 1600px; perspective-origin: 50% 20%; transform-style: preserve-3d; }
+.tier-slot {
   transform-style: preserve-3d;
-  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+  transform: translate3d(0, calc(var(--i) * -30px), calc(var(--i) * 70px));
+  animation: tier-climb 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 0.14s + 0.15s);
 }
-.pricing-card:hover {
-  transform: rotateX(5deg) rotateY(-5deg) translateZ(12px) translateY(-8px);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.06) inset,
-    0 8px 24px rgba(0,0,0,0.5),
-    0 40px 80px rgba(0,0,0,0.45),
-    0 0 0 1px rgba(34,197,94,0.08);
+@keyframes tier-climb {
+  from { opacity: 0; transform: translate3d(0, 140px, -320px); }
+  to { opacity: 1; transform: translate3d(0, calc(var(--i) * -30px), calc(var(--i) * 70px)); }
 }
-.pricing-card-hl {
+@keyframes tier-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+.tier-plate {
+  position: relative;
   transform-style: preserve-3d;
-  transform: rotateX(0deg) rotateY(0deg) translateZ(10px) translateY(-5px);
-  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-radius: 22px;
+  padding: 28px 24px 24px;
+  color: #e5ebf5;
+  background: linear-gradient(170deg, var(--plate-top) 0%, var(--plate-bottom) 75%);
+  border: 1px solid var(--plate-edge);
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.85), 0 0 60px -20px var(--plate-glow);
 }
-.pricing-card-hl:hover {
-  transform: rotateX(5deg) rotateY(-5deg) translateZ(24px) translateY(-12px);
-  box-shadow:
-    0 1px 0 rgba(34,197,94,0.12) inset,
-    0 8px 28px rgba(0,0,0,0.5),
-    0 48px 96px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(34,197,94,0.2),
-    0 0 80px rgba(34,197,94,0.1);
-}
-.pricing-card-gloss::before {
-  content: '';
+/* Physical thickness: a darker slab behind the face, visible when the plate tilts */
+.tier-plate::before {
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(160deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.018) 30%, transparent 60%);
+  background: linear-gradient(180deg, var(--plate-depth-a), var(--plate-depth-b));
+  transform: translateZ(-18px);
+  filter: brightness(0.7);
+}
+.tier-plate:hover {
+  transform: rotateX(4deg) rotateY(-6deg) translateY(-6px);
+  box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95), 0 0 90px -10px var(--plate-glow);
+}
+.tier-layer { position: relative; display: flex; flex: 1; flex-direction: column; transform: translateZ(40px); }
+.tier-level { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c1); }
+.tier-tag { margin: 10px 0 0; min-height: 3.9em; font-size: 14px; line-height: 1.45; color: #94a3b8; }
+.tier-fee { margin: 20px 0 0; padding-top: 14px; border-top: 1px dashed rgba(148, 163, 184, 0.2); font-size: 12px; line-height: 1.5; color: #64748b; }
+.tier-fee b { color: #94a3b8; font-weight: 600; }
+.tier-fee strong { color: #e2e8f0; font-variant-numeric: tabular-nums; }
+.tier-cta {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 12px 26px -10px var(--c2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tier-cta:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -10px var(--c2); }
+.tier-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 4;
+  transform: translate(-50%, 0) translateZ(70px);
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 8px 22px -6px var(--c2);
+}
+.tier-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
   pointer-events: none;
-  z-index: 1;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 246, 200, 0.32) 50%, transparent 60%);
+  background-size: 260% 100%;
+  mix-blend-mode: screen;
+  animation: tier-sweep 4.2s linear infinite;
+}
+@keyframes tier-sweep {
+  from { background-position: 130% 0; }
+  to { background-position: -130% 0; }
+}
+
+/* Level 1: steel grey, the entry point */
+.tier-t1 { --c1: #cbd5e1; --c2: #475569; --ink: #1e293b; --plate-top: #1a2233; --plate-bottom: #0b1019; --plate-edge: rgba(148, 163, 184, 0.35); --plate-glow: rgba(148, 163, 184, 0.12); --plate-depth-a: #475569; --plate-depth-b: #1e293b; }
+/* Level 2: emerald with a deep metallic finish, luxurious from the first paid plan */
+.tier-t2 { --c1: #6ee7b7; --c2: #059669; --ink: #052e21; --plate-top: #134e3a; --plate-bottom: #06150f; --plate-edge: rgba(110, 231, 183, 0.55); --plate-glow: rgba(52, 211, 153, 0.3); --plate-depth-a: #059669; --plate-depth-b: #064e3b; }
+.tier-t2 .tier-plate { box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.12), 0 30px 60px -28px rgba(0, 0, 0, 0.85), 0 0 60px -20px var(--plate-glow); }
+/* Level 3: sapphire-indigo, with a slow halo */
+.tier-t3 { --c1: #a5b4fc; --c2: #4338ca; --ink: #1e1b4b; --plate-top: #1b1f4a; --plate-bottom: #0a0c24; --plate-edge: rgba(129, 140, 248, 0.6); --plate-glow: rgba(129, 140, 248, 0.38); --plate-depth-a: #4338ca; --plate-depth-b: #1e1b4b; }
+.tier-t3 .tier-plate { animation: tier-halo 3.2s ease-in-out infinite; }
+@keyframes tier-halo {
+  0%, 100% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 50px -18px var(--plate-glow); }
+  50% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 90px -8px var(--plate-glow); }
+}
+/* Level 4: gold on black, with a foil sheen */
+.tier-t4 { --c1: #fde68a; --c2: #b45309; --ink: #451a03; --plate-top: #2a1d05; --plate-bottom: #120c02; --plate-edge: rgba(251, 191, 36, 0.8); --plate-glow: rgba(251, 191, 36, 0.5); --plate-depth-a: #b45309; --plate-depth-b: #451a03; }
+.tier-t4 .tier-plate { box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.95), 0 0 120px -12px var(--plate-glow); }
+
+@media (max-width: 900px) {
+  .tier-slot { transform: none; animation-name: tier-rise; }
+  .tier-plate:hover { transform: none; }
+  .tier-layer { transform: none; }
+  .tier-plate::before { transform: translate(6px, 6px); }
+}
+@media (hover: none) {
+  .tier-plate:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tier-slot { animation: none; opacity: 1; }
+  .tier-t3 .tier-plate, .tier-sheen { animation: none; }
+  .tier-plate { transition: none; }
 }
