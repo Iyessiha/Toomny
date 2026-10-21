@@ -15,9 +15,9 @@ export async function savePixelSettings(formData: FormData): Promise<{ error?: s
     return { error: "invalid_field", field: PIXEL_FIELDS[parsed.field].label };
   }
 
+  const db = createAdminClient();
   let error: { message: string } | null = null;
   try {
-    const db = createAdminClient();
     ({ error } = await db
       .from("pixels_publicitaires")
       .upsert({ id: 1, ...parsed.values, updated_by: actor.id, updated_at: new Date().toISOString() }));
