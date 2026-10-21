@@ -10,6 +10,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,7 @@ export default async function BoostPage({
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       kicker="Boost"
       title="Service Boost"

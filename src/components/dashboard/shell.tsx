@@ -1,6 +1,5 @@
 "use client";
 
-import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -140,6 +139,7 @@ function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string;
 
 export function DashboardShell({
   user,
+  bell,
   nav = [],
   navSections,
   title,
@@ -149,6 +149,8 @@ export function DashboardShell({
   children,
   locale = "fr",
 }: {
+  /** Cloche de notifications : composant serveur, rendu par la page et passé ici. */
+  bell?: React.ReactNode;
   user: {
     displayName: string | null;
     email: string | null;
@@ -221,7 +223,7 @@ export function DashboardShell({
             <Logo size={26} />
           </Link>
           <div className="flex items-center gap-1">
-            <NotificationBell locale={locale === "en" ? "en" : "fr"} />
+            {bell}
           {/* Sign out — icône en haut à droite */}
           <button
             onClick={handleSignOut}
@@ -353,7 +355,7 @@ export function DashboardShell({
           </button>
           <Link href="/" className="text-[var(--color-brand-500)]"><Logo size={22} /></Link>
           <div className="flex items-center gap-2">
-            <NotificationBell locale={locale === "en" ? "en" : "fr"} />
+            {bell}
             <button
               onClick={handleLocaleSwitch}
               disabled={switching}

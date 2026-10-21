@@ -9,7 +9,9 @@ import { getCategories } from "@/lib/catalog";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
+import { Notice } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.services };
@@ -24,7 +26,7 @@ export default async function PrestationsPage() {
   const nav = getDashboardTexts(locale).nav;
 
   const supabase = await createClient();
-  const [{ data: services }, categories] = await Promise.all([
+  const [{ data: services, error: servicesError }, categories] = await Promise.all([
     supabase
       .from("services")
       .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, gallery_urls, tags, created_at")
@@ -53,12 +55,19 @@ export default async function PrestationsPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       kicker={nav.services}
       title={t.title}
       subtitle={t.subtitle}
       locale={locale}
       navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
+      {/* Une panne de lecture ne doit pas ressembler à une liste vide. */}
+      {servicesError && (
+        <div className="mb-6">
+          <Notice tone="danger">{t.errors.network}</Notice>
+        </div>
+      )}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-lg font-bold">{t.listTitle}</h2>
         <Link href="/dashboard/prestations/nouveau" className="btn-primary">

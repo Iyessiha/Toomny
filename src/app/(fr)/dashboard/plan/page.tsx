@@ -18,6 +18,7 @@ import {
   normalizePlan,
   type PlanTier,
 } from "@/lib/plans";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,7 @@ export default async function PlanPage({
     return (
       <DashboardShell
         user={user}
+        bell={<NotificationBell locale={locale} />}
         locale={locale}
         kicker={t.nav.plan}
         title={p.title}

@@ -9,6 +9,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Section } from "@/components/dashboard/pro";
 import { ProfileForm } from "@/components/dashboard/profile-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.profile };
@@ -31,6 +32,7 @@ export default async function ProfilPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       kicker={t.nav.profile}
       title={t.profile.title}
       subtitle={t.profile.subtitle}

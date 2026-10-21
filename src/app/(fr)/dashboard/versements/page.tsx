@@ -12,6 +12,7 @@ import { formatMoney } from "@/lib/money";
 import { getPayoutTexts } from "@/i18n/payouts";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,7 @@ export default async function VersementsPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       kicker={nav.payouts}
       title={t.title}

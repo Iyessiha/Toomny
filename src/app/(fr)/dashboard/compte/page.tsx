@@ -8,6 +8,7 @@ import { getAccountTexts } from "@/i18n/account";
 import { visitorLocale } from "@/i18n/server-locale";
 import { deleteMyAccount } from "./actions";
 import { AccountEmailForm, AccountPasswordForm } from "@/components/dashboard/account-forms";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAccountTexts(await visitorLocale()).title };
@@ -30,6 +31,7 @@ export default async function AccountPage({
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}

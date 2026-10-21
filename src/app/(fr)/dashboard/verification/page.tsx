@@ -11,6 +11,7 @@ import { Notice, Pill, Section, kycTone } from "@/components/dashboard/pro";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
 import { getKycTexts } from "@/i18n/kyc";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.verification };
@@ -41,6 +42,7 @@ export default async function VerificationPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       title={t.pageTitle}
       subtitle={t.pageSubtitle}

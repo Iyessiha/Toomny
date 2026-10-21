@@ -4,6 +4,7 @@ import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { WishlistGrid } from "@/components/dashboard/wishlist-grid";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export default async function WishlistPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       kicker={t.nav.wishlist}
       title={t.nav.wishlist}
       locale={locale}
