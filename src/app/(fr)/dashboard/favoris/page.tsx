@@ -5,11 +5,18 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { WishlistGrid } from "@/components/dashboard/wishlist-grid";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { visitorLocale } from "@/i18n/server-locale";
+import type { Locale } from "@/i18n/dictionaries";
 
 export const dynamic = "force-dynamic";
 
+const copy: Record<Locale, { metaTitle: string }> = {
+  fr: { metaTitle: "Mes favoris · Toomny" },
+  en: { metaTitle: "My favorites · Toomny" },
+};
+
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: "Mes favoris · Toomny" };
+  return { title: copy[await visitorLocale()].metaTitle };
 }
 
 export default async function WishlistPage() {

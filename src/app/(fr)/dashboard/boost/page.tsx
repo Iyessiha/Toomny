@@ -11,6 +11,7 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import type { Locale } from "@/i18n/dictionaries";
 
 export const dynamic = "force-dynamic";
 
@@ -35,11 +36,72 @@ const BOOST_NAMES: Record<string, string> = {
   elite: "Boost Elite",
 };
 
-const BOOST_STATUS_FR: Record<string, string> = {
-  pending: "En attente",
-  active: "Actif",
-  expired: "Expiré",
-  failed: "Échoué",
+type BoostCopy = {
+  statusLabels: Record<string, string>;
+  placements: Record<string, string>;
+  current: string;
+  popular: string;
+  expiresPrefix: string;
+  perMonth: string;
+  daysUnit: string;
+  nextTitle: string;
+  chooseTitle: string;
+  renew: string;
+  activate: string;
+  redirecting: string;
+  checkoutError: string;
+  colDate: string;
+  colOffer: string;
+  colAmount: string;
+};
+
+const copy: Record<Locale, BoostCopy> = {
+  fr: {
+    statusLabels: { pending: "En attente", active: "Actif", expired: "Expiré", failed: "Échoué" },
+    placements: {
+      catalogue_badge: "Badge « Boosté » dans le catalogue",
+      catalogue_sort: "Priorité dans le tri des services",
+      search_sponsored: "Résultats sponsorisés dans la recherche",
+      homepage_featured: "Section vedette sur la page d'accueil",
+    },
+    current: "Actif",
+    popular: "Populaire",
+    expiresPrefix: "Expire le",
+    perMonth: "/ mois",
+    daysUnit: "j",
+    nextTitle: "Renouveler ou changer d'offre",
+    chooseTitle: "Choisir une offre Boost",
+    renew: "Renouveler",
+    activate: "Activer",
+    redirecting: "Redirection…",
+    checkoutError: "Erreur de paiement. Réessayez.",
+    colDate: "Date",
+    colOffer: "Offre",
+    colAmount: "Montant",
+  },
+  en: {
+    statusLabels: { pending: "Pending", active: "Active", expired: "Expired", failed: "Failed" },
+    placements: {
+      catalogue_badge: "“Boosted” badge in the catalog",
+      catalogue_sort: "Priority in service sorting",
+      search_sponsored: "Sponsored results in search",
+      homepage_featured: "Featured section on the homepage",
+    },
+    current: "Active",
+    popular: "Popular",
+    expiresPrefix: "Expires on",
+    perMonth: "/ month",
+    daysUnit: "d",
+    nextTitle: "Renew or change plan",
+    chooseTitle: "Choose a Boost plan",
+    renew: "Renew",
+    activate: "Activate",
+    redirecting: "Redirecting…",
+    checkoutError: "Payment error. Please try again.",
+    colDate: "Date",
+    colOffer: "Offer",
+    colAmount: "Amount",
+  },
 };
 
 function boostTone(status: string) {
@@ -58,6 +120,7 @@ export default async function BoostPage({
   if (!isProvider(user.role)) redirect("/dashboard");
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
+  const c = copy[locale];
   const { payment } = await searchParams;
 
   const supabase = await createClient();
@@ -128,10 +191,10 @@ export default async function BoostPage({
               </svg>
             }
             label={t.boostPage.daysLeft}
-            value={daysLeft !== null ? `${daysLeft} j` : "—"}
+            value={daysLeft !== null ? `${daysLeft} ${c.daysUnit}` : "—"}
             hint={
               periodEnd
-                ? `Expire le ${periodEnd.toLocaleDateString(dateTag, { day: "2-digit", month: "short", year: "numeric" })}`
+                ? `${c.expiresPrefix} ${periodEnd.toLocaleDateString(dateTag, { day: "2-digit", month: "short", year: "numeric" })}`
                 : ""
             }
           />
@@ -151,20 +214,13 @@ export default async function BoostPage({
 
       {/* Grille des offres */}
       <h2 className="mb-4 font-display text-lg font-bold">
-        {activeBoost ? "Renouveler ou changer d'offre" : "Choisir une offre Boost"}
+        {activeBoost ? c.nextTitle : c.chooseTitle}
       </h2>
       <div className="grid gap-5 sm:grid-cols-3">
         {BOOST_TIERS.map((tier) => {
           const spec = BOOSTS[tier];
           const isCurrent = activeBoost?.tier === tier;
           const highlight = tier === "pro";
-
-          const placements: Record<string, string> = {
-            catalogue_badge: "Badge « Boosté » dans le catalogue",
-            catalogue_sort: "Priorité dans le tri des services",
-            search_sponsored: "Résultats sponsorisés dans la recherche",
-            homepage_featured: "Section vedette sur la page d'accueil",
-          };
 
           return (
             <div
@@ -183,7 +239,7 @@ export default async function BoostPage({
                       : "bg-[var(--color-brand-500)] text-white"
                   }`}
                 >
-                  {isCurrent ? "Actif" : "Populaire"}
+                  {isCurrent ? c.current : c.popular}
                 </span>
               )}
 
@@ -198,7 +254,7 @@ export default async function BoostPage({
                   {formatMoney(spec.priceMinor, spec.currency, locale)}
                 </span>
                 <span className={`ml-1.5 text-sm ${highlight ? "text-white/70" : "text-[var(--subtle)]"}`}>
-                  / mois
+                  {c.perMonth}
                 </span>
               </div>
 
@@ -210,7 +266,7 @@ export default async function BoostPage({
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </span>
-                    <span className={highlight ? "text-white/90" : ""}>{placements[p] ?? p}</span>
+                    <span className={highlight ? "text-white/90" : ""}>{c.placements[p] ?? p}</span>
                   </li>
                 ))}
               </ul>
@@ -218,9 +274,9 @@ export default async function BoostPage({
               <BoostCheckoutButton
                 tier={tier}
                 highlight={highlight}
-                label={isCurrent ? "Renouveler" : "Activer"}
-                redirectingLabel="Redirection…"
-                errorLabel="Erreur de paiement. Réessayez."
+                label={isCurrent ? c.renew : c.activate}
+                redirectingLabel={c.redirecting}
+                errorLabel={c.checkoutError}
               />
             </div>
           );
@@ -237,11 +293,11 @@ export default async function BoostPage({
           <TableCard title={t.boostPage.historyTitle}>
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Offre</th>
+                <th>{c.colDate}</th>
+                <th>{c.colOffer}</th>
                 <th>{t.boostPage.colPeriod}</th>
                 <th>{t.boostPage.colStatus}</th>
-                <th className="text-right">Montant</th>
+                <th className="text-right">{c.colAmount}</th>
               </tr>
             </thead>
             <tbody>
@@ -258,7 +314,7 @@ export default async function BoostPage({
                     <td className="font-semibold">{BOOST_NAMES[b.tier] ?? b.tier}</td>
                     <td className="text-[var(--subtle)]">{period}</td>
                     <td>
-                      <Pill tone={boostTone(b.status)}>{BOOST_STATUS_FR[b.status] ?? b.status}</Pill>
+                      <Pill tone={boostTone(b.status)}>{c.statusLabels[b.status] ?? b.status}</Pill>
                     </td>
                     <td className="text-right font-display font-bold">
                       {formatMoney(BigInt(b.amount_minor), b.currency, locale)}
