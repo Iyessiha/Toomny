@@ -5,6 +5,7 @@ import { recordFunding } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
 import { nextPeriodEnd } from "@/lib/plans";
 import { BOOST_PERIOD_MS } from "@/lib/boost";
+import { fundedDueAt } from "@/lib/order-deadline";
 
 export const runtime = "nodejs";
 
@@ -131,14 +132,14 @@ export async function POST(request: Request): Promise<Response> {
 
     const { data: order } = await db
       .from("orders")
-      .select("id, status, reference, client_id, provider_id, amount_minor, currency")
+      .select("id, status, reference, client_id, provider_id, amount_minor, currency, created_at, due_at")
       .eq("id", hold.order_id)
       .maybeSingle();
 
     if (order?.status === "pending_payment") {
       await db
         .from("orders")
-        .update({ status: "funded" })
+        .update({ status: "funded", due_at: fundedDueAt(order, new Date(now)) })
         .eq("id", order.id)
         .eq("status", "pending_payment");
 

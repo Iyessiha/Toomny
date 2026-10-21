@@ -8,6 +8,7 @@ import { UUID_RE } from "@/lib/orders";
 import { recordFunding, recordCompletion } from "@/lib/order-ledger";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
+import { fundedDueAt } from "@/lib/order-deadline";
 
 /**
  * Confirmer un paiement reçu chez le partenaire agréé : pending_payment -> funded.
@@ -23,7 +24,7 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
   const db = createAdminClient();
   const { data: order } = await db
     .from("orders")
-    .select("id, status, reference, amount_minor, currency, provider_id")
+    .select("id, status, reference, amount_minor, currency, provider_id, created_at, due_at")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return;
@@ -36,7 +37,11 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
 
   const { error } = await db
     .from("orders")
-    .update({ status: "funded", updated_at: new Date().toISOString() })
+    .update({
+      status: "funded",
+      due_at: fundedDueAt(order, new Date()),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", orderId)
     .eq("status", "pending_payment");
 

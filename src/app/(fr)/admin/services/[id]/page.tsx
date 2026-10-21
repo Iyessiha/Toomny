@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCategories } from "@/lib/catalog";
@@ -10,6 +9,7 @@ import { getAdminTexts } from "@/i18n/admin";
 import { getListingGuideTexts, REJECTION_REASONS } from "@/i18n/listing-guide";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceEditForm } from "@/components/admin/service-edit-form";
+import { ServicePhotosForm } from "@/components/admin/service-photos-form";
 import { Avatar, Notice, Pill, Section, serviceTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { checkListing } from "@/lib/listing-checks";
@@ -131,30 +131,27 @@ export default async function AdminServiceReviewPage({
           </ul>
         </Section>
 
-        {/* Photo de couverture */}
+        {/* Photos : couverture et galerie, modifiables par l'admin */}
         <Section title={t.coverTitle}>
-          {service.cover_url ? (
-            <a href={service.cover_url} target="_blank" rel="noopener noreferrer" className="relative block aspect-video overflow-hidden rounded-xl bg-[var(--surface)]" aria-label={t.openImage}>
-              <Image src={service.cover_url} alt={service.title} fill className="object-contain" sizes="(min-width: 1024px) 800px, 100vw" />
-            </a>
-          ) : (
-            <Notice tone="danger">{t.noCover}</Notice>
-          )}
-        </Section>
-
-        {/* Galerie */}
-        <Section title={`${t.galleryTitle} (${gallery.length})`}>
-          {gallery.length === 0 ? (
-            <p className="text-sm text-[var(--subtle)]">{t.noGallery}</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {gallery.map((url, i) => (
-                <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="relative aspect-[4/3] overflow-hidden rounded-xl bg-[var(--surface)]" aria-label={t.openImage}>
-                  <Image src={url} alt={`${service.title} — ${i + 2}`} fill className="object-cover" sizes="(min-width: 768px) 25vw, 50vw" />
-                </a>
-              ))}
-            </div>
-          )}
+          <ServicePhotosForm
+            serviceId={service.id}
+            title={service.title}
+            coverUrl={service.cover_url}
+            galleryUrls={gallery}
+            texts={{
+              replaceCover: t.replaceCover,
+              addPhoto: t.addPhoto,
+              removePhoto: t.removePhoto,
+              uploading: t.uploading,
+              photoError: t.photoError,
+              galleryFull: t.galleryFull,
+              coverNotLandscape: t.coverNotLandscape,
+              noCover: t.noCover,
+              noGallery: t.noGallery,
+              openImage: t.openImage,
+              galleryLabel: t.galleryLabel,
+            }}
+          />
         </Section>
 
         {/* Informations */}

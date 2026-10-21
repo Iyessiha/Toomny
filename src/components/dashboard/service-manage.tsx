@@ -7,13 +7,14 @@ import {
   updateService,
   deleteService,
   toggleServiceStatus,
+  resubmitService,
   upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { EmptyState } from "@/components/dashboard/shell-ui";
 import { Pill, serviceTone } from "@/components/dashboard/pro";
 import type { Locale } from "@/i18n/dictionaries";
-import { resizeCover } from "@/lib/resize-image";
+import { CoverNotLandscapeError, resizeCover } from "@/lib/resize-image";
 
 type Service = {
   id: string;
@@ -158,7 +159,11 @@ export function ServiceManage({
     let file: File;
     try {
       file = await resizeCover(raw);
-    } catch {
+    } catch (err) {
+      if (err instanceof CoverNotLandscapeError) {
+        setUploadError(t.form.coverNotLandscape);
+        return;
+      }
       file = raw;
     }
     const preview = URL.createObjectURL(file);
@@ -268,6 +273,17 @@ export function ServiceManage({
     }
   }
 
+  async function handleResubmit(s: Service) {
+    setPending(true);
+    const result = await resubmitService(s.id);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+    } else {
+      router.refresh();
+    }
+  }
+
   async function handleDelete(s: Service) {
     if (!confirm(t.deleteConfirm)) return;
     setPending(true);
@@ -320,6 +336,15 @@ export function ServiceManage({
                   className="btn-ghost btn-sm disabled:opacity-50"
                 >
                   {s.status === "active" ? t.pause : t.activate}
+                </button>
+              )}
+              {s.status === "removed" && (
+                <button
+                  onClick={() => handleResubmit(s)}
+                  disabled={pending}
+                  className="btn-ghost btn-sm disabled:opacity-50"
+                >
+                  {t.resubmit}
                 </button>
               )}
               {(s.status === "draft" || s.status === "paused") && (

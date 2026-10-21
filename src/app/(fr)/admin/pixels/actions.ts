@@ -16,10 +16,18 @@ export async function savePixelSettings(formData: FormData): Promise<{ error?: s
   }
 
   const db = createAdminClient();
-  const { error } = await db
-    .from("pixels_publicitaires")
-    .upsert({ id: 1, ...parsed.values, updated_by: actor.id, updated_at: new Date().toISOString() });
-  if (error) return { error: error.message };
+  let error: { message: string } | null = null;
+  try {
+    ({ error } = await db
+      .from("pixels_publicitaires")
+      .upsert({ id: 1, ...parsed.values, updated_by: actor.id, updated_at: new Date().toISOString() }));
+  } catch (err) {
+    error = { message: (err as Error).message };
+  }
+  if (error) {
+    console.error("[admin/pixels] save:", error.message);
+    return { error: error.message };
+  }
 
   await recordAdminAction(db, {
     actorId: actor.id,

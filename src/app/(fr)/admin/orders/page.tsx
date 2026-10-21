@@ -110,7 +110,7 @@ export default async function AdminOrdersPage({
               <tr key={o.id}>
                 <td>
                   <Link
-                    href={`/orders/${o.id}`}
+                    href={`/admin/orders/${o.id}`}
                     className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
                   >
                     {o.reference}
@@ -132,7 +132,7 @@ export default async function AdminOrdersPage({
                 </td>
                 <td>
                   <div className="flex items-center justify-end gap-2">
-                    <Link href={`/orders/${o.id}`} className="btn-ghost btn-sm">
+                    <Link href={`/admin/orders/${o.id}`} className="btn-ghost btn-sm">
                       {t.viewDetail}
                     </Link>
 

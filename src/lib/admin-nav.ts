@@ -2,7 +2,12 @@ import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import type { Locale } from "@/i18n/dictionaries";
 
-export type NavItem = { href: string; label: string; current?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  current?: boolean;
+  badge?: { count: number; attention: boolean };
+};
 export type NavGroup = { label: string; items: NavItem[] };
 
 export function getAdminNavGroups(locale: Locale, currentPath: string): NavGroup[] {

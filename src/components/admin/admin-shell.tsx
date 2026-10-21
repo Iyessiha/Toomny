@@ -8,12 +8,13 @@ import { getAdminTexts } from "@/i18n/admin";
 import type { Locale } from "@/i18n/dictionaries";
 import type { NavItem, NavGroup } from "@/lib/admin-nav";
 import { flattenNavGroups } from "@/lib/admin-nav";
+import { getAdminNavCounts } from "@/lib/admin-counts";
 
 export type { NavItem, NavGroup };
 
-export function AdminShell({
+export async function AdminShell({
   user,
-  nav,
+  nav: navBase,
   title,
   subtitle,
   kicker,
@@ -34,6 +35,11 @@ export function AdminShell({
   const tAdmin = getAdminTexts(locale);
   const adminNav = getAdminTexts(locale).nav;
   const displayName = user.displayName ?? user.email ?? "?";
+  const counts = await getAdminNavCounts();
+  const nav: NavGroup[] = navBase.map((group) => ({
+    ...group,
+    items: group.items.map((item) => (counts[item.href] ? { ...item, badge: counts[item.href] } : item)),
+  }));
   const flatNav = flattenNavGroups(nav);
 
   return (
@@ -114,6 +120,17 @@ export function AdminShell({
                       >
                         <NavIcon href={item.href} />
                         {item.label}
+                        {item.badge && item.badge.count > 0 && (
+                          <span
+                            className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${
+                              item.badge.attention
+                                ? "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]"
+                                : "bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]"
+                            }`}
+                          >
+                            {item.badge.count}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   ))}
