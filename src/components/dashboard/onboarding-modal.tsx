@@ -140,10 +140,24 @@ export function OnboardingModal({
     });
   }
 
+  // Échap ferme l'onboarding comme le bouton « Passer ».
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") finish();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
   if (closed) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onboarding-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+    >
       <div className="relative w-full max-w-md rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-2xl">
         {/* En-tête */}
         <div className="px-8 pt-8 pb-6">
@@ -164,7 +178,7 @@ export function OnboardingModal({
             {current.icon}
           </div>
 
-          <h2 className="mt-5 font-display text-xl font-bold leading-tight">
+          <h2 id="onboarding-title" className="mt-5 font-display text-xl font-bold leading-tight">
             {locale === "en" ? current.titleEn : current.titleFr}
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-[var(--subtle)]">

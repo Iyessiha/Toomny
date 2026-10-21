@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type FormEvent } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -126,9 +126,22 @@ export function ServiceManage({
       const suggestedPrice = Math.round((basePrice * multiplierPrice) / 5000) * 5000 || basePrice;
       const suggestedDays = Math.max(1, Math.round(baseDays * multiplierDays));
       const defaultName = tier === 1 ? t.form.pkgBasic : tier === 2 ? t.form.pkgStandard : t.form.pkgPremium;
-      return { enabled: true, name: defaultName, description: "", price: String(suggestedPrice), deliveryDays: String(suggestedDays) };
+      // Forfait proposé mais non coché : le prestataire choisit ce qu'il publie.
+      return { enabled: false, name: defaultName, description: "", price: String(suggestedPrice), deliveryDays: String(suggestedDays) };
     }) as [PackageSlot, PackageSlot, PackageSlot]);
   }
+
+  // Échap ferme la fenêtre de modification, comme le bouton ×.
+  useEffect(() => {
+    if (!editing) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeEdit();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // closeEdit ne dépend que des setters et des textes : la liste de dépendances reste [editing].
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editing]);
 
   function closeEdit() {
     setEditing(null);
@@ -245,54 +258,66 @@ export function ServiceManage({
         delivery_days: Number(slot.deliveryDays),
       }));
 
-    const [result, pkgResult] = await Promise.all([
-      updateService(editing.id, fd),
-      upsertPackages(editing.id, enabledPackages),
-    ]);
-    setPending(false);
-    if ("error" in result && result.error) {
-      setError(result.error);
-    } else if ("error" in pkgResult && pkgResult.error) {
-      setError(pkgResult.error);
-    } else {
+    try {
+      // Séquentiel : si la prestation n'est pas enregistrée, les forfaits ne le sont pas non plus.
+      const result = await updateService(editing.id, fd);
+      if ("error" in result && result.error) {
+        setError(result.error);
+        return;
+      }
+      const pkgResult = await upsertPackages(editing.id, enabledPackages);
+      if ("error" in pkgResult && pkgResult.error) {
+        setError(pkgResult.error);
+        return;
+      }
       const msg = "pendingReview" in result && result.pendingReview ? t.pendingReview : t.updated;
       setSuccess(msg);
       router.refresh();
       setTimeout(closeEdit, 1200);
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
     }
   }
 
   async function handleToggle(s: Service) {
     setPending(true);
-    const result = await toggleServiceStatus(s.id, s.status);
-    setPending(false);
-    if ("error" in result && result.error) {
-      setError(result.error);
-    } else {
-      router.refresh();
+    try {
+      const result = await toggleServiceStatus(s.id, s.status);
+      if ("error" in result && result.error) setError(result.error);
+      else router.refresh();
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
     }
   }
 
   async function handleResubmit(s: Service) {
     setPending(true);
-    const result = await resubmitService(s.id);
-    setPending(false);
-    if ("error" in result && result.error) {
-      setError(result.error);
-    } else {
-      router.refresh();
+    try {
+      const result = await resubmitService(s.id);
+      if ("error" in result && result.error) setError(result.error);
+      else router.refresh();
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
     }
   }
 
   async function handleDelete(s: Service) {
     if (!confirm(t.deleteConfirm)) return;
     setPending(true);
-    const result = await deleteService(s.id);
-    setPending(false);
-    if ("error" in result && result.error) {
-      setError(result.error);
-    } else {
-      router.refresh();
+    try {
+      const result = await deleteService(s.id);
+      if ("error" in result && result.error) setError(result.error);
+      else router.refresh();
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
     }
   }
 
@@ -373,9 +398,14 @@ export function ServiceManage({
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
           onClick={(e) => { if (e.target === e.currentTarget) closeEdit(); }}
         >
-          <div className="w-full max-w-lg overflow-y-auto rounded-2xl bg-[var(--background)] p-6 shadow-2xl max-h-[90dvh]">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-service-title"
+            className="w-full max-w-lg overflow-y-auto rounded-2xl bg-[var(--background)] p-6 shadow-2xl max-h-[90dvh]"
+          >
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-display text-lg font-bold">{t.editTitle}</h2>
+              <h2 id="edit-service-title" className="font-display text-lg font-bold">{t.editTitle}</h2>
               <button
                 onClick={closeEdit}
                 className="rounded-full p-1.5 text-[var(--subtle)] hover:text-[var(--foreground)]"

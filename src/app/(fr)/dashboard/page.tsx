@@ -124,14 +124,14 @@ function ProviderDashboard({
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Total encaissé"
-          value={formatMoney(data.earnedMinor, cur, "fr")}
+          value={formatMoney(data.earnedMinor, cur, locale)}
           hint={`${completedOrders} mission${completedOrders !== 1 ? "s" : ""} validée${completedOrders !== 1 ? "s" : ""}`}
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
           accent
         />
         <StatCard
           label="En attente"
-          value={formatMoney(data.pendingMinor, cur, "fr")}
+          value={formatMoney(data.pendingMinor, cur, locale)}
           hint="Fonds sécurisés en séquestre"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>}
         />
@@ -197,7 +197,7 @@ function ProviderDashboard({
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <span className="font-display text-sm font-bold">{formatMoney(BigInt(o.provider_net_minor), o.currency, "fr")}</span>
+                        <span className="font-display text-sm font-bold">{formatMoney(BigInt(o.provider_net_minor), o.currency, locale)}</span>
                       </td>
                     </tr>
                   ))}
@@ -340,7 +340,7 @@ function ClientDashboard({
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label="Total dépensé"
-          value={formatMoney(data.spentMinor, cur, "fr")}
+          value={formatMoney(data.spentMinor, cur, locale)}
           hint="Hors annulations et remboursements"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
           accent
@@ -385,7 +385,7 @@ function ClientDashboard({
                     </span>
                   </div>
                   <p className="font-display font-bold text-[var(--color-brand-700)]">
-                    {formatMoney(BigInt(o.amount_minor), o.currency, "fr")}
+                    {formatMoney(BigInt(o.amount_minor), o.currency, locale)}
                   </p>
                 </div>
               ))}
@@ -425,7 +425,7 @@ function ClientDashboard({
                         </span>
                       </td>
                       <td className="px-5 py-4 text-right font-display font-bold">
-                        {formatMoney(BigInt(o.amount_minor), o.currency, "fr")}
+                        {formatMoney(BigInt(o.amount_minor), o.currency, locale)}
                       </td>
                     </tr>
                   ))}

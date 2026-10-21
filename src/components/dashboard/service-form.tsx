@@ -176,7 +176,14 @@ export function ServiceForm({
       }));
     fd.set("packagesJson", enabledPackages.length ? JSON.stringify(enabledPackages) : "");
 
-    const result = await createService(fd);
+    let result;
+    try {
+      result = await createService(fd);
+    } catch {
+      setPending(false);
+      setError(t.errors.network);
+      return;
+    }
     setPending(false);
     if ("error" in result && result.error) {
       setError(result.error);
