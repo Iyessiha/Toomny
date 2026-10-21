@@ -24,7 +24,8 @@ export function PixelSettingsForm({ settings, locale }: { settings: PixelSetting
       return;
     }
     if (result.error) {
-      setError(t.errorSave);
+      // Le détail technique aide à trouver la cause (table absente, clé de service, etc.).
+      setError(`${t.errorSave} (${result.error})`);
       return;
     }
     setSaved(true);
