@@ -123,6 +123,13 @@ const fr = {
           ? `Votre prestation « ${p.service} » est maintenant en ligne.`
           : "Votre prestation est maintenant en ligne.",
     },
+    service_rejected: {
+      title: "Prestation à revoir",
+      body: (p) =>
+        p.service
+          ? `Votre prestation « ${p.service} » n'a pas été publiée. L'e-mail envoyé explique comment la compléter.`
+          : "Une de vos prestations n'a pas été publiée. L'e-mail envoyé explique comment la compléter.",
+    },
     service_removed: {
       title: "Prestation retirée",
       body: (p) =>
@@ -250,6 +257,13 @@ const en: typeof fr = {
         p.service
           ? `Your service "${p.service}" is now live.`
           : "Your service is now live.",
+    },
+    service_rejected: {
+      title: "Service to review",
+      body: (p) =>
+        p.service
+          ? `Your service « ${p.service} » was not published. The email explains how to complete it.`
+          : "One of your services was not published. The email explains how to complete it.",
     },
     service_removed: {
       title: "Service removed",

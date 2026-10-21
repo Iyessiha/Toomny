@@ -1,10 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
+import { sendServiceRejectedEmail } from "@/lib/email";
+import { isRejectionReason } from "@/i18n/listing-guide";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
@@ -97,4 +100,64 @@ export async function editService(formData: FormData): Promise<{ error?: string 
   revalidatePath("/services");
   revalidatePath(`/services/${id}`);
   return {};
+}
+
+/**
+ * Refus d'une prestation en brouillon : motifs cochés + message optionnel.
+ * Le prestataire reçoit une notification et un e-mail qui explique comment rédiger une annonce complète.
+ */
+export async function rejectService(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+
+  const id = String(formData.get("serviceId") ?? "");
+  if (!UUID_RE.test(id)) return;
+
+  const reasons = formData.getAll("reasons").map(String).filter(isRejectionReason);
+  if (reasons.length === 0) redirect(`/admin/services/${id}?error=reason`);
+
+  const message = String(formData.get("message") ?? "").trim().slice(0, 1000);
+
+  const db = createAdminClient();
+  const { data: service } = await db
+    .from("services")
+    .select("provider_id, title, status, provider:profiles!services_provider_id_profiles_id_fk(display_name, email, preferred_locale)")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!service || service.status !== "draft") redirect(`/admin/services/${id}?error=status`);
+
+  const provider = Array.isArray(service.provider) ? service.provider[0] : service.provider;
+  if (!provider?.email) redirect(`/admin/services/${id}?error=email`);
+
+  const locale = provider.preferred_locale === "en" ? "en" : "fr";
+  const firstName = (provider.display_name ?? "").trim().split(" ")[0];
+
+  await notify(db, {
+    recipientId: service.provider_id,
+    type: "service_rejected",
+    params: { service: service.title ?? undefined },
+    link: "/dashboard/prestations",
+    sendEmail: false,
+  });
+
+  await sendServiceRejectedEmail({
+    to: provider.email,
+    firstName,
+    serviceTitle: service.title,
+    reasons,
+    message,
+    locale,
+  });
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "service.reject",
+    targetType: "service",
+    targetId: id,
+    details: { reasons, hasMessage: message.length > 0 },
+  });
+
+  revalidatePath("/admin/services");
+  revalidatePath(`/admin/services/${id}`);
+  redirect(`/admin/services/${id}?refused=1`);
 }

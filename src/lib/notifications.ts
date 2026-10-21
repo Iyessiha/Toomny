@@ -24,6 +24,7 @@ export const NOTIFICATION_TYPES = [
   "subscription_failed",
   "service_approved",
   "service_removed",
+  "service_rejected",
   "boost_activated",
   "boost_failed",
 ] as const;

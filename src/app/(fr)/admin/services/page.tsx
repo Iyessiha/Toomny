@@ -103,7 +103,7 @@ export default async function AdminServicesPage({
                 <td>
                   <div className="flex flex-wrap justify-end gap-2">
                     <Link href={`/admin/services/${s.id}`} className="btn-ghost btn-sm">
-                      {t.edit}
+                      {t.review}
                     </Link>
                     {s.status !== "active" && (
                       <ModerationButton serviceId={s.id} status="active" label={t.publish} primary />
