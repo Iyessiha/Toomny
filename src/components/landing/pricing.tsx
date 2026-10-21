@@ -126,7 +126,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                 <tr className="border-b border-[var(--border)]">
                   <th className="px-6 py-4 font-medium text-[var(--subtle)]"></th>
                   <th className="px-6 py-4 font-display text-sm font-bold">Fiverr</th>
-                  <th className="px-6 py-4 font-display text-sm font-bold">ComeUp</th>
+                  <th className="px-6 py-4 font-display text-sm font-bold">Upwork</th>
                   <th className="bg-[var(--color-brand-500)] px-6 py-4 font-display text-sm font-bold text-white">
                     Toomny
                   </th>
@@ -165,7 +165,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                     <dd className="text-right text-[var(--subtle)]">{r.fiverr}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[var(--subtle)]">ComeUp</dt>
+                    <dt className="text-[var(--subtle)]">Upwork</dt>
                     <dd className="text-right text-[var(--subtle)]">{r.upwork as string}</dd>
                   </div>
                   <div className="flex justify-between gap-4 border-t border-[var(--border)] pt-1">
@@ -182,23 +182,9 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
 
         <p data-reveal className="mt-6 text-xs leading-relaxed text-[var(--subtle)]">
           {t.sourcesPrefix}
-          <a
-            href="https://www.jobbers.io/?p=53038"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            {t.sourceA}
-          </a>
+          {t.sourceA}
           {t.sourcesMid}
-          <a
-            href="https://vaultleap.com/blog/payoneer-fees-explained-2026"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            {t.sourceB}
-          </a>
+          {t.sourceB}
           {t.sourcesSuffix}
         </p>
       </div>
