@@ -1,12 +1,6 @@
-import Link from "next/link";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
-
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
+import { TierStaircase } from "./tier-staircase";
 
 export function Pricing({ locale = "fr" }: { locale?: Locale }) {
   const t = getLanding(locale).pricing;
@@ -40,77 +34,11 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
           </div>
         </div>
 
-        {/* Provider plans */}
+        {/* Provider plans: staircase, the design is fixed and dark on purpose */}
         <p data-reveal className="mb-5 mt-14 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--subtle)]">
           {t.plansFor}
         </p>
-        <div className="pricing-scene grid gap-5 sm:grid-cols-3">
-          {t.plans.map((plan) => (
-            <div
-              key={plan.name}
-              data-reveal
-              className={`pricing-card-gloss relative flex flex-col rounded-2xl p-6 ${
-                plan.highlight
-                  ? "pricing-card-hl border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] shadow-[0_0_0_1px_var(--color-brand-200),0_20px_60px_rgba(0,0,0,0.15)]"
-                  : "pricing-card border border-[var(--border)] bg-[var(--background)] shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-              }`}
-            >
-              {plan.badge && (
-                <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-brand-500)] px-3.5 py-1 text-xs font-bold text-white shadow-[0_4px_16px_rgba(16,128,67,0.4)]">
-                  {plan.badge}
-                </span>
-              )}
-
-              {/* Plan name */}
-              <p className={`font-display text-lg font-bold ${plan.highlight ? "text-[var(--color-brand-700)]" : ""}`}>
-                {plan.name}
-              </p>
-
-              {/* Commission pill */}
-              <div
-                className={`mt-4 inline-flex w-fit items-center gap-2 rounded-xl px-3 py-2 ${
-                  plan.highlight ? "bg-[var(--color-brand-100)] border border-[var(--color-brand-200)]" : "bg-[var(--surface)] border border-[var(--border)]"
-                }`}
-              >
-                <span className="font-display text-2xl font-bold text-[var(--color-brand-600)]">
-                  {plan.commission}
-                </span>
-                <span className="text-sm text-[var(--subtle)]">commission</span>
-              </div>
-
-              {/* Price */}
-              <div className="mt-5">
-                <span className="font-display text-2xl font-bold">{plan.price}</span>
-                <span className="ml-1.5 text-sm text-[var(--subtle)]">{plan.priceNote}</span>
-              </div>
-
-              {/* Separator */}
-              <hr className="my-5 border-white/[0.06]" />
-
-              {/* Features */}
-              <ul className="flex-1 space-y-2.5">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm">
-                    <span className="shrink-0 font-bold text-[var(--color-brand-500)]"><CheckIcon /></span>
-                    <span className={plan.highlight ? "text-[var(--foreground)]" : "text-[var(--subtle)]"}>{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <Link
-                href={plan.href}
-                className={`relative z-[2] mt-7 block rounded-full px-4 py-3 text-center text-sm font-semibold transition-all duration-150 ${
-                  plan.highlight
-                    ? "bg-gradient-to-r from-[var(--color-brand-600)] to-[var(--color-brand-500)] text-white shadow-[0_4px_16px_rgba(16,128,67,0.35),0_1px_0_rgba(255,255,255,0.15)_inset] hover:opacity-90 hover:-translate-y-px"
-                    : "border border-[var(--color-brand-300)] text-[var(--color-brand-600)] hover:bg-[var(--color-brand-50)]"
-                }`}
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
+        <TierStaircase plans={t.plans} tiers={t.tiers} levelWord={t.levelWord} />
 
         {/* Comparison table */}
         <div className="mt-20">

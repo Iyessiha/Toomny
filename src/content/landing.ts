@@ -127,6 +127,13 @@ const fr = {
           href: "/auth?role=provider",
         },
       ],
+      levelWord: "Niveau",
+      tiers: [
+        { step: "Départ", tagline: "Recevez vos premiers clients gratuitement", feeLine: "Commission Toomny : 10 %. Sur 100 000 FCFA, vous touchez 89 100 FCFA après le versement de 1 %." },
+        { step: "Croissance", tagline: "Publiez davantage de services pour être vu", feeLine: "Commission Toomny : 8 %. Sur 100 000 FCFA, vous touchez 91 080 FCFA après le versement de 1 %." },
+        { step: "Accélération", tagline: "Vingt services publiés et un tableau de bord analytique", feeLine: "Commission Toomny : 5 %. Sur 100 000 FCFA, vous touchez 94 050 FCFA après le versement de 1 %." },
+        { step: "Sommet", tagline: "Cinquante services publiés et la commission la plus basse", feeLine: "Commission Toomny : 3 %. Sur 100 000 FCFA, vous touchez 96 030 FCFA après le versement de 1 %." },
+      ],
       compareTitle: "Ce que les plateformes mondiales vous prennent vraiment",
       rows: [
         { label: "Commission prestataire", fiverr: "20 % (comparatifs tiers)", upwork: "0 à 15 %, variable (souvent ~10 %)", toomny: "De 10 % à 3 % selon le plan" },
@@ -320,6 +327,13 @@ const en: LandingContent = {
           cta: "Become Expert",
           href: "/auth?role=provider",
         },
+      ],
+      levelWord: "Level",
+      tiers: [
+        { step: "Start", tagline: "Get your first clients for free", feeLine: "Toomny commission: 10%. On 100,000 FCFA you receive 89,100 FCFA after the 1% payout fee." },
+        { step: "Growth", tagline: "Publish more services to be seen more", feeLine: "Toomny commission: 8%. On 100,000 FCFA you receive 91,080 FCFA after the 1% payout fee." },
+        { step: "Acceleration", tagline: "Twenty published services and an analytics dashboard", feeLine: "Toomny commission: 5%. On 100,000 FCFA you receive 94,050 FCFA after the 1% payout fee." },
+        { step: "Summit", tagline: "Fifty published services and the lowest commission", feeLine: "Toomny commission: 3%. On 100,000 FCFA you receive 96,030 FCFA after the 1% payout fee." },
       ],
       compareTitle: "What global platforms actually take from you",
       rows: [

@@ -559,40 +559,221 @@ html.lenis, html.lenis body { height: auto; }
 }
 .talent-track:hover { animation-play-state: paused; }
 
-/* ── Pricing 3D cards ────────────────────────────────────────────────────── */
-.pricing-scene { perspective: 1400px; }
-.pricing-card {
+/* ── Pricing staircase (niveaux en escalier) ─────────────────────────────── */
+/* Panneau sombre permanent : ses couleurs sont fixes, quel que soit le thème. */
+.tier-panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 40px 20px 48px;
+  color: #e5ebf5;
+  background:
+    radial-gradient(900px 500px at 80% -10%, rgba(251, 191, 36, 0.10), transparent 60%),
+    radial-gradient(800px 500px at 0% 110%, rgba(99, 102, 241, 0.12), transparent 60%),
+    #070a10;
+}
+@media (min-width: 640px) { .tier-panel { padding: 56px 40px 64px; } }
+
+.tier-rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.tier-rail::before {
+  content: "";
+  position: absolute;
+  left: 8px; right: 8px; top: 7px;
+  height: 2px;
+  opacity: 0.5;
+  background: linear-gradient(90deg, #94a3b8, #34d399, #818cf8, #fbbf24);
+}
+.tier-step {
+  position: relative;
+  padding-top: 28px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+.tier-step::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--c1);
+  box-shadow: 0 0 0 4px #070a10, 0 0 22px var(--glow);
+}
+.tier-step b { display: block; color: #f8fafc; font-size: 15px; margin-bottom: 2px; }
+
+.tier-scene {
+  margin-top: 150px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  perspective: 2000px;
+  perspective-origin: 50% 20%;
   transform-style: preserve-3d;
-  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
 }
-.pricing-card:hover {
-  transform: rotateX(5deg) rotateY(-5deg) translateZ(12px) translateY(-8px);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.06) inset,
-    0 8px 24px rgba(0,0,0,0.5),
-    0 40px 80px rgba(0,0,0,0.45),
-    0 0 0 1px rgba(34,197,94,0.08);
-}
-.pricing-card-hl {
+.tier-slot {
   transform-style: preserve-3d;
-  transform: rotateX(0deg) rotateY(0deg) translateZ(10px) translateY(-5px);
-  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+  transform: translate3d(0, calc(var(--i) * -18px), calc(var(--i) * 20px));
+  animation: tier-climb 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 0.16s + 0.2s);
 }
-.pricing-card-hl:hover {
-  transform: rotateX(5deg) rotateY(-5deg) translateZ(24px) translateY(-12px);
-  box-shadow:
-    0 1px 0 rgba(34,197,94,0.12) inset,
-    0 8px 28px rgba(0,0,0,0.5),
-    0 48px 96px rgba(0,0,0,0.5),
-    0 0 0 1px rgba(34,197,94,0.2),
-    0 0 80px rgba(34,197,94,0.1);
+@keyframes tier-climb {
+  from { opacity: 0; transform: translate3d(0, 140px, -320px); }
+  to { opacity: 1; transform: translate3d(0, calc(var(--i) * -18px), calc(var(--i) * 20px)); }
 }
-.pricing-card-gloss::before {
-  content: '';
+
+/* Palette par niveau : une couleur propre à chaque palier. */
+.tier-1 { --i: 0; --c1: #cbd5e1; --c2: #475569; --ink: #1e293b; --edge: rgba(148, 163, 184, 0.35); --glow: rgba(148, 163, 184, 0.12); }
+.tier-2 { --i: 1; --c1: #6ee7b7; --c2: #059669; --ink: #064e3b; --edge: rgba(52, 211, 153, 0.55); --glow: rgba(52, 211, 153, 0.28); }
+.tier-3 { --i: 2; --c1: #a5b4fc; --c2: #4338ca; --ink: #1e1b4b; --edge: rgba(129, 140, 248, 0.6); --glow: rgba(129, 140, 248, 0.38); }
+.tier-4 { --i: 3; --c1: #fde68a; --c2: #b45309; --ink: #451a03; --edge: rgba(251, 191, 36, 0.8); --glow: rgba(251, 191, 36, 0.5); }
+
+.tier-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.45s;
+  border-radius: 22px;
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: linear-gradient(170deg, #141a28 0%, #0a0e17 70%);
+  border: 1px solid var(--edge);
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 60px -20px var(--glow);
+}
+/* Épaisseur physique : une plaque plus sombre derrière la face. */
+.tier-card::before {
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(160deg, rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.018) 30%, transparent 60%);
-  pointer-events: none;
-  z-index: 1;
+  background: linear-gradient(180deg, var(--c2), var(--ink));
+  transform: translateZ(-18px);
+  filter: brightness(0.7);
 }
+.tier-card:hover { box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95), 0 0 90px -10px var(--glow); }
+.tier-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgba(255, 255, 255, 0.22), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.tier-card:hover .tier-glare { opacity: 1; }
+.tier-layer { position: relative; transform: translateZ(40px); display: flex; flex-direction: column; flex: 1; }
+.tier-no { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c1); }
+.tier-plan { font-size: 24px; font-weight: 800; margin: 8px 0 0; letter-spacing: -0.02em; color: #f8fafc; }
+.tier-tag { margin: 10px 0 0; font-size: 14px; line-height: 1.45; color: #94a3b8; min-height: 3.9em; }
+.tier-price { margin-top: 18px; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+.tier-price small { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-top: 4px; }
+.tier-price.is-free { color: var(--c1); }
+.tier-rule { border: 0; border-top: 1px solid rgba(148, 163, 184, 0.18); margin: 20px 0; }
+.tier-feat { list-style: none; padding: 0; margin: 0; display: grid; gap: 11px; flex: 1; }
+.tier-feat li { display: flex; gap: 10px; font-size: 14px; line-height: 1.4; color: #e2e8f0; }
+.tier-feat li::before {
+  content: "✓";
+  flex: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--c1);
+}
+.tier-fee {
+  margin: 20px 0 0;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(148, 163, 184, 0.2);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+.tier-cta {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  padding: 13px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 12px 26px -10px var(--c2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tier-cta:hover { transform: translateY(-2px); }
+.tier-1 .tier-cta { color: #e2e8f0; background: none; border: 1px solid rgba(203, 213, 225, 0.4); box-shadow: none; }
+.tier-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translate(-50%, 0) translateZ(70px);
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  padding: 6px 14px;
+  border-radius: 999px;
+  z-index: 4;
+  box-shadow: 0 8px 22px -6px var(--c2);
+}
+/* Le palier Pro respire doucement. */
+.tier-3 .tier-card { animation: tier-halo 3.2s ease-in-out infinite; }
+@keyframes tier-halo {
+  0%, 100% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 50px -18px var(--glow); }
+  50% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 90px -8px var(--glow); }
+}
+/* Le sommet : carte or, reflet qui balaie la surface. */
+.tier-4 .tier-card { background: linear-gradient(170deg, #2a1d05 0%, #120c02 75%); }
+.tier-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 246, 200, 0.32) 50%, transparent 60%);
+  background-size: 260% 100%;
+  mix-blend-mode: screen;
+  animation: tier-sweep 4.2s linear infinite;
+}
+@keyframes tier-sweep {
+  from { background-position: 130% 0; }
+  to { background-position: -130% 0; }
+}
+
+/* Mobile et petite tablette : une grille à plat, sans escalier. */
+@media (max-width: 900px) {
+  .tier-scene { grid-template-columns: repeat(2, minmax(0, 1fr)); perspective: none; }
+  .tier-rail { grid-template-columns: repeat(2, 1fr); row-gap: 22px; }
+  .tier-rail::before { display: none; }
+  .tier-slot { transform: none; animation-name: tier-rise; }
+  .tier-card { transform: none; }
+}
+@media (max-width: 560px) {
+  .tier-scene { grid-template-columns: minmax(0, 1fr); }
+  .tier-tag { min-height: 0; }
+}
+@keyframes tier-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tier-slot, .tier-card, .tier-card::before { animation: none !important; transition: none !important; }
+  .tier-slot { opacity: 1; }
+  .tier-sheen { animation: none !important; }
+}
+@media (hover: none) { .tier-card { transform: none; } }
