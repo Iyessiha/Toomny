@@ -15,12 +15,13 @@ export type AdminAction =
   | "payout.mark_paid"
   | "payout.mark_failed"
   | "payout.requeue"
-  | "plan.set";
+  | "plan.set"
+  | "pixels.update";
 
 export type AdminAuditEntry = {
   actorId: string;
   action: AdminAction;
-  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider";
+  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider" | "site";
   targetId: string;
   details?: Record<string, unknown>;
 };

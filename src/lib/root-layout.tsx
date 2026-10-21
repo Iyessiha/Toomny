@@ -1,11 +1,12 @@
 import { headers } from "next/headers";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
-import Script from "next/script";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { MotionProvider } from "@/components/motion-provider";
 import { SwRegister } from "@/components/pwa/sw-register";
 import { PwaInstallBanner } from "@/components/pwa/install-banner";
 import type { Locale } from "@/i18n/dictionaries";
+import { getPixelSettings } from "@/lib/pixels-server";
+import { PixelScripts } from "@/components/analytics/pixel-scripts";
 
 // next/font héberge les fichiers au build : zéro requête vers Google au
 // runtime, ce qui compte sur les réseaux lents de nos marchés.
@@ -52,14 +53,8 @@ export async function RootShell({ locale, children }: { locale: Locale; children
         <MotionProvider />
         <SwRegister />
         <PwaInstallBanner />
-        {/* Google Ads tag */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-536531182"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','AW-536531182');`}
-        </Script>
+        {/* Pixels publicitaires, configurés dans l'admin (/admin/pixels). */}
+        <PixelScripts settings={await getPixelSettings()} />
       </body>
     </html>
   );
