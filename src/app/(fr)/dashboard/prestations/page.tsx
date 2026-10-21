@@ -12,6 +12,20 @@ import { ServiceManage } from "@/components/dashboard/service-manage";
 import { Notice } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import type { Locale } from "@/i18n/dictionaries";
+
+const copy: Record<Locale, { verifyTitle: string; verifyBody: string; verifyLink: string }> = {
+  fr: {
+    verifyTitle: "Vérification d'identité requise",
+    verifyBody: "Vos prestations restent en brouillon et ne seront pas publiées tant que votre identité n'est pas vérifiée.",
+    verifyLink: "Vérifier mon identité",
+  },
+  en: {
+    verifyTitle: "Identity verification required",
+    verifyBody: "Your services stay in draft and won't be published until your identity is verified.",
+    verifyLink: "Verify my identity",
+  },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.services };
@@ -24,6 +38,7 @@ export default async function PrestationsPage() {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale).services;
   const nav = getDashboardTexts(locale).nav;
+  const c = copy[locale];
 
   const supabase = await createClient();
   const [{ data: services, error: servicesError }, categories] = await Promise.all([
@@ -64,10 +79,10 @@ export default async function PrestationsPage() {
     >
       {user.verificationStatus !== "verified" && (
         <div className="mb-6">
-          <Notice tone="warning" title="Vérification d'identité requise">
-            Vos prestations restent en brouillon et ne seront pas publiées tant que votre identité n&apos;est pas vérifiée.{" "}
+          <Notice tone="warning" title={c.verifyTitle}>
+            {c.verifyBody}{" "}
             <Link href="/dashboard/verification" className="font-semibold underline underline-offset-2">
-              Vérifier mon identité
+              {c.verifyLink}
             </Link>
           </Notice>
         </div>

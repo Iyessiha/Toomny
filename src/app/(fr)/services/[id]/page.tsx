@@ -10,6 +10,7 @@ import { categoryMeta, categoryGradient } from "@/lib/categories";
 import { ServiceSidebar } from "@/components/catalog/service-sidebar";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { visitorLocale } from "@/i18n/server-locale";
+import { detectLanguage } from "@/lib/detect-language";
 import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { ReviewsList } from "@/components/catalog/reviews-list";
@@ -62,6 +63,20 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     .eq("id", id)
     .maybeSingle();
   if (!service) notFound();
+
+  // Prestation rédigée dans l'autre langue : lien vers le traducteur gratuit de Google (sans clé).
+  const writtenIn = detectLanguage(`${service.title} ${service.description ?? ""}`);
+  const pageUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"}/services/${service.id}`;
+  const translateLink =
+    writtenIn && writtenIn !== locale
+      ? {
+          href: `https://translate.google.com/translate?sl=${writtenIn}&tl=${locale}&u=${encodeURIComponent(pageUrl)}`,
+          note: locale === "en"
+            ? "This service is written in French."
+            : "Cette prestation est rédigée en anglais.",
+          label: locale === "en" ? "Translate this page (free, Google Translate)" : "Traduire cette page (gratuit, Google Traduction)",
+        }
+      : null;
 
   const category = Array.isArray(service.category) ? service.category[0] : service.category;
   const meta = category ? categoryMeta(category.slug) : null;
@@ -311,6 +326,19 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
             {/* Description */}
             <section>
               <h2 className="font-display text-xl font-bold">{t.aboutService}</h2>
+              {translateLink && (
+                <p className="mt-4 rounded-xl bg-[var(--surface)] px-4 py-3 text-sm text-[var(--subtle)]">
+                  {translateLink.note}{" "}
+                  <a
+                    href={translateLink.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-[var(--color-brand-600)] underline underline-offset-2"
+                  >
+                    {translateLink.label}
+                  </a>
+                </p>
+              )}
               <div className="mt-4 whitespace-pre-line text-base leading-relaxed text-[var(--subtle)]">
                 {service.description}
               </div>

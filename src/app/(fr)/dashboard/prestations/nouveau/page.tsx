@@ -8,9 +8,16 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceForm } from "@/components/dashboard/service-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { visitorLocale } from "@/i18n/server-locale";
+import type { Locale } from "@/i18n/dictionaries";
+
+const copy: Record<Locale, { metaTitle: string; back: string }> = {
+  fr: { metaTitle: "Nouvelle prestation — Toomny", back: "Retour aux prestations" },
+  en: { metaTitle: "New service — Toomny", back: "Back to services" },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: "Nouvelle prestation — Toomny" };
+  return { title: copy[await visitorLocale()].metaTitle };
 }
 export const dynamic = "force-dynamic";
 
@@ -38,7 +45,7 @@ export default async function NouvellePrestation() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          {locale === "en" ? "Back to services" : "Retour aux prestations"}
+          {copy[locale].back}
         </Link>
 
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-4 sm:p-8">

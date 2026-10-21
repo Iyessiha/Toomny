@@ -30,6 +30,11 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
 
+const copy: Record<Locale, { removePhoto: string }> = {
+  fr: { removePhoto: "Supprimer" },
+  en: { removePhoto: "Remove" },
+};
+
 export function ServiceForm({
   categories,
   locale = "fr",
@@ -38,6 +43,7 @@ export function ServiceForm({
   locale?: Locale;
 }) {
   const t = getDashboardTexts(locale).services;
+  const c = copy[locale];
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -258,7 +264,7 @@ export function ServiceForm({
                 type="button"
                 onClick={() => removeGalleryImage(i)}
                 className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold text-white hover:bg-black/80"
-                aria-label="Supprimer"
+                aria-label={c.removePhoto}
               >
                 {t.form.galleryRemove}
               </button>

@@ -19,8 +19,14 @@ import {
   type PlanTier,
 } from "@/lib/plans";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import type { Locale } from "@/i18n/dictionaries";
 
 export const dynamic = "force-dynamic";
+
+const copy: Record<Locale, { essentielName: string; proName: string; expertName: string; commission: string }> = {
+  fr: { essentielName: "Essentiel", proName: "Pro", expertName: "Expert", commission: "commission" },
+  en: { essentielName: "Essential", proName: "Pro", expertName: "Expert", commission: "commission" },
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await visitorLocale();
@@ -111,13 +117,14 @@ export default async function PlanPage({
   const storedTier = normalizePlan(profile?.plan);
   const activeTier = effectivePlan(profile?.plan, profile?.plan_expires_at ?? null, now);
   const activeSpec = PLANS[activeTier];
+  const c = copy[locale];
   const landingPlans = getLanding(locale).pricing.plans;
   // landingPlans[0] = Débutant (gratuit), [1] = Essentiel, [2] = Pro, [3] = Expert
   const planDisplayNames: Record<PlanTier, string> = {
     debutant: landingPlans[0]?.name ?? p.starterName,
-    essentiel: landingPlans[1]?.name ?? "Essentiel",
-    pro: landingPlans[2]?.name ?? "Pro",
-    expert: landingPlans[3]?.name ?? "Expert",
+    essentiel: landingPlans[1]?.name ?? c.essentielName,
+    pro: landingPlans[2]?.name ?? c.proName,
+    expert: landingPlans[3]?.name ?? c.expertName,
   };
 
   const dateTag = locale === "en" ? "en-GB" : "fr-FR";
@@ -268,7 +275,7 @@ export default async function PlanPage({
                     card.highlight ? "text-white/75" : "text-[var(--color-brand-500)]"
                   }`}
                 >
-                  commission
+                  {c.commission}
                 </span>
               </div>
 

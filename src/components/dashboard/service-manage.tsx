@@ -62,6 +62,23 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
 
+const copy: Record<Locale, { close: string; cancel: string; removePhoto: string; priceLabel: string; delayLabel: string }> = {
+  fr: {
+    close: "Fermer",
+    cancel: "Annuler",
+    removePhoto: "Supprimer",
+    priceLabel: "Prix (FCFA)",
+    delayLabel: "Délai (jours)",
+  },
+  en: {
+    close: "Close",
+    cancel: "Cancel",
+    removePhoto: "Remove",
+    priceLabel: "Price (FCFA)",
+    delayLabel: "Delivery (days)",
+  },
+};
+
 export function ServiceManage({
   services,
   categories,
@@ -75,6 +92,7 @@ export function ServiceManage({
 }) {
   const t = getDashboardTexts(locale).services;
   const statusLabels = getDashboardTexts(locale).service;
+  const c = copy[locale];
   const router = useRouter();
 
   const [editing, setEditing] = useState<Service | null>(null);
@@ -409,7 +427,7 @@ export function ServiceManage({
               <button
                 onClick={closeEdit}
                 className="rounded-full p-1.5 text-[var(--subtle)] hover:text-[var(--foreground)]"
-                aria-label="Fermer"
+                aria-label={c.close}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6 6 18M6 6l12 12" />
@@ -442,7 +460,7 @@ export function ServiceManage({
                           <span className="text-sm font-semibold">{tierLabel}</span>
                           {slot.enabled && slot.price && (
                             <span className="ml-auto text-xs font-semibold text-[var(--color-brand-600)]">
-                              {Number(slot.price).toLocaleString("fr-FR")} FCFA
+                              {Number(slot.price).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA
                             </span>
                           )}
                         </label>
@@ -466,7 +484,7 @@ export function ServiceManage({
                             />
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <p className="mb-1 text-[11px] text-[var(--subtle)]">Prix (FCFA)</p>
+                                <p className="mb-1 text-[11px] text-[var(--subtle)]">{c.priceLabel}</p>
                                 <input
                                   type="text"
                                   inputMode="numeric"
@@ -477,7 +495,7 @@ export function ServiceManage({
                                 />
                               </div>
                               <div>
-                                <p className="mb-1 text-[11px] text-[var(--subtle)]">Délai (jours)</p>
+                                <p className="mb-1 text-[11px] text-[var(--subtle)]">{c.delayLabel}</p>
                                 <input
                                   type="number"
                                   min={1}
@@ -556,7 +574,7 @@ export function ServiceManage({
                         type="button"
                         onClick={() => removeGalleryImage(i)}
                         className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-[10px] font-bold text-white hover:bg-black/80"
-                        aria-label="Supprimer"
+                        aria-label={c.removePhoto}
                       >
                         {t.form.galleryRemove}
                       </button>
@@ -714,7 +732,7 @@ export function ServiceManage({
                   onClick={closeEdit}
                   className="flex-1 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-medium transition-colors hover:border-[var(--color-brand-400)]"
                 >
-                  Annuler
+                  {c.cancel}
                 </button>
                 <button
                   type="submit"

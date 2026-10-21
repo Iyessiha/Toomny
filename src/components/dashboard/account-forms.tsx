@@ -8,6 +8,11 @@ import type { Locale } from "@/i18n/dictionaries";
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
 
+const copy: Record<Locale, { labelColon: string }> = {
+  fr: { labelColon: " :" },
+  en: { labelColon: ":" },
+};
+
 export function AccountEmailForm({
   currentEmail,
   locale = "fr",
@@ -16,6 +21,7 @@ export function AccountEmailForm({
   locale?: Locale;
 }) {
   const t = getAccountTexts(locale);
+  const c = copy[locale];
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -35,7 +41,7 @@ export function AccountEmailForm({
     <section className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
       <h2 className="font-display text-base font-bold">{t.emailTitle}</h2>
       <p className="mt-1 text-xs text-[var(--subtle)]">
-        {t.emailCurrent} : <span className="font-medium text-[var(--foreground)]">{currentEmail}</span>
+        {t.emailCurrent}{c.labelColon} <span className="font-medium text-[var(--foreground)]">{currentEmail}</span>
       </p>
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <div>
