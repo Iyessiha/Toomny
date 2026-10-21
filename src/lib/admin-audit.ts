@@ -5,6 +5,7 @@ export type AdminAction =
   | "kyc.approve"
   | "kyc.reject"
   | "service.reject"
+  | "service.photos"
   | "kyc.flag"
   | "service.moderate"
   | "order.confirm_payment"
