@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
+import { FeatureCards } from "@/components/features/feature-cards";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
@@ -45,45 +46,34 @@ export default async function SecurityPage() {
         {/* Payment flow */}
         <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
           <h2 className="text-center font-display text-2xl font-bold">{s.flowTitle}</h2>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {s.flow.map((step, i) => (
-              <div key={i} className="relative flex flex-col items-center rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 text-center">
-                <span className="text-3xl" aria-hidden>{flowIcons[i]}</span>
-                <span className="mt-1 text-xs font-bold text-[var(--color-brand-500)]">
-                  {i + 1}
-                </span>
-                <p className="mt-3 text-sm font-medium leading-snug">{step}</p>
-                {i < s.flow.length - 1 && (
-                  <span
-                    className="absolute -right-2.5 top-1/2 hidden -translate-y-1/2 text-xl text-[var(--border)] lg:block"
-                    aria-hidden
-                  >
-                    →
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className="mt-10">
+            <FeatureCards
+              cards={s.flow.map((step, i) => ({
+                title: `${i + 1}`,
+                body: step,
+                icon: flowIcons[i],
+                index: undefined,
+              }))}
+              columns={4}
+              showArrows
+              variant="colorful"
+            />
           </div>
         </section>
 
         {/* Guarantees */}
         <section className="border-t border-[var(--border)] bg-[var(--surface)] py-16">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="grid gap-6 sm:grid-cols-2">
-              {s.guarantees.map((g, i) => {
-                const icons = ["🏦", "🪪", "⚖️", "⏱️"];
-                return (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6"
-                  >
-                    <span className="text-2xl" aria-hidden>{icons[i]}</span>
-                    <h3 className="mt-3 font-display text-lg font-bold">{g.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">{g.body}</p>
-                  </div>
-                );
-              })}
-            </div>
+            <FeatureCards
+              cards={s.guarantees.map((g) => ({
+                title: g.title,
+                body: g.body,
+                icon: ['🏦', '🪪', '⚖️', '⏱️'][s.guarantees.indexOf(g)],
+              }))}
+              columns={2}
+              showArrows={false}
+              variant="colorful"
+            />
           </div>
         </section>
 
