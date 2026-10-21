@@ -7,6 +7,19 @@ import { LOCALE_COOKIE } from "@/i18n/locale-detection";
 import { sendConfirmEmail, sendWelcomeEmail } from "@/lib/email";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+const USERS_PAGE_SIZE = 1000;
+
+/** Vrai si un compte existe déjà avec cette adresse, confirmé ou non. */
+async function emailAlreadyRegistered(email: string): Promise<boolean> {
+  const db = createAdminClient();
+  for (let page = 1; ; page++) {
+    const { data, error } = await db.auth.admin.listUsers({ page, perPage: USERS_PAGE_SIZE });
+    if (error) throw new Error(error.message);
+    if (data.users.some((u) => u.email?.toLowerCase() === email)) return true;
+    if (data.users.length < USERS_PAGE_SIZE) return false;
+  }
+}
+
 const WINDOW_SECONDS = 60 * 60;
 const MAX_PER_IP = 10;
 const MAX_PER_EMAIL = 3;
@@ -87,6 +100,17 @@ export async function POST(request: NextRequest) {
   if (emailError === "format") return NextResponse.json({ error: m.emailFormat }, { status: 400 });
   if (emailError === "disposable") return NextResponse.json({ error: m.emailDisposable }, { status: 400 });
   if (emailError === "no_mx") return NextResponse.json({ error: m.emailNoMx }, { status: 400 });
+
+  // Adresse déjà connue (confirmée ou non) : refus avant toute création de lien.
+  // generateLink ne refuse pas un compte non confirmé et en réécrirait le mot de passe.
+  let taken: boolean;
+  try {
+    taken = await emailAlreadyRegistered(email);
+  } catch (err) {
+    console.error("[signup] recherche de compte:", (err as Error).message);
+    return NextResponse.json({ error: m.failed }, { status: 500 });
+  }
+  if (taken) return NextResponse.json({ error: m.exists }, { status: 409 });
 
   // Le compte est créé ici, sans e-mail de Supabase : le lien de confirmation part par Resend, avec le modèle Toomny.
   const origin = new URL(request.url).origin;
