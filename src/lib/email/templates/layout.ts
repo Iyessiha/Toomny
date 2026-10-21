@@ -1,20 +1,10 @@
+import { socialLinks } from "@/lib/social";
+
 export type LayoutOpts = {
   siteUrl: string;
   previewText?: string;
   children: string;
 };
-
-/** Réseaux sociaux de Toomny, lus depuis l'environnement. Un réseau sans URL n'apparaît pas. */
-export function socialLinks(): { label: string; url: string }[] {
-  const entries: [string, string | undefined][] = [
-    ["Instagram", process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM],
-    ["Facebook", process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK],
-    ["TikTok", process.env.NEXT_PUBLIC_SOCIAL_TIKTOK],
-    ["LinkedIn", process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN],
-    ["X", process.env.NEXT_PUBLIC_SOCIAL_X],
-  ];
-  return entries.filter((e): e is [string, string] => !!e[1]?.startsWith("https://")).map(([label, url]) => ({ label, url }));
-}
 
 export function emailLayout({ siteUrl, previewText, children }: LayoutOpts): string {
   const social = socialLinks();

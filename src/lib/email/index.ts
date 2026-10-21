@@ -11,6 +11,7 @@ import { renderServiceRejectedEmail } from "./templates/service-rejected";
 import { renderConfirmEmail } from "./templates/confirm";
 import { renderKycRejectedEmail } from "./templates/kyc-rejected";
 import { renderServicePublishedEmail, type BoostOffer } from "./templates/service-published";
+import { renderBoostReminderEmail } from "./templates/boost-reminder";
 import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
 import { formatMoney } from "@/lib/money";
 
@@ -167,5 +168,37 @@ export async function sendServicePublishedEmail(opts: {
     await resend.emails.send({ from: FROM, to: opts.to, subject, html });
   } catch (err) {
     console.error("[email:service-published]", (err as Error).message);
+  }
+}
+
+/** Relance de boost : envoyée seulement par la tâche planifiée, jamais à la main. */
+export async function sendBoostReminderEmail(opts: {
+  to: string;
+  firstName: string;
+  serviceTitle: string;
+  locale: Locale;
+}): Promise<boolean> {
+  const resend = getResend();
+  if (!resend) return false;
+  try {
+    const offers: BoostOffer[] = BOOST_TIERS.map((tier) => ({
+      name: tier.charAt(0).toUpperCase() + tier.slice(1),
+      price: formatMoney(BOOSTS[tier].priceMinor, "XOF", opts.locale),
+      placements: BOOSTS[tier].placements,
+    }));
+    const html = renderBoostReminderEmail({
+      firstName: opts.firstName,
+      serviceTitle: opts.serviceTitle,
+      boostUrl: `${SITE_URL}/dashboard/boost`,
+      offers,
+      locale: opts.locale,
+      siteUrl: SITE_URL,
+    });
+    const subject = opts.locale === "en" ? "Get your service noticed" : "Faites remarquer votre prestation";
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    return true;
+  } catch (err) {
+    console.error("[email:boost-reminder]", (err as Error).message);
+    return false;
   }
 }

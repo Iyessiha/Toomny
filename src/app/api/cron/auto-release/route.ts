@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { timingSafeEqual } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, autoReleaseCutoff } from "@/lib/escrow";
 import { recordCompletion } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
+import { isCronAuthorized } from "@/lib/cron-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,24 +21,8 @@ export const dynamic = "force-dynamic";
  */
 const BATCH_SIZE = 50;
 
-function isAuthorized(request: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    // En production, refuser absolument si le secret est absent.
-    if (process.env.NODE_ENV === "production") return false;
-    // En dev, autoriser uniquement depuis localhost.
-    return true;
-  }
-
-  const header = request.headers.get("authorization");
-  if (!header?.startsWith("Bearer ")) return false;
-  const provided = Buffer.from(header.slice("Bearer ".length));
-  const expected = Buffer.from(secret);
-  return provided.length === expected.length && timingSafeEqual(provided, expected);
-}
-
 export async function GET(request: Request): Promise<Response> {
-  if (!isAuthorized(request)) {
+  if (!isCronAuthorized(request)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   if (!process.env.CRON_SECRET) {

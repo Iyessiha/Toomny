@@ -1,11 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "regions": ["cdg1"],
+  "regions": [
+    "cdg1"
+  ],
   "crons": [
     {
       "path": "/api/cron/auto-release",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/boost-reminders",
+      "schedule": "0 10 * * 1,4"
     }
   ]
 }

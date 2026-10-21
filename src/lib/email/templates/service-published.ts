@@ -58,23 +58,32 @@ const copy = {
   },
 } as const;
 
+/** Trois offres de boost côte à côte, avec leurs prix réels. */
+export function renderBoostOffers(
+  offers: BoostOffer[],
+  perTier: string,
+  placements: Record<string, string>,
+): string {
+  return offers
+    .map(
+      (o) => `
+        <td style="width:33%;vertical-align:top;padding:14px;border:1px solid #dfe7e2;border-radius:14px;">
+          <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#108043;">${escapeHtml(o.name)}</p>
+          <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:#1d2b23;">${escapeHtml(o.price)} <span style="font-size:12px;font-weight:400;color:#6b7b72;">${perTier}</span></p>
+          ${o.placements
+            .map((p) => `<p style="margin:0 0 4px;font-size:12px;color:#4f5f56;">✓ ${escapeHtml(placements[p] ?? p)}</p>`)
+            .join("")}
+        </td>`,
+    )
+    .join('<td style="width:8px;"></td>');
+}
+
 export function renderServicePublishedEmail(opts: ServicePublishedEmailOpts): string {
   const t = copy[opts.locale === "en" ? "en" : "fr"];
   const tips = guideTips(opts.locale);
   const title = escapeHtml(opts.serviceTitle);
 
-  const offersHtml = opts.offers
-    .map(
-      (o) => `
-        <td style="width:33%;vertical-align:top;padding:14px;border:1px solid #dfe7e2;border-radius:14px;">
-          <p style="margin:0 0 4px;font-size:15px;font-weight:800;color:#108043;">${escapeHtml(o.name)}</p>
-          <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:#1d2b23;">${escapeHtml(o.price)} <span style="font-size:12px;font-weight:400;color:#6b7b72;">${t.perTier}</span></p>
-          ${o.placements
-            .map((p) => `<p style="margin:0 0 4px;font-size:12px;color:#4f5f56;">✓ ${escapeHtml(t.placements[p] ?? p)}</p>`)
-            .join("")}
-        </td>`,
-    )
-    .join('<td style="width:8px;"></td>');
+  const offersHtml = renderBoostOffers(opts.offers, t.perTier, t.placements);
 
   const content = `
     <tr>

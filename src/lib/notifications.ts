@@ -27,6 +27,7 @@ export const NOTIFICATION_TYPES = [
   "service_rejected",
   "boost_activated",
   "boost_failed",
+  "boost_reminder",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

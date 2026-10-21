@@ -147,6 +147,13 @@ const fr = {
       body: (p) =>
         `Le paiement pour le Boost ${p.plan ?? ""} n'a pas abouti. Vous pouvez réessayer.`,
     },
+    boost_reminder: {
+      title: "Boostez votre prestation",
+      body: (p) =>
+        p.service
+          ? `« ${p.service} » n'est pas encore boostée. Un boost la met en avant pendant 30 jours.`
+          : "Votre prestation n'est pas encore boostée. Un boost la met en avant pendant 30 jours.",
+    },
   } as Record<string, NotificationCopy>,
 };
 
@@ -281,6 +288,13 @@ const en: typeof fr = {
       title: "Boost payment declined",
       body: (p) =>
         `The payment for the ${p.plan ?? ""} Boost did not go through. You can try again.`,
+    },
+    boost_reminder: {
+      title: "Boost your service",
+      body: (p) =>
+        p.service
+          ? `“${p.service}” is not boosted yet. A boost puts it in front of clients for 30 days.`
+          : "Your service is not boosted yet. A boost puts it in front of clients for 30 days.",
     },
   } as Record<string, NotificationCopy>,
 };
