@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
+import { PricingScene } from "@/components/pricing/pricing-scene";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
@@ -57,22 +58,8 @@ export default async function PricingPage() {
           </div>
         </section>
 
-        {/* Key numbers */}
-        <section className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {highlights.map((h) => (
-              <div
-                key={h.label}
-                className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 text-center"
-              >
-                <p className="font-display text-4xl font-bold text-[var(--color-brand-500)]">
-                  {h.value}
-                </p>
-                <p className="mt-1 text-sm text-[var(--subtle)]">{h.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* Pricing Plans */}
+        <PricingScene plans={p.plans} locale={locale} />
 
         {/* Comparison table */}
         <section className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
