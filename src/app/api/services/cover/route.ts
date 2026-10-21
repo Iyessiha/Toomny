@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { imageMimeFromBytes } from "@/lib/request-security";
+import { isLandscapeBytes } from "@/lib/image-size";
 
 const MAX_BYTES = 3 * 1024 * 1024;
 // 10 uploads par utilisateur par heure
@@ -38,6 +39,13 @@ export async function POST(request: Request): Promise<Response> {
   const detectedMime = imageMimeFromBytes(new Uint8Array(buffer));
   if (!detectedMime) {
     return NextResponse.json({ error: "Type non autorisé (jpeg, png, webp uniquement)" }, { status: 400 });
+  }
+  // La couverture doit être en paysage : contrôle serveur, en plus de celui du navigateur.
+  if (!isLandscapeBytes(new Uint8Array(buffer))) {
+    return NextResponse.json(
+      { error: "La photo de couverture doit être en format paysage (plus large que haute)." },
+      { status: 400 },
+    );
   }
 
   const ext = detectedMime === "image/jpeg" ? "jpg" : detectedMime.split("/")[1];

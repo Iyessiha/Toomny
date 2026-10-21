@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { clientIp, emailFingerprint, verifyTurnstile } from "@/lib/request-security";
 import { validateEmail, normalizePhone } from "@/lib/email-guard";
 import { LOCALE_COOKIE } from "@/i18n/locale-detection";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendConfirmEmail, sendWelcomeEmail } from "@/lib/email";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const WINDOW_SECONDS = 60 * 60;
 const MAX_PER_IP = 10;
@@ -88,16 +88,15 @@ export async function POST(request: NextRequest) {
   if (emailError === "disposable") return NextResponse.json({ error: m.emailDisposable }, { status: 400 });
   if (emailError === "no_mx") return NextResponse.json({ error: m.emailNoMx }, { status: 400 });
 
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  // Le compte est créé ici, sans e-mail de Supabase : le lien de confirmation part par Resend, avec le modèle Toomny.
   const origin = new URL(request.url).origin;
 
-  const { error } = await supabase.auth.signUp({
+  const { data: link, error } = await createAdminClient().auth.admin.generateLink({
+    type: "signup",
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/dashboard`,
+      redirectTo: `${origin}/dashboard`,
       data: {
         first_name: firstName,
         last_name: lastName,
@@ -111,11 +110,13 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  if (error) {
-    if (error.message.includes("already registered")) return NextResponse.json({ error: m.exists }, { status: 409 });
+  if (error || !link?.properties?.action_link) {
+    if (error && /already/i.test(error.message)) return NextResponse.json({ error: m.exists }, { status: 409 });
     return NextResponse.json({ error: m.failed }, { status: 400 });
   }
 
+  const sent = await sendConfirmEmail({ to: email, confirmUrl: link.properties.action_link, locale });
+  if (!sent) console.error("[signup] e-mail de confirmation non envoyé:", email);
   void sendWelcomeEmail({ to: email, firstName, locale });
 
   return NextResponse.json({ success: true });

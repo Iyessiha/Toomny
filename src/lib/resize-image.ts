@@ -7,7 +7,7 @@ export const COVER_W = 1280;
 export const COVER_H = 720;
 export const COVER_ASPECT = `${COVER_W}/${COVER_H}`;
 // Largeur / hauteur minimale. 1.25 = 5:4 : en dessous, l'image est trop carrée pour une couverture.
-export const MIN_COVER_RATIO = 1.25;
+import { MIN_COVER_RATIO } from "./image-size";
 export const COVER_HINT_FR = `Format recommandé : 1280 × 720 px (16:9) · paysage uniquement · JPEG, PNG ou WebP · max 3 Mo`;
 export const COVER_HINT_EN = `Recommended: 1280 × 720 px (16:9) · landscape only · JPEG, PNG or WebP · max 3 MB`;
 

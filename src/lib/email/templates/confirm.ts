@@ -1,4 +1,5 @@
 import { emailLayout } from "./layout";
+import { guideTips, renderTipsHtml } from "./guides";
 
 /**
  * Template HTML de l'email de confirmation d'adresse Supabase.
@@ -56,7 +57,9 @@ export function renderConfirmEmail(opts: ConfirmEmailOpts): string {
           Ou copiez ce lien dans votre navigateur :<br/>
           <span style="color:#5b6af5;word-break:break-all;">${opts.confirmUrl}</span>
         </p>
-      </td>
+      
+        ${renderTipsHtml([guideTips("fr").setup])}
+        </td>
     </tr>
 
     <!-- WARNING -->

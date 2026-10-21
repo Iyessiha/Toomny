@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
-import { Avatar, FilterTabs, Pill, TableCard, serviceTone } from "@/components/dashboard/pro";
+import { Avatar, FilterTabs, Notice, Pill, TableCard, serviceTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
@@ -20,13 +20,13 @@ export const dynamic = "force-dynamic";
 export default async function AdminServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; error?: string }>;
 }) {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).servicesPage;
   const tabKeys = Object.keys(t.tabs);
-  const { status: rawStatus } = await searchParams;
+  const { status: rawStatus, error: errorParam } = await searchParams;
   const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "all";
 
   const db = createAdminClient();
@@ -54,6 +54,13 @@ export default async function AdminServicesPage({
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/services")}
     >
+      {errorParam === "kyc" && (
+        <div className="mb-6">
+          <Notice tone="warning">
+            Publication impossible : le prestataire n&apos;a pas encore de vérification d&apos;identité validée.
+          </Notice>
+        </div>
+      )}
       <FilterTabs
         items={tabKeys.map((key) => ({
           href: `/admin/services?status=${key}`,

@@ -62,6 +62,16 @@ export default async function PrestationsPage() {
       locale={locale}
       navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
+      {user.verificationStatus !== "verified" && (
+        <div className="mb-6">
+          <Notice tone="warning" title="Vérification d'identité requise">
+            Vos prestations restent en brouillon et ne seront pas publiées tant que votre identité n&apos;est pas vérifiée.{" "}
+            <Link href="/dashboard/verification" className="font-semibold underline underline-offset-2">
+              Vérifier mon identité
+            </Link>
+          </Notice>
+        </div>
+      )}
       {/* Une panne de lecture ne doit pas ressembler à une liste vide. */}
       {servicesError && (
         <div className="mb-6">

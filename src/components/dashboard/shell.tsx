@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getDashboardTexts } from "@/i18n/dashboard";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
@@ -175,7 +176,7 @@ export function DashboardShell({
 
   const [signingOut, setSigningOut] = useState(false);
   const otherLocale = locale === "en" ? "fr" : "en";
-  const otherPath = locale === "en" ? "/dashboard" : "/en/dashboard";
+  const shellTexts = getDashboardTexts(locale === "en" ? "en" : "fr").shell;
 
   async function handleSignOut() {
     if (signingOut) return;
@@ -189,8 +190,9 @@ export function DashboardShell({
     if (switching) return;
     setSwitching(true);
     try {
+      // Pas de version « /en » du tableau de bord : la langue vient du profil.
+      // On enregistre la préférence puis on rafraîchit la page courante.
       await setPreferredLocale(otherLocale as "fr" | "en");
-      router.push(otherPath);
       router.refresh();
     } finally {
       setSwitching(false);
@@ -228,8 +230,8 @@ export function DashboardShell({
           <button
             onClick={handleSignOut}
             disabled={signingOut}
-            title="Se déconnecter"
-            aria-label="Se déconnecter"
+            title={shellTexts.signOut}
+            aria-label={shellTexts.signOut}
             className="rounded-lg p-1.5 text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)] disabled:opacity-50"
           >
             {signingOut
