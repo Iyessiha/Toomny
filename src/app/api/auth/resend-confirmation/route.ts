@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "failed" }, { status: 500 });
   }
 
-  const sent = await sendConfirmEmail({ to: user.email, confirmUrl: link.properties.action_link, locale: user.preferredLocale });
+  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=magiclink&next=/dashboard`;
+  const sent = await sendConfirmEmail({ to: user.email, confirmUrl, locale: user.preferredLocale });
   if (!sent) return NextResponse.json({ error: "failed" }, { status: 500 });
   return NextResponse.json({ success: true });
 }
