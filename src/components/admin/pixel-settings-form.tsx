@@ -42,15 +42,27 @@ export function PixelSettingsForm({ settings, locale }: { settings: PixelSetting
         {PIXEL_KEYS.map((key) => (
           <div key={key} className="flex flex-col gap-1">
             <label htmlFor={key} className="text-sm font-medium">{PIXEL_FIELDS[key].label}</label>
-            <input
-              id={key}
-              name={key}
-              defaultValue={settings[key] ?? ""}
-              placeholder={t.placeholderEmpty}
-              className="input font-mono"
-              autoComplete="off"
-              spellCheck={false}
-            />
+            {key === "custom_code" ? (
+              <textarea
+                id={key}
+                name={key}
+                rows={8}
+                defaultValue={settings[key] ?? ""}
+                placeholder={t.placeholderEmpty}
+                className="input font-mono text-xs"
+                spellCheck={false}
+              />
+            ) : (
+              <input
+                id={key}
+                name={key}
+                defaultValue={settings[key] ?? ""}
+                placeholder={t.placeholderEmpty}
+                className="input font-mono"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            )}
             <span className="text-xs text-[var(--subtle)]">{PIXEL_FIELDS[key].hint}</span>
           </div>
         ))}

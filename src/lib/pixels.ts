@@ -12,6 +12,11 @@ export const PIXEL_FIELDS = {
   ga4_measurement_id: { label: "Google Analytics 4", pattern: /^G-[A-Z0-9]{4,15}$/, hint: "Format G-XXXXXXXXXX" },
   snapchat_pixel_id: { label: "Snapchat", pattern: /^[a-f0-9-]{36}$/, hint: "Identifiant UUID" },
   pinterest_tag_id: { label: "Pinterest", pattern: /^[0-9]{13,16}$/, hint: "Chiffres uniquement" },
+  custom_code: {
+    label: "Code personnalisé (JavaScript)",
+    pattern: /^[\s\S]{1,20000}$/,
+    hint: "JavaScript uniquement, collé tel quel : la balise <script> est ajoutée automatiquement. Exécuté sur toutes les pages : ne collez que du code de confiance.",
+  },
 } as const;
 
 export type PixelField = keyof typeof PIXEL_FIELDS;
@@ -23,6 +28,11 @@ export const PIXEL_SETTINGS_EMPTY: PixelSettings = Object.fromEntries(
   PIXEL_KEYS.map((k) => [k, null]),
 ) as PixelSettings;
 
+/** Retire une balise <script> entourant le code, si l'admin l'a collée avec. */
+export function stripScriptTags(code: string): string {
+  return code.replace(/^\s*<script[^>]*>/i, "").replace(/<\/script>\s*$/i, "").trim();
+}
+
 /**
  * Lit les valeurs saisies. Une valeur vide désactive le pixel.
  * Renvoie le premier champ invalide, ou les valeurs normalisées.
@@ -32,7 +42,7 @@ export function parsePixelSettings(
 ): { ok: true; values: PixelSettings } | { ok: false; field: PixelField } {
   const values = { ...PIXEL_SETTINGS_EMPTY };
   for (const key of PIXEL_KEYS) {
-    const raw = read(key).trim();
+    const raw = key === "custom_code" ? stripScriptTags(read(key)) : read(key).trim();
     if (raw === "") continue;
     if (!PIXEL_FIELDS[key].pattern.test(raw)) return { ok: false, field: key };
     values[key] = raw;
@@ -62,6 +72,7 @@ export function pixelScripts(s: PixelSettings): PixelScript[] {
   if (s.tiktok_pixel_id) scripts.push({ id: "tiktok", code: TIKTOK(s.tiktok_pixel_id) });
   if (s.snapchat_pixel_id) scripts.push({ id: "snapchat", code: SNAPCHAT(s.snapchat_pixel_id) });
   if (s.pinterest_tag_id) scripts.push({ id: "pinterest", code: PINTEREST(s.pinterest_tag_id) });
+  if (s.custom_code) scripts.push({ id: "custom", code: s.custom_code });
 
   const gtagIds = [s.google_ads_id, s.ga4_measurement_id].filter((id): id is string => Boolean(id));
   if (gtagIds.length > 0) {

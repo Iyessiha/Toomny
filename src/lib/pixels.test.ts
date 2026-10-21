@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PIXEL_SETTINGS_EMPTY, parsePixelSettings, pixelScripts } from "./pixels";
+import { PIXEL_SETTINGS_EMPTY, parsePixelSettings, pixelScripts, stripScriptTags } from "./pixels";
 
 const saisie = (valeurs: Record<string, string>) => (name: string) => valeurs[name] ?? "";
 
@@ -65,5 +65,29 @@ describe("pixelScripts", () => {
       pinterest_tag_id: "1234567890123",
     });
     expect(scripts.map((s) => s.id)).toEqual(["tiktok", "snapchat", "pinterest"]);
+  });
+});
+
+describe("code personnalisé", () => {
+  it("retire une balise <script> entourant le code", () => {
+    expect(stripScriptTags("<script>console.log(1)</script>")).toBe("console.log(1)");
+    expect(stripScriptTags("  <script type=\"text/javascript\">x()</script>  ")).toBe("x()");
+  });
+
+  it("garde du JavaScript brut tel quel", () => {
+    expect(stripScriptTags("window.a = 1;")).toBe("window.a = 1;");
+  });
+
+  it("ajoute le code personnalisé aux scripts du site", () => {
+    const parsed = parsePixelSettings((name) => (name === "custom_code" ? "<script>window.x=1</script>" : ""));
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.values.custom_code).toBe("window.x=1");
+    expect(pixelScripts(parsed.values)).toEqual([{ id: "custom", code: "window.x=1" }]);
+  });
+
+  it("refuse un code personnalisé trop long", () => {
+    const parsed = parsePixelSettings((name) => (name === "custom_code" ? "x".repeat(20001) : ""));
+    expect(parsed.ok).toBe(false);
   });
 });
