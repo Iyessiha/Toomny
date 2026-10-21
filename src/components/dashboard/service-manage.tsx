@@ -15,10 +15,12 @@ import { EmptyState } from "@/components/dashboard/shell-ui";
 import { Pill, serviceTone } from "@/components/dashboard/pro";
 import type { Locale } from "@/i18n/dictionaries";
 import { CoverNotLandscapeError, resizeCover } from "@/lib/resize-image";
+import { countryLabel, formatSubmittedAt } from "@/i18n/auth";
 
 type Service = {
   id: string;
   title: string;
+  created_at: string;
   description: string | null;
   price_minor: number;
   currency: string;
@@ -354,6 +356,10 @@ export function ServiceManage({
           <li key={s.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{s.title}</p>
+              <p className="mt-0.5 text-xs text-[var(--subtle)]">
+                {locale === "en" ? "Submitted on " : "Soumise le "}
+                {formatSubmittedAt(s.created_at, locale)}
+              </p>
               <p className="mt-0.5 flex items-center gap-2 text-xs text-[var(--subtle)]">
                 <span>{t.delivery} {s.delivery_days} {t.days}</span>
                 <Pill tone={serviceTone(s.status)}>

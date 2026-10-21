@@ -196,3 +196,18 @@ export const countryNames: Record<Locale, Record<string, string>> = {
 export function getAuthTexts(locale: Locale): AuthTexts {
   return authTexts[locale];
 }
+
+/** Nom lisible d'un pays à partir de son code (CI → Côte d'Ivoire). Le code est gardé s'il est inconnu. */
+export function countryLabel(code: string | null | undefined, locale: Locale): string {
+  if (!code) return "—";
+  return countryNames[locale][code] ?? countryNames.fr[code] ?? code;
+}
+
+/** Date et heure de soumission, en heure d'Abidjan. */
+export function formatSubmittedAt(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleString(locale === "en" ? "en-GB" : "fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Abidjan",
+  });
+}

@@ -12,6 +12,7 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
 import { UserRoleManager } from "@/components/admin/user-role-manager";
+import { countryLabel, formatSubmittedAt } from "@/i18n/auth";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -87,7 +88,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             </div>
             <div>
               <dt className="text-xs text-[var(--subtle)]">{t.usersPage.colCountry}</dt>
-              <dd className="mt-0.5 font-semibold">{profile.country_code ?? "—"}</dd>
+              <dd className="mt-0.5 font-semibold">{countryLabel(profile.country_code, locale)}</dd>
             </div>
             <div>
               <dt className="text-xs text-[var(--subtle)]">{t.usersPage.colDate}</dt>

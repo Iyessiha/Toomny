@@ -10,6 +10,7 @@ import { formatMoney } from "@/lib/money";
 import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
+import { countryLabel, formatSubmittedAt } from "@/i18n/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).servicesPage.metaTitle };
@@ -86,6 +87,10 @@ export default async function AdminServicesPage({
               <tr key={s.id}>
                 <td className="whitespace-normal!">
                   <span className="block font-semibold">{s.title}</span>
+                  <span className="block text-xs text-[var(--subtle)]">
+                    {locale === "en" ? "Submitted on " : "Soumise le "}
+                    {formatSubmittedAt(s.created_at, locale)}
+                  </span>
                   <span className="mt-1 flex items-center gap-2">
                     <Pill tone={serviceTone(s.status)}>{t.status[s.status] ?? s.status}</Pill>
                     <span className="text-xs text-[var(--subtle)]">
