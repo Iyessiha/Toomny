@@ -27,17 +27,17 @@ export default async function AdminServicesPage({
   const t = getAdminTexts(locale).servicesPage;
   const tabKeys = Object.keys(t.tabs);
   const { status: rawStatus } = await searchParams;
-  const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "draft";
+  const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "all";
 
   const db = createAdminClient();
-  const { data: rows } = await db
+  const base = db
     .from("services")
     .select(
       "id, title, price_minor, currency, delivery_days, status, created_at, provider:profiles!services_provider_id_profiles_id_fk(display_name, email), category:categories(name_fr)",
     )
-    .eq("status", status)
     .order("created_at", { ascending: false })
     .limit(100);
+  const { data: rows } = await (status === "all" ? base : base.eq("status", status));
 
   const list = (rows ?? []).map((r) => {
     const provider = Array.isArray(r.provider) ? r.provider[0] : r.provider;
