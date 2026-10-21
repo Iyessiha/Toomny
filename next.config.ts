@@ -20,6 +20,12 @@ const nextConfig: NextConfig = {
     return [
       { source: "/service-categories/:slug", destination: "/services?categorie=:slug", permanent: true },
       { source: "/terms-of-use", destination: "/cgu", permanent: true },
+      { source: "/about-us", destination: "/comment-ca-marche", permanent: true },
+      { source: "/freelancers", destination: "/services", permanent: true },
+      { source: "/freelancers-for-employer", destination: "/services", permanent: true },
+      { source: "/freelancer-projects", destination: "/services", permanent: true },
+      { source: "/jobs", destination: "/services", permanent: true },
+      { source: "/settings-employer", destination: "/dashboard", permanent: true },
     ];
   },
   async headers() {

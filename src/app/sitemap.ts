@@ -3,6 +3,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
 
+// Le sitemap suit les prestations publiées : régénéré au plus une fois par heure.
+export const revalidate = 3600;
+
 // Seuils en dessous desquels une fiche est trop mince pour être indexée.
 const MIN_SERVICE_DESCRIPTION_LENGTH = 150;
 const MIN_PROVIDER_BIO_LENGTH = 80;
