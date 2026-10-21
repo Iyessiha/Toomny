@@ -10,6 +10,9 @@ import { renderNotificationEmail } from "./templates/notification";
 import { renderServiceRejectedEmail } from "./templates/service-rejected";
 import { renderConfirmEmail } from "./templates/confirm";
 import { renderKycRejectedEmail } from "./templates/kyc-rejected";
+import { renderServicePublishedEmail, type BoostOffer } from "./templates/service-published";
+import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
+import { formatMoney } from "@/lib/money";
 
 let _resend: Resend | null = null;
 
@@ -130,5 +133,39 @@ export async function sendKycRejectedEmail(opts: {
     await resend.emails.send({ from: FROM, to: opts.to, subject, html });
   } catch (err) {
     console.error("[email:kyc-rejected]", (err as Error).message);
+  }
+}
+
+/** Prestation publiée : confirmation et incitation à booster, avec les offres réelles. */
+export async function sendServicePublishedEmail(opts: {
+  to: string;
+  firstName: string;
+  serviceTitle: string;
+  serviceId: string;
+  locale: Locale;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend) return;
+  try {
+    const offers: BoostOffer[] = BOOST_TIERS.map((tier) => ({
+      name: tier.charAt(0).toUpperCase() + tier.slice(1),
+      price: formatMoney(BOOSTS[tier].priceMinor, "XOF", opts.locale),
+      placements: BOOSTS[tier].placements,
+    }));
+    const html = renderServicePublishedEmail({
+      firstName: opts.firstName,
+      serviceTitle: opts.serviceTitle,
+      serviceUrl: `${SITE_URL}/services/${opts.serviceId}`,
+      boostUrl: `${SITE_URL}/dashboard/boost`,
+      offers,
+      locale: opts.locale,
+      siteUrl: SITE_URL,
+    });
+    const subject = opts.locale === "en"
+      ? `Your service “${opts.serviceTitle}” is live`
+      : `Votre prestation « ${opts.serviceTitle} » est en ligne`;
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+  } catch (err) {
+    console.error("[email:service-published]", (err as Error).message);
   }
 }

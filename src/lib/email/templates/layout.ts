@@ -4,7 +4,28 @@ export type LayoutOpts = {
   children: string;
 };
 
+/** Réseaux sociaux de Toomny, lus depuis l'environnement. Un réseau sans URL n'apparaît pas. */
+export function socialLinks(): { label: string; url: string }[] {
+  const entries: [string, string | undefined][] = [
+    ["Instagram", process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM],
+    ["Facebook", process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK],
+    ["TikTok", process.env.NEXT_PUBLIC_SOCIAL_TIKTOK],
+    ["LinkedIn", process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN],
+    ["X", process.env.NEXT_PUBLIC_SOCIAL_X],
+  ];
+  return entries.filter((e): e is [string, string] => !!e[1]?.startsWith("https://")).map(([label, url]) => ({ label, url }));
+}
+
 export function emailLayout({ siteUrl, previewText, children }: LayoutOpts): string {
+  const social = socialLinks();
+  const socialHtml = social.length
+    ? `<p style="margin:0 0 14px;font-size:13px;">
+        ${social
+          .map((s) => `<a href="${s.url}" style="color:#108043;text-decoration:none;font-weight:600;margin:0 8px;">${s.label}</a>`)
+          .join("")}
+      </p>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,41 +35,44 @@ export function emailLayout({ siteUrl, previewText, children }: LayoutOpts): str
 <title>Toomny</title>
 ${previewText ? `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">${previewText}</div>` : ""}
 </head>
-<body style="margin:0;padding:0;background:#0c0f14;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
-<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#0c0f14;padding:40px 16px;">
+<body style="margin:0;padding:0;background:#f3f6f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f3f6f4;padding:40px 16px;">
   <tr>
     <td align="center">
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:560px;">
 
-        <!-- HEADER -->
+        <!-- HEADER : logo Toomny -->
         <tr>
-          <td style="padding-bottom:32px;text-align:center;">
-            <a href="${siteUrl}" style="text-decoration:none;">
-              <span style="font-size:22px;font-weight:800;letter-spacing:-0.5px;color:#ffffff;">Toomny</span>
-              <span style="font-size:22px;font-weight:800;color:#5b6af5;">.</span>
+          <td style="padding-bottom:28px;text-align:center;">
+            <a href="${siteUrl}" style="text-decoration:none;display:inline-block;">
+              <img src="${siteUrl}/icon.png" width="40" height="40" alt="Toomny" style="display:inline-block;vertical-align:middle;border:0;width:40px;height:40px;border-radius:10px;" />
+              <span style="display:inline-block;vertical-align:middle;margin-left:10px;font-size:24px;font-weight:800;letter-spacing:-0.5px;color:#108043;">Toomny</span>
             </a>
           </td>
         </tr>
 
         <!-- CONTENT CARD -->
         <tr>
-          <td style="background:#131720;border-radius:20px;border:1px solid rgba(255,255,255,0.08);overflow:hidden;">
+          <td style="background:#ffffff;border-radius:20px;border:1px solid #dfe7e2;overflow:hidden;">
             ${children}
           </td>
         </tr>
 
         <!-- FOOTER -->
         <tr>
-          <td style="padding-top:32px;text-align:center;">
-            <p style="margin:0 0 8px;font-size:12px;color:#4b5270;">
-              <a href="${siteUrl}" style="color:#5b6af5;text-decoration:none;">Toomny</a>
+          <td style="padding-top:30px;text-align:center;">
+            ${socialHtml}
+            <p style="margin:0 0 10px;font-size:12px;color:#7d8a82;">
+              <a href="${siteUrl}" style="color:#108043;text-decoration:none;font-weight:600;">Toomny</a>
               &nbsp;·&nbsp;
-              <a href="${siteUrl}/privacy" style="color:#4b5270;text-decoration:none;">Confidentialité</a>
+              <a href="${siteUrl}/cgu" style="color:#7d8a82;text-decoration:none;">CGU</a>
               &nbsp;·&nbsp;
-              <a href="${siteUrl}/terms" style="color:#4b5270;text-decoration:none;">CGU</a>
+              <a href="${siteUrl}/confidentialite" style="color:#7d8a82;text-decoration:none;">Confidentialité</a>
+              &nbsp;·&nbsp;
+              <a href="${siteUrl}/mentions-legales" style="color:#7d8a82;text-decoration:none;">Mentions légales</a>
             </p>
-            <p style="margin:0;font-size:11px;color:#353b52;">
-              Vous recevez cet email car vous avez un compte Toomny.
+            <p style="margin:0;font-size:11px;color:#8a968f;">
+              Vous recevez cet e-mail car vous avez un compte Toomny.
             </p>
           </td>
         </tr>

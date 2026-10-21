@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
-import { sendServiceRejectedEmail } from "@/lib/email";
+import { sendServiceRejectedEmail, sendServicePublishedEmail } from "@/lib/email";
 import { isRejectionReason } from "@/i18n/listing-guide";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
@@ -54,10 +54,32 @@ export async function moderateService(formData: FormData): Promise<void> {
     return;
   }
 
-  if (service && (status === "active" || status === "removed")) {
+  if (service && status === "active") {
+    // Publication : notification en ligne + e-mail dédié, avec l'incitation à booster.
     await notify(db, {
       recipientId: service.provider_id,
-      type: status === "active" ? "service_approved" : "service_removed",
+      type: "service_approved",
+      params: { service: service.title ?? undefined },
+      link: "/dashboard/prestations",
+      sendEmail: false,
+    });
+    const [{ data: author }, { data: prof }] = await Promise.all([
+      db.auth.admin.getUserById(service.provider_id),
+      db.from("profiles").select("first_name, preferred_locale").eq("id", service.provider_id).maybeSingle(),
+    ]);
+    if (author?.user?.email) {
+      await sendServicePublishedEmail({
+        to: author.user.email,
+        firstName: prof?.first_name ?? "",
+        serviceTitle: service.title ?? "",
+        serviceId: id,
+        locale: prof?.preferred_locale === "en" ? "en" : "fr",
+      });
+    }
+  } else if (service && status === "removed") {
+    await notify(db, {
+      recipientId: service.provider_id,
+      type: "service_removed",
       params: { service: service.title ?? undefined },
       link: "/dashboard/prestations",
     });
