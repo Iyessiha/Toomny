@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -219,6 +220,8 @@ export function DashboardShell({
           <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--color-brand-500)]">
             <Logo size={26} />
           </Link>
+          <div className="flex items-center gap-1">
+            <NotificationBell locale={locale === "en" ? "en" : "fr"} />
           {/* Sign out — icône en haut à droite */}
           <button
             onClick={handleSignOut}
@@ -232,6 +235,7 @@ export function DashboardShell({
               : <IcOut />
             }
           </button>
+          </div>
           {/* Thin brand line at bottom */}
           <div className="absolute bottom-0 inset-x-4 h-px bg-gradient-to-r from-[var(--color-brand-200)] via-[var(--color-brand-100)] to-transparent" />
         </div>
@@ -349,6 +353,7 @@ export function DashboardShell({
           </button>
           <Link href="/" className="text-[var(--color-brand-500)]"><Logo size={22} /></Link>
           <div className="flex items-center gap-2">
+            <NotificationBell locale={locale === "en" ? "en" : "fr"} />
             <button
               onClick={handleLocaleSwitch}
               disabled={switching}

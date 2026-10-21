@@ -46,6 +46,8 @@ function ProviderDashboard({
   const kycRejected = user.verificationStatus === "rejected";
   const firstName = user.firstName ?? user.displayName?.split(" ")[0] ?? "vous";
 
+  // « Commandes reçues » : seulement les commandes où l'utilisateur est prestataire.
+  const receivedOrders = data.orders.filter((o) => o.provider_id === user.id);
   const completedOrders = data.orders.filter((o) => o.status === "completed").length;
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
@@ -154,7 +156,7 @@ function ProviderDashboard({
         <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-base font-bold">Commandes reçues</h2>
-            {data.orders.length > 0 && (
+            {receivedOrders.length > 0 && (
               <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
                 Voir tout
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -162,7 +164,7 @@ function ProviderDashboard({
             )}
           </div>
 
-          {data.orders.length === 0 ? (
+          {receivedOrders.length === 0 ? (
             <EmptyState
               title="Aucune commande pour l'instant"
               body="Publiez votre première prestation pour apparaître dans le catalogue et recevoir des commandes."
@@ -181,7 +183,7 @@ function ProviderDashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {data.orders.slice(0, 10).map((o) => (
+                  {receivedOrders.slice(0, 10).map((o) => (
                     <tr key={o.id} className="group transition-colors hover:bg-[var(--surface)]">
                       <td className="px-5 py-4">
                         <span className="font-mono text-xs font-semibold text-[var(--subtle)] group-hover:text-[var(--foreground)]">{o.reference}</span>

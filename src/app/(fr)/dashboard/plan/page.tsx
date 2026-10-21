@@ -358,6 +358,10 @@ export default async function PlanPage({
                       })}`
                     : "—";
 
+                // Une souscription « active » dont la période est passée est expirée.
+                const shownStatus =
+                  sub.status === "active" && sub.period_end && new Date(sub.period_end) <= now ? "expired" : sub.status;
+
                 return (
                   <tr key={sub.id}>
                     <td className="text-[var(--subtle)]">
@@ -370,8 +374,8 @@ export default async function PlanPage({
                     <td className="font-semibold">{planDisplayNames[subTier]}</td>
                     <td className="text-[var(--subtle)]">{periodText}</td>
                     <td>
-                      <Pill tone={subscriptionTone(sub.status)}>
-                        {p.subStatus[sub.status] ?? sub.status}
+                      <Pill tone={subscriptionTone(shownStatus)}>
+                        {p.subStatus[shownStatus] ?? shownStatus}
                       </Pill>
                     </td>
                     <td className="text-right font-display font-bold">
