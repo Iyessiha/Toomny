@@ -84,24 +84,24 @@ export default async function BoostPage({
       user={user}
       bell={<NotificationBell locale={locale} />}
       locale={locale}
-      kicker="Boost"
-      title="Service Boost"
-      subtitle="Mettez vos prestations en avant sur les points stratégiques du site."
+      kicker={t.boostPage.kicker}
+      title={t.boostPage.title}
+      subtitle={t.boostPage.subtitle}
       navSections={dashboardNavSections(t.nav, user.role, "/dashboard/boost")}
     >
       <AutoRefresh />
 
       {payment === "success" && (
         <div className="mb-6">
-          <Notice tone="success" title="Paiement reçu">
-            Votre boost sera activé dès la confirmation du paiement, généralement en quelques secondes.
+          <Notice tone="success" title={t.boostPage.paidTitle}>
+            {t.boostPage.paidBody}
           </Notice>
         </div>
       )}
       {payment === "error" && (
         <div className="mb-6">
-          <Notice tone="danger" title="Paiement refusé">
-            Le paiement n&apos;a pas abouti. Vérifiez votre solde et réessayez.
+          <Notice tone="danger" title={t.boostPage.failedTitle}>
+            {t.boostPage.failedBody}
           </Notice>
         </div>
       )}
@@ -116,9 +116,9 @@ export default async function BoostPage({
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
             }
-            label="Boost actif"
+            label={t.boostPage.activeLabel}
             value={BOOST_NAMES[activeBoost.tier] ?? activeBoost.tier}
-            hint="Abonnement en cours"
+            hint={t.boostPage.activeHint}
           />
           <ProStat
             tone="brand"
@@ -127,7 +127,7 @@ export default async function BoostPage({
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
             }
-            label="Jours restants"
+            label={t.boostPage.daysLeft}
             value={daysLeft !== null ? `${daysLeft} j` : "—"}
             hint={
               periodEnd
@@ -142,9 +142,9 @@ export default async function BoostPage({
                 <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
               </svg>
             }
-            label="Emplacements inclus"
+            label={t.boostPage.slots}
             value={String(BOOSTS[activeBoost.tier as keyof typeof BOOSTS]?.placements.length ?? "—")}
-            hint="Points de visibilité"
+            hint={t.boostPage.slotsHint}
           />
         </div>
       )}
@@ -230,17 +230,17 @@ export default async function BoostPage({
       {/* Historique */}
       <div className="mt-10">
         {history.length === 0 ? (
-          <Section title="Historique">
-            <EmptyState title="Aucun boost" body="Activez votre premier boost pour apparaître en position prioritaire." />
+          <Section title={t.boostPage.history}>
+            <EmptyState title={t.boostPage.emptyTitle} body={t.boostPage.emptyBody} />
           </Section>
         ) : (
-          <TableCard title="Historique des boosts">
+          <TableCard title={t.boostPage.historyTitle}>
             <thead>
               <tr>
                 <th>Date</th>
                 <th>Offre</th>
-                <th>Période</th>
-                <th>Statut</th>
+                <th>{t.boostPage.colPeriod}</th>
+                <th>{t.boostPage.colStatus}</th>
                 <th className="text-right">Montant</th>
               </tr>
             </thead>
