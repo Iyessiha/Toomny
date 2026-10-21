@@ -94,6 +94,8 @@ export async function requestPayout() {
 
   const { error } = await db.from("payouts").insert(rows);
   if (error) {
+    // 23505 : une demande concurrente a déjà créé ce versement (voir migration 0034).
+    if (error.code === "23505") return { error: t.errors.alreadyRequested };
     console.error("requestPayout:", error.message);
     return { error: t.errors.request };
   }

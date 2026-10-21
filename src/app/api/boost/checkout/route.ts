@@ -42,6 +42,28 @@ export async function POST(request: Request): Promise<Response> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
   const reference = boostReference();
 
+  // 1. Ligne « en attente » créée avant la session : sans elle, un paiement réussi
+  //    ne pourrait jamais être rattaché et activé par le webhook.
+  const { data: pending, error: pendingError } = await db
+    .from("boosts")
+    .insert({
+      provider_id: user.id,
+      tier: spec.tier,
+      amount_minor: spec.priceMinor.toString(),
+      currency: spec.currency,
+      status: "pending",
+      partner: paymentProvider.name,
+      partner_payment_ref: reference,
+    })
+    .select("id")
+    .single();
+
+  if (pendingError || !pending) {
+    console.error("[boost:checkout] insert:", pendingError?.message);
+    return NextResponse.json({ error: "Impossible d'enregistrer le boost" }, { status: 500 });
+  }
+
+  // 2. Session chez le fournisseur.
   let paymentResult;
   try {
     paymentResult = await paymentProvider.createSubscriptionPayment({
@@ -60,21 +82,21 @@ export async function POST(request: Request): Promise<Response> {
     });
   } catch (err) {
     console.error("[boost:checkout]", (err as Error).message);
+    await db.from("boosts").delete().eq("id", pending.id);
     return NextResponse.json({ error: "Erreur de paiement" }, { status: 502 });
   }
 
-  const { error: insertError } = await db.from("boosts").insert({
-    provider_id: user.id,
-    tier: spec.tier,
-    amount_minor: spec.priceMinor.toString(),
-    currency: spec.currency,
-    status: "pending",
-    partner: paymentResult.partner,
-    partner_payment_ref: paymentResult.partnerPaymentRef,
-  });
+  // 3. La référence réelle du fournisseur est enregistrée avant de rendre l'URL de paiement.
+  //    Sans cela, le webhook ne retrouverait pas la ligne. Si l'écriture échoue, le client
+  //    ne reçoit pas d'URL et la session ne peut pas être payée.
+  const { error: refError } = await db
+    .from("boosts")
+    .update({ partner_payment_ref: paymentResult.partnerPaymentRef })
+    .eq("id", pending.id);
 
-  if (insertError) {
-    console.error("[boost:checkout] insert:", insertError.message);
+  if (refError) {
+    console.error("[boost:checkout] ref:", refError.message);
+    await db.from("boosts").delete().eq("id", pending.id);
     return NextResponse.json({ error: "Impossible d'enregistrer le boost" }, { status: 500 });
   }
 

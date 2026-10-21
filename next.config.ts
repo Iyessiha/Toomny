@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     ],
   },
   poweredByHeader: false,
+  experimental: {
+    // Les trois photos KYC réduites côté navigateur dépassent la limite par défaut (1 Mo).
+    // Plafond Vercel des requêtes : 4,5 Mo.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   async headers() {
     // En développement, les aperçus sont affichés dans une iframe (bac à sable
     // distant) : on n'y interdit pas l'encadrement, sinon l'aperçu reste blanc.
