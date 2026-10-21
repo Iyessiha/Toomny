@@ -207,7 +207,8 @@ export async function updateService(id: string, formData: FormData) {
       cover_url: coverUrl,
       gallery_urls: galleryUrls,
       tags,
-      ...(requiresReview ? { status: "pending_review" } : {}),
+      // Le statut « pending_review » n'existe pas dans l'enum : on repasse en brouillon, file de l'admin.
+      ...(requiresReview ? { status: "draft" } : {}),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -296,6 +297,31 @@ export async function deleteService(id: string) {
     .in("status", ["draft", "paused"]);
 
   if (error) return { error: e.delete };
+
+  revalidatePath("/dashboard/prestations");
+  return { success: true };
+}
+
+/**
+ * Soumet à nouveau une prestation retirée : elle repart en brouillon, dans la file de modération.
+ * Seul le propriétaire peut le faire, et seulement depuis le statut « removed ».
+ */
+export async function resubmitService(id: string) {
+  const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).services.errors;
+  if (!isProvider(user.role)) return { error: e.notProvider };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("services")
+    .update({ status: "draft", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("provider_id", user.id)
+    .eq("status", "removed")
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) return { error: e.toggle };
 
   revalidatePath("/dashboard/prestations");
   return { success: true };

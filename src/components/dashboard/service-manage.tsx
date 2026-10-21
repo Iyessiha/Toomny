@@ -7,6 +7,7 @@ import {
   updateService,
   deleteService,
   toggleServiceStatus,
+  resubmitService,
   upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -272,6 +273,17 @@ export function ServiceManage({
     }
   }
 
+  async function handleResubmit(s: Service) {
+    setPending(true);
+    const result = await resubmitService(s.id);
+    setPending(false);
+    if ("error" in result && result.error) {
+      setError(result.error);
+    } else {
+      router.refresh();
+    }
+  }
+
   async function handleDelete(s: Service) {
     if (!confirm(t.deleteConfirm)) return;
     setPending(true);
@@ -324,6 +336,15 @@ export function ServiceManage({
                   className="btn-ghost btn-sm disabled:opacity-50"
                 >
                   {s.status === "active" ? t.pause : t.activate}
+                </button>
+              )}
+              {s.status === "removed" && (
+                <button
+                  onClick={() => handleResubmit(s)}
+                  disabled={pending}
+                  className="btn-ghost btn-sm disabled:opacity-50"
+                >
+                  {t.resubmit}
                 </button>
               )}
               {(s.status === "draft" || s.status === "paused") && (
