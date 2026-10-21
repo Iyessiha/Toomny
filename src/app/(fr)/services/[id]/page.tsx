@@ -63,6 +63,8 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
     .eq("id", id)
     .maybeSingle();
   if (!service) notFound();
+  // Prestation non publiée : visible seulement par son prestataire.
+  if (service.status !== "active" && user?.id !== service.provider_id) notFound();
 
   // Prestation rédigée dans l'autre langue : lien vers le traducteur gratuit de Google (sans clé).
   const writtenIn = detectLanguage(`${service.title} ${service.description ?? ""}`);

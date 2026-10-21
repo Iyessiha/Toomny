@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   description:
     "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery. From 3% commission, 0% for buyers.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"),
-  alternates: { canonical: "/en", languages: { "fr-FR": "/", "en-US": "/en" } },
   openGraph: {
     type: "website",
     locale: "en_US",

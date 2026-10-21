@@ -16,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: t.title, template: "%s · Toomny" },
     description: t.description,
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"),
-    alternates: { canonical: "/", languages: { "fr-FR": "/", "en-US": "/en" } },
     openGraph: {
       type: "website",
       locale: "fr_FR",

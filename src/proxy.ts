@@ -90,7 +90,10 @@ async function route(request: NextRequest, requestHeaders: Headers): Promise<Nex
 
   // Première visite sur l'accueil : langue choisie selon le pays détecté, une seule fois.
   // Le cookie évite toute boucle de redirection et respecte un choix déjà fait.
-  if (request.nextUrl.pathname === "/" && !request.cookies.get(LOCALE_COOKIE)) {
+  // Les robots n'ont pas de cookie et crawlent depuis les États-Unis : sans cette exception,
+  // Googlebot serait redirigé vers /en à chaque passage et la version française ne serait pas indexée.
+  const isCrawler = /googlebot|bingbot|duckduckbot|yandex|baiduspider/i.test(request.headers.get("user-agent") ?? "");
+  if (request.nextUrl.pathname === "/" && !request.cookies.get(LOCALE_COOKIE) && !isCrawler) {
     const locale = localeForCountry(request.headers.get("x-vercel-ip-country"));
     const target = locale === "en" ? "/en" : "/";
     const redirect = NextResponse.redirect(new URL(target, request.url));
