@@ -68,7 +68,7 @@ function ProviderDashboard({
           className="flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 4.5v15m7.5-7.5h-15" /></svg>
-          Publier
+          {t.providerHome.publish}
         </Link>
       }
     >
@@ -85,7 +85,7 @@ function ProviderDashboard({
               </div>
               <div>
                 <p className="font-semibold text-amber-900">
-                  {kycRejected ? "Vérification rejetée — nouvelle soumission possible" : "Vérifiez votre identité pour encaisser"}
+                  {kycRejected ? t.providerHome.kycBannerRejected : t.providerHome.kycBannerTitle}
                 </p>
                 <p className="mt-0.5 text-sm text-amber-800/80">
                   {kycRejected
@@ -98,7 +98,7 @@ function ProviderDashboard({
               href="/dashboard/verification"
               className="shrink-0 rounded-xl bg-amber-700 px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-800 active:scale-95"
             >
-              {kycRejected ? "Resoumettre" : "Vérifier mon identité"}
+              {kycRejected ? t.providerHome.resubmit : t.providerHome.verifyMyId}
             </Link>
           </div>
           {/* Progress bar */}
@@ -127,7 +127,7 @@ function ProviderDashboard({
         <StatCard
           label={t.home.earned}
           value={formatMoney(data.earnedMinor, cur, locale)}
-          hint={`${completedOrders} mission${completedOrders !== 1 ? "s" : ""} validée${completedOrders !== 1 ? "s" : ""}`}
+          hint={`${completedOrders} ${completedOrders === 1 ? t.providerHome.missionsOne : t.providerHome.missionsMany}`}
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
           accent
         />
@@ -157,7 +157,7 @@ function ProviderDashboard({
         {/* Commandes récentes */}
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-base font-bold">Commandes reçues</h2>
+            <h2 className="font-display text-base font-bold">{t.providerHome.receivedOrders}</h2>
             {receivedOrders.length > 0 && (
               <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
                 Voir tout
@@ -170,7 +170,7 @@ function ProviderDashboard({
             <EmptyState
               title={t.home.noOrders}
               body="Publiez votre première prestation pour apparaître dans le catalogue et recevoir des commandes."
-              action={{ href: "/dashboard/prestations", label: "Publier une prestation" }}
+              action={{ href: "/dashboard/prestations", label: t.providerHome.publishService }}
               icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>}
             />
           ) : (
@@ -214,7 +214,7 @@ function ProviderDashboard({
           {/* Profil completion */}
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
             <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Mon profil</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">{t.providerHome.myProfile}</p>
             </div>
             <div className="p-5">
               <div className="flex items-center gap-3">
@@ -230,13 +230,13 @@ function ProviderDashboard({
                 </div>
               </div>
               <div className="mt-4 space-y-2.5">
-                <ProfileRow label={t.home.profileName} done={!!user.displayName} />
-                <ProfileRow label={t.home.profilePhone} done={!!user.phone} />
-                <ProfileRow label={t.home.profileCity} done={!!user.city} />
-                <ProfileRow label={t.home.profileKyc} done={kycDone} />
+                <ProfileRow label={t.home.profileName} done={!!user.displayName} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
+                <ProfileRow label={t.home.profilePhone} done={!!user.phone} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
+                <ProfileRow label={t.home.profileCity} done={!!user.city} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
+                <ProfileRow label={t.home.profileKyc} done={kycDone} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
               </div>
               <Link href="/dashboard/profil" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
-                Compléter mon profil
+                {t.providerHome.completeProfile}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             </div>
@@ -245,19 +245,19 @@ function ProviderDashboard({
           {/* Actions rapides */}
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
             <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Actions rapides</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">{t.providerHome.quickActions}</p>
             </div>
             <div className="p-3 space-y-1">
-              <QuickLink href="/dashboard/prestations" label="Publier une prestation" icon={
+              <QuickLink href="/dashboard/prestations" label={t.providerHome.publishService} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 4.5v15m7.5-7.5h-15"/></svg>
               } />
-              <QuickLink href="/dashboard/versements" label="Configurer les versements" icon={
+              <QuickLink href="/dashboard/versements" label={t.providerHome.configurePayouts} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M6 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>
               } />
-              {!kycDone && <QuickLink href="/dashboard/verification" label="Vérifier mon identité" icon={
+              {!kycDone && <QuickLink href="/dashboard/verification" label={t.providerHome.verifyMyId} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
               } warn />}
-              <QuickLink href="/services" label="Explorer le catalogue" icon={
+              <QuickLink href="/services" label={t.providerHome.exploreCatalogue} icon={
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               } />
             </div>
@@ -266,7 +266,7 @@ function ProviderDashboard({
           {/* Modes de paiement */}
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
             <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
-              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">Modes de paiement</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--subtle)]">{t.providerHome.paymentMethods}</p>
             </div>
             <div className="p-5">
               <div className="grid grid-cols-2 gap-2">
@@ -278,7 +278,7 @@ function ProviderDashboard({
                 ))}
               </div>
               <Link href="/dashboard/versements" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
-                Configurer mon numéro
+                {t.providerHome.configureNumber}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
             </div>
@@ -492,17 +492,17 @@ function ClientDashboard({
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function ProfileRow({ label, done }: { label: string; done: boolean }) {
+function ProfileRow({ label, done, doneLabel, toFillLabel }: { label: string; done: boolean; doneLabel: string; toFillLabel: string }) {
   return (
     <div className="flex items-center justify-between text-xs">
       <span className="text-[var(--subtle)]">{label}</span>
       {done ? (
         <span className="flex items-center gap-1 font-medium text-[var(--color-brand-600)]">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4 4L19 7"/></svg>
-          Complété
+          {doneLabel}
         </span>
       ) : (
-        <span className="font-medium text-amber-500">À renseigner</span>
+        <span className="font-medium text-amber-500">{toFillLabel}</span>
       )}
     </div>
   );

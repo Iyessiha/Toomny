@@ -206,11 +206,12 @@ export function DashboardShell({
     .map((w) => w[0]?.toUpperCase())
     .join("");
 
+  const ph = getDashboardTexts(locale === "en" ? "en" : "fr").providerHome;
   const roleLabel: Record<string, string> = {
-    client: "Recruteur",
-    provider: "Prestataire",
-    both: "Prestataire · Recruteur",
-    admin: "Administrateur",
+    client: ph.shellRoleClient,
+    provider: ph.shellRoleProvider,
+    both: ph.shellRoleBoth,
+    admin: ph.shellRoleAdmin,
   };
 
   const kycVerified = user.verificationStatus === "verified";
@@ -277,7 +278,7 @@ export function DashboardShell({
                 kycVerified ? "bg-emerald-50 text-emerald-700" : kycPending ? "bg-sky-50 text-sky-700" : "bg-amber-50 text-amber-700"
               }`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${kycVerified ? "bg-emerald-500" : kycPending ? "bg-sky-500 animate-pulse" : "bg-amber-400"}`} />
-                {kycVerified ? "Vérifié" : kycPending ? "En cours" : "Non vérifié"}
+                {kycVerified ? ph.kycVerified : kycPending ? ph.kycPending : ph.kycUnverified}
               </span>
             )}
           </div>
