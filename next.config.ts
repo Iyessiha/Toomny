@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
     // Plafond Vercel des requêtes : 4,5 Mo.
     serverActions: { bodySizeLimit: "4mb" },
   },
+  // Anciennes adresses de l'ancien site encore présentes dans l'index de Google.
+  async redirects() {
+    return [
+      { source: "/service-categories/:slug", destination: "/services?categorie=:slug", permanent: true },
+      { source: "/terms-of-use", destination: "/cgu", permanent: true },
+    ];
+  },
   async headers() {
     // En développement, les aperçus sont affichés dans une iframe (bac à sable
     // distant) : on n'y interdit pas l'encadrement, sinon l'aperçu reste blanc.
