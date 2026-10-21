@@ -15,6 +15,7 @@ import { MessageSection } from "@/components/orders/message-section";
 import { PayButton } from "@/components/orders/pay-button";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.order };
@@ -60,6 +61,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       title={order.reference}
       subtitle={service?.title ?? t.detailSubtitleFallback}
       locale={locale}

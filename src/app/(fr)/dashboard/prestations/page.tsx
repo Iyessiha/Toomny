@@ -11,6 +11,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
 import { Notice } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.services };
@@ -54,6 +55,7 @@ export default async function PrestationsPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       kicker={nav.services}
       title={t.title}
       subtitle={t.subtitle}

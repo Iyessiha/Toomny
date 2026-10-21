@@ -7,6 +7,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Pill, disputeTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ export default async function DisputesPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}

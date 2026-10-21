@@ -7,6 +7,7 @@ import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceForm } from "@/components/dashboard/service-form";
 import { getDashboardTexts } from "@/i18n/dashboard";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: "Nouvelle prestation — Toomny" };
@@ -24,6 +25,7 @@ export default async function NouvellePrestation() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       title={t.services.newTitle}
       locale={locale}
       navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}

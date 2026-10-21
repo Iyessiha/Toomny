@@ -8,6 +8,7 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { getNotificationTexts } from "@/i18n/notifications";
 import { renderNotification, toParams } from "@/lib/notifications";
 import { markAllNotificationsRead, openNotification } from "./actions";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +98,7 @@ export default async function NotificationsPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       locale={locale}
       title={t.title}
       subtitle={t.subtitle}

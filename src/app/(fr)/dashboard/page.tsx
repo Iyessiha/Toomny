@@ -8,6 +8,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -56,6 +57,7 @@ function ProviderDashboard({
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       title={`Bonjour, ${firstName}`}
       subtitle={new Date().toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       locale={locale}

@@ -10,6 +10,7 @@ import { Pill, TableCard, orderTone } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getPublicPageTexts(await visitorLocale()).titles.orders };
@@ -32,6 +33,7 @@ export default async function OrdersPage() {
   return (
     <DashboardShell
       user={user}
+      bell={<NotificationBell locale={locale} />}
       title={t.orders.title}
       locale={locale}
       subtitle={t.orders.subtitle}
