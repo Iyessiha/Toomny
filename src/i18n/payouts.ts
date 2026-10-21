@@ -46,6 +46,7 @@ const fr = {
     save: "Le canal n'a pas pu être enregistré.",
     notProvider: "Réservé aux comptes prestataires.",
     request: "La demande de versement a échoué. Réessayez.",
+    alreadyRequested: "Ce versement a déjà été demandé. Actualisez la page.",
   },
 };
 
@@ -94,6 +95,7 @@ const en: typeof fr = {
     save: "The channel could not be saved.",
     notProvider: "Reserved for provider accounts.",
     request: "The payout request failed. Please try again.",
+    alreadyRequested: "This payout has already been requested. Refresh the page.",
   },
 };
 

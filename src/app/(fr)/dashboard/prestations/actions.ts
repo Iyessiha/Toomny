@@ -225,15 +225,26 @@ export async function toggleServiceStatus(id: string, currentStatus: string) {
   const e = getDashboardTexts(user.preferredLocale).services.errors;
   if (!isProvider(user.role)) return { error: e.notProvider };
 
-  const newStatus = currentStatus === "active" ? "paused" : currentStatus === "paused" ? "active" : null;
+  // Le statut réel est lu en base : l'écran peut être en retard sur la prestation.
+  // La mise à jour passe par la clé de service, car la règle RLS interdit de repasser en « active ».
+  const db = createAdminClient();
+  const { data: owned } = await db
+    .from("services")
+    .select("status")
+    .eq("id", id)
+    .eq("provider_id", user.id)
+    .maybeSingle();
+  if (!owned || owned.status !== currentStatus) return { error: e.toggle };
+
+  const newStatus = owned.status === "active" ? "paused" : owned.status === "paused" ? "active" : null;
   if (!newStatus) return { error: e.toggle };
 
-  const supabase = await createClient();
-  const { error } = await supabase
+  const { error } = await db
     .from("services")
-    .update({ status: newStatus })
+    .update({ status: newStatus, updated_at: new Date().toISOString() })
     .eq("id", id)
-    .eq("provider_id", user.id);
+    .eq("provider_id", user.id)
+    .eq("status", owned.status);
 
   if (error) return { error: e.toggle };
 
@@ -288,15 +299,18 @@ export async function deleteService(id: string) {
   const e = getDashboardTexts(user.preferredLocale).services.errors;
   if (!isProvider(user.role)) return { error: e.notProvider };
 
-  const supabase = await createClient();
-  const { error } = await supabase
+  // Pas de droit DELETE pour le rôle authentifié : la suppression passe par la clé de service,
+  // limitée au propriétaire et aux statuts « brouillon » et « en pause ».
+  const db = createAdminClient();
+  const { data: deleted, error } = await db
     .from("services")
     .delete()
     .eq("id", id)
     .eq("provider_id", user.id)
-    .in("status", ["draft", "paused"]);
+    .in("status", ["draft", "paused"])
+    .select("id");
 
-  if (error) return { error: e.delete };
+  if (error || !deleted || deleted.length === 0) return { error: e.delete };
 
   revalidatePath("/dashboard/prestations");
   return { success: true };

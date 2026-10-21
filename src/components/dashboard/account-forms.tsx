@@ -49,6 +49,17 @@ export function AccountEmailForm({
             className={inputClass}
           />
         </div>
+        <div>
+          <label htmlFor="emailCurrentPassword" className="text-sm font-medium">{t.passwordCurrent}</label>
+          <input
+            id="emailCurrentPassword"
+            name="currentPassword"
+            type="password"
+            required
+            autoComplete="current-password"
+            className={inputClass}
+          />
+        </div>
         {error && <p role="alert" className="notice notice-danger">{error}</p>}
         {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.emailSent}</p>}
         <button

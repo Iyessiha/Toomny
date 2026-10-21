@@ -47,7 +47,6 @@ export function ProfileForm({
     if (!file) return;
     const preview = URL.createObjectURL(file);
     setAvatarPreview(preview);
-    setAvatarUrl(null);
     setUploadError(null);
     setUploading(true);
     const fd = new FormData();
@@ -58,12 +57,14 @@ export function ProfileForm({
       if (!res.ok || !data.url) {
         setUploadError(data.error ?? p.avatarError);
         setAvatarPreview(defaults.avatarUrl);
+        setAvatarUrl(defaults.avatarUrl);
       } else {
         setAvatarUrl(data.url);
       }
     } catch {
       setUploadError(p.avatarError);
       setAvatarPreview(defaults.avatarUrl);
+      setAvatarUrl(defaults.avatarUrl);
     } finally {
       setUploading(false);
     }

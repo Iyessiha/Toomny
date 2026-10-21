@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { submitVerification } from "@/app/(fr)/dashboard/verification/actions";
 import { KYC_COUNTRIES } from "@/lib/kyc";
 import { getKycTexts } from "@/i18n/kyc";
+import { compressImage } from "@/lib/compress-image";
 import { countryNames } from "@/i18n/auth";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
 import { KycSelfieGuide } from "@/components/dashboard/kyc-selfie-guide";
@@ -136,20 +137,26 @@ export function KycForm({
     setLoading(true);
     setError(null);
 
-    const form = new FormData(e.currentTarget);
-    if (frontFile) form.set("front", frontFile);
-    if (backFile) form.set("back", backFile);
-    if (selfieFile) form.set("selfie", selfieFile);
+    try {
+      // Les photos sont réduites avant envoi, sinon la requête dépasse la limite du serveur.
+      const form = new FormData(e.currentTarget);
+      if (frontFile) form.set("front", await compressImage(frontFile));
+      if (backFile) form.set("back", await compressImage(backFile));
+      if (selfieFile) form.set("selfie", await compressImage(selfieFile));
 
-    const result = await submitVerification(form);
+      const result = await submitVerification(form);
 
-    if (result.error) {
-      setError(result.error);
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      } else {
+        setSuccess(true);
+        setLoading(false);
+        router.refresh();
+      }
+    } catch {
+      setError(getKycTexts(locale).errors.network);
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setLoading(false);
-      router.refresh();
     }
   }
 

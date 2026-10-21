@@ -33,10 +33,18 @@ export async function changeEmail(formData: FormData) {
   const t = getAccountTexts(user.preferredLocale).errors;
 
   const newEmail = String(formData.get("newEmail") ?? "").trim().toLowerCase();
+  const currentPassword = String(formData.get("currentPassword") ?? "");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) return { error: t.emailInvalid };
   if (newEmail === (user.email ?? "").toLowerCase()) return { error: t.emailSame };
 
+  // Changer d'adresse donne accès au compte : on exige le mot de passe actuel, comme pour le mot de passe.
   const supabase = await createClient();
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email ?? "",
+    password: currentPassword,
+  });
+  if (signInError) return { error: t.passwordWrong };
+
   const { error } = await supabase.auth.updateUser({ email: newEmail });
   if (error) return { error: t.emailFailed };
 

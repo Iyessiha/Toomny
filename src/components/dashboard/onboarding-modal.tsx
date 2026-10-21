@@ -114,7 +114,8 @@ export function OnboardingModal({
   role: UserRole;
   locale: Locale;
 }) {
-  const steps = role === "provider" ? PROVIDER_STEPS : CLIENT_STEPS;
+  // Les comptes « both » sont aussi prestataires : ils reçoivent le parcours prestataire.
+  const steps = role === "provider" || role === "both" ? PROVIDER_STEPS : CLIENT_STEPS;
   const [step, setStep] = useState(0);
   const [closed, setClosed] = useState(false);
   const [, startTransition] = useTransition();
