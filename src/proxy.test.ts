@@ -29,11 +29,30 @@ describe("buildCsp", () => {
     expect(directive(csp, "frame-src")).toBe("frame-src https://challenges.cloudflare.com");
   });
 
-  it("ne liste que Supabase et Turnstile comme origines externes", () => {
+  it("ne liste que Supabase, Turnstile et les plateformes de suivi comme origines externes", () => {
     const csp = buildCsp("n", false);
     const external = csp.match(/https?:\/\/[^\s;']+|wss:\/\/[^\s;']+/g) ?? [];
+    const autorisees = new Set([
+      "https://challenges.cloudflare.com",
+      "https://*.supabase.co",
+      "wss://*.supabase.co",
+      "https://connect.facebook.net",
+      "https://analytics.tiktok.com",
+      "https://sc-static.net",
+      "https://s.pinimg.com",
+      "https://www.googletagmanager.com",
+      "https://www.facebook.com",
+      "https://tr.snapchat.com",
+      "https://sc-logs.snapchat.com",
+      "https://ct.pinterest.com",
+      "https://www.google.com",
+      "https://*.google-analytics.com",
+      "https://*.analytics.google.com",
+      "https://*.googletagmanager.com",
+      "https://*.doubleclick.net",
+    ]);
     for (const origin of new Set(external)) {
-      expect(["https://challenges.cloudflare.com", "https://*.supabase.co", "wss://*.supabase.co"]).toContain(origin);
+      expect(autorisees).toContain(origin);
     }
   });
 });

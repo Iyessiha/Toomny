@@ -4,10 +4,36 @@ import { LOCALE_COOKIE, localeForCountry } from "@/i18n/locale-detection";
 import type { Locale } from "@/i18n/dictionaries";
 
 /**
+ * Origines de suivi publicitaire, chargées selon les pixels configurés dans
+ * l'admin (voir lib/pixels.ts). Elles ne sont utiles qu'aux visiteurs du site
+ * public ; le nonce reste la véritable barrière pour les scripts.
+ */
+const TRACKING_SCRIPT_HOSTS = [
+  "https://connect.facebook.net",
+  "https://analytics.tiktok.com",
+  "https://sc-static.net",
+  "https://s.pinimg.com",
+  "https://www.googletagmanager.com",
+];
+const TRACKING_BEACON_HOSTS = [
+  "https://www.facebook.com",
+  "https://analytics.tiktok.com",
+  "https://tr.snapchat.com",
+  "https://sc-logs.snapchat.com",
+  "https://ct.pinterest.com",
+  "https://www.google.com",
+  "https://*.google-analytics.com",
+  "https://*.analytics.google.com",
+  "https://*.googletagmanager.com",
+  "https://*.doubleclick.net",
+];
+
+/**
  * Politique de contenu. Seules les origines réellement utilisées sont listées :
- * Supabase (API, stockage des pièces KYC signées) et Cloudflare Turnstile.
- * Le nonce autorise les scripts inline que nous posons nous-mêmes (voir
- * root-layout.tsx) et ceux de Next.js, sans ouvrir `'unsafe-inline'`.
+ * Supabase (API, stockage des pièces KYC signées), Cloudflare Turnstile et les
+ * plateformes publicitaires configurées. Le nonce autorise les scripts inline
+ * que nous posons nous-mêmes (voir root-layout.tsx) et ceux de Next.js, sans
+ * ouvrir `'unsafe-inline'`.
  */
 export function buildCsp(nonce: string, isDev: boolean): string {
   const scriptSrc = [
@@ -15,6 +41,7 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     `'nonce-${nonce}'`,
     "'strict-dynamic'",
     "https://challenges.cloudflare.com",
+    ...TRACKING_SCRIPT_HOSTS,
     ...(isDev ? ["'unsafe-eval'"] : []),
   ];
 
@@ -23,9 +50,9 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     `script-src ${scriptSrc.join(" ")}`,
     // Next.js et Tailwind injectent des styles ; pas de script via cet attribut.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co",
+    `img-src 'self' data: blob: https://*.supabase.co ${TRACKING_BEACON_HOSTS.join(" ")}`,
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com",
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com ${TRACKING_BEACON_HOSTS.join(" ")}`,
     "frame-src https://challenges.cloudflare.com",
     "object-src 'none'",
     "base-uri 'self'",
