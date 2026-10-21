@@ -24,7 +24,7 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM = "Toomny <noreply@toomny.com>";
+const FROM = "Toomny <hello@toomny.com>";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
 
 export async function sendWelcomeEmail(opts: {
