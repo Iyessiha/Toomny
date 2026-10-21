@@ -40,6 +40,7 @@ export function getAdminNavGroups(locale: Locale, currentPath: string): NavGroup
       items: [
         item("/admin/services", nav.services),
         item("/admin/categories", nav.categories),
+        item("/admin/pixels", nav.pixels),
       ],
     },
     {
