@@ -27,6 +27,7 @@ export type ServiceCard = {
     country_code: string | null;
     rating_avg: number | null;
     rating_count: number;
+    verified?: boolean;
   } | null;
 };
 
@@ -244,7 +245,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
     supabase.from("categories").select("id, slug"),
     supabase
       .from("provider_directory")
-      .select("id, display_name, country_code")
+      .select("id, display_name, country_code, verification_status")
       .in("id", providerIds),
     supabase
       .from("provider_profiles")
@@ -259,7 +260,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
   ]);
 
   const catById = new Map(((allCategories.data ?? []) as { id: string; slug: string }[]).map((c) => [c.id, c.slug]));
-  const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((p) => [p.id, p]));
+  const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null; verification_status: string | null }[]).map((p) => [p.id, p]));
   const profById = new Map(((profiles.data ?? []) as { profile_id: string; rating_avg: number | null; rating_count: number }[]).map((p) => [p.profile_id, p]));
   const boostedProviders = new Set(((boosts.data ?? []) as { provider_id: string }[]).map((b) => b.provider_id));
 
@@ -277,6 +278,7 @@ export async function getServices(filters: ServiceFilters = {}): Promise<Service
             country_code: dir.country_code,
             rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null,
             rating_count: prof?.rating_count ?? 0,
+            verified: dir.verification_status === "verified",
           }
         : null,
     };
@@ -305,13 +307,13 @@ export async function getServicesByIds(ids: string[]): Promise<ServiceCard[]> {
 
   const [allCategories, providers, profiles, boosts] = await Promise.all([
     supabase.from("categories").select("id, slug"),
-    supabase.from("provider_directory").select("id, display_name, country_code").in("id", providerIds),
+    supabase.from("provider_directory").select("id, display_name, country_code, verification_status").in("id", providerIds),
     supabase.from("provider_profiles").select("profile_id, rating_avg, rating_count").in("profile_id", providerIds),
     supabase.from("boosts").select("provider_id").eq("status", "active").gt("period_end", now).in("provider_id", providerIds),
   ]);
 
   const catById = new Map(((allCategories.data ?? []) as { id: string; slug: string }[]).map((c) => [c.id, c.slug]));
-  const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null }[]).map((p) => [p.id, p]));
+  const dirById = new Map(((providers.data ?? []) as { id: string; display_name: string | null; country_code: string | null; verification_status: string | null }[]).map((p) => [p.id, p]));
   const profById = new Map(((profiles.data ?? []) as { profile_id: string; rating_avg: number | null; rating_count: number }[]).map((p) => [p.profile_id, p]));
   const boostedProviders = new Set(((boosts.data ?? []) as { provider_id: string }[]).map((b) => b.provider_id));
 
@@ -323,7 +325,7 @@ export async function getServicesByIds(ids: string[]): Promise<ServiceCard[]> {
       boosted: boostedProviders.has(provider_id),
       category_slug: catById.get(r.category_id) ?? null,
       provider: dir
-        ? { id: provider_id, display_name: dir.display_name, country_code: dir.country_code, rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null, rating_count: prof?.rating_count ?? 0 }
+        ? { id: provider_id, display_name: dir.display_name, country_code: dir.country_code, rating_avg: prof?.rating_avg != null ? Number(prof.rating_avg) : null, rating_count: prof?.rating_count ?? 0, verified: dir.verification_status === "verified" }
         : null,
     };
   });

@@ -104,6 +104,14 @@ export function ServiceCard({ service: s, locale }: Props) {
                 {s.provider?.display_name ?? t.provider}
               </p>
             )}
+            {s.provider?.verified && (
+              <span
+                title={t.identityVerified}
+                className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-500)] px-2 py-px text-[10px] font-bold text-white"
+              >
+                ✓ {t.badgeVerified}
+              </span>
+            )}
             <p className="mt-0.5 text-[10px] text-[var(--subtle)]">
               {[s.provider?.country_code, `${s.delivery_days} ${s.delivery_days > 1 ? t.days : t.day}`]
                 .filter(Boolean).join(" · ")}
