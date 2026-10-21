@@ -11,6 +11,7 @@ import { renderServiceRejectedEmail } from "./templates/service-rejected";
 import { renderConfirmEmail } from "./templates/confirm";
 import { renderKycRejectedEmail } from "./templates/kyc-rejected";
 import { renderServicePublishedEmail, type BoostOffer } from "./templates/service-published";
+import { htmlToText } from "./text";
 import { renderBoostReminderEmail } from "./templates/boost-reminder";
 import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
 import { formatMoney } from "@/lib/money";
@@ -36,7 +37,7 @@ export async function sendWelcomeEmail(opts: {
   try {
     const subject = opts.locale === "en" ? "Welcome to Toomny 🎉" : "Bienvenue sur Toomny 🎉";
     const html = renderWelcomeEmail({ ...opts, siteUrl: SITE_URL });
-    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:welcome]", (err as Error).message);
   }
@@ -65,7 +66,7 @@ export async function sendNotificationEmail(opts: {
       locale: opts.locale,
       siteUrl: SITE_URL,
     });
-    await resend.emails.send({ from: FROM, to: opts.to, subject: title, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject: title, html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:notification]", opts.type, (err as Error).message);
   }
@@ -92,7 +93,7 @@ export async function sendServiceRejectedEmail(opts: {
       locale: opts.locale,
       siteUrl: SITE_URL,
     });
-    await resend.emails.send({ from: FROM, to: opts.to, subject: t.subject(opts.serviceTitle), html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject: t.subject(opts.serviceTitle), html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:service-rejected]", (err as Error).message);
   }
@@ -105,7 +106,7 @@ export async function sendConfirmEmail(opts: { to: string; confirmUrl: string; l
   try {
     const subject = opts.locale === "en" ? "Confirm your Toomny email" : "Confirmez votre adresse Toomny";
     const html = renderConfirmEmail({ confirmUrl: opts.confirmUrl, siteUrl: SITE_URL });
-    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
     return true;
   } catch (err) {
     console.error("[email:confirm]", (err as Error).message);
@@ -131,7 +132,7 @@ export async function sendKycRejectedEmail(opts: {
       siteUrl: SITE_URL,
     });
     const subject = opts.locale === "en" ? "Your identity check was not approved" : "Votre vérification d'identité n'a pas été validée";
-    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:kyc-rejected]", (err as Error).message);
   }
@@ -165,7 +166,7 @@ export async function sendServicePublishedEmail(opts: {
     const subject = opts.locale === "en"
       ? `Your service “${opts.serviceTitle}” is live`
       : `Votre prestation « ${opts.serviceTitle} » est en ligne`;
-    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:service-published]", (err as Error).message);
   }
@@ -195,7 +196,7 @@ export async function sendBoostReminderEmail(opts: {
       siteUrl: SITE_URL,
     });
     const subject = opts.locale === "en" ? "Get your service noticed" : "Faites remarquer votre prestation";
-    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
     return true;
   } catch (err) {
     console.error("[email:boost-reminder]", (err as Error).message);
