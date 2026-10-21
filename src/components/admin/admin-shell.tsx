@@ -93,7 +93,7 @@ export function AdminShell({
           </div>
 
           {/* Nav grouped */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
             {nav.map((group, gi) => (
               <div key={gi} className={gi > 0 ? "mt-5" : ""}>
                 {group.label && (

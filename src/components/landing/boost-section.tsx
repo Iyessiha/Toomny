@@ -55,7 +55,7 @@ const CONTENT = {
     tiers: [
       {
         name: "Boost Starter",
-        price: "5,000 XOF",
+        price: "5 000 FCFA",
         period: "/month",
         perks: [
           "Priority badge on your services",
@@ -66,7 +66,7 @@ const CONTENT = {
       },
       {
         name: "Boost Pro",
-        price: "10,000 XOF",
+        price: "10 000 FCFA",
         period: "/month",
         badge: "Popular",
         perks: [
@@ -79,7 +79,7 @@ const CONTENT = {
       },
       {
         name: "Boost Elite",
-        price: "18,000 XOF",
+        price: "18 000 FCFA",
         period: "/month",
         perks: [
           "Priority badge on your services",

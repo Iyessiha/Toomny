@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type AdminAction =
   | "kyc.approve"
   | "kyc.reject"
+  | "service.reject"
   | "kyc.flag"
   | "service.moderate"
   | "order.confirm_payment"

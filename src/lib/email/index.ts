@@ -4,8 +4,10 @@ import type { Locale } from "@/i18n/dictionaries";
 import type { NotificationType } from "@/lib/notifications";
 import type { NotificationParams } from "@/i18n/notifications";
 import { getNotificationTexts } from "@/i18n/notifications";
+import { getListingGuideTexts } from "@/i18n/listing-guide";
 import { renderWelcomeEmail } from "./templates/welcome";
 import { renderNotificationEmail } from "./templates/notification";
+import { renderServiceRejectedEmail } from "./templates/service-rejected";
 
 let _resend: Resend | null = null;
 
@@ -60,5 +62,32 @@ export async function sendNotificationEmail(opts: {
     await resend.emails.send({ from: FROM, to: opts.to, subject: title, html });
   } catch (err) {
     console.error("[email:notification]", opts.type, (err as Error).message);
+  }
+}
+
+export async function sendServiceRejectedEmail(opts: {
+  to: string;
+  firstName: string;
+  serviceTitle: string;
+  reasons: string[];
+  message: string;
+  locale: Locale;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend) return;
+  try {
+    const t = getListingGuideTexts(opts.locale).email;
+    const html = renderServiceRejectedEmail({
+      firstName: opts.firstName,
+      serviceTitle: opts.serviceTitle,
+      reasons: opts.reasons,
+      message: opts.message,
+      ctaUrl: `${SITE_URL}/dashboard/prestations`,
+      locale: opts.locale,
+      siteUrl: SITE_URL,
+    });
+    await resend.emails.send({ from: FROM, to: opts.to, subject: t.subject(opts.serviceTitle), html });
+  } catch (err) {
+    console.error("[email:service-rejected]", (err as Error).message);
   }
 }

@@ -56,8 +56,14 @@ export function formatMoney(minor: bigint, currency: string, locale: "fr" | "en"
   const { exponent } = currencyOrThrow(currency);
   const divisor = 10 ** exponent;
   const value = Number(minor) / divisor;
+  const tag = locale === "fr" ? "fr-FR" : "en-US";
 
-  return new Intl.NumberFormat(locale === "fr" ? "fr-FR" : "en-US", {
+  // Le CFA s'écrit après le montant : « 350 000 FCFA ».
+  if (currency === "XOF") {
+    return `${new Intl.NumberFormat(tag, { maximumFractionDigits: 0 }).format(value)} FCFA`;
+  }
+
+  return new Intl.NumberFormat(tag, {
     style: "currency",
     currency,
     minimumFractionDigits: exponent,
