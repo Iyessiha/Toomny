@@ -1,6 +1,7 @@
 import type React from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { AddRecruiterCard, BecomeProviderCard } from "@/components/dashboard/role-switch";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { getDashboardData, ORDER_STATUS_FR, statusTone } from "@/lib/dashboard";
 import { DashboardShell, StatCard, EmptyState } from "@/components/dashboard/shell";
@@ -263,6 +264,12 @@ function ProviderDashboard({
             </div>
           </div>
 
+          {user.role === "provider" && (
+            <div className="mt-6">
+              <AddRecruiterCard locale={locale} />
+            </div>
+          )}
+
           {/* Modes de paiement */}
           <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] shadow-sm">
             <div className="border-b border-[var(--border)] bg-[var(--surface)] px-5 py-3">
@@ -362,6 +369,12 @@ function ClientDashboard({
       </div>
 
       {/* ── Corps principal ─────────────────────────────────────────────── */}
+      {user.role === "client" && (
+        <div className="mt-6">
+          <BecomeProviderCard locale={locale} />
+        </div>
+      )}
+
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_280px]">
 
         {/* Commandes */}
