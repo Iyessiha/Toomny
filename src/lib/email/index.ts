@@ -8,6 +8,8 @@ import { getListingGuideTexts } from "@/i18n/listing-guide";
 import { renderWelcomeEmail } from "./templates/welcome";
 import { renderNotificationEmail } from "./templates/notification";
 import { renderServiceRejectedEmail } from "./templates/service-rejected";
+import { renderConfirmEmail } from "./templates/confirm";
+import { renderKycRejectedEmail } from "./templates/kyc-rejected";
 
 let _resend: Resend | null = null;
 
@@ -89,5 +91,44 @@ export async function sendServiceRejectedEmail(opts: {
     await resend.emails.send({ from: FROM, to: opts.to, subject: t.subject(opts.serviceTitle), html });
   } catch (err) {
     console.error("[email:service-rejected]", (err as Error).message);
+  }
+}
+
+/** Confirmation d'adresse, envoyée par Resend avec le modèle Toomny (et non celui de Supabase). */
+export async function sendConfirmEmail(opts: { to: string; confirmUrl: string; locale: Locale }): Promise<boolean> {
+  const resend = getResend();
+  if (!resend) return false;
+  try {
+    const subject = opts.locale === "en" ? "Confirm your Toomny email" : "Confirmez votre adresse Toomny";
+    const html = renderConfirmEmail({ confirmUrl: opts.confirmUrl, siteUrl: SITE_URL });
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+    return true;
+  } catch (err) {
+    console.error("[email:confirm]", (err as Error).message);
+    return false;
+  }
+}
+
+/** Demande de vérification d'identité refusée, avec le motif. */
+export async function sendKycRejectedEmail(opts: {
+  to: string;
+  firstName: string;
+  reason: string;
+  locale: Locale;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend) return;
+  try {
+    const html = renderKycRejectedEmail({
+      firstName: opts.firstName,
+      reason: opts.reason,
+      ctaUrl: `${SITE_URL}/dashboard/verification`,
+      locale: opts.locale,
+      siteUrl: SITE_URL,
+    });
+    const subject = opts.locale === "en" ? "Your identity check was not approved" : "Votre vérification d'identité n'a pas été validée";
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html });
+  } catch (err) {
+    console.error("[email:kyc-rejected]", (err as Error).message);
   }
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { imageMimeFromBytes } from "@/lib/request-security";
+import { isLandscapeBytes } from "@/lib/image-size";
 import { recordAdminAction } from "@/lib/admin-audit";
 
 const MAX_BYTES = 3 * 1024 * 1024;
@@ -55,6 +56,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const buffer = await file.arrayBuffer();
     const mime = imageMimeFromBytes(new Uint8Array(buffer));
     if (!mime) return NextResponse.json({ error: "bad_type" }, { status: 400 });
+    // Couverture : paysage obligatoire, contrôlé ici aussi (la galerie n'est pas concernée).
+    if (action === "cover" && !isLandscapeBytes(new Uint8Array(buffer))) {
+      return NextResponse.json({ error: "not_landscape" }, { status: 400 });
+    }
 
     const ext = mime === "image/jpeg" ? "jpg" : mime.split("/")[1];
     const path = `${service.provider_id}/${randomUUID()}.${ext}`;

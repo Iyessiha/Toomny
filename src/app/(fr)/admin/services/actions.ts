@@ -34,6 +34,16 @@ export async function moderateService(formData: FormData): Promise<void> {
     .eq("id", id)
     .maybeSingle();
 
+  // Pas de publication tant que l'identité du prestataire n'est pas vérifiée.
+  if (status === "active" && service) {
+    const { data: prov } = await db
+      .from("profiles")
+      .select("verification_status")
+      .eq("id", service.provider_id)
+      .maybeSingle();
+    if (prov?.verification_status !== "verified") redirect("/admin/services?error=kyc");
+  }
+
   const { error } = await db
     .from("services")
     .update({ status, updated_at: new Date().toISOString() })

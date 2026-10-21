@@ -1,5 +1,6 @@
 "use server";
 
+import { sendKycRejectedEmail } from "@/lib/email";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -102,6 +103,20 @@ export async function rejectVerification(verificationId: string, reason: string)
     type: "verification_rejected",
     link: "/dashboard/verification",
   });
+
+  // E-mail explicite avec le motif : le prestataire sait quoi corriger et quoi refaire.
+  const [{ data: author }, { data: prof }] = await Promise.all([
+    db.auth.admin.getUserById(verif.profile_id),
+    db.from("profiles").select("first_name, preferred_locale").eq("id", verif.profile_id).maybeSingle(),
+  ]);
+  if (author?.user?.email) {
+    await sendKycRejectedEmail({
+      to: author.user.email,
+      firstName: prof?.first_name ?? "",
+      reason,
+      locale: prof?.preferred_locale === "en" ? "en" : "fr",
+    });
+  }
 
   revalidatePath("/admin/verifications");
   revalidatePath("/admin");

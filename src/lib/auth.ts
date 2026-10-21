@@ -18,6 +18,8 @@ export type CurrentUser = {
   verificationStatus: string;
   preferredLocale: Locale;
   onboardingDone: boolean;
+  /** Adresse confirmée par lien : sans elle, l'espace connecté reste fermé. */
+  emailConfirmed: boolean;
 };
 
 const PROFILE_COLUMNS =
@@ -98,6 +100,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     verificationStatus: profile.verification_status,
     preferredLocale: profile.preferred_locale === "en" ? "en" : "fr",
     onboardingDone: (profile as Record<string, unknown>).onboarding_done === true,
+    emailConfirmed: user.email_confirmed_at != null,
   };
 }
 
@@ -105,6 +108,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function requireAuth(): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/auth");
+  if (!user.emailConfirmed) redirect("/auth/confirm-email");
   return user as CurrentUser;
 }
 
