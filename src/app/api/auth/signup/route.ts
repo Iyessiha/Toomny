@@ -139,7 +139,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: m.failed }, { status: 400 });
   }
 
-  const sent = await sendConfirmEmail({ to: email, confirmUrl: link.properties.action_link, locale });
+  // Lien sur le domaine Toomny : la route /auth/confirm valide le jeton haché.
+  const confirmUrl = `${origin}/auth/confirm?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=signup&next=/dashboard`;
+  const sent = await sendConfirmEmail({ to: email, confirmUrl, locale });
   if (!sent) console.error("[signup] e-mail de confirmation non envoyé:", email);
   void sendWelcomeEmail({ to: email, firstName, locale });
 
