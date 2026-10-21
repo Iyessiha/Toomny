@@ -146,7 +146,7 @@ export default async function AdminPage() {
             openLabel={t.open}
           />
           <TodoCard
-            href="/admin/services"
+            href="/admin/services?status=draft"
             label={t.todoServices}
             count={c.draftServices}
             hint={t.todoServicesHint}
