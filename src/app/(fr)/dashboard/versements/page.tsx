@@ -52,7 +52,8 @@ export default async function VersementsPage() {
   const nav = getDashboardTexts(locale).nav;
   const supabase = await createClient();
 
-  const [{ data: profile }, { data: orders }, { data: payoutsData }] = await Promise.all([
+  const [{ data: profile }, { data: orders }, { data: payoutsData }, { data: balanceOrders }, { data: balancePayouts }] =
+    await Promise.all([
     supabase
       .from("provider_profiles")
       .select("payout_channel, payout_msisdn, payout_verified_at")
@@ -66,10 +67,21 @@ export default async function VersementsPage() {
       .limit(100),
     supabase
       .from("payouts")
-      .select("id, order_id, amount_minor, currency, status, channel, created_at, paid_at")
+      .select("id, order_id, amount_minor, currency, status, channel, created_at, paid_at, failure_reason")
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
+    // Soldes calculés sur toutes les lignes, sans limite d'affichage.
+    supabase
+      .from("orders")
+      .select("status, provider_net_minor")
+      .eq("provider_id", user.id)
+      .in("status", ["completed", "funded", "in_progress", "delivered", "disputed"]),
+    supabase
+      .from("payouts")
+      .select("amount_minor")
+      .eq("provider_id", user.id)
+      .neq("status", "failed"),
   ]);
 
   const orderList = orders ?? [];
@@ -79,21 +91,18 @@ export default async function VersementsPage() {
   // Calcul des soldes
   let earned = 0n;
   let inProgress = 0n;
-  for (const o of orderList) {
+  for (const o of balanceOrders ?? []) {
     if (o.status === "completed") earned += BigInt(o.provider_net_minor);
-    else if (["funded", "in_progress", "delivered", "disputed"].includes(o.status))
-      inProgress += BigInt(o.provider_net_minor);
+    else inProgress += BigInt(o.provider_net_minor);
   }
 
   // Déjà versé (queued + processing + paid)
   let alreadyQueued = 0n;
-  const queuedOrderIds = new Set<string>();
-  for (const p of payoutList) {
-    if (p.status !== "failed") {
-      alreadyQueued += BigInt(p.amount_minor);
-      queuedOrderIds.add(p.order_id);
-    }
-  }
+  for (const p of balancePayouts ?? []) alreadyQueued += BigInt(p.amount_minor);
+  // Statut du versement en cours par commande : « en file », « en cours », « payé »…
+  const activePayoutByOrder = new Map<string, string>(
+    payoutList.filter((p) => p.status !== "failed").map((p) => [p.order_id, p.status]),
+  );
   const available = earned - alreadyQueued < 0n ? 0n : earned - alreadyQueued;
 
   const hasChannel = !!profile?.payout_channel && !!profile?.payout_msisdn;
@@ -183,6 +192,9 @@ export default async function VersementsPage() {
                       <Pill tone={payoutTone(p.status)}>
                         {t.payoutStatus[p.status] ?? p.status}
                       </Pill>
+                      {p.status === "failed" && p.failure_reason && (
+                        <span className="mt-1 block text-xs text-[var(--subtle)]">{p.failure_reason}</span>
+                      )}
                     </td>
                     <td className="text-right font-display font-bold">
                       {formatMoney(BigInt(p.amount_minor), p.currency, locale)}
@@ -219,8 +231,10 @@ export default async function VersementsPage() {
                     </td>
                     <td className="text-[var(--subtle)]">
                       {t.status[o.status] ?? o.status}
-                      {o.status === "completed" && queuedOrderIds.has(o.id) && (
-                        <span className="ml-2 text-xs">{t.payoutStatus.queued}</span>
+                      {o.status === "completed" && activePayoutByOrder.has(o.id) && (
+                        <span className="ml-2 text-xs">
+                          {t.payoutStatus[activePayoutByOrder.get(o.id) ?? "queued"] ?? t.payoutStatus.queued}
+                        </span>
                       )}
                     </td>
                     <td className="text-right font-display font-bold">

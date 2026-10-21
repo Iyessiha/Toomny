@@ -5,6 +5,7 @@ import { recordFunding } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
 import { nextPeriodEnd } from "@/lib/plans";
 import { BOOST_PERIOD_MS } from "@/lib/boost";
+import { activeUntil } from "@/lib/period";
 import { fundedDueAt } from "@/lib/order-deadline";
 
 export const runtime = "nodejs";
@@ -59,11 +60,14 @@ export async function POST(request: Request): Promise<Response> {
 
         if (boost.status === "active") return NextResponse.json({ ok: true });
 
-        const periodEnd = new Date(nowDate.getTime() + BOOST_PERIOD_MS).toISOString();
+        // Le temps restant d'un boost en cours est conservé : on ajoute la nouvelle période à la suite.
+        const carried = await activeUntil(db, "boosts", boost.provider_id, nowDate);
+        const boostStart = carried ?? nowDate;
+        const periodEnd = new Date(boostStart.getTime() + BOOST_PERIOD_MS).toISOString();
 
         await db
           .from("boosts")
-          .update({ status: "active", period_start: now, period_end: periodEnd })
+          .update({ status: "active", period_start: boostStart.toISOString(), period_end: periodEnd })
           .eq("id", boost.id);
 
         await notify(db, {
@@ -81,7 +85,9 @@ export async function POST(request: Request): Promise<Response> {
         return NextResponse.json({ ok: true });
       }
 
-      const periodEnd = nextPeriodEnd(nowDate).toISOString();
+      // Renouvellement avant échéance : la nouvelle période part de la fin de l'ancienne.
+      const carried = await activeUntil(db, "subscriptions", sub.provider_id, nowDate);
+      const periodEnd = nextPeriodEnd(carried ?? nowDate).toISOString();
 
       await db
         .from("subscriptions")
@@ -94,7 +100,7 @@ export async function POST(request: Request): Promise<Response> {
         .from("subscriptions")
         .update({
           status: "active",
-          period_start: now,
+          period_start: (carried ?? nowDate).toISOString(),
           period_end: periodEnd,
         })
         .eq("id", sub.id);

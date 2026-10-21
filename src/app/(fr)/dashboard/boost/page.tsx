@@ -68,9 +68,10 @@ export default async function BoostPage({
     .limit(25);
 
   const history = (boostRows ?? []) as BoostRow[];
-  const activeBoost = history.find((b) => b.status === "active");
   const dateTag = locale === "en" ? "en-GB" : "fr-FR";
   const now = new Date();
+  // Un boost « actif » dont la période est passée est expiré : on ne l'affiche pas comme en cours.
+  const activeBoost = history.find((b) => b.status === "active" && b.period_end && new Date(b.period_end) > now);
   const periodEnd = activeBoost?.period_end ? new Date(activeBoost.period_end) : null;
   const daysLeft =
     periodEnd && periodEnd > now
@@ -90,15 +91,15 @@ export default async function BoostPage({
 
       {payment === "success" && (
         <div className="mb-6">
-          <Notice tone="success" title="Boost activé !">
-            Votre boost est maintenant actif. Vos services apparaissent en position prioritaire.
+          <Notice tone="success" title="Paiement reçu">
+            Votre boost sera activé dès la confirmation du paiement, généralement en quelques secondes.
           </Notice>
         </div>
       )}
       {payment === "error" && (
         <div className="mb-6">
           <Notice tone="danger" title="Paiement refusé">
-            Le paiement n'a pas abouti. Vérifiez votre solde et réessayez.
+            Le paiement n&apos;a pas abouti. Vérifiez votre solde et réessayez.
           </Notice>
         </div>
       )}
