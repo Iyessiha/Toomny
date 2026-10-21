@@ -36,24 +36,24 @@ export function renderWelcomeEmail(opts: WelcomeEmailOpts): string {
   const content = `
     <!-- HERO GRADIENT -->
     <tr>
-      <td style="background:linear-gradient(135deg,#1a1f35 0%,#0e1220 100%);padding:40px 36px 32px;border-radius:20px 20px 0 0;">
-        <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#5b6af5;">Toomny</p>
+      <td style="background:linear-gradient(135deg,#108043 0%,#0a552d 100%);padding:40px 36px 32px;border-radius:20px 20px 0 0;">
+        <p style="margin:0 0 6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#cdeeda;">Toomny</p>
         <h1 style="margin:0 0 10px;font-size:28px;font-weight:800;color:#ffffff;line-height:1.2;">${t.headline},<br/>${opts.firstName} 👋</h1>
-        <p style="margin:0;font-size:14px;color:#7b82a0;">${t.subline}</p>
+        <p style="margin:0;font-size:14px;color:#e2f4ea;">${t.subline}</p>
       </td>
     </tr>
 
     <!-- BODY -->
     <tr>
       <td style="padding:32px 36px;">
-        <p style="margin:0 0 8px;font-size:15px;color:#9aa0b8;line-height:1.65;">${t.body}</p>
+        <p style="margin:0 0 8px;font-size:15px;color:#4f5f56;line-height:1.65;">${t.body}</p>
 
         ${renderTipsHtml([tips.setup, tips.profilePhoto, tips.coverPhoto])}
 
         <!-- CTA -->
         <table cellpadding="0" cellspacing="0" role="presentation" style="margin-top:28px;">
           <tr>
-            <td style="border-radius:14px;background:linear-gradient(135deg,#5b6af5,#7b8aff);">
+            <td style="border-radius:14px;background:linear-gradient(135deg,#108043,#2fa36a);">
               <a href="${dashboardUrl}" style="display:inline-block;padding:16px 32px;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;letter-spacing:0.01em;">${t.cta} →</a>
             </td>
           </tr>
@@ -64,7 +64,7 @@ export function renderWelcomeEmail(opts: WelcomeEmailOpts): string {
     <!-- FOOTER NOTE -->
     <tr>
       <td style="padding:0 36px 32px;">
-        <p style="margin:0;font-size:13px;color:#4b5270;line-height:1.5;">${t.footer}</p>
+        <p style="margin:0;font-size:13px;color:#7d8a82;line-height:1.5;">${t.footer}</p>
       </td>
     </tr>
   `;

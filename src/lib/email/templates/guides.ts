@@ -98,8 +98,8 @@ export function renderTipsHtml(tips: Tip[]): string {
   return tips
     .map(
       (tip) => `
-        <h2 style="margin:24px 0 8px;font-size:16px;color:#e8eaf0;">${escapeHtml(tip.title)}</h2>
-        <ul style="margin:0 0 8px;padding-left:20px;font-size:14px;color:#9aa0b8;line-height:1.7;">
+        <h2 style="margin:24px 0 8px;font-size:16px;color:#1d2b23;">${escapeHtml(tip.title)}</h2>
+        <ul style="margin:0 0 8px;padding-left:20px;font-size:14px;color:#4f5f56;line-height:1.7;">
           ${tip.items.map((item) => `<li style="margin:0 0 4px;">${escapeHtml(item)}</li>`).join("")}
         </ul>`,
     )
