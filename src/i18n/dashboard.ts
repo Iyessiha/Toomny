@@ -25,6 +25,7 @@ const fr = {
     profile: "Mon profil",
     kyc: "Vérification KYC",
     account: "Compte",
+    support: "Contacter Toomny",
     admin: "Admin",
     sections: {
       activity: "Activité",
@@ -434,6 +435,7 @@ const en: DashboardTexts = {
     profile: "My profile",
     kyc: "Identity check",
     account: "Account",
+    support: "Contact Toomny",
     admin: "Admin",
     sections: {
       activity: "Activity",

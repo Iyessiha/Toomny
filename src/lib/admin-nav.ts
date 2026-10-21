@@ -50,7 +50,7 @@ export function getAdminNavGroups(locale: Locale, currentPath: string): NavGroup
     },
     {
       label: nav.sections.operations,
-      items: [item("/admin/disputes", mktNav.disputes)],
+      items: [item("/admin/disputes", mktNav.disputes), item("/admin/support", nav.support)],
     },
   ];
 }

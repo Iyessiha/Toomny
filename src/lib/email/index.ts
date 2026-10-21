@@ -202,3 +202,34 @@ export async function sendBoostReminderEmail(opts: {
     return false;
   }
 }
+
+/** Demande de contact : l'équipe reçoit le message, répondre écrit directement au prestataire. */
+export async function sendSupportRequestEmail(opts: {
+  fromEmail: string;
+  fromName: string;
+  role: string;
+  subject: string;
+  body: string;
+}): Promise<boolean> {
+  const resend = getResend();
+  if (!resend) return false;
+  try {
+    const to = process.env.SUPPORT_EMAIL ?? "support@toomny.com";
+    const text = [
+      `De : ${opts.fromName} <${opts.fromEmail}> (${opts.role})`,
+      "",
+      opts.body,
+    ].join("\n");
+    await resend.emails.send({
+      from: FROM,
+      to,
+      replyTo: opts.fromEmail,
+      subject: `[Contact] ${opts.subject}`,
+      text,
+    });
+    return true;
+  } catch (err) {
+    console.error("[email:support]", (err as Error).message);
+    return false;
+  }
+}
