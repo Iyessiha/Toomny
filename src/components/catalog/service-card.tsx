@@ -46,6 +46,15 @@ export function ServiceCard({ service: s, locale }: Props) {
       onKeyDown={(e) => e.key === "Enter" && router.push(`/services/${s.id}`)}
       className="group block cursor-pointer overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--color-brand-500)]/10 hover:border-[var(--color-brand-200)]"
     >
+      <style>{`
+        @keyframes pulse-online {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+        .online-badge {
+          animation: pulse-online 1.5s ease-in-out infinite;
+        }
+      `}</style>
       {/* ── Image avec overlay gradient ── */}
       <div className="relative w-full overflow-hidden" style={{ paddingBottom: "58%" }}>
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
@@ -59,17 +68,26 @@ export function ServiceCard({ service: s, locale }: Props) {
           style={{ background: "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.10) 45%, transparent 75%)" }}
         />
 
-        {/* Badge Vedette — haut gauche */}
-        {s.boosted && (
-          <div className="absolute left-2.5 top-2.5 z-10">
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-amber-950 shadow-md shadow-amber-500/30">
+        {/* Badges — haut gauche */}
+        <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-2">
+          {/* Badge Vedette */}
+          {s.boosted && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-[11px] font-bold text-amber-950 shadow-md shadow-amber-500/30 w-fit">
               <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
               </svg>
               Vedette
             </span>
-          </div>
-        )}
+          )}
+
+          {/* Badge En ligne — clignotant */}
+          {s.provider?.is_online && (
+            <span className="online-badge inline-flex items-center gap-1.5 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-md shadow-emerald-500/50 w-fit">
+              <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+              {locale === "fr" ? "En ligne" : "Online"}
+            </span>
+          )}
+        </div>
 
         {/* Wishlist — haut droite */}
         <div className="absolute right-2 top-2 z-10" onClick={(e) => e.stopPropagation()}>
