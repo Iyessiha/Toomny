@@ -222,6 +222,7 @@ export const services = pgTable(
     coverUrl: text("cover_url"),
     galleryUrls: text("gallery_urls").array().default([]).notNull(),
     tags: text("tags").array().default([]).notNull(),
+    viewsCount: integer("views_count").default(0).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
