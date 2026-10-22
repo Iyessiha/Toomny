@@ -22,7 +22,13 @@ const tierColors = [
   { name: 't4', c1: '#fde68a', c2: '#b45309', ink: '#451a03', edge: 'rgba(251, 191, 36, .8)', glow: 'rgba(251, 191, 36, .5)' },
 ];
 
-export function PricingScene({ plans, locale }: { plans: Plan[]; locale: string }) {
+interface PricingSceneProps {
+  plans: Plan[];
+  locale: string;
+  columns?: 2 | 3 | 4;
+}
+
+export function PricingScene({ plans, locale, columns = 4 }: PricingSceneProps) {
   const sceneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -102,7 +108,7 @@ export function PricingScene({ plans, locale }: { plans: Plan[]; locale: string 
 
         @media (min-width: 1024px) {
           .pricing-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(${columns}, 1fr);
           }
         }
 
