@@ -125,10 +125,17 @@ export const profiles = pgTable(
     preferredLocale: localeEnum("preferred_locale").default("fr").notNull(),
     preferredCurrency: text("preferred_currency").default("XOF").notNull(),
     verificationStatus: verificationStatusEnum("verification_status").default("unverified").notNull(),
+    isOnline: boolean("is_online").default(false).notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).defaultNow().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index("profiles_country_idx").on(t.countryCode), index("profiles_role_idx").on(t.role)],
+  (t) => [
+    index("profiles_country_idx").on(t.countryCode),
+    index("profiles_role_idx").on(t.role),
+    index("profiles_is_online_idx").on(t.isOnline),
+    index("profiles_last_seen_idx").on(t.lastSeenAt),
+  ],
 );
 
 export const providerProfiles = pgTable(
