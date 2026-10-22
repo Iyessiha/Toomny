@@ -289,14 +289,14 @@ export function FeatureCards({
                 className={`feature-card ${variant === 'colorful' ? 'colorful' : ''}`}
                 style={
                   palette
-                    ? {
+                    ? ({
                         '--c1': palette.c1,
                         '--c2': palette.c2,
                         '--ink': palette.ink,
                         '--edge': palette.edge,
                         '--glow': palette.glow,
-                      }
-                    : ({} as React.CSSProperties)
+                      } as React.CSSProperties & Record<string, string>)
+                    : undefined
                 }
               >
                 {withGlare && <div className="feature-glare"></div>}

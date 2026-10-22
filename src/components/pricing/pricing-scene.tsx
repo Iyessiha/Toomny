@@ -447,7 +447,7 @@ export function PricingScene({ plans, locale }: { plans: Plan[]; locale: string 
                 '--ink': color.ink,
                 '--edge': color.edge,
                 '--glow': color.glow,
-              } as React.CSSProperties}
+              } as React.CSSProperties & Record<string, string>}
             >
               <article className="pricing-card">
                 <div className="pricing-glare"></div>
