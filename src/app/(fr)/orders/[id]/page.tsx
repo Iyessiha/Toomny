@@ -13,6 +13,8 @@ import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
 import { MessageSection } from "@/components/orders/message-section";
 import { PayButton } from "@/components/orders/pay-button";
+import { CheckPaymentButton } from "@/components/orders/check-payment-button";
+import { checkOrderPayment } from "../actions";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
@@ -83,6 +85,17 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                   <PayButton
                     orderId={order.id}
                     labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
+                  />
+                  <CheckPaymentButton
+                    orderId={order.id}
+                    action={checkOrderPayment}
+                    labels={{
+                      checkPayment: t.checkPayment,
+                      checkingPayment: t.checkingPayment,
+                      checkPending: t.checkPending,
+                      checkFailed: t.checkFailed,
+                      checkError: t.checkError,
+                    }}
                   />
                 </div>
               </div>

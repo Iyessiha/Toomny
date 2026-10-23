@@ -13,8 +13,26 @@ import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { recordCompletion, refreshProviderRating } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
 import { actorName } from "@/lib/names";
+import { confirmOrderPayment, type PaymentCheck } from "@/lib/payments/confirm-order-payment";
 
 type Result = { error: string } | { success: true; orderId?: string };
+
+/**
+ * Le client demande à Toomny de vérifier son paiement auprès de GeniusPay, sans attendre le webhook.
+ */
+export async function checkOrderPayment(orderId: string): Promise<{ status: PaymentCheck | "error" }> {
+  const user = await requireAuth();
+  if (!UUID_RE.test(orderId)) return { status: "error" };
+
+  try {
+    const status = await confirmOrderPayment(orderId, user.id);
+    revalidatePath(`/orders/${orderId}`);
+    return { status };
+  } catch (err) {
+    console.error("[orders:checkPayment]", (err as Error).message);
+    return { status: "error" };
+  }
+}
 
 /**
  * Commander une prestation. La commande est figée au prix du moment (montants
