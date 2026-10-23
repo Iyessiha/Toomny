@@ -142,7 +142,7 @@ export default async function SupportPage({
           <Notice tone="info" title={t.newReplyTitle}>{t.newReplyBody}</Notice>
         </div>
       )}
-      <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr] lg:grid-rows-[minmax(0,1fr)]">
         <div className={`${selectedParam || newMode ? "hidden lg:flex" : "flex"} min-h-0 flex-col gap-4`}>
           {readiness && <ReadinessChecklist readiness={readiness.readiness} locale={locale} />}
           <ConversationList

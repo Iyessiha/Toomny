@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { ConversationList, type ConversationItem } from "@/components/messaging/conversation-list";
 import { ConversationPane, type PaneRequest } from "@/components/messaging/conversation-pane";
-import { ReadinessChecklist } from "@/components/messaging/readiness-checklist";
+import type { Readiness } from "@/lib/account-readiness";
 import { formatSubmittedAt } from "@/i18n/auth";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
@@ -103,7 +103,7 @@ export default async function AdminSupportPage({
 
   let pane: PaneRequest | null = null;
   let messages: ReturnType<typeof buildThread> = [];
-  let readinessNode: React.ReactNode = undefined;
+  let readiness: Readiness | undefined = undefined;
   if (selected) {
     const isClosed = selected.status === "closed";
     pane = {
@@ -119,17 +119,7 @@ export default async function AdminSupportPage({
     };
     messages = buildThread(selected as RawRequest, attachments, urls, (iso) => formatSubmittedAt(iso, locale));
     const requester = await readinessForUser(db, selected.profile_id);
-    if (requester)
-      readinessNode = (
-        <ReadinessChecklist
-          readiness={requester.readiness}
-          locale={locale}
-          viewer="team"
-          collapsible
-          notifyAction={notifyRequesterMissing}
-          requestId={selected.id}
-        />
-      );
+    readiness = requester?.readiness;
   }
 
   return (
@@ -141,7 +131,7 @@ export default async function AdminSupportPage({
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/support")}
     >
-      <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr] lg:grid-rows-[minmax(0,1fr)]">
         <ConversationList
           items={items}
           selectedId={selected?.id ?? null}
@@ -163,7 +153,8 @@ export default async function AdminSupportPage({
             draftAction={draftSupportReply}
             analyzeAction={analyzeRequesterAccount}
             reopenAction={reopenSupportRequest}
-            readinessPanel={readinessNode}
+            readiness={readiness}
+            notifyAction={notifyRequesterMissing}
           />
         ) : (
           <div className="flex items-center justify-center rounded-2xl border border-dashed border-[var(--border)] p-10 text-sm text-[var(--subtle)]">
