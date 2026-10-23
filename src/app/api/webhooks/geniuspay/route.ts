@@ -23,8 +23,16 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ ok: false, error: "signature invalide" }, { status: 400 });
   }
 
+  // Journal de réception : chaque notification du partenaire, pour diagnostiquer les paiements bloqués.
+  const db = createAdminClient();
+  await db.from("payment_webhook_log").insert({
+    partner: "geniuspay",
+    event: event.type,
+    reference: event.partnerHoldRef ?? null,
+    outcome: "received",
+  });
+
   if (event.type === "hold.held" && event.partnerHoldRef) {
-    const db = createAdminClient();
     const nowDate = new Date();
     const now = nowDate.toISOString();
 

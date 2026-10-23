@@ -5,6 +5,9 @@ import { paymentProvider } from "@/lib/payments/geniuspay";
 import { isSupportedCurrency } from "@/lib/money";
 import { UUID_RE } from "@/lib/orders";
 
+/** Une page de paiement encore récente est réutilisée : pas de seconde demande pour un même clic répété. */
+const CHECKOUT_REUSE_MS = 30 * 60 * 1000;
+
 export async function POST(request: Request): Promise<Response> {
   const supabase = await createClient();
   const {
@@ -50,7 +53,7 @@ export async function POST(request: Request): Promise<Response> {
   // créer une nouvelle ; un paiement déjà confirmé bloque tout nouvel essai.
   const { data: existingHolds } = await db
     .from("escrow_holds")
-    .select("id, status")
+    .select("id, status, checkout_url, created_at")
     .eq("order_id", orderId)
     .in("status", ["requested", "held"]);
   if (existingHolds?.some((h) => h.status === "held")) {
@@ -59,6 +62,16 @@ export async function POST(request: Request): Promise<Response> {
       { status: 409 },
     );
   }
+  const reusable = existingHolds?.find(
+    (h) =>
+      h.status === "requested" &&
+      h.checkout_url &&
+      Date.now() - new Date(h.created_at).getTime() < CHECKOUT_REUSE_MS,
+  );
+  if (reusable?.checkout_url) {
+    return NextResponse.json({ checkoutUrl: reusable.checkout_url });
+  }
+
   if (existingHolds && existingHolds.length > 0) {
     await db
       .from("escrow_holds")
@@ -103,6 +116,7 @@ export async function POST(request: Request): Promise<Response> {
     partner: holdResult.partner,
     partner_hold_ref: holdResult.partnerHoldRef,
     status: holdResult.status,
+    checkout_url: holdResult.checkoutUrl ?? null,
     amount_minor: order.client_charge_minor ?? order.amount_minor,
     currency: order.currency,
   });
