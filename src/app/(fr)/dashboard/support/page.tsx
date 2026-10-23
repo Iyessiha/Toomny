@@ -8,6 +8,7 @@ import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { SupportForm } from "@/components/dashboard/support-form";
 import { SupportSeenMarker } from "@/components/dashboard/support-conversation";
+import { Notice } from "@/components/dashboard/pro";
 import { ConversationList, type ConversationItem } from "@/components/messaging/conversation-list";
 import { ConversationPane, type PaneRequest } from "@/components/messaging/conversation-pane";
 import { ReadinessChecklist } from "@/components/messaging/readiness-checklist";
@@ -38,6 +39,8 @@ const copy = {
     answered: "Répondue",
     closed: "Résolue",
     unread: "Nouvelle réponse",
+    newReplyTitle: "L'équipe Toomny vous a répondu",
+    newReplyBody: "Ouvrez la conversation ci-dessous pour lire la réponse.",
     resolve: "Ma demande est résolue",
     from: "De",
   },
@@ -54,6 +57,8 @@ const copy = {
     answered: "Answered",
     closed: "Resolved",
     unread: "New reply",
+    newReplyTitle: "The Toomny team replied to you",
+    newReplyBody: "Open the conversation below to read the reply.",
     resolve: "My request is resolved",
     from: "From",
   },
@@ -131,6 +136,11 @@ export default async function SupportPage({
       navSections={dashboardNavSections(nav, user.role, "/dashboard/support")}
     >
       <SupportSeenMarker />
+      {items.some((i) => i.unread) && (
+        <div className="mb-4">
+          <Notice tone="info" title={t.newReplyTitle}>{t.newReplyBody}</Notice>
+        </div>
+      )}
       <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr]">
         <div className={`${selectedParam || newMode ? "hidden lg:flex" : "flex"} min-h-0 flex-col gap-4`}>
           {readiness && <ReadinessChecklist readiness={readiness.readiness} locale={locale} />}
