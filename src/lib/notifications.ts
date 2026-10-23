@@ -11,6 +11,7 @@ export const NOTIFICATION_TYPES = [
   "service_changes_requested",
   "order_payment_reminder",
   "order_funded",
+  "order_payment_confirmed",
   "order_payment_failed",
   "order_message",
   "order_started",

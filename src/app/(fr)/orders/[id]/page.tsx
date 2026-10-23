@@ -15,6 +15,8 @@ import { MessageSection } from "@/components/orders/message-section";
 import { PayButton } from "@/components/orders/pay-button";
 import { CheckPaymentButton } from "@/components/orders/check-payment-button";
 import { checkOrderPayment } from "../actions";
+import { ClientOrderSummary } from "@/components/orders/client-order-summary";
+import { resolveDisplayNames } from "@/lib/names";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
@@ -36,10 +38,15 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const supabase = await createClient();
   const { data: order } = await supabase
     .from("orders")
-    .select("id, reference, status, amount_minor, client_charge_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
+    .select("id, reference, status, amount_minor, collect_fee_minor, client_charge_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
     .eq("id", id)
     .maybeSingle();
   if (!order) notFound();
+
+  const priceAmount = BigInt(order.amount_minor);
+  const feeMinor = order.collect_fee_minor != null ? BigInt(order.collect_fee_minor) : BigInt(0);
+  const totalMinor = order.client_charge_minor != null ? BigInt(order.client_charge_minor) : priceAmount + feeMinor;
+  const providerName = (await resolveDisplayNames([order.provider_id])).get(order.provider_id)?.short ?? "—";
 
   const { data: messages } = await supabase
     .from("messages")
@@ -100,6 +107,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
             </div>
+          )}
+          {isClient && (
+            <ClientOrderSummary
+              locale={locale}
+              orderId={order.id}
+              reference={order.reference}
+              status={order.status}
+              serviceTitle={(order.service as unknown as { title: string } | null)?.title ?? ""}
+              providerName={providerName}
+              createdAt={new Date(order.created_at)}
+              dueAt={order.due_at ? new Date(order.due_at) : null}
+              currency={order.currency}
+              priceMinor={BigInt(order.amount_minor)}
+              feeMinor={feeMinor}
+              totalMinor={totalMinor}
+            />
           )}
           <Section
             title={t.requirements}

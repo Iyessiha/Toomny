@@ -68,7 +68,7 @@ describe("toParams", () => {
 
 describe("isNotificationType", () => {
   it("accepte les 28 types et refuse le reste", () => {
-    expect(NOTIFICATION_TYPES).toHaveLength(28);
+    expect(NOTIFICATION_TYPES).toHaveLength(29);
     expect(isNotificationType("support_replied")).toBe(true);
     expect(isNotificationType("order_funded")).toBe(true);
     expect(isNotificationType("subscription_activated")).toBe(true);

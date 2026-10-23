@@ -1,7 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Locale } from "@/i18n/dictionaries";
 import { recordFunding } from "@/lib/order-ledger";
 import { notify } from "@/lib/notifications";
 import { fundedDueAt } from "@/lib/order-deadline";
+import { sendPaymentReceiptEmail } from "@/lib/email";
+import { loadReceipt, type Receipt } from "@/lib/receipt";
 
 /**
  * Marque le hold `held` puis finance la commande si elle attend encore son paiement.
@@ -38,14 +41,52 @@ export async function fundOrderFromHold(
   if (!funded) return false;
 
   await recordFunding(db, order);
-
-  await notify(db, {
-    recipientId: order.provider_id,
-    type: "order_funded",
-    params: { ref: order.reference },
-    link: `/orders/${order.id}`,
-  });
+  await notifyOrderPaid(db, order.id, order.client_id, order.provider_id, order.reference);
 
   console.info("[payments] commande financée:", order.id);
   return true;
+}
+
+/**
+ * Dans l'app, le client et le prestataire reçoivent chacun une notification.
+ * Par e-mail, chacun reçoit son message soigné : reçu détaillé pour le client,
+ * bouton « Démarrer » pour le prestataire. Le client n'a donc pas de second e-mail générique.
+ */
+async function notifyOrderPaid(
+  db: SupabaseClient,
+  orderId: string,
+  clientId: string,
+  providerId: string,
+  reference: string,
+): Promise<void> {
+  const link = `/orders/${orderId}`;
+  const params = { ref: reference };
+
+  await notify(db, { recipientId: clientId, type: "order_payment_confirmed", params, link, sendEmail: false });
+  await notify(db, { recipientId: providerId, type: "order_funded", params, link, sendEmail: false });
+
+  const receipt = await loadReceipt(db, orderId);
+  if (!receipt) return;
+
+  await sendReceiptTo(db, clientId, "client", receipt);
+  await sendReceiptTo(db, providerId, "provider", receipt);
+}
+
+async function sendReceiptTo(
+  db: SupabaseClient,
+  userId: string,
+  audience: "client" | "provider",
+  receipt: Receipt,
+): Promise<void> {
+  try {
+    const { data } = await db.auth.admin.getUserById(userId);
+    const user = data?.user;
+    if (!user?.email) return;
+    const meta = user.user_metadata as Record<string, unknown>;
+    const firstName = typeof meta?.first_name === "string" ? meta.first_name : "vous";
+    const locale: Locale = meta?.preferred_locale === "en" ? "en" : "fr";
+    await sendPaymentReceiptEmail({ to: user.email, audience, firstName, receipt, locale });
+  } catch (err) {
+    console.error("[payments:receipt]", audience, (err as Error).message);
+  }
 }
