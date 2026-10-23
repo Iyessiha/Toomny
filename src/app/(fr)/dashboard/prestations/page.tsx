@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
+import { hasAiAccess } from "@/lib/provider-assist";
+import { AiServicesPanel, AiUpsell } from "@/components/dashboard/ai-assist";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
@@ -41,14 +43,16 @@ export default async function PrestationsPage() {
   const c = copy[locale];
 
   const supabase = await createClient();
-  const [{ data: services, error: servicesError }, categories] = await Promise.all([
+  const [{ data: services, error: servicesError }, categories, { data: planRow }] = await Promise.all([
     supabase
       .from("services")
       .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, gallery_urls, tags, created_at")
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false }),
     getCategories(),
+    supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", user.id).maybeSingle(),
   ]);
+  const aiAccess = hasAiAccess(planRow?.plan, planRow?.plan_expires_at ?? null);
 
   const list = services ?? [];
 
@@ -102,6 +106,7 @@ export default async function PrestationsPage() {
           {t.newTitle}
         </Link>
       </div>
+      {aiAccess ? <AiServicesPanel locale={locale} /> : <div className="mb-6"><AiUpsell locale={locale} /></div>}
       <ServiceManage
         services={list}
         categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}

@@ -10,6 +10,9 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { PlanNudgeCard } from "@/components/dashboard/plan-nudge-card";
+import { planNudge, type PlanNudge } from "@/lib/plan-nudge";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -18,6 +21,7 @@ export default async function DashboardPage() {
   const user = await requireAuth();
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
+  const nudge = provider ? await getProviderPlanNudge(user.id) : null;
 
   return (
     <>
@@ -25,7 +29,7 @@ export default async function DashboardPage() {
         <OnboardingModal role={user.role} locale={user.preferredLocale} />
       )}
       {provider
-        ? <ProviderDashboard user={user} data={data} />
+        ? <ProviderDashboard user={user} data={data} nudge={nudge} />
         : <ClientDashboard user={user} data={data} />}
     </>
   );
@@ -33,12 +37,32 @@ export default async function DashboardPage() {
 
 // ─── Dashboard PRESTATAIRE ──────────────────────────────────────────────────
 
+/** Plan effectif et prestations actives du prestataire, pour le bandeau d'abonnement. */
+async function getProviderPlanNudge(userId: string): Promise<PlanNudge | null> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", userId).maybeSingle(),
+    supabase
+      .from("services")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", userId)
+      .not("status", "eq", "removed"),
+  ]);
+  return planNudge({
+    plan: profile?.plan,
+    expiresAt: profile?.plan_expires_at ?? null,
+    activeServices: count ?? 0,
+  });
+}
+
 function ProviderDashboard({
   user,
   data,
+  nudge,
 }: {
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
+  nudge: PlanNudge | null;
 }) {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
@@ -73,6 +97,8 @@ function ProviderDashboard({
         </Link>
       }
     >
+      {nudge && <PlanNudgeCard nudge={nudge} locale={locale} />}
+
       {/* ── KYC Banner ─────────────────────────────────────────────────── */}
       {!kycDone && !kycPending && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50">

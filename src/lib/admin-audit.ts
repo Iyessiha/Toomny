@@ -19,6 +19,7 @@ export type AdminAction =
   | "payout.requeue"
   | "plan.set"
   | "pixels.update"
+  | "support.reply"
   | "support.close";
 
 export type AdminAuditEntry = {

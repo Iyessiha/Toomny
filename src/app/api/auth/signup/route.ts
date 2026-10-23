@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { clientIp, emailFingerprint, verifyTurnstile } from "@/lib/request-security";
+import { LEAKED_PASSWORD_MESSAGE, isLeakedPassword } from "@/lib/password-leak";
 import { validateEmail, normalizePhone } from "@/lib/email-guard";
 import { LOCALE_COOKIE } from "@/i18n/locale-detection";
 import { sendConfirmEmail, sendWelcomeEmail } from "@/lib/email";
@@ -94,6 +95,10 @@ export async function POST(request: NextRequest) {
   if (!ipOk || !emailOk) return NextResponse.json({ error: m.rateLimited }, { status: 429 });
 
   if (!(await verifyTurnstile(token, ip))) return NextResponse.json({ error: m.captcha }, { status: 400 });
+
+  if (await isLeakedPassword(password)) {
+    return NextResponse.json({ error: LEAKED_PASSWORD_MESSAGE[locale] }, { status: 400 });
+  }
 
   // Validation email approfondie (async : DNS MX + blocklist)
   const emailError = await validateEmail(email);

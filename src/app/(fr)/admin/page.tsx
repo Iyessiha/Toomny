@@ -108,7 +108,8 @@ export default async function AdminPage() {
   const fmt = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "fr-FR");
 
   const queuedPayouts = c.queuedPayouts;
-  const todoTotal = c.pendingKyc + c.draftServices + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts;
+  const todoTotal =
+    c.pendingKyc + c.draftServices + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts + c.awaitingSupport;
 
   const orderDelta = deltaOf(s.trend.ordersLast7, s.trend.ordersPrev7, t.vsPrev);
   const volumeDelta = deltaOf(Number(s.trend.amountLast7), Number(s.trend.amountPrev7), t.vsPrev);
@@ -176,6 +177,13 @@ export default async function AdminPage() {
             hint={fill(t.todoPayoutsHint, { q: queuedPayouts, f: c.failedPayouts })}
             openLabel={t.open}
             urgent={c.failedPayouts > 0}
+          />
+          <TodoCard
+            href="/admin/support"
+            label={t.todoSupport}
+            count={c.awaitingSupport}
+            hint={t.todoSupportHint}
+            openLabel={t.open}
           />
         </div>
       </Section>

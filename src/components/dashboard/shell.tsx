@@ -1,5 +1,6 @@
 "use client";
 
+import { PresenceHeartbeat } from "@/components/dashboard/presence-heartbeat";
 import { useState } from "react";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import Link from "next/link";
@@ -334,6 +335,7 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-dvh bg-[var(--surface)]">
+      <PresenceHeartbeat />
       {/* Sidebar desktop */}
       <aside className="hidden w-[220px] shrink-0 border-r border-[var(--border)] bg-[var(--background)] lg:fixed lg:inset-y-0 lg:flex lg:flex-col">
         <SidebarContent />

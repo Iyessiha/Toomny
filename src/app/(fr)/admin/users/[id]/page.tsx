@@ -42,7 +42,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     db.from("provider_profiles").select("headline, plan, plan_expires_at, rating_avg, rating_count, completed_orders").eq("profile_id", id).maybeSingle(),
     db.from("orders").select("id, reference, status, amount_minor, currency, created_at").eq("client_id", id).order("created_at", { ascending: false }).limit(20),
     db.from("orders").select("id, reference, status, amount_minor, currency, created_at").eq("provider_id", id).order("created_at", { ascending: false }).limit(20),
-    db.from("kyc_verifications").select("id, status, created_at, rejection_reason").eq("profile_id", id).order("created_at", { ascending: false }).limit(5),
+    db.from("verifications").select("id, status, created_at, rejection_reason").eq("profile_id", id).order("created_at", { ascending: false }).limit(5),
     db.from("payouts").select("id, order_id, amount_minor, currency, status, created_at").eq("provider_id", id).order("created_at", { ascending: false }).limit(20),
   ]);
 

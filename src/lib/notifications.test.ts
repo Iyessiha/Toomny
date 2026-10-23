@@ -1,4 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
+
+// Le module d'e-mail importe `server-only` : hors serveur, on le neutralise.
+vi.mock("server-only", () => ({}));
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   NOTIFICATION_TYPES,
@@ -64,8 +67,9 @@ describe("toParams", () => {
 });
 
 describe("isNotificationType", () => {
-  it("accepte les 18 types et refuse le reste", () => {
-    expect(NOTIFICATION_TYPES).toHaveLength(18);
+  it("accepte les 25 types et refuse le reste", () => {
+    expect(NOTIFICATION_TYPES).toHaveLength(25);
+    expect(isNotificationType("support_replied")).toBe(true);
     expect(isNotificationType("order_funded")).toBe(true);
     expect(isNotificationType("subscription_activated")).toBe(true);
     expect(isNotificationType("ORDER_FUNDED")).toBe(false);
