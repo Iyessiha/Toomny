@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
+import { AccountAdminPanel } from "@/components/admin/account-admin-panel";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
@@ -118,6 +119,11 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             <UserRoleManager userId={profile.id} currentRole={profile.role} locale={locale} />
           </div>
         </div>
+      </Section>
+
+      {/* Compte : lien de réinitialisation et adresse e-mail */}
+      <Section title={locale === "en" ? "Account access" : "Accès au compte"} className="mt-6">
+        <AccountAdminPanel userId={profile.id} email={profile.email ?? ""} />
       </Section>
 
       {/* KYC */}

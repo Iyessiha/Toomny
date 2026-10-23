@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { paymentProvider } from "@/lib/payments/geniuspay";
-import { recordFunding } from "@/lib/order-ledger";
+import { fundOrderFromHold } from "@/lib/payments/fund-hold";
 import { notify } from "@/lib/notifications";
 import { nextPeriodEnd } from "@/lib/plans";
 import { BOOST_PERIOD_MS } from "@/lib/boost";
 import { activeUntil } from "@/lib/period";
-import { fundedDueAt } from "@/lib/order-deadline";
 
 export const runtime = "nodejs";
 
@@ -139,37 +138,7 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json({ ok: true });
     }
 
-    await db
-      .from("escrow_holds")
-      .update({ status: "held", held_at: now })
-      .eq("id", hold.id);
-
-    const { data: order } = await db
-      .from("orders")
-      .select("id, status, reference, client_id, provider_id, amount_minor, currency, created_at, due_at")
-      .eq("id", hold.order_id)
-      .maybeSingle();
-
-    if (order?.status === "pending_payment") {
-      await db
-        .from("orders")
-        .update({ status: "funded", due_at: fundedDueAt(order, new Date(now)) })
-        .eq("id", order.id)
-        .eq("status", "pending_payment");
-
-      await recordFunding(db, order);
-
-      await notify(db, {
-        recipientId: order.provider_id,
-        type: "order_funded",
-        params: { ref: order.reference },
-        link: `/orders/${order.id}`,
-      });
-
-      console.info("[webhook:geniuspay] commande financée:", order.id);
-    } else {
-      console.warn("[webhook:geniuspay] commande pas en pending_payment:", hold.order_id, order?.status);
-    }
+    await fundOrderFromHold(db, hold, now);
   }
 
   if (event.type === "hold.failed" && event.partnerHoldRef) {
