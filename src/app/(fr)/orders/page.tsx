@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Pill, TableCard, orderTone } from "@/components/dashboard/pro";
+import { getReceiptTexts } from "@/i18n/receipt";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
@@ -21,6 +22,7 @@ export default async function OrdersPage() {
   const user = await requireAuth();
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
+  const receiptText = getReceiptTexts(locale);
   const supabase = await createClient();
   const { data } = await supabase
     .from("orders")
@@ -70,7 +72,11 @@ export default async function OrdersPage() {
                     {providerSide ? t.orders.asProvider : t.orders.asClient}
                   </td>
                   <td>
-                    <Pill tone={orderTone(o.status)}>{t.status[o.status] ?? o.status}</Pill>
+                    <Pill tone={orderTone(o.status)}>
+                      {providerSide
+                        ? (t.status[o.status] ?? o.status)
+                        : (receiptText.badge[o.status as keyof typeof receiptText.badge] ?? o.status)}
+                    </Pill>
                   </td>
                   <td className="text-right font-display font-bold">
                     {formatMoney(BigInt(amount), o.currency, locale)}

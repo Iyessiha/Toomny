@@ -65,6 +65,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     { data: profile },
     { data: services },
     { data: reviews },
+    { data: statsRow },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
     supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages").eq("profile_id", id).maybeSingle(),
@@ -76,6 +77,11 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .order("created_at", { ascending: false })
       .limit(24),
     supabase.from("reviews").select("id, rating, comment, created_at, author_id").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
+    supabase
+      .from("provider_order_stats")
+      .select("orders_received, orders_completed, reviews_count, stars_5, stars_4, stars_3, stars_2, stars_1")
+      .eq("provider_id", id)
+      .maybeSingle(),
   ]);
 
   // Fallback : si le prestataire n'est pas dans la vue (role mal assigné),
@@ -136,6 +142,20 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     return found && found !== "—" ? found : t.verifiedClient;
   }
   const avg = profile?.rating_avg ? Number(profile.rating_avg) : null;
+  const stats = {
+    ordersReceived: Number(statsRow?.orders_received ?? 0),
+    ordersCompleted: Number(statsRow?.orders_completed ?? 0),
+    reviewsCount: Number(statsRow?.reviews_count ?? 0),
+    stars: [
+      { value: 5, count: Number(statsRow?.stars_5 ?? 0) },
+      { value: 4, count: Number(statsRow?.stars_4 ?? 0) },
+      { value: 3, count: Number(statsRow?.stars_3 ?? 0) },
+      { value: 2, count: Number(statsRow?.stars_2 ?? 0) },
+      { value: 1, count: Number(statsRow?.stars_1 ?? 0) },
+    ],
+  };
+  const satisfiedCount = (statsRow?.stars_5 ?? 0) + (statsRow?.stars_4 ?? 0);
+  const satisfaction = stats.reviewsCount > 0 ? Math.round((Number(satisfiedCount) / stats.reviewsCount) * 100) : null;
   const initials = (person.display_name ?? "P").slice(0, 2).toUpperCase();
   const isVerified = person.verification_status === "verified";
 
@@ -216,9 +236,9 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-[var(--subtle)]">{t.missions}</dt>
+                <dt className="text-xs text-[var(--subtle)]">{t.ordersReceived}</dt>
                 <dd className="mt-0.5 font-display text-xl font-extrabold">
-                  {profile?.completed_orders ?? 0}
+                  {stats.ordersReceived}
                 </dd>
               </div>
             </dl>
@@ -315,6 +335,60 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               ))}
             </ul>
           )}
+        </section>
+
+        {/* Activité et avis : compteurs publics, satisfaction et répartition des étoiles */}
+        <section aria-labelledby="provider-activity" className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.1fr]">
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <h2 id="provider-activity" className="font-display text-xl font-bold">{t.activityTitle}</h2>
+            {stats.ordersReceived === 0 && <p className="mt-2 text-sm text-[var(--subtle)]">{t.noActivity}</p>}
+            <dl className="mt-6 grid grid-cols-2 gap-5">
+              <div>
+                <dt className="text-xs text-[var(--subtle)]">{t.ordersReceived}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold">{stats.ordersReceived}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-[var(--subtle)]">{t.ordersCompleted}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold">{stats.ordersCompleted}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-[var(--subtle)]">{t.reviewsCount}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold">{stats.reviewsCount}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-[var(--subtle)]">{t.satisfaction}</dt>
+                <dd className="mt-1 font-display text-2xl font-extrabold">
+                  {satisfaction !== null ? `${satisfaction}%` : "—"}
+                </dd>
+                <dd className="mt-0.5 text-xs text-[var(--subtle)]">{t.satisfactionLabel}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <h3 className="font-display text-base font-bold">{t.starsTitle}</h3>
+            {stats.reviewsCount === 0 ? (
+              <p className="mt-4 text-sm text-[var(--subtle)]">{t.noReviewsList}</p>
+            ) : (
+              <ul className="mt-5 space-y-3">
+                {stats.stars.map((star) => {
+                  const share = Math.round((star.count / stats.reviewsCount) * 100);
+                  return (
+                    <li key={star.value} className="grid grid-cols-[3.5rem_1fr_3rem] items-center gap-3 text-sm">
+                      <span className="font-semibold">★ {star.value}</span>
+                      <span className="h-2.5 overflow-hidden rounded-full bg-[var(--border)]" aria-hidden="true">
+                        <span
+                          className="block h-full rounded-full bg-[var(--color-brand-500)]"
+                          style={{ width: `${share}%` }}
+                        />
+                      </span>
+                      <span className="text-right text-[var(--subtle)]">{star.count}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </section>
 
         {/* Avis */}

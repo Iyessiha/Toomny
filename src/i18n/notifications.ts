@@ -69,6 +69,11 @@ const fr = {
       body: (p) =>
         `La commande ${p.ref ?? ""} est financée : le paiement est séquestré, vous pouvez démarrer.`,
     },
+    order_payment_confirmed: {
+      title: "Paiement confirmé",
+      body: (p) =>
+        `Votre paiement pour la commande ${p.ref ?? ""} est confirmé. Le prestataire peut démarrer, votre reçu est disponible.`,
+    },
     order_payment_failed: {
       title: "Paiement refusé",
       body: (p) =>
@@ -235,6 +240,11 @@ const en: typeof fr = {
       title: "Order paid",
       body: (p) =>
         `Order ${p.ref ?? ""} is funded: the payment is held in escrow, you can start.`,
+    },
+    order_payment_confirmed: {
+      title: "Payment confirmed",
+      body: (p) =>
+        `Your payment for order ${p.ref ?? ""} is confirmed. The provider can start, your receipt is available.`,
     },
     order_payment_failed: {
       title: "Payment declined",
