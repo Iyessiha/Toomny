@@ -38,7 +38,7 @@ export function ConversationList({
   hidden?: boolean;
 }) {
   return (
-    <aside className={`${hidden ? "hidden lg:flex" : "flex"} min-h-0 flex-col rounded-2xl border border-[var(--border)] bg-[var(--background)]`}>
+    <aside className={`${hidden ? "hidden lg:flex" : "flex"} min-h-0 flex-col rounded-2xl border border-[var(--border)] bg-[var(--background)] lg:h-full`}>
       {newHref && newLabel && (
         <div className="border-b border-[var(--border)] p-3">
           <Link href={newHref} className="btn-primary btn-sm w-full justify-center">

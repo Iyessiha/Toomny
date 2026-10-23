@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ATTACHMENTS_PER_MESSAGE, validateAttachment } from "@/lib/support-attachments";
 import { SUPPORT_REPLY_MAX } from "@/lib/support-replies";
+import type { Readiness, ReadinessCheck } from "@/lib/account-readiness";
 
 export type PaneRole = "admin" | "requester";
 
@@ -57,6 +58,15 @@ type Copy = {
   analyzeHint: string;
   reopen: string;
   archived: string;
+  teamTitle: string;
+  canPublish: string;
+  cannotPublish: string;
+  sendItem: string;
+  sentItem: string;
+  notifyAccount: string;
+  notifyAccountHint: string;
+  missingBody: (label: string, hint: string) => string;
+  allDone: string;
   closeConfirm: string;
   closedNotice: string;
   back: string;
@@ -89,6 +99,15 @@ const copy: Record<"fr" | "en", Copy> = {
     analyzeHint: "Recommandations rédigées à partir du compte du demandeur. Relisez-les avant d'envoyer au prestataire.",
     reopen: "Rouvrir la conversation",
     archived: "Le texte de cette conversation a été archivé après 90 jours : elle ne peut plus être rouverte.",
+    teamTitle: "Compte du demandeur",
+    canPublish: "Peut publier",
+    cannotPublish: "Ne peut pas encore publier",
+    sendItem: "Envoyer dans la conversation",
+    sentItem: "Message envoyé au demandeur.",
+    notifyAccount: "Notifier le prestataire des éléments manquants",
+    notifyAccountHint: "Il reçoit une notification et un e-mail avec la liste.",
+    missingBody: (label, hint) => `Pour publier vos prestations, il vous reste à compléter : ${label}. ${hint}`,
+    allDone: "Rien à compléter sur ce compte.",
     closeConfirm: "Clôturer cette demande ? Les captures d'écran seront supprimées.",
     closedNotice: "Cette demande est résolue. Les captures d'écran ont été supprimées.",
     back: "Retour aux conversations",
@@ -119,6 +138,15 @@ const copy: Record<"fr" | "en", Copy> = {
     analyzeHint: "Recommendations drafted from the requester's account. Review them before sending to the provider.",
     reopen: "Reopen the conversation",
     archived: "This conversation's text was archived after 90 days: it can no longer be reopened.",
+    teamTitle: "Requester's account",
+    canPublish: "Can publish",
+    cannotPublish: "Cannot publish yet",
+    sendItem: "Send in the conversation",
+    sentItem: "Message sent to the requester.",
+    notifyAccount: "Notify the provider of the missing items",
+    notifyAccountHint: "They receive a notification and an email with the list.",
+    missingBody: (label, hint) => `To publish your services, you still need to complete: ${label}. ${hint}`,
+    allDone: "Nothing to complete on this account.",
     closeConfirm: "Close this request? Screenshots will be deleted.",
     closedNotice: "This request is resolved. Screenshots have been deleted.",
     back: "Back to conversations",
@@ -151,7 +179,8 @@ export function ConversationPane({
   draftAction,
   analyzeAction,
   reopenAction,
-  readinessPanel,
+  readiness,
+  notifyAction,
 }: {
   viewer: PaneRole;
   locale: "fr" | "en";
@@ -164,7 +193,8 @@ export function ConversationPane({
   draftAction?: (requestId: string) => Promise<{ text: string } | { error: string }>;
   analyzeAction?: (requestId: string) => Promise<{ text: string } | { error: string }>;
   reopenAction?: (formData: FormData) => Promise<void>;
-  readinessPanel?: React.ReactNode;
+  readiness?: Readiness;
+  notifyAction?: (formData: FormData) => Promise<void>;
 }) {
   const t = copy[locale];
   const router = useRouter();
@@ -247,6 +277,27 @@ export function ConversationPane({
     });
   }
 
+  /** Envoie directement dans la conversation un message décrivant un élément manquant. */
+  async function sendMissingItem(check: ReadinessCheck) {
+    if (sending) return;
+    setSending(true);
+    setError(null);
+    setNotice(null);
+    const fd = new FormData();
+    fd.append("requestId", request.id);
+    fd.append("body", t.missingBody(check.label, check.hint));
+    fd.append("attachmentIds", "");
+    fd.append("quoteRole", "");
+    fd.append("quoteBody", "");
+    const result = await sendAction(fd);
+    setSending(false);
+    if ("error" in result) setError(result.error);
+    else {
+      setNotice(t.sentItem);
+      router.refresh();
+    }
+  }
+
   async function send(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (sending || uploading || text.trim() === "") return;
@@ -287,7 +338,7 @@ export function ConversationPane({
   }
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]">
+    <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] lg:h-full">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] p-4">
         <div className="min-w-0">
           <Link href={backHref} className="mb-1 inline-block text-xs font-medium text-[var(--subtle)] hover:text-[var(--foreground)] lg:hidden">
@@ -321,7 +372,47 @@ export function ConversationPane({
         </div>
       </header>
 
-      {readinessPanel && <div className="shrink-0 border-b border-[var(--border)] p-3">{readinessPanel}</div>}
+      {viewer === "admin" && readiness && (
+        <details className="shrink-0 border-b border-[var(--border)] p-3">
+          <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-sm">
+            <span className="font-semibold">{t.teamTitle}</span>
+            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${readiness.canPublish ? TONE.success : TONE.warning}`}>
+              {readiness.canPublish ? t.canPublish : t.cannotPublish}
+            </span>
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {readiness.checks.map((c) => (
+              <li key={c.key} className="flex items-start justify-between gap-3 text-sm">
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    <span aria-hidden className="mr-1.5">{c.ok ? "✓" : "·"}</span>
+                    {c.label}
+                  </p>
+                  {!c.ok && <p className="text-xs text-[var(--subtle)]">{c.hint}</p>}
+                </div>
+                {!c.ok && (
+                  <button
+                    type="button"
+                    disabled={sending}
+                    onClick={() => void sendMissingItem(c)}
+                    className="btn-ghost btn-sm shrink-0"
+                  >
+                    {t.sendItem}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {readiness.missing.length === 0 && <p className="mt-3 text-xs text-[var(--subtle)]">{t.allDone}</p>}
+          {notifyAction && readiness.missing.length > 0 && (
+            <form action={notifyAction} className="mt-4 flex flex-wrap items-center gap-2">
+              <input type="hidden" name="requestId" value={request.id} />
+              <button type="submit" className="btn-primary btn-sm">{t.notifyAccount}</button>
+              <span className="text-[11px] text-[var(--subtle)]">{t.notifyAccountHint}</span>
+            </form>
+          )}
+        </details>
+      )}
 
       <div ref={scroller} className="min-h-[260px] flex-1 space-y-4 overflow-y-auto bg-[var(--surface)] p-4 lg:min-h-0">
         {messages.map((m) => {
