@@ -20,6 +20,10 @@
     {
       "path": "/api/cron/support-retention",
       "schedule": "45 4 * * *"
+    },
+    {
+      "path": "/api/cron/order-payment-reminders",
+      "schedule": "0 9 * * *"
     }
   ]
 }

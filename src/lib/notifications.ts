@@ -9,6 +9,7 @@ export const NOTIFICATION_TYPES = [
   "support_replied",
   "account_missing",
   "service_changes_requested",
+  "order_payment_reminder",
   "order_funded",
   "order_payment_failed",
   "order_message",

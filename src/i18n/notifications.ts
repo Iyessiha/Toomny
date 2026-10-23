@@ -39,6 +39,13 @@ const fr = {
       title: "Nouvelle réponse",
       body: (p) => `${p.from ?? "Un membre"} a répondu à votre message.`,
     },
+    order_payment_reminder: {
+      title: "Votre commande attend le paiement",
+      body: (p) =>
+        p.ref
+          ? `La commande ${p.ref} n'est pas encore lancée. Payez-la pour que le prestataire démarre.`
+          : "Une de vos commandes n'est pas encore lancée. Payez-la pour que le prestataire démarre.",
+    },
     service_changes_requested: {
       title: "Prestation à corriger",
       body: (p) =>
@@ -198,6 +205,13 @@ const en: typeof fr = {
     inquiry_replied: {
       title: "New reply",
       body: (p) => `${p.from ?? "A member"} replied to your message.`,
+    },
+    order_payment_reminder: {
+      title: "Your order is awaiting payment",
+      body: (p) =>
+        p.ref
+          ? `Order ${p.ref} has not started yet. Pay it so the provider can start.`
+          : "One of your orders has not started yet. Pay it so the provider can start.",
     },
     service_changes_requested: {
       title: "Service to correct",
