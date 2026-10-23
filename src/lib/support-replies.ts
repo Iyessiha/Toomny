@@ -42,3 +42,18 @@ export function buildSupportDraftPrompt(input: {
   ].join("\n");
   return { system: DRAFT_SYSTEM, user };
 }
+
+/**
+ * Faut-il envoyer un e-mail pour un nouveau message ? Oui seulement si le
+ * destinataire a ouvert la conversation après le dernier message précédent
+ * (ou si c'est le premier). Une rafale de messages non lus ne produit donc
+ * qu'un seul e-mail : c'est ce qui limite la consommation du quota d'envoi.
+ */
+export function shouldEmailRecipient(input: {
+  lastMessageAt: string | null;
+  recipientSeenAt: string | null;
+}): boolean {
+  if (!input.lastMessageAt) return true;
+  if (!input.recipientSeenAt) return true;
+  return new Date(input.recipientSeenAt).getTime() >= new Date(input.lastMessageAt).getTime();
+}

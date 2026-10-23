@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SUPPORT_REPLY_MAX, buildSupportDraftPrompt, validateSupportReply } from "./support-replies";
+import { SUPPORT_REPLY_MAX, buildSupportDraftPrompt, shouldEmailRecipient, validateSupportReply } from "./support-replies";
 
 describe("validateSupportReply", () => {
   it("rejette une réponse vide ou composée d'espaces", () => {
@@ -40,5 +40,35 @@ describe("buildSupportDraftPrompt", () => {
   it("interdit les promesses de remboursement dans le brief système", () => {
     const { system } = buildSupportDraftPrompt({ subject: "s", body: "b", role: "client", locale: "en" });
     expect(system).toMatch(/remboursement/);
+  });
+});
+
+describe("shouldEmailRecipient", () => {
+  it("envoie le premier message", () => {
+    expect(shouldEmailRecipient({ lastMessageAt: null, recipientSeenAt: null })).toBe(true);
+  });
+
+  it("envoie si le destinataire n'a jamais ouvert la conversation", () => {
+    expect(
+      shouldEmailRecipient({ lastMessageAt: "2026-10-23T10:00:00Z", recipientSeenAt: null }),
+    ).toBe(true);
+  });
+
+  it("n'envoie pas une seconde fois tant que le destinataire n'a pas ouvert", () => {
+    expect(
+      shouldEmailRecipient({
+        lastMessageAt: "2026-10-23T10:00:00Z",
+        recipientSeenAt: "2026-10-23T09:00:00Z",
+      }),
+    ).toBe(false);
+  });
+
+  it("renvoie un e-mail après une nouvelle ouverture", () => {
+    expect(
+      shouldEmailRecipient({
+        lastMessageAt: "2026-10-23T10:00:00Z",
+        recipientSeenAt: "2026-10-23T11:00:00Z",
+      }),
+    ).toBe(true);
   });
 });

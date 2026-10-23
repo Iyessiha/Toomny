@@ -19,45 +19,43 @@ export const dynamic = "force-dynamic";
 const copy = {
   fr: {
     title: "Demandes de contact",
-    subtitle: "Messages envoyés par les prestataires et clients depuis « Contacter Toomny ». Répondez ici : le demandeur est notifié.",
-    open: "En cours",
-    answered: "Répondue",
+    subtitle: "Conversations avec les prestataires et clients. Répondez ici : le message arrive dans leur espace, un e-mail part seulement si nécessaire.",
+    toAnswer: "À répondre",
+    waitingRequester: "En attente du demandeur",
     closed: "Traitée",
     close: "Marquer traitée",
     emptyTitle: "Aucune demande",
     emptyBody: "Les demandes de contact apparaîtront ici.",
     from: "De",
     received: "Reçue le",
-    history: "Échanges",
-    teamLabel: "Équipe Toomny",
-    placeholder: "Votre réponse au demandeur…",
+    team: "Équipe Toomny",
+    placeholder: "Votre réponse…",
     draft: "Rédiger avec l'IA",
     drafting: "Rédaction…",
     send: "Envoyer la réponse",
     sending: "Envoi…",
     draftHint: "Brouillon généré. Relisez-le et modifiez-le avant d'envoyer : rien n'est envoyé automatiquement.",
-    sent: "Réponse envoyée. Le demandeur a été notifié.",
+    sent: "Réponse envoyée.",
   },
   en: {
     title: "Contact requests",
-    subtitle: "Messages sent by providers and clients from “Contact Toomny”. Reply here: the requester is notified.",
-    open: "Open",
-    answered: "Replied",
+    subtitle: "Conversations with providers and clients. Reply here: the message appears in their space, an email is sent only when needed.",
+    toAnswer: "To answer",
+    waitingRequester: "Waiting for requester",
     closed: "Closed",
     close: "Mark as closed",
     emptyTitle: "No requests",
     emptyBody: "Contact requests will appear here.",
     from: "From",
     received: "Received on",
-    history: "Exchanges",
-    teamLabel: "Toomny team",
-    placeholder: "Your reply to the requester…",
+    team: "Toomny team",
+    placeholder: "Your reply…",
     draft: "Draft with AI",
     drafting: "Drafting…",
     send: "Send reply",
     sending: "Sending…",
     draftHint: "Draft generated. Review and edit it before sending: nothing is sent automatically.",
-    sent: "Reply sent. The requester has been notified.",
+    sent: "Reply sent.",
   },
 } as const;
 
@@ -70,15 +68,23 @@ export default async function AdminSupportPage() {
   const { data: rows } = await db
     .from("support_requests")
     .select(
-      "id, subject, body, status, created_at, replied_at, profile:profiles(display_name, email, role), replies:support_replies(id, body, created_at)",
+      "id, subject, body, status, created_at, awaiting_admin, profile:profiles(display_name, email, role), replies:support_replies(id, body, created_at, author_role)",
     )
     .order("created_at", { ascending: false })
     .limit(100);
 
   const list = (rows ?? []).map((r) => {
     const profile = Array.isArray(r.profile) ? r.profile[0] : r.profile;
-    const replies = [...(r.replies ?? [])].sort((a, b) => a.created_at.localeCompare(b.created_at));
-    return { ...r, profile, replies };
+    const thread = [
+      { id: `req-${r.id}`, role: "requester" as const, body: r.body, at: r.created_at },
+      ...(r.replies ?? []).map((reply) => ({
+        id: reply.id,
+        role: reply.author_role as "admin" | "requester",
+        body: reply.body,
+        at: reply.created_at,
+      })),
+    ].sort((a, b) => a.at.localeCompare(b.at));
+    return { ...r, profile, thread };
   });
 
   return (
@@ -100,16 +106,17 @@ export default async function AdminSupportPage() {
             const isClosed = r.status === "closed";
             const pill = isClosed
               ? { tone: "neutral" as const, label: t.closed }
-              : r.replied_at
-                ? { tone: "success" as const, label: t.answered }
-                : { tone: "warning" as const, label: t.open };
+              : r.awaiting_admin
+                ? { tone: "warning" as const, label: t.toAnswer }
+                : { tone: "neutral" as const, label: t.waitingRequester };
+            const requesterName = r.profile?.display_name ?? "—";
             return (
               <article key={r.id} className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold">{r.subject}</p>
                     <p className="mt-0.5 text-xs text-[var(--subtle)]">
-                      {t.from} : {r.profile?.display_name ?? "—"} · {r.profile?.email} · {t.received}{" "}
+                      {t.from} : {requesterName} · {r.profile?.email} · {t.received}{" "}
                       {formatSubmittedAt(r.created_at, locale)}
                     </p>
                   </div>
@@ -124,23 +131,22 @@ export default async function AdminSupportPage() {
                   </div>
                 </div>
 
-                <p className="mt-3 whitespace-pre-line rounded-xl bg-[var(--surface)] p-3 text-sm">{r.body}</p>
-
-                {r.replies.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{t.history}</p>
-                    <ul className="mt-2 space-y-2">
-                      {r.replies.map((reply) => (
-                        <li key={reply.id} className="rounded-xl border border-[var(--border)] p-3 text-sm">
-                          <p className="text-[11px] text-[var(--subtle)]">
-                            {t.teamLabel} · {formatSubmittedAt(reply.created_at, locale)}
-                          </p>
-                          <p className="mt-1 whitespace-pre-line">{reply.body}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <ul className="mt-4 space-y-2">
+                  {r.thread.map((m) => {
+                    const fromTeam = m.role === "admin";
+                    return (
+                      <li
+                        key={m.id}
+                        className={`rounded-xl p-3 text-sm ${fromTeam ? "ml-6 border border-[var(--border)]" : "mr-6 bg-[var(--surface)]"}`}
+                      >
+                        <p className="text-[11px] text-[var(--subtle)]">
+                          {fromTeam ? t.team : requesterName} · {formatSubmittedAt(m.at, locale)}
+                        </p>
+                        <p className="mt-1 whitespace-pre-line">{m.body}</p>
+                      </li>
+                    );
+                  })}
+                </ul>
 
                 {!isClosed && (
                   <SupportReplyForm

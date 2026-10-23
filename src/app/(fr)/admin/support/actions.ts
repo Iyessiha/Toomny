@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
 import { UUID_RE } from "@/lib/orders";
-import { validateSupportReply, type SupportLocale } from "@/lib/support-replies";
+import { shouldEmailRecipient, validateSupportReply, type SupportLocale } from "@/lib/support-replies";
 import { generateSupportDraft } from "@/lib/ai/support-draft";
 
 /** Marque une demande de contact comme traitée. Action journalisée. */
@@ -35,8 +35,9 @@ export async function closeSupportRequest(formData: FormData): Promise<void> {
 }
 
 /**
- * Envoie une réponse à une demande : enregistrée, notifiée au demandeur
- * (in-app et e-mail), puis journalisée. Refusée si la demande est déjà close.
+ * Envoie une réponse de l'équipe dans la conversation. Le demandeur est notifié
+ * dans l'application ; l'e-mail n'part que s'il n'a pas déjà un message non lu
+ * (voir shouldEmailRecipient). Journalisé. Refusé si la demande est close.
  */
 export async function replySupportRequest(
   formData: FormData,
@@ -51,15 +52,24 @@ export async function replySupportRequest(
   const db = createAdminClient();
   const { data: request } = await db
     .from("support_requests")
-    .select("id, profile_id, status")
+    .select("id, profile_id, status, requester_seen_at")
     .eq("id", id)
     .maybeSingle();
   if (!request) return { error: "Demande introuvable." };
   if (request.status === "closed") return { error: "Cette demande est déjà traitée." };
 
+  const { data: previous } = await db
+    .from("support_replies")
+    .select("created_at")
+    .eq("request_id", id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const { error: insertError } = await db.from("support_replies").insert({
     request_id: id,
     author_id: admin.id,
+    author_role: "admin",
     body: parsed.body,
   });
   if (insertError) {
@@ -67,10 +77,9 @@ export async function replySupportRequest(
     return { error: "L'envoi de la réponse a échoué. Réessayez." };
   }
 
-  const repliedAt = new Date().toISOString();
   const { error: updateError } = await db
     .from("support_requests")
-    .update({ replied_at: repliedAt })
+    .update({ replied_at: new Date().toISOString(), awaiting_admin: false })
     .eq("id", id);
   if (updateError) console.error("replySupportRequest update:", updateError.message);
 
@@ -78,6 +87,10 @@ export async function replySupportRequest(
     recipientId: request.profile_id,
     type: "support_replied",
     link: "/dashboard/support",
+    sendEmail: shouldEmailRecipient({
+      lastMessageAt: previous?.created_at ?? null,
+      recipientSeenAt: request.requester_seen_at ?? null,
+    }),
   });
 
   await recordAdminAction(db, {

@@ -14,7 +14,7 @@ export type AdminCounts = {
   overdueOrders: number;
   queuedPayouts: number;
   failedPayouts: number;
-  /** Demandes de contact ouvertes, sans réponse de l'équipe. */
+  /** Demandes de contact ouvertes dont le dernier message attend l'équipe. */
   awaitingSupport: number;
 };
 
@@ -38,7 +38,7 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
       db.from("orders").select("id", head).in("status", ["funded", "in_progress"]).lt("due_at", nowIso),
       db.from("payouts").select("id", head).in("status", ["queued", "processing"]),
       db.from("payouts").select("id", head).eq("status", "failed"),
-      db.from("support_requests").select("id", head).eq("status", "open").is("replied_at", null),
+      db.from("support_requests").select("id", head).eq("status", "open").eq("awaiting_admin", true),
     ]);
 
   return {
