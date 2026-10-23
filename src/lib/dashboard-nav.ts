@@ -27,11 +27,11 @@ export function dashboardNavSections(
         items: markCurrent(
           [
             { href: "/dashboard", label: nav.overview },
-            { href: "/orders", label: nav.orders },
+            { href: "/orders", label: nav.orders, badgeKey: "orders" },
             { href: "/messages", label: nav.messages },
             { href: "/demandes", label: nav.inquiries },
             { href: "/disputes", label: nav.disputes },
-            { href: "/notifications", label: nav.notifications },
+            { href: "/notifications", label: nav.notifications, badgeKey: "notifications" },
             { href: "/dashboard/favoris", label: nav.wishlist },
           ],
           current,
@@ -41,7 +41,7 @@ export function dashboardNavSections(
         title: nav.sections.business,
         items: markCurrent(
           [
-            { href: "/dashboard/prestations", label: nav.services },
+            { href: "/dashboard/prestations", label: nav.services, badgeKey: "services" },
             { href: "/dashboard/versements", label: nav.payouts },
             { href: "/dashboard/plan", label: nav.plan },
             { href: "/dashboard/boost", label: nav.boost },
@@ -72,10 +72,10 @@ export function dashboardNavSections(
           { href: "/dashboard", label: nav.home },
           { href: "/services", label: nav.findProvider },
           { href: "/dashboard/favoris", label: nav.wishlist },
-          { href: "/orders", label: nav.myOrders },
+          { href: "/orders", label: nav.myOrders, badgeKey: "orders" },
           { href: "/messages", label: nav.messages },
           { href: "/demandes", label: nav.inquiries },
-          { href: "/notifications", label: nav.notifications },
+          { href: "/notifications", label: nav.notifications, badgeKey: "notifications" },
         ],
         current,
       ),
