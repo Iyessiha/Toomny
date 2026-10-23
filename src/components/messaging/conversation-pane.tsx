@@ -27,6 +27,8 @@ export type PaneRequest = {
   statusLabel: string;
   statusTone: "neutral" | "warning" | "success";
   createdLabel: string;
+  /** Faux si le texte a été archivé (rétention) : la conversation ne peut plus être rouverte. */
+  reopenable: boolean;
 };
 
 type SendResult = { success: true } | { error: string };
@@ -50,6 +52,11 @@ type Copy = {
   draft: string;
   drafting: string;
   draftHint: string;
+  analyze: string;
+  analyzing: string;
+  analyzeHint: string;
+  reopen: string;
+  archived: string;
   closeConfirm: string;
   closedNotice: string;
   back: string;
@@ -77,6 +84,11 @@ const copy: Record<"fr" | "en", Copy> = {
     draft: "Rédiger avec l'IA",
     drafting: "Rédaction…",
     draftHint: "Brouillon généré. Relisez-le avant d'envoyer.",
+    analyze: "Analyser le compte",
+    analyzing: "Analyse…",
+    analyzeHint: "Recommandations rédigées à partir du compte du demandeur. Relisez-les avant d'envoyer au prestataire.",
+    reopen: "Rouvrir la conversation",
+    archived: "Le texte de cette conversation a été archivé après 90 jours : elle ne peut plus être rouverte.",
     closeConfirm: "Clôturer cette demande ? Les captures d'écran seront supprimées.",
     closedNotice: "Cette demande est résolue. Les captures d'écran ont été supprimées.",
     back: "Retour aux conversations",
@@ -102,6 +114,11 @@ const copy: Record<"fr" | "en", Copy> = {
     draft: "Draft with AI",
     drafting: "Drafting…",
     draftHint: "Draft generated. Review it before sending.",
+    analyze: "Analyze the account",
+    analyzing: "Analyzing…",
+    analyzeHint: "Recommendations drafted from the requester's account. Review them before sending to the provider.",
+    reopen: "Reopen the conversation",
+    archived: "This conversation's text was archived after 90 days: it can no longer be reopened.",
     closeConfirm: "Close this request? Screenshots will be deleted.",
     closedNotice: "This request is resolved. Screenshots have been deleted.",
     back: "Back to conversations",
@@ -132,6 +149,8 @@ export function ConversationPane({
   closeAction,
   closeLabel,
   draftAction,
+  analyzeAction,
+  reopenAction,
   readinessPanel,
 }: {
   viewer: PaneRole;
@@ -143,6 +162,8 @@ export function ConversationPane({
   closeAction: (formData: FormData) => Promise<void>;
   closeLabel: string;
   draftAction?: (requestId: string) => Promise<{ text: string } | { error: string }>;
+  analyzeAction?: (requestId: string) => Promise<{ text: string } | { error: string }>;
+  reopenAction?: (formData: FormData) => Promise<void>;
   readinessPanel?: React.ReactNode;
 }) {
   const t = copy[locale];
@@ -153,6 +174,7 @@ export function ConversationPane({
   const [files, setFiles] = useState<Pending[]>([]);
   const [sending, setSending] = useState(false);
   const [drafting, setDrafting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -247,17 +269,20 @@ export function ConversationPane({
     router.refresh();
   }
 
-  async function onDraft() {
-    if (!draftAction) return;
-    setDrafting(true);
+  async function generate(
+    action: (requestId: string) => Promise<{ text: string } | { error: string }>,
+    done: string,
+    setBusy: (busy: boolean) => void,
+  ) {
+    setBusy(true);
     setError(null);
     setNotice(null);
-    const result = await draftAction(request.id);
-    setDrafting(false);
+    const result = await action(request.id);
+    setBusy(false);
     if ("error" in result) setError(result.error);
     else {
       setText(result.text);
-      setNotice(t.draftHint);
+      setNotice(done);
     }
   }
 
@@ -276,6 +301,12 @@ export function ConversationPane({
         </div>
         <div className="flex items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${TONE[request.statusTone]}`}>{request.statusLabel}</span>
+          {request.closed && reopenAction && request.reopenable && (
+            <form action={reopenAction}>
+              <input type="hidden" name="requestId" value={request.id} />
+              <button type="submit" className="btn-ghost btn-sm">{t.reopen}</button>
+            </form>
+          )}
           {!request.closed && (
             <form
               action={closeAction}
@@ -338,7 +369,9 @@ export function ConversationPane({
       </div>
 
       {request.closed ? (
-        <p className="border-t border-[var(--border)] bg-[var(--background)] p-4 text-sm text-[var(--subtle)]">{t.closedNotice}</p>
+        <p className="border-t border-[var(--border)] bg-[var(--background)] p-4 text-sm text-[var(--subtle)]">
+          {request.reopenable ? t.closedNotice : t.archived}
+        </p>
       ) : (
         <form onSubmit={send} className="space-y-3 border-t border-[var(--border)] bg-[var(--background)] p-4">
           {quote && (
@@ -398,8 +431,23 @@ export function ConversationPane({
               />
             </label>
             {draftAction && (
-              <button type="button" onClick={onDraft} disabled={drafting || sending} className="btn-ghost btn-sm">
+              <button
+                type="button"
+                onClick={() => generate(draftAction, t.draftHint, setDrafting)}
+                disabled={drafting || analyzing || sending}
+                className="btn-ghost btn-sm"
+              >
                 {drafting ? t.drafting : t.draft}
+              </button>
+            )}
+            {analyzeAction && (
+              <button
+                type="button"
+                onClick={() => generate(analyzeAction, t.analyzeHint, setAnalyzing)}
+                disabled={analyzing || drafting || sending}
+                className="btn-ghost btn-sm"
+              >
+                {analyzing ? t.analyzing : t.analyze}
               </button>
             )}
             <span className="ml-auto text-[11px] text-[var(--subtle)]">{t.counter(text.length, SUPPORT_REPLY_MAX)}</span>

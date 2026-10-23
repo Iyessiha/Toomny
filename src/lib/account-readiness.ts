@@ -116,3 +116,33 @@ export function readinessSummary(r: Readiness): string {
     `Éléments manquants : ${todo.length ? todo.join(" ; ") : "aucun"}`,
   ].join("\n");
 }
+
+export type AccountFacts = {
+  role: string;
+  emailConfirmed: boolean;
+  verificationStatus: string;
+  headline: string | null;
+  bio: string | null;
+  city: string | null;
+  skills: string | null;
+  hasAvatar: boolean;
+};
+
+/**
+ * Valeurs réelles du compte pour l'analyse. Les textes saisis par l'utilisateur
+ * sont délimités : ce sont des données à évaluer, jamais des consignes.
+ */
+export function accountFactsText(f: AccountFacts): string {
+  const bio = (f.bio ?? "").trim();
+  const skills = (f.skills ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return [
+    `Rôle : ${f.role}`,
+    `E-mail confirmé : ${f.emailConfirmed ? "oui" : "non"}`,
+    `Vérification d'identité : ${f.verificationStatus}`,
+    `Titre (${(f.headline ?? "").trim().length} caractères) : <donnee>${(f.headline ?? "").trim() || "vide"}</donnee>`,
+    `Présentation (${bio.length} caractères, minimum ${BIO_MIN_CHARS}) : <donnee>${bio || "vide"}</donnee>`,
+    `Ville : ${f.city?.trim() ? `<donnee>${f.city.trim()}</donnee>` : "vide"}`,
+    `Compétences (${skills.length}, minimum ${SKILLS_MIN}) : ${skills.length ? skills.map((s) => `<donnee>${s}</donnee>`).join(", ") : "aucune"}`,
+    `Photo de profil : ${f.hasAvatar ? "oui" : "non"}`,
+  ].join("\n");
+}

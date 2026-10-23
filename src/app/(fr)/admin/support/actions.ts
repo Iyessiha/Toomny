@@ -7,7 +7,7 @@ import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
 import { UUID_RE } from "@/lib/orders";
 import { shouldEmailRecipient, validateSupportReply, type SupportLocale } from "@/lib/support-replies";
-import { generateSupportDraft } from "@/lib/ai/support-draft";
+import { generateAccountAnalysis, generateSupportDraft } from "@/lib/ai/support-draft";
 import { readinessForUser } from "@/lib/account-readiness-server";
 import { readinessSummary } from "@/lib/account-readiness";
 import { parseAttachmentIds, readQuoteFields } from "@/lib/support-attachments";
@@ -153,4 +153,75 @@ export async function draftSupportReply(
     locale,
     readiness: requester ? readinessSummary(requester.readiness) : undefined,
   });
+}
+
+/** Analyse le compte du DEMANDEUR (pas celui de l'équipe) et prépare les recommandations. Rien n'est envoyé. */
+export async function analyzeRequesterAccount(
+  requestId: string,
+): Promise<{ text: string } | { error: string }> {
+  await requireAdmin();
+  if (!UUID_RE.test(requestId)) return { error: "Demande introuvable." };
+
+  const db = createAdminClient();
+  const { data: request } = await db
+    .from("support_requests")
+    .select("subject, body, profile_id")
+    .eq("id", requestId)
+    .maybeSingle();
+  if (!request) return { error: "Demande introuvable." };
+
+  const requester = await readinessForUser(db, request.profile_id);
+  if (!requester) return { error: "Compte du demandeur introuvable." };
+
+  const { data: profile } = await db
+    .from("profiles")
+    .select("preferred_locale")
+    .eq("id", request.profile_id)
+    .maybeSingle();
+  const locale: SupportLocale = profile?.preferred_locale === "en" ? "en" : "fr";
+
+  return generateAccountAnalysis({
+    subject: request.subject,
+    body: request.body,
+    role: requester.role,
+    locale,
+    factsText: requester.factsText,
+    readinessSummary: readinessSummary(requester.readiness),
+  });
+}
+
+/**
+ * Rouvre une conversation résolue. Impossible si son texte a déjà été purgé
+ * (rétention de 90 jours) : il n'y a plus rien à reprendre. Journalisé.
+ */
+export async function reopenSupportRequest(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const id = String(formData.get("requestId") ?? "");
+  if (!UUID_RE.test(id)) return;
+
+  const db = createAdminClient();
+  const { data: request } = await db
+    .from("support_requests")
+    .select("id, status, text_purged_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (!request || request.status !== "closed" || request.text_purged_at) return;
+
+  const { error } = await db
+    .from("support_requests")
+    .update({ status: "open", closed_at: null, awaiting_admin: false })
+    .eq("id", id);
+  if (error) {
+    console.error("reopenSupportRequest:", error.message);
+    return;
+  }
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "support.reopen",
+    targetType: "support",
+    targetId: id,
+  });
+  revalidatePath("/admin/support");
+  revalidatePath("/dashboard/support");
 }

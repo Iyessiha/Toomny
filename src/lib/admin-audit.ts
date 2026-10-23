@@ -20,6 +20,7 @@ export type AdminAction =
   | "plan.set"
   | "pixels.update"
   | "support.reply"
+  | "support.reopen"
   | "support.close";
 
 export type AdminAuditEntry = {
