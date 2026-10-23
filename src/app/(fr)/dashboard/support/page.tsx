@@ -122,6 +122,7 @@ export default async function SupportPage({
       statusLabel: isClosed ? t.closed : selected.awaiting_admin ? t.awaitingTeam : t.answered,
       statusTone: isClosed ? "neutral" : selected.awaiting_admin ? "warning" : "success",
       createdLabel: formatSubmittedAt(selected.created_at, locale),
+      reopenable: false,
     };
     messages = buildThread(selected as RawRequest, attachments, urls, (iso) => formatSubmittedAt(iso, locale));
   }

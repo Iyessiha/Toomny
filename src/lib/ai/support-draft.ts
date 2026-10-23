@@ -1,7 +1,7 @@
 import "server-only";
 import { callClaude } from "@/lib/ai/claude";
 import { toomnyKnowledge } from "@/lib/ai/toomny-knowledge";
-import { buildSupportDraftPrompt, type SupportLocale } from "@/lib/support-replies";
+import { buildAccountAnalysisPrompt, buildSupportDraftPrompt, type SupportLocale } from "@/lib/support-replies";
 
 /**
  * Brouillon de réponse à une demande de contact. Le modèle reçoit les politiques
@@ -17,5 +17,22 @@ export async function generateSupportDraft(input: {
 }): Promise<{ text: string } | { error: string }> {
   const { system, user } = buildSupportDraftPrompt({ ...input, knowledge: toomnyKnowledge(input.locale) });
   const result = await callClaude({ system, user, maxTokens: 1000, cacheSystem: true });
+  return result.ok ? { text: result.text } : { error: result.error };
+}
+
+/**
+ * Analyse du compte du demandeur : recommandations numérotées, rédigées pour
+ * être envoyées au demandeur. Rien n'est envoyé : l'équipe relit d'abord.
+ */
+export async function generateAccountAnalysis(input: {
+  subject: string;
+  body: string;
+  role: string;
+  locale: SupportLocale;
+  factsText: string;
+  readinessSummary: string;
+}): Promise<{ text: string } | { error: string }> {
+  const { system, user } = buildAccountAnalysisPrompt({ ...input, knowledge: toomnyKnowledge(input.locale) });
+  const result = await callClaude({ system, user, maxTokens: 1500, cacheSystem: true });
   return result.ok ? { text: result.text } : { error: result.error };
 }

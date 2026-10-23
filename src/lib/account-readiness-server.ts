@@ -1,12 +1,15 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { accountReadiness, type Readiness } from "@/lib/account-readiness";
+import { accountFactsText, accountReadiness, type AccountFacts, type Readiness } from "@/lib/account-readiness";
 
 export type UserReadiness = {
   userId: string;
   role: string;
   displayName: string | null;
   readiness: Readiness;
+  facts: AccountFacts;
+  /** Valeurs réelles lisibles par l'IA d'analyse (texte délimité). */
+  factsText: string;
 };
 
 /** État réel d'un compte : e-mail (côté auth), vérification et fiche prestataire. */
@@ -32,5 +35,22 @@ export async function readinessForUser(db: SupabaseClient, userId: string): Prom
         }
       : null,
   });
-  return { userId, role: profile.role, displayName: profile.display_name, readiness };
+  const facts: AccountFacts = {
+    role: profile.role,
+    emailConfirmed: Boolean(auth?.user?.email_confirmed_at),
+    verificationStatus: profile.verification_status ?? "unverified",
+    headline: provider?.headline ?? null,
+    bio: provider?.bio ?? null,
+    city: provider?.city ?? null,
+    skills: provider?.skills ?? null,
+    hasAvatar: Boolean(provider?.avatar_url),
+  };
+  return {
+    userId,
+    role: profile.role,
+    displayName: profile.display_name,
+    readiness,
+    facts,
+    factsText: accountFactsText(facts),
+  };
 }

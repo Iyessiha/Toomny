@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SUPPORT_REPLY_MAX, buildSupportDraftPrompt, shouldEmailRecipient, validateSupportReply } from "./support-replies";
+import { SUPPORT_REPLY_MAX, buildAccountAnalysisPrompt, buildSupportDraftPrompt, shouldEmailRecipient, validateSupportReply } from "./support-replies";
 
 describe("validateSupportReply", () => {
   it("rejette une réponse vide ou composée d'espaces", () => {
@@ -70,5 +70,32 @@ describe("shouldEmailRecipient", () => {
         recipientSeenAt: "2026-10-23T11:00:00Z",
       }),
     ).toBe(true);
+  });
+});
+
+describe("buildAccountAnalysisPrompt", () => {
+  const prompt = buildAccountAnalysisPrompt({
+    subject: "Impossible de publier",
+    body: "Je n'arrive pas à publier",
+    role: "provider",
+    locale: "fr",
+    factsText: "Présentation (40 caractères, minimum 80) : <donnee>court</donnee>",
+    readinessSummary: "Peut publier une prestation : non",
+  });
+
+  it("désigne le compte du demandeur, jamais celui de l'équipe", () => {
+    expect(prompt.system).toContain("compte du DEMANDEUR");
+    expect(prompt.system).toContain("jamais du compte de l'équipe Toomny");
+  });
+
+  it("transmet les valeurs réelles du compte, délimitées", () => {
+    expect(prompt.user).toContain("<compte>");
+    expect(prompt.user).toContain("40 caractères, minimum 80");
+    expect(prompt.user).toContain("</compte>");
+  });
+
+  it("isole la demande du demandeur", () => {
+    expect(prompt.user).toContain("<demande>");
+    expect(prompt.user).toContain("Je n'arrive pas à publier");
   });
 });
