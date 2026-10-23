@@ -340,3 +340,28 @@ export async function resubmitService(id: string) {
   revalidatePath("/dashboard/prestations");
   return { success: true };
 }
+
+/**
+ * Le prestataire soumet (à nouveau) une prestation en brouillon à la validation de
+ * l'équipe, après avoir corrigé les points signalés. Seules ses prestations en brouillon.
+ */
+export async function requestServiceReview(id: string) {
+  const user = await requireAuth();
+  const e = getDashboardTexts(user.preferredLocale).services.errors;
+  if (!isProvider(user.role)) return { error: e.notProvider };
+  if (!UUID_RE.test(id)) return { error: e.toggle };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("services")
+    .update({ review_requested_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("provider_id", user.id)
+    .eq("status", "draft")
+    .select("id")
+    .maybeSingle();
+  if (error || !data) return { error: e.toggle };
+
+  revalidatePath("/dashboard/prestations");
+  return { success: true };
+}
