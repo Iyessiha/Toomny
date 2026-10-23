@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/support-cleanup",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/support-retention",
+      "schedule": "45 4 * * *"
     }
   ]
 }
