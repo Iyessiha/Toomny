@@ -8,6 +8,7 @@ import {
   deleteService,
   toggleServiceStatus,
   resubmitService,
+  requestServiceReview,
   upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -30,6 +31,8 @@ type Service = {
   cover_url: string | null;
   gallery_urls: string[] | null;
   tags: string[] | null;
+  review_notes: string | null;
+  review_requested_at: string | null;
 };
 
 type PackageRow = {
@@ -94,6 +97,20 @@ export function ServiceManage({
 }) {
   const t = getDashboardTexts(locale).services;
   const statusLabels = getDashboardTexts(locale).service;
+  const reviewCopy =
+    locale === "en"
+      ? {
+          toFix: "Points to correct",
+          submit: "Submit for review",
+          resubmit: "Submit again",
+          waiting: "Submitted: waiting for the Toomny team.",
+        }
+      : {
+          toFix: "Points à corriger",
+          submit: "Soumettre pour validation",
+          resubmit: "Soumettre à nouveau",
+          waiting: "Soumise : en attente de l'équipe Toomny.",
+        };
   const c = copy[locale];
   const router = useRouter();
 
@@ -314,6 +331,19 @@ export function ServiceManage({
     }
   }
 
+  async function handleRequestReview(s: Service) {
+    setPending(true);
+    try {
+      const result = await requestServiceReview(s.id);
+      if ("error" in result && result.error) setError(result.error);
+      else router.refresh();
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function handleResubmit(s: Service) {
     setPending(true);
     try {
@@ -366,6 +396,31 @@ export function ServiceManage({
                   {statusLabels[s.status as keyof typeof statusLabels] ?? s.status}
                 </Pill>
               </p>
+              {s.status === "draft" && (s.review_notes || !s.review_requested_at) && (
+                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                  {s.review_notes && (
+                    <>
+                      <p className="font-semibold">{reviewCopy.toFix}</p>
+                      <ul className="mt-1 list-none space-y-0.5 whitespace-pre-line">
+                        {s.review_notes.split("\n").map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {s.review_requested_at ? (
+                    <p className="mt-2 font-medium">{reviewCopy.waiting}</p>
+                  ) : (
+                    <button
+                      onClick={() => handleRequestReview(s)}
+                      disabled={pending}
+                      className="btn-primary btn-sm mt-2 disabled:opacity-50"
+                    >
+                      {s.review_notes ? reviewCopy.resubmit : reviewCopy.submit}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <p className="shrink-0 font-display font-bold">
               {(s.price_minor / 1).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA

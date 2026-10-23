@@ -7,7 +7,18 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
 import { sendServiceRejectedEmail, sendServicePublishedEmail } from "@/lib/email";
-import { isRejectionReason } from "@/i18n/listing-guide";
+import { isRejectionReason, type RejectionReason } from "@/i18n/listing-guide";
+import { reviewServiceText } from "@/lib/ai/service-review";
+import {
+  deterministicPoints,
+  mergePoints,
+  parseAiPoints,
+  pointsAsNotes,
+  reasonMessage,
+  reviewVerdict,
+  type ReviewPoint,
+  type ReviewVerdict,
+} from "@/lib/service-review";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
@@ -172,6 +183,13 @@ export async function rejectService(formData: FormData): Promise<void> {
     sendEmail: false,
   });
 
+  // Points enregistrés sur la prestation : le prestataire les retrouve pour corriger.
+  const notes = pointsAsNotes([
+    ...reasons.map((r) => ({ reason: r as RejectionReason, message: reasonMessage(r as RejectionReason) })),
+    ...(message ? [{ reason: "other" as RejectionReason, message }] : []),
+  ]);
+  await db.from("services").update({ review_notes: notes, review_requested_at: null }).eq("id", id);
+
   await sendServiceRejectedEmail({
     to: provider.email,
     firstName,
@@ -192,4 +210,55 @@ export async function rejectService(formData: FormData): Promise<void> {
   revalidatePath("/admin/services");
   revalidatePath(`/admin/services/${id}`);
   redirect(`/admin/services/${id}?refused=1`);
+}
+
+/**
+ * Analyse une prestation soumise : contrôles objectifs (couverture, description,
+ * coordonnées, titre, prix, catégorie) fusionnés avec la lecture de l'IA. Rien n'est
+ * modifié : l'équipe décide de valider ou de refuser avec ces points.
+ */
+export async function analyzeServiceListing(
+  serviceId: string,
+): Promise<ReviewVerdict | { error: string }> {
+  await requireAdmin();
+  if (!UUID_RE.test(serviceId)) return { error: "Prestation introuvable." };
+
+  const db = createAdminClient();
+  const { data: service } = await db
+    .from("services")
+    .select("title, description, price_minor, delivery_days, category_id, cover_url, gallery_urls, provider_id")
+    .eq("id", serviceId)
+    .maybeSingle();
+  if (!service) return { error: "Prestation introuvable." };
+
+  const [{ data: category }, { count: packagesCount }, { data: provider }] = await Promise.all([
+    service.category_id
+      ? db.from("categories").select("name_fr, name_en").eq("id", service.category_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    db.from("service_packages").select("id", { count: "exact", head: true }).eq("service_id", serviceId),
+    db.from("profiles").select("preferred_locale").eq("id", service.provider_id).maybeSingle(),
+  ]);
+  const locale = provider?.preferred_locale === "en" ? "en" : "fr";
+
+  const facts = {
+    title: service.title ?? "",
+    description: service.description ?? "",
+    priceMinor: Number(service.price_minor),
+    deliveryDays: Number(service.delivery_days),
+    categoryId: service.category_id ?? null,
+    coverUrl: service.cover_url ?? null,
+    galleryUrls: (service.gallery_urls ?? []) as string[],
+    packagesCount: packagesCount ?? 0,
+  };
+  const deterministic = deterministicPoints(facts);
+
+  const ai = await reviewServiceText({
+    ...facts,
+    categoryName: category ? (locale === "en" ? category.name_en : category.name_fr) : null,
+    locale,
+  });
+  if ("error" in ai) return { error: ai.error };
+
+  const points: ReviewPoint[] = mergePoints(deterministic, parseAiPoints(ai));
+  return reviewVerdict(points);
 }
