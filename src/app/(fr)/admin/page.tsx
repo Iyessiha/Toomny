@@ -109,7 +109,7 @@ export default async function AdminPage() {
 
   const queuedPayouts = c.queuedPayouts;
   const todoTotal =
-    c.pendingKyc + c.draftServices + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts + c.awaitingSupport;
+    c.pendingKyc + c.servicesToValidate + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts + c.awaitingSupport;
 
   const orderDelta = deltaOf(s.trend.ordersLast7, s.trend.ordersPrev7, t.vsPrev);
   const volumeDelta = deltaOf(Number(s.trend.amountLast7), Number(s.trend.amountPrev7), t.vsPrev);
@@ -148,10 +148,25 @@ export default async function AdminPage() {
             openLabel={t.open}
           />
           <TodoCard
-            href="/admin/services?status=draft"
+            href="/admin/services?queue=resubmitted"
+            label={t.todoServicesResubmitted}
+            count={c.servicesResubmitted}
+            hint={t.todoServicesResubmittedHint}
+            openLabel={t.open}
+            urgent={c.servicesResubmitted > 0}
+          />
+          <TodoCard
+            href="/admin/services?queue=to_validate"
             label={t.todoServices}
-            count={c.draftServices}
+            count={c.servicesToValidate - c.servicesResubmitted}
             hint={t.todoServicesHint}
+            openLabel={t.open}
+          />
+          <TodoCard
+            href="/admin/services?queue=rejected"
+            label={t.todoServicesRejected}
+            count={c.servicesRejected}
+            hint={t.todoServicesRejectedHint}
             openLabel={t.open}
           />
           <TodoCard
