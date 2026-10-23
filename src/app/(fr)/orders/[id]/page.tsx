@@ -34,7 +34,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const supabase = await createClient();
   const { data: order } = await supabase
     .from("orders")
-    .select("id, reference, status, amount_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
+    .select("id, reference, status, amount_minor, client_charge_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
     .eq("id", id)
     .maybeSingle();
   if (!order) notFound();
@@ -69,6 +69,25 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
+          {isClient && order.status === "pending_payment" && (
+            <div className="rounded-2xl border-2 border-[var(--color-brand-500)] bg-[var(--color-brand-50)] p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-display text-base font-bold">{t.payBannerTitle}</p>
+                  <p className="mt-1 text-sm text-[var(--subtle)]">{t.payBannerBody}</p>
+                  <p className="mt-2 font-display text-lg font-bold">
+                    {t.payBannerAmount} : {formatMoney(BigInt(order.client_charge_minor ?? order.amount_minor), order.currency, locale)}
+                  </p>
+                </div>
+                <div className="w-full shrink-0 sm:w-56">
+                  <PayButton
+                    orderId={order.id}
+                    labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
           <Section
             title={t.requirements}
             action={
@@ -116,16 +135,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <p className="text-sm text-[var(--subtle)]">{t.noActions}</p>
             )}
           </Section>
-          {isClient && order.status === "pending_payment" && (
-            <Notice tone="warning" title={t.pendingPayment}>
-              <div className="mt-3">
-                <PayButton
-                  orderId={order.id}
-                  labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
-                />
-              </div>
-            </Notice>
-          )}
         </aside>
       </div>
     </DashboardShell>
