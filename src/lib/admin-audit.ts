@@ -12,6 +12,7 @@ export type AdminAction =
   | "order.force_in_progress"
   | "order.force_delivered"
   | "order.force_completed"
+  | "order.payment_emails"
   | "dispute.resolve"
   | "payout.process"
   | "payout.mark_paid"

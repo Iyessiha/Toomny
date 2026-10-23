@@ -42,7 +42,7 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
   return (
     <section
       aria-live="polite"
-      className="mb-6 overflow-hidden rounded-3xl border border-[var(--color-brand-500)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
+      className="animate-rise mb-6 overflow-hidden rounded-3xl border border-[var(--color-brand-500)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

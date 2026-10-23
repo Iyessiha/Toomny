@@ -287,7 +287,7 @@ const fr = {
     attachView: "Voir la pièce jointe",
     actionLabels: {
       cancel: "Annuler la commande",
-      start: "Commencer la mission",
+      start: "Accepter et démarrer la mission",
       deliver: "Marquer comme livrée",
       accept: "Valider la livraison",
       dispute: "Ouvrir un litige",
@@ -700,7 +700,7 @@ const en: DashboardTexts = {
     attachView: "View attachment",
     actionLabels: {
       cancel: "Cancel order",
-      start: "Start the mission",
+      start: "Accept and start the mission",
       deliver: "Mark as delivered",
       accept: "Approve delivery",
       dispute: "Open a dispute",

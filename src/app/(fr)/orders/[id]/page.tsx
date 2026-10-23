@@ -16,6 +16,8 @@ import { PayButton } from "@/components/orders/pay-button";
 import { CheckPaymentButton } from "@/components/orders/check-payment-button";
 import { checkOrderPayment } from "../actions";
 import { ClientOrderSummary } from "@/components/orders/client-order-summary";
+import { getReceiptTexts } from "@/i18n/receipt";
+import { formatReceiptDate } from "@/lib/receipt-format";
 import { resolveDisplayNames } from "@/lib/names";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
@@ -31,6 +33,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale).orders;
   const nav = getDashboardTexts(locale).nav;
+  const receiptText = getReceiptTexts(locale);
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
 
@@ -78,6 +81,25 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
+          {isProvider && order.status === "funded" && (
+            <div className="animate-rise rounded-3xl border border-[var(--color-brand-500)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-500)] p-6 text-white shadow-lg">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-100">✓ {receiptText.steps.paid}</p>
+              <p className="mt-2 font-display text-xl font-bold">{receiptText.newOrderTitle}</p>
+              <p className="mt-1 text-sm text-emerald-50">{receiptText.newOrderBody}</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-white/12 p-4">
+                  <p className="text-xs text-emerald-100">{receiptText.youReceive}</p>
+                  <p className="mt-1 font-display text-2xl font-extrabold">{formatMoney(BigInt(order.provider_net_minor), order.currency, locale)}</p>
+                </div>
+                {order.due_at && (
+                  <div className="rounded-2xl bg-white/12 p-4">
+                    <p className="text-xs text-emerald-100">{receiptText.deliverBy}</p>
+                    <p className="mt-1 font-display text-lg font-bold">{formatReceiptDate(new Date(order.due_at), locale)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           {isClient && order.status === "pending_payment" && (
             <div className="rounded-2xl border-2 border-[var(--color-brand-500)] bg-[var(--color-brand-50)] p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

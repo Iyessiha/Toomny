@@ -71,6 +71,11 @@ const fr = {
   summaryHeading: "Suivi de votre commande",
   paymentHeading: "Paiement",
   detailsHeading: "Détails",
+  newOrderTitle: "Nouvelle commande payée",
+  newOrderBody: "Le paiement est sécurisé. Lisez le brief du client, puis acceptez la commande pour démarrer le travail.",
+  youReceive: "Vous recevrez",
+  deliverBy: "Livraison avant le",
+  brief: "Brief du client",
 };
 
 const en: typeof fr = {
@@ -144,6 +149,11 @@ const en: typeof fr = {
   summaryHeading: "Order tracking",
   paymentHeading: "Payment",
   detailsHeading: "Details",
+  newOrderTitle: "New paid order",
+  newOrderBody: "The payment is secured. Read the client's brief, then accept the order to start the work.",
+  youReceive: "You will receive",
+  deliverBy: "Deliver by",
+  brief: "Client's brief",
 };
 
 export type ReceiptTexts = typeof fr;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { RealtimeChannel } from "@supabase/supabase-js";
@@ -58,12 +58,23 @@ function playChime(): void {
   });
 }
 
+const SOUND_EVENT = "toomny-sound-change";
+
 function readSoundPreference(): boolean {
   try {
     return window.localStorage.getItem(SOUND_KEY) !== "off";
   } catch {
     return true;
   }
+}
+
+function subscribeSound(onChange: () => void): () => void {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(SOUND_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(SOUND_EVENT, onChange);
+  };
 }
 
 /**
@@ -75,8 +86,7 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
   const router = useRouter();
   const t = COPY[locale];
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [soundOn, setSoundOn] = useState(true);
-  const soundRef = useRef(true);
+  const soundOn = useSyncExternalStore(subscribeSound, readSoundPreference, () => true);
   const nextId = useRef(0);
   const unread = useRef(0);
   const baseTitle = useRef<string | null>(null);
@@ -87,7 +97,7 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
 
   const notifyNew = useCallback(
     (row: NotificationRow) => {
-      if (soundRef.current) playChime();
+      if (readSoundPreference()) playChime();
       if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
 
       const copy = getNotificationTexts(locale).items[row.type as keyof ReturnType<typeof getNotificationTexts>["items"]];
@@ -108,9 +118,6 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
   );
 
   useEffect(() => {
-    const saved = readSoundPreference();
-    soundRef.current = saved;
-    setSoundOn(saved);
     baseTitle.current = document.title;
 
     // Le son exige un geste : on prépare le contexte au premier clic ou toucher.
@@ -149,14 +156,13 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
   }, [notifyNew]);
 
   function toggleSound() {
-    const next = !soundRef.current;
-    soundRef.current = next;
-    setSoundOn(next);
+    const next = !readSoundPreference();
     try {
       window.localStorage.setItem(SOUND_KEY, next ? "on" : "off");
     } catch {
       // Préférence non sauvegardée : elle reste active pour cette page.
     }
+    window.dispatchEvent(new Event(SOUND_EVENT));
     if (next) playChime();
   }
 
@@ -178,7 +184,7 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
           key={toast.id}
           role="status"
           aria-live="polite"
-          className="pointer-events-auto rounded-2xl border border-[var(--color-brand-500)] bg-white p-4 shadow-xl"
+          className="pointer-events-auto animate-rise rounded-2xl border border-[var(--color-brand-500)] bg-white p-4 shadow-xl"
         >
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[var(--color-brand-500)] text-sm font-bold text-white" aria-hidden>

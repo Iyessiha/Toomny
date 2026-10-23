@@ -42,7 +42,7 @@ export function ClientOrderSummary(props: ClientOrderSummaryProps) {
   ];
 
   return (
-    <section className="space-y-6 rounded-3xl border border-[var(--border)] bg-white p-6 sm:p-8">
+    <section className="animate-rise space-y-6 rounded-3xl border border-[var(--border)] bg-white p-6 sm:p-8">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-bold">{t.summaryHeading}</h2>
