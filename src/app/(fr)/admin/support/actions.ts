@@ -8,8 +8,12 @@ import { notify } from "@/lib/notifications";
 import { UUID_RE } from "@/lib/orders";
 import { shouldEmailRecipient, validateSupportReply, type SupportLocale } from "@/lib/support-replies";
 import { generateSupportDraft } from "@/lib/ai/support-draft";
+import { readinessForUser } from "@/lib/account-readiness-server";
+import { readinessSummary } from "@/lib/account-readiness";
+import { parseAttachmentIds, readQuoteFields } from "@/lib/support-attachments";
+import { linkAttachments, purgeRequestAttachments } from "@/lib/support-attachments-server";
 
-/** Marque une demande de contact comme traitée. Action journalisée. */
+/** Clôt une demande et supprime ses captures d'écran. Action journalisée. */
 export async function closeSupportRequest(formData: FormData): Promise<void> {
   const admin = await requireAdmin();
   const id = String(formData.get("requestId") ?? "");
@@ -25,6 +29,7 @@ export async function closeSupportRequest(formData: FormData): Promise<void> {
     return;
   }
 
+  await purgeRequestAttachments(db, id);
   await recordAdminAction(db, {
     actorId: admin.id,
     action: "support.close",
@@ -35,9 +40,9 @@ export async function closeSupportRequest(formData: FormData): Promise<void> {
 }
 
 /**
- * Envoie une réponse de l'équipe dans la conversation. Le demandeur est notifié
- * dans l'application ; l'e-mail n'part que s'il n'a pas déjà un message non lu
- * (voir shouldEmailRecipient). Journalisé. Refusé si la demande est close.
+ * Envoie une réponse de l'équipe dans la conversation, avec ses captures et une
+ * éventuelle citation. Le demandeur est notifié dans l'application ; l'e-mail
+ * n'part que si la règle de quota l'autorise. Journalisé. Refusé si close.
  */
 export async function replySupportRequest(
   formData: FormData,
@@ -48,6 +53,8 @@ export async function replySupportRequest(
 
   const parsed = validateSupportReply(formData.get("body"));
   if ("error" in parsed) return parsed;
+
+  const attachmentIds = parseAttachmentIds(formData.get("attachmentIds"));
 
   const db = createAdminClient();
   const { data: request } = await db
@@ -66,16 +73,23 @@ export async function replySupportRequest(
     .limit(1)
     .maybeSingle();
 
-  const { error: insertError } = await db.from("support_replies").insert({
-    request_id: id,
-    author_id: admin.id,
-    author_role: "admin",
-    body: parsed.body,
-  });
-  if (insertError) {
-    console.error("replySupportRequest insert:", insertError.message);
+  const { data: inserted, error: insertError } = await db
+    .from("support_replies")
+    .insert({
+      request_id: id,
+      author_id: admin.id,
+      author_role: "admin",
+      body: parsed.body,
+      ...readQuoteFields((key) => formData.get(key)),
+    })
+    .select("id")
+    .single();
+  if (insertError || !inserted) {
+    console.error("replySupportRequest insert:", insertError?.message);
     return { error: "L'envoi de la réponse a échoué. Réessayez." };
   }
+
+  await linkAttachments(db, { ids: attachmentIds, requestId: id, replyId: inserted.id, uploaderId: admin.id });
 
   const { error: updateError } = await db
     .from("support_requests")
@@ -105,6 +119,7 @@ export async function replySupportRequest(
   return { success: true };
 }
 
+
 /**
  * Brouillon de réponse rédigé par Claude. Rien n'est envoyé : l'administrateur
  * relit le texte dans le formulaire avant de l'envoyer.
@@ -130,10 +145,12 @@ export async function draftSupportReply(
     .maybeSingle();
 
   const locale: SupportLocale = profile?.preferred_locale === "en" ? "en" : "fr";
+  const requester = await readinessForUser(db, request.profile_id);
   return generateSupportDraft({
     subject: request.subject,
     body: request.body,
     role: profile?.role ?? "client",
     locale,
+    readiness: requester ? readinessSummary(requester.readiness) : undefined,
   });
 }
