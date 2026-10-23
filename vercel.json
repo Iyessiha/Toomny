@@ -12,6 +12,14 @@
     {
       "path": "/api/cron/boost-reminders",
       "schedule": "0 10 * * 1,4"
+    },
+    {
+      "path": "/api/cron/support-cleanup",
+      "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/support-retention",
+      "schedule": "45 4 * * *"
     }
   ]
 }

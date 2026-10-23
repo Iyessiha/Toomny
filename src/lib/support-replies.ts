@@ -30,17 +30,23 @@ export function buildSupportDraftPrompt(input: {
   body: string;
   role: string;
   locale: SupportLocale;
+  /** Résumé de l'état réel du compte (e-mail, identité, profil). */
+  readiness?: string;
+  /** Politiques et fonctionnement du site. Le système reste stable, donc mis en cache. */
+  knowledge?: string;
 }): { system: string; user: string } {
   const user = [
     `Langue de la réponse : ${input.locale}`,
     `Rôle du demandeur : ${input.role}`,
+    input.readiness ? `État du compte du demandeur :\n${input.readiness}` : "",
     "",
     "<demande>",
     `Sujet : ${input.subject}`,
     input.body,
     "</demande>",
-  ].join("\n");
-  return { system: DRAFT_SYSTEM, user };
+  ].filter((line, i, all) => line !== "" || all[i - 1] !== "").join("\n");
+  const system = input.knowledge ? `${DRAFT_SYSTEM}\n\n${input.knowledge}` : DRAFT_SYSTEM;
+  return { system, user };
 }
 
 /**

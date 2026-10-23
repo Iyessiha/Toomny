@@ -19,6 +19,8 @@ export async function callClaude(opts: {
   user: string;
   maxTokens: number;
   schema?: Record<string, unknown>;
+  /** Le système est stable entre les appels (connaissance du site) : on le met en cache. */
+  cacheSystem?: boolean;
 }): Promise<ClaudeResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return { ok: false, error: "L'assistant IA n'est pas configuré. Contactez l'équipe Toomny." };
@@ -29,7 +31,9 @@ export async function callClaude(opts: {
     const response = await client.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: opts.maxTokens,
-      system: opts.system,
+      system: opts.cacheSystem
+        ? [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }]
+        : opts.system,
       messages: [{ role: "user", content: opts.user }],
       thinking: { type: "disabled" },
       output_config: {

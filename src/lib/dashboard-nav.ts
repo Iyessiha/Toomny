@@ -56,7 +56,7 @@ export function dashboardNavSections(
             { href: "/dashboard/profil", label: nav.profile },
             { href: "/dashboard/verification", label: nav.kyc },
             { href: "/dashboard/compte", label: nav.account },
-            { href: "/dashboard/support", label: nav.support },
+            { href: "/dashboard/support", label: nav.support, badgeKey: "support" },
           ],
           current,
         ),
@@ -86,7 +86,7 @@ export function dashboardNavSections(
         [
           { href: "/dashboard/profil", label: nav.profile },
           { href: "/dashboard/compte", label: nav.account },
-            { href: "/dashboard/support", label: nav.support },
+            { href: "/dashboard/support", label: nav.support, badgeKey: "support" },
         ],
         current,
       ),
