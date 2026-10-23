@@ -39,6 +39,13 @@ const fr = {
       title: "Nouvelle réponse",
       body: (p) => `${p.from ?? "Un membre"} a répondu à votre message.`,
     },
+    service_changes_requested: {
+      title: "Prestation à corriger",
+      body: (p) =>
+        p.service
+          ? `Votre prestation « ${p.service} » demande quelques corrections. Les points à corriger sont affichés sur la prestation.`
+          : "Une de vos prestations demande quelques corrections. Les points sont affichés sur la prestation.",
+    },
     account_missing: {
       title: "Votre compte est à compléter",
       body: (p) =>
@@ -191,6 +198,13 @@ const en: typeof fr = {
     inquiry_replied: {
       title: "New reply",
       body: (p) => `${p.from ?? "A member"} replied to your message.`,
+    },
+    service_changes_requested: {
+      title: "Service to correct",
+      body: (p) =>
+        p.service
+          ? `Your service "${p.service}" needs a few corrections. The points to correct are shown on the service.`
+          : "One of your services needs a few corrections. The points are shown on the service.",
     },
     account_missing: {
       title: "Your account needs completing",

@@ -11,6 +11,8 @@ import { moderateService } from "./actions";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { countryLabel, formatSubmittedAt } from "@/i18n/auth";
+import { getAdminCounts } from "@/lib/admin-counts";
+import { serviceQueue, type ServiceQueue } from "@/lib/service-queue";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).servicesPage.metaTitle };
@@ -21,24 +23,42 @@ export const dynamic = "force-dynamic";
 export default async function AdminServicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<{ status?: string; queue?: string; error?: string }>;
 }) {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = getAdminTexts(locale).servicesPage;
   const tabKeys = Object.keys(t.tabs);
-  const { status: rawStatus, error: errorParam } = await searchParams;
+  const { status: rawStatus, queue: rawQueue, error: errorParam } = await searchParams;
   const status = tabKeys.includes(rawStatus ?? "") ? (rawStatus as string) : "all";
+  const queue = (["to_validate", "resubmitted", "rejected"] as const).find((q) => q === rawQueue) ?? null;
+  const counts = await getAdminCounts();
+  const queueCounts = {
+    to_validate: counts.servicesToValidate - counts.servicesResubmitted,
+    resubmitted: counts.servicesResubmitted,
+    rejected: counts.servicesRejected,
+  };
+  const fr = locale !== "en";
 
   const db = createAdminClient();
   const base = db
     .from("services")
     .select(
-      "id, title, price_minor, currency, delivery_days, status, created_at, provider:profiles!services_provider_id_profiles_id_fk(display_name, email), category:categories(name_fr)",
+      "id, title, price_minor, currency, delivery_days, status, created_at, review_notes, review_requested_at, provider:profiles!services_provider_id_profiles_id_fk(display_name, email), category:categories(name_fr)",
     )
     .order("created_at", { ascending: false })
     .limit(100);
-  const { data: rows } = await (status === "all" ? base : base.eq("status", status));
+  const filtered =
+    queue === "to_validate"
+      ? base.eq("status", "draft").or("review_notes.is.null,review_requested_at.not.is.null")
+      : queue === "resubmitted"
+        ? base.eq("status", "draft").not("review_requested_at", "is", null)
+        : queue === "rejected"
+          ? base.eq("status", "draft").not("review_notes", "is", null).is("review_requested_at", null)
+          : status === "all"
+            ? base
+            : base.eq("status", status);
+  const { data: rows } = await filtered;
 
   const list = (rows ?? []).map((r) => {
     const provider = Array.isArray(r.provider) ? r.provider[0] : r.provider;
@@ -55,6 +75,25 @@ export default async function AdminServicesPage({
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/services")}
     >
+      <div className="mb-6 grid gap-3 md:grid-cols-3">
+        {[
+          { key: "resubmitted" as const, count: queueCounts.resubmitted, label: fr ? "Resoumises" : "Resubmitted", hint: fr ? "Corrigées : à revalider en priorité" : "Corrected: review first", tone: "border-rose-300 bg-rose-50 text-rose-900" },
+          { key: "to_validate" as const, count: queueCounts.to_validate, label: fr ? "À valider" : "To validate", hint: fr ? "Nouvelles prestations" : "New services", tone: "border-amber-300 bg-amber-50 text-amber-900" },
+          { key: "rejected" as const, count: queueCounts.rejected, label: fr ? "Rejetées" : "Rejected", hint: fr ? "En attente du prestataire" : "Waiting for the provider", tone: "border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]" },
+        ].map((card) => (
+          <Link
+            key={card.key}
+            href={`/admin/services?queue=${card.key}`}
+            aria-current={queue === card.key ? "true" : undefined}
+            className={`rounded-2xl border p-4 transition-shadow hover:shadow-md ${card.tone} ${queue === card.key ? "ring-2 ring-[var(--color-brand-500)]" : ""}`}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide opacity-70">{card.label}</p>
+            <p className="mt-1 font-display text-3xl font-bold">{card.count}</p>
+            <p className="text-xs opacity-70">{card.hint}</p>
+          </Link>
+        ))}
+      </div>
+
       {errorParam === "kyc" && (
         <div className="mb-6">
           <Notice tone="warning">
@@ -62,13 +101,15 @@ export default async function AdminServicesPage({
           </Notice>
         </div>
       )}
-      <FilterTabs
-        items={tabKeys.map((key) => ({
-          href: `/admin/services?status=${key}`,
-          label: t.tabs[key as keyof typeof t.tabs],
-          current: status === key,
-        }))}
-      />
+      {!queue && (
+        <FilterTabs
+          items={tabKeys.map((key) => ({
+            href: `/admin/services?status=${key}`,
+            label: t.tabs[key as keyof typeof t.tabs],
+            current: status === key,
+          }))}
+        />
+      )}
 
       {list.length === 0 ? (
         <EmptyState title={t.emptyTitle} body={t.emptyBody} />
@@ -83,8 +124,11 @@ export default async function AdminServicesPage({
             </tr>
           </thead>
           <tbody>
-            {list.map((s) => (
-              <tr key={s.id}>
+            {list.map((s) => {
+              const q: ServiceQueue = serviceQueue(s);
+              const rowTone = q === "resubmitted" ? "bg-rose-50/60" : q === "new" ? "bg-amber-50/50" : "";
+              return (
+              <tr key={s.id} className={rowTone}>
                 <td className="whitespace-normal!">
                   <span className="block font-semibold">{s.title}</span>
                   <span className="block text-xs text-[var(--subtle)]">
@@ -93,6 +137,11 @@ export default async function AdminServicesPage({
                   </span>
                   <span className="mt-1 flex items-center gap-2">
                     <Pill tone={serviceTone(s.status)}>{t.status[s.status] ?? s.status}</Pill>
+                    {q && (
+                      <Pill tone={q === "resubmitted" ? "danger" : q === "new" ? "warning" : "neutral"}>
+                        {q === "resubmitted" ? (fr ? "Resoumise" : "Resubmitted") : q === "new" ? (fr ? "À valider" : "To validate") : fr ? "Rejetée" : "Rejected"}
+                      </Pill>
+                    )}
                     <span className="text-xs text-[var(--subtle)]">
                       {s.category?.name_fr ?? "—"} · {s.delivery_days} {t.days}
                     </span>
@@ -129,7 +178,8 @@ export default async function AdminServicesPage({
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </TableCard>
       )}

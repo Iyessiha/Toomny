@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
 import { UUID_RE } from "@/lib/orders";
-import { shouldEmailRecipient, validateSupportReply, type SupportLocale } from "@/lib/support-replies";
+import { validateSupportReply, type SupportLocale } from "@/lib/support-replies";
 import { generateAccountAnalysis, generateSupportDraft } from "@/lib/ai/support-draft";
 import { readinessForUser } from "@/lib/account-readiness-server";
 import { readinessSummary } from "@/lib/account-readiness";
@@ -101,10 +101,8 @@ export async function replySupportRequest(
     recipientId: request.profile_id,
     type: "support_replied",
     link: "/dashboard/support",
-    sendEmail: shouldEmailRecipient({
-      lastMessageAt: previous?.created_at ?? null,
-      recipientSeenAt: request.requester_seen_at ?? null,
-    }),
+    // Notification dans l'application seulement : pas d'e-mail, pour préserver le quota d'envoi.
+    sendEmail: false,
   });
 
   await recordAdminAction(db, {
@@ -255,7 +253,7 @@ export async function notifyRequesterMissing(formData: FormData): Promise<void> 
     type: "account_missing",
     params: { items },
     link,
-    sendEmail: true,
+    sendEmail: false,
   });
 
   await recordAdminAction(db, {

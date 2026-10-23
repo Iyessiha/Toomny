@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
-import { sendServiceRejectedEmail, sendServicePublishedEmail } from "@/lib/email";
+import { sendServicePublishedEmail } from "@/lib/email";
 import { isRejectionReason, type RejectionReason } from "@/i18n/listing-guide";
 import { reviewServiceText } from "@/lib/ai/service-review";
 import {
@@ -163,21 +163,16 @@ export async function rejectService(formData: FormData): Promise<void> {
   const db = createAdminClient();
   const { data: service } = await db
     .from("services")
-    .select("provider_id, title, status, provider:profiles!services_provider_id_profiles_id_fk(display_name, email, preferred_locale)")
+    .select("provider_id, title, status")
     .eq("id", id)
     .maybeSingle();
 
   if (!service || service.status !== "draft") redirect(`/admin/services/${id}?error=status`);
 
-  const provider = Array.isArray(service.provider) ? service.provider[0] : service.provider;
-  if (!provider?.email) redirect(`/admin/services/${id}?error=email`);
-
-  const locale = provider.preferred_locale === "en" ? "en" : "fr";
-  const firstName = (provider.display_name ?? "").trim().split(" ")[0];
-
+  // Notification dans l'application uniquement : les points sont sur la prestation.
   await notify(db, {
     recipientId: service.provider_id,
-    type: "service_rejected",
+    type: "service_changes_requested",
     params: { service: service.title ?? undefined },
     link: "/dashboard/prestations",
     sendEmail: false,
@@ -190,14 +185,7 @@ export async function rejectService(formData: FormData): Promise<void> {
   ]);
   await db.from("services").update({ review_notes: notes, review_requested_at: null }).eq("id", id);
 
-  await sendServiceRejectedEmail({
-    to: provider.email,
-    firstName,
-    serviceTitle: service.title,
-    reasons,
-    message,
-    locale,
-  });
+
 
   await recordAdminAction(db, {
     actorId: admin.id,
