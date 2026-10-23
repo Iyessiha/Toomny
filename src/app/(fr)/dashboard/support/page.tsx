@@ -23,7 +23,9 @@ const copy = {
     historyTitle: "Mes demandes",
     empty: "Vous n'avez encore envoyé aucune demande.",
     open: "En cours",
+    answered: "Répondue",
     closed: "Traitée",
+    teamReply: "Réponse de l'équipe Toomny",
     colSubject: "Sujet",
     colStatus: "Statut",
     colDate: "Envoyée le",
@@ -36,7 +38,9 @@ const copy = {
     historyTitle: "My requests",
     empty: "You have not sent any request yet.",
     open: "Open",
+    answered: "Answered",
     closed: "Closed",
+    teamReply: "Reply from the Toomny team",
     colSubject: "Subject",
     colStatus: "Status",
     colDate: "Sent on",
@@ -53,7 +57,7 @@ export default async function SupportPage() {
   const supabase = await createClient();
   const { data: requests } = await supabase
     .from("support_requests")
-    .select("id, subject, status, created_at")
+    .select("id, subject, status, created_at, replied_at, replies:support_replies(id, body, created_at)")
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -95,8 +99,8 @@ export default async function SupportPage() {
                     <td className="font-semibold">{r.subject}</td>
                     <td className="text-xs text-[var(--subtle)]">{formatSubmittedAt(r.created_at, locale)}</td>
                     <td>
-                      <Pill tone={r.status === "closed" ? "neutral" : "warning"}>
-                        {r.status === "closed" ? t.closed : t.open}
+                      <Pill tone={r.status === "closed" ? "neutral" : r.replied_at ? "success" : "warning"}>
+                        {r.status === "closed" ? t.closed : r.replied_at ? t.answered : t.open}
                       </Pill>
                     </td>
                   </tr>
@@ -104,6 +108,25 @@ export default async function SupportPage() {
               </tbody>
             </TableCard>
           )}
+          {requests
+            ?.filter((r) => r.replies.length > 0)
+            .map((r) => (
+              <div key={r.id} className="mt-4 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
+                <p className="text-sm font-semibold">{r.subject}</p>
+                <ul className="mt-3 space-y-3">
+                  {[...r.replies]
+                    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+                    .map((reply) => (
+                      <li key={reply.id} className="rounded-xl bg-[var(--surface)] p-3 text-sm">
+                        <p className="text-[11px] text-[var(--subtle)]">
+                          {t.teamReply} · {formatSubmittedAt(reply.created_at, locale)}
+                        </p>
+                        <p className="mt-1 whitespace-pre-line">{reply.body}</p>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            ))}
         </section>
       </div>
     </DashboardShell>

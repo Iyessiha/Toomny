@@ -6,6 +6,7 @@ import { sendNotificationEmail } from "@/lib/email";
 export const NOTIFICATION_TYPES = [
   "inquiry_received",
   "inquiry_replied",
+  "support_replied",
   "order_funded",
   "order_payment_failed",
   "order_message",

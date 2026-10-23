@@ -38,6 +38,10 @@ const fr = {
       title: "Nouvelle réponse",
       body: (p) => `${p.from ?? "Un membre"} a répondu à votre message.`,
     },
+    support_replied: {
+      title: "Réponse de l'équipe Toomny",
+      body: () => "L'équipe Toomny a répondu à votre demande de contact. Ouvrez-la pour lire la réponse.",
+    },
     order_funded: {
       title: "Commande payée",
       body: (p) =>
@@ -179,6 +183,10 @@ const en: typeof fr = {
     inquiry_replied: {
       title: "New reply",
       body: (p) => `${p.from ?? "A member"} replied to your message.`,
+    },
+    support_replied: {
+      title: "Reply from the Toomny team",
+      body: () => "The Toomny team replied to your contact request. Open it to read the reply.",
     },
     order_funded: {
       title: "Order paid",
