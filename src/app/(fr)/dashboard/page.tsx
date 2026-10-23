@@ -13,6 +13,13 @@ import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { PlanNudgeCard } from "@/components/dashboard/plan-nudge-card";
 import { planNudge, type PlanNudge } from "@/lib/plan-nudge";
 import { createClient } from "@/lib/supabase/server";
+import { EncouragementCard } from "@/components/dashboard/encouragement-card";
+import { pickEncouragement } from "@/lib/encouragement";
+
+/** Adresse publique de Toomny, pour les liens de partage. */
+function siteBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
+}
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -78,6 +85,15 @@ function ProviderDashboard({
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   ).length;
+  const siteUrl = siteBaseUrl();
+  const encouragement = pickEncouragement({
+    isProvider: true,
+    toStart: data.orders.filter((o) => o.provider_id === user.id && o.status === "funded").length,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: completedOrders,
+    orders: receivedOrders.length,
+    activeServices: data.servicesCount,
+  });
 
   return (
     <DashboardShell
@@ -97,6 +113,14 @@ function ProviderDashboard({
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteUrl}
+          profileUrl={`${siteUrl}/prestataires/${user.id}`}
+        />
+      )}
       {nudge && <PlanNudgeCard nudge={nudge} locale={locale} />}
 
       {/* ── KYC Banner ─────────────────────────────────────────────────── */}
@@ -335,6 +359,14 @@ function ClientDashboard({
   const t = getDashboardTexts(locale);
   const cur = data.currency;
   const firstName = user.firstName ?? user.displayName?.split(" ")[0] ?? t.home.fallbackName;
+  const encouragement = pickEncouragement({
+    isProvider: false,
+    toStart: 0,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: 0,
+    orders: data.orders.length,
+    activeServices: 0,
+  });
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   );
@@ -358,6 +390,15 @@ function ClientDashboard({
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteBaseUrl()}
+          profileUrl={`${siteBaseUrl()}/prestataires/${user.id}`}
+        />
+      )}
+
       {/* ── Litiges en cours ────────────────────────────────────────────── */}
       {disputedOrders.length > 0 && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
