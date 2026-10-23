@@ -1,3 +1,5 @@
+import { ReloadButton } from "@/components/ui/reload-button";
+
 export const metadata = { title: "Hors ligne · Toomny", robots: { index: false } };
 
 export default function OfflinePage() {
@@ -12,12 +14,10 @@ export default function OfflinePage() {
       <p className="mt-3 max-w-sm text-sm leading-relaxed text-[var(--subtle)]">
         Vérifiez votre connexion internet et réessayez. Les pages déjà visitées restent accessibles depuis le cache.
       </p>
-      <button
-        onClick={() => window.location.reload()}
+      <ReloadButton
+        label="Réessayer"
         className="mt-8 rounded-full bg-[var(--color-brand-500)] px-8 py-3 text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]"
-      >
-        Réessayer
-      </button>
+      />
     </main>
   );
 }
