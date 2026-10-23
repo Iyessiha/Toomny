@@ -6,6 +6,7 @@ import { deleteAccount } from "@/lib/account";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getAccountTexts } from "@/i18n/account";
+import { LEAKED_PASSWORD_MESSAGE, isLeakedPassword } from "@/lib/password-leak";
 
 /**
  * Suppression définitive du compte connecté. Il faut retaper son adresse e-mail :
@@ -61,6 +62,7 @@ export async function changePassword(formData: FormData) {
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (newPassword.length < 8) return { error: t.passwordTooShort };
+  if (await isLeakedPassword(newPassword)) return { error: LEAKED_PASSWORD_MESSAGE[user.preferredLocale] };
   if (newPassword !== confirmPassword) return { error: t.passwordMismatch };
 
   const supabase = await createClient();

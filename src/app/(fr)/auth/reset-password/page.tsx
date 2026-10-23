@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/ui/logo";
+import { LEAKED_PASSWORD_MESSAGE } from "@/lib/password-leak";
 
 const inputClass =
   "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20";
@@ -72,6 +73,16 @@ export default function ResetPasswordPage() {
     if (pw.length < 8) { setError(t.errors.minLength); return; }
     setPending(true);
     setError(null);
+    const check = await fetch("/api/auth/password-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw }),
+    }).then((r) => (r.ok ? r.json() : { leaked: false })).catch(() => ({ leaked: false }));
+    if (check.leaked) {
+      setError(LEAKED_PASSWORD_MESSAGE.fr);
+      setPending(false);
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password: pw });
     if (error) {
       setError(t.errors.generic);
