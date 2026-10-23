@@ -321,7 +321,7 @@ export function ConversationPane({
         </div>
       </header>
 
-      {readinessPanel && <div className="border-b border-[var(--border)] p-4">{readinessPanel}</div>}
+      {readinessPanel && <div className="shrink-0 border-b border-[var(--border)] p-3">{readinessPanel}</div>}
 
       <div ref={scroller} className="min-h-[260px] flex-1 space-y-4 overflow-y-auto bg-[var(--surface)] p-4 lg:min-h-0">
         {messages.map((m) => {
@@ -369,11 +369,11 @@ export function ConversationPane({
       </div>
 
       {request.closed ? (
-        <p className="border-t border-[var(--border)] bg-[var(--background)] p-4 text-sm text-[var(--subtle)]">
+        <p className="shrink-0 border-t border-[var(--border)] bg-[var(--background)] p-4 text-sm text-[var(--subtle)]">
           {request.reopenable ? t.closedNotice : t.archived}
         </p>
       ) : (
-        <form onSubmit={send} className="space-y-3 border-t border-[var(--border)] bg-[var(--background)] p-4">
+        <form onSubmit={send} className="shrink-0 space-y-3 border-t border-[var(--border)] bg-[var(--background)] p-4">
           {quote && (
             <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[var(--color-brand-500)] bg-[var(--surface)] p-3 text-xs">
               <div className="min-w-0">

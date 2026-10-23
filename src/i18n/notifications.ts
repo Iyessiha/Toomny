@@ -11,6 +11,7 @@ export type NotificationParams = {
   rating?: string;
   amount?: string;
   plan?: string;
+  items?: string;
 };
 
 export type NotificationCopy = { title: string; body: (p: NotificationParams) => string };
@@ -37,6 +38,13 @@ const fr = {
     inquiry_replied: {
       title: "Nouvelle réponse",
       body: (p) => `${p.from ?? "Un membre"} a répondu à votre message.`,
+    },
+    account_missing: {
+      title: "Votre compte est à compléter",
+      body: (p) =>
+        p.items
+          ? `Pour publier vos prestations, il reste à faire : ${p.items}.`
+          : "Il reste des éléments à compléter sur votre compte.",
     },
     support_replied: {
       title: "Réponse de l'équipe Toomny",
@@ -183,6 +191,13 @@ const en: typeof fr = {
     inquiry_replied: {
       title: "New reply",
       body: (p) => `${p.from ?? "A member"} replied to your message.`,
+    },
+    account_missing: {
+      title: "Your account needs completing",
+      body: (p) =>
+        p.items
+          ? `To publish your services, you still need to: ${p.items}.`
+          : "Some items on your account still need completing.",
     },
     support_replied: {
       title: "Reply from the Toomny team",

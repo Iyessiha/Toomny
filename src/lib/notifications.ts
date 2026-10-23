@@ -7,6 +7,7 @@ export const NOTIFICATION_TYPES = [
   "inquiry_received",
   "inquiry_replied",
   "support_replied",
+  "account_missing",
   "order_funded",
   "order_payment_failed",
   "order_message",
@@ -103,7 +104,7 @@ async function sendEmailForNotification(
   }
 }
 
-const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount", "plan"] as const;
+const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount", "plan", "items"] as const;
 
 /**
  * Assainit les paramètres lus en base (jsonb non typé) : seules les clés

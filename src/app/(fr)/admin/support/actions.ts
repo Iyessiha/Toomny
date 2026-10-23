@@ -225,3 +225,45 @@ export async function reopenSupportRequest(formData: FormData): Promise<void> {
   revalidatePath("/admin/support");
   revalidatePath("/dashboard/support");
 }
+
+/**
+ * L'équipe valide l'envoi des éléments manquants au prestataire. Le compte est
+ * relu au moment de l'envoi. Le prestataire reçoit une notification et un e-mail.
+ */
+export async function notifyRequesterMissing(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+  const id = String(formData.get("requestId") ?? "");
+  if (!UUID_RE.test(id)) return;
+
+  const db = createAdminClient();
+  const { data: request } = await db
+    .from("support_requests")
+    .select("id, profile_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (!request) return;
+
+  const requester = await readinessForUser(db, request.profile_id);
+  if (!requester || requester.readiness.missing.length === 0) return;
+
+  const missing = requester.readiness.missing;
+  const items = missing.map((c) => c.label.toLowerCase()).join(", ").slice(0, 200);
+  const link = missing.some((c) => c.key === "identity") ? "/dashboard/verification" : "/dashboard/profil";
+
+  await notify(db, {
+    recipientId: request.profile_id,
+    type: "account_missing",
+    params: { items },
+    link,
+    sendEmail: true,
+  });
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "account.notify",
+    targetType: "support",
+    targetId: id,
+    details: { missing: missing.map((c) => c.key) },
+  });
+  revalidatePath("/admin/support");
+}
