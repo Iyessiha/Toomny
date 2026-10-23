@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Locale } from "@/i18n/dictionaries";
+import { SHARE_NETWORKS, shareHref, trackedUrl, type ShareNetwork } from "@/lib/share-links";
 
 export type SharableService = { id: string; title: string; priceLabel: string };
 
@@ -30,31 +31,10 @@ const COPY = {
   },
 } as const;
 
-type Network = keyof (typeof COPY)["fr"]["networks"];
-
 /** Lien public d'une prestation, marqué par réseau pour mesurer ce qui amène des commandes. */
 function serviceUrl(siteUrl: string, id: string, network: string): string {
-  return `${siteUrl}/services/${id}?utm_source=${network}&utm_medium=provider_share&utm_campaign=service_share`;
+  return trackedUrl(`${siteUrl}/services/${id}`, network, "provider_share", "service_share");
 }
-
-function shareHref(network: Network, url: string, text: string): string {
-  const u = encodeURIComponent(url);
-  const t = encodeURIComponent(text);
-  switch (network) {
-    case "whatsapp":
-      return `https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`;
-    case "facebook":
-      return `https://www.facebook.com/sharer/sharer.php?u=${u}`;
-    case "x":
-      return `https://twitter.com/intent/tweet?text=${t}&url=${u}`;
-    case "linkedin":
-      return `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
-    case "telegram":
-      return `https://t.me/share/url?url=${u}&text=${t}`;
-  }
-}
-
-const NETWORKS: Network[] = ["whatsapp", "facebook", "x", "linkedin", "telegram"];
 
 /** Bloc du tableau de bord : partager chaque prestation publiée sur les réseaux, en un clic. */
 export function ShareServices({ services, locale, siteUrl }: Props) {
@@ -88,7 +68,7 @@ export function ShareServices({ services, locale, siteUrl }: Props) {
                 <p className="text-sm text-[var(--subtle)]">{s.priceLabel}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {NETWORKS.map((network) => (
+                {SHARE_NETWORKS.map((network: ShareNetwork) => (
                   <a
                     key={network}
                     href={shareHref(network, serviceUrl(siteUrl, s.id, network), text)}
