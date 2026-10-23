@@ -22,12 +22,14 @@ export type AdminAction =
   | "support.reply"
   | "support.reopen"
   | "account.notify"
+  | "account.recovery_sent"
+  | "account.email_change"
   | "support.close";
 
 export type AdminAuditEntry = {
   actorId: string;
   action: AdminAction;
-  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider" | "site" | "support";
+  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider" | "site" | "support" | "user";
   targetId: string;
   details?: Record<string, unknown>;
 };
