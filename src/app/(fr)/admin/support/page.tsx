@@ -16,6 +16,7 @@ import {
   analyzeRequesterAccount,
   closeSupportRequest,
   draftSupportReply,
+  notifyRequesterMissing,
   reopenSupportRequest,
   replySupportRequest,
 } from "./actions";
@@ -118,7 +119,17 @@ export default async function AdminSupportPage({
     };
     messages = buildThread(selected as RawRequest, attachments, urls, (iso) => formatSubmittedAt(iso, locale));
     const requester = await readinessForUser(db, selected.profile_id);
-    if (requester) readinessNode = <ReadinessChecklist readiness={requester.readiness} locale={locale} />;
+    if (requester)
+      readinessNode = (
+        <ReadinessChecklist
+          readiness={requester.readiness}
+          locale={locale}
+          viewer="team"
+          collapsible
+          notifyAction={notifyRequesterMissing}
+          requestId={selected.id}
+        />
+      );
   }
 
   return (

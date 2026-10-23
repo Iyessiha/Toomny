@@ -21,6 +21,7 @@ export type AdminAction =
   | "pixels.update"
   | "support.reply"
   | "support.reopen"
+  | "account.notify"
   | "support.close";
 
 export type AdminAuditEntry = {
