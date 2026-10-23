@@ -11,6 +11,8 @@ import { AiServicesPanel, AiUpsell } from "@/components/dashboard/ai-assist";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
+import { ShareServices } from "@/components/dashboard/share-services";
+import { formatMoney } from "@/lib/money";
 import { Notice } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
@@ -107,6 +109,17 @@ export default async function PrestationsPage() {
         </Link>
       </div>
       {aiAccess ? <AiServicesPanel locale={locale} /> : <div className="mb-6"><AiUpsell locale={locale} /></div>}
+      <ShareServices
+        locale={locale}
+        siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"}
+        services={list
+          .filter((s) => s.status === "active")
+          .map((s) => ({
+            id: s.id,
+            title: s.title,
+            priceLabel: formatMoney(BigInt(s.price_minor), s.currency, locale),
+          }))}
+      />
       <ServiceManage
         services={list}
         categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}
