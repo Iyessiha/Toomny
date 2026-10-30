@@ -1,5 +1,6 @@
 import { Header } from "./header";
 import { Hero } from "./hero";
+import { TrustBar } from "./trust-bar";
 import { TalentStrip } from "./talent-strip";
 import { Categories } from "./categories";
 import { FeaturedServices } from "./featured-services";
@@ -9,7 +10,6 @@ import { MarketingPopup } from "./marketing-popup";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { ProvidersPreview } from "./providers-preview";
-import { TrustBar } from "./trust-bar";
 import { Faq } from "./faq";
 import { FinalCta } from "./cta";
 import { Footer } from "./footer";
@@ -26,11 +26,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <TalentStrip locale={locale} />
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />
-        <ProvidersPreview locale={locale} />
         <HowItWorks locale={locale} />
         <BoostSection locale={locale} />
         <Pricing locale={locale} />
         <Security locale={locale} />
+        <ProvidersPreview locale={locale} />
         <Faq locale={locale} />
         <FinalCta locale={locale} />
       </main>

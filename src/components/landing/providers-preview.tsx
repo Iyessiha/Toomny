@@ -10,15 +10,6 @@ export async function ProvidersPreview({ locale }: { locale: Locale }) {
   const providers = (await listPublicProviders(t.detailProvider)).slice(0, 6);
   if (providers.length === 0) return null;
 
-  const labels = {
-    profile: t.viewProfile,
-    verified: t.identityVerified,
-    featured: t.featured,
-    rating: t.rating,
-    ordersReceived: t.ordersReceived,
-    services: t.services,
-  };
-
   return (
     <section className="border-t border-[var(--border)] bg-[var(--background)]">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24">
@@ -36,7 +27,7 @@ export async function ProvidersPreview({ locale }: { locale: Locale }) {
         <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {providers.map((p) => (
             <li key={p.id} data-reveal>
-              <ProviderCard p={p} labels={labels} />
+              <ProviderCard p={p} locale={locale} />
             </li>
           ))}
         </ul>

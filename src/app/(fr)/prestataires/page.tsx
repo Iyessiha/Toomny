@@ -26,15 +26,6 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Pr
 
   const all = await listPublicProviders(t.detailProvider);
   const rows = filterProviders(all, query);
-  const labels = {
-    profile: t.viewProfile,
-    verified: t.identityVerified,
-    featured: t.featured,
-    rating: t.rating,
-    ordersReceived: t.ordersReceived,
-    services: t.services,
-  };
-
   return (
     <>
       <Header locale={locale} />
@@ -64,7 +55,7 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Pr
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((p) => (
               <li key={p.id}>
-                <ProviderCard p={p} labels={labels} />
+                <ProviderCard p={p} locale={locale} />
               </li>
             ))}
           </ul>

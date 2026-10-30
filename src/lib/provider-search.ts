@@ -13,6 +13,10 @@ export type ProviderCardData = {
   received: number;
   services: number;
   boosted: boolean;
+  businessType: "individual" | "company";
+  companyName: string | null;
+  /** Prix le plus bas parmi les prestations actives, en unités mineures XOF. */
+  fromPriceMinor: number | null;
 };
 
 /** Mots de la recherche, normalisés : insensibles à la casse et aux accents. */

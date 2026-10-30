@@ -12,13 +12,13 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const { data: active } = await supabase.from("services").select("provider_id").eq("status", "active").limit(2000);
+  const { data: active } = await supabase.from("services").select("provider_id, price_minor").eq("status", "active").limit(2000);
   const ids = [...new Set((active ?? []).map((s) => s.provider_id as string))].slice(0, MAX_PROVIDERS);
   if (ids.length === 0) return [];
 
   const [dirs, profs, stats, counts, boosts] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").in("id", ids),
-    supabase.from("provider_profiles").select("profile_id, avatar_url, headline, city, skills, rating_avg, rating_count").in("profile_id", ids),
+    supabase.from("provider_profiles").select("profile_id, avatar_url, headline, city, skills, rating_avg, rating_count, business_type, company_name").in("profile_id", ids),
     supabase.from("provider_order_stats").select("provider_id, orders_received").in("provider_id", ids),
     supabase.from("services").select("provider_id").eq("status", "active").in("provider_id", ids),
     supabase.from("boosts").select("provider_id").eq("status", "active").gt("period_end", now).in("provider_id", ids),
@@ -32,6 +32,13 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
   for (const row of counts.data ?? []) {
     const id = row.provider_id as string;
     countById.set(id, (countById.get(id) ?? 0) + 1);
+  }
+  const fromById = new Map<string, number>();
+  for (const row of active ?? []) {
+    const id = row.provider_id as string;
+    const price = Number(row.price_minor);
+    const current = fromById.get(id);
+    if (current === undefined || price < current) fromById.set(id, price);
   }
 
   const rows = ids
@@ -53,6 +60,9 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
         received: statById.get(id) ?? 0,
         services: countById.get(id) ?? 0,
         boosted: boostedIds.has(id),
+        businessType: p?.business_type === "company" ? "company" : "individual",
+        companyName: (p?.company_name as string | null) ?? null,
+        fromPriceMinor: fromById.get(id) ?? null,
       };
     })
     .filter((r): r is ProviderCardData => r !== null);
