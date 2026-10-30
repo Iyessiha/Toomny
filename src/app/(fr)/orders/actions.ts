@@ -6,8 +6,10 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { assertTransition, type OrderStatus } from "@/lib/escrow";
 import { splitOrderAmount } from "@/lib/money";
-import { commissionBpsForPlan } from "@/lib/plans";
 import { ORDER_RULES, UUID_RE, orderReference, type OrderAction } from "@/lib/orders";
+import { commissionBpsForPlan, hasPaidPlan } from "@/lib/plans";
+import { MAX_ADDONS_PER_SERVICE, orderTotals } from "@/lib/service-addons";
+import { getAddonTexts } from "@/i18n/addons";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { recordCompletion, refreshProviderRating } from "@/lib/order-ledger";
@@ -38,7 +40,12 @@ export async function checkOrderPayment(orderId: string): Promise<{ status: Paym
  * Commander une prestation. La commande est figée au prix du moment (montants
  * recalculés ici, jamais repris du formulaire). Elle démarre en `pending_payment`.
  */
-export async function createOrder(input: { serviceId: string; requirements: string; packageId?: string }): Promise<Result> {
+export async function createOrder(input: {
+  serviceId: string;
+  requirements: string;
+  packageId?: string;
+  addonIds?: string[];
+}): Promise<Result> {
   const user = await requireAuth();
   const e = getDashboardTexts(user.preferredLocale).orders.errors;
 
@@ -89,6 +96,29 @@ export async function createOrder(input: { serviceId: string; requirements: stri
     providerProfile?.plan_expires_at ?? null,
     now,
   );
+  // Suppléments : seuls ceux, actifs, de cette prestation comptent, et seulement si le prestataire est payant.
+  const addonIds = [...new Set(input.addonIds ?? [])];
+  if (addonIds.length > MAX_ADDONS_PER_SERVICE) return { error: e.notFound };
+  if (addonIds.some((id) => !UUID_RE.test(id))) return { error: e.notFound };
+
+  let chosenAddons: { id: string; title: string; price_minor: number | string; extra_delivery_days: number }[] = [];
+  if (addonIds.length > 0) {
+    if (!hasPaidPlan(providerProfile?.plan, providerProfile?.plan_expires_at ?? null, now)) {
+      return { error: getAddonTexts(user.preferredLocale).errors.locked };
+    }
+    const { data: addonRows } = await db
+      .from("service_addons")
+      .select("id, title, price_minor, extra_delivery_days")
+      .eq("service_id", service.id)
+      .eq("active", true)
+      .in("id", addonIds);
+    if (!addonRows || addonRows.length !== addonIds.length) return { error: e.notFound };
+    chosenAddons = addonRows;
+    const totals = orderTotals(priceMinor, deliveryDays, chosenAddons);
+    priceMinor = totals.priceMinor;
+    deliveryDays = totals.deliveryDays;
+  }
+
   const split = splitOrderAmount(priceMinor, commissionBps);
 
   const { data: order, error } = await db
@@ -115,6 +145,24 @@ export async function createOrder(input: { serviceId: string; requirements: stri
     .single();
 
   if (error || !order) return { error: e.create };
+
+  if (chosenAddons.length > 0) {
+    const { error: addonError } = await db.from("order_addons").insert(
+      chosenAddons.map((a) => ({
+        order_id: order.id,
+        addon_id: a.id,
+        title: a.title,
+        price_minor: BigInt(a.price_minor).toString(),
+        extra_delivery_days: a.extra_delivery_days,
+      })),
+    );
+    if (addonError) {
+      // Une commande sans ses suppléments serait fausse : on l'annule plutôt que de la laisser.
+      console.error("createOrder addons:", addonError.message);
+      await db.from("orders").delete().eq("id", order.id);
+      return { error: e.create };
+    }
+  }
 
   revalidatePath("/orders");
   return { success: true, orderId: order.id };

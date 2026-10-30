@@ -17,6 +17,7 @@ import { CheckPaymentButton } from "@/components/orders/check-payment-button";
 import { checkOrderPayment } from "../actions";
 import { ClientOrderSummary } from "@/components/orders/client-order-summary";
 import { getReceiptTexts } from "@/i18n/receipt";
+import { getAddonTexts } from "@/i18n/addons";
 import { formatReceiptDate } from "@/lib/receipt-format";
 import { resolveDisplayNames } from "@/lib/names";
 import { ReviewForm } from "@/components/orders/review-form";
@@ -56,6 +57,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     .select("id, body, sender_id, created_at")
     .eq("order_id", id)
     .order("created_at", { ascending: true });
+
+  const { data: orderAddons } = await supabase
+    .from("order_addons")
+    .select("title, price_minor, extra_delivery_days")
+    .eq("order_id", id);
 
   const isClient = order.client_id === user.id;
   const isProvider = order.provider_id === user.id;
@@ -145,6 +151,18 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               feeMinor={feeMinor}
               totalMinor={totalMinor}
             />
+          )}
+          {(orderAddons ?? []).length > 0 && (
+            <Section title={getAddonTexts(locale).orderAddons}>
+              <ul className="divide-y divide-[var(--border)]">
+                {(orderAddons ?? []).map((a) => (
+                  <li key={a.title} className="flex items-center justify-between gap-4 py-2.5 text-sm">
+                    <span className="font-medium">{a.title}{a.extra_delivery_days > 0 ? ` · +${a.extra_delivery_days} j` : ""}</span>
+                    <span className="font-display font-bold">+{formatMoney(BigInt(a.price_minor), order.currency, locale)}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
           )}
           <Section
             title={t.requirements}
