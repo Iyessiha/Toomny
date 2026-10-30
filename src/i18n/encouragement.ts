@@ -22,6 +22,12 @@ const fr = {
         : "Votre première mission est terminée. Continuez comme ça, chaque avis compte !",
     cta: "Voir mes commandes",
   },
+  addPhoto: {
+    title: "Ajoutez votre photo professionnelle 📸",
+    body: () =>
+      "Les clients choisissent les personnes qu'ils voient. Une photo nette, en lumière naturelle, rassure et fait la différence. Elle apparaît sur toutes vos prestations.",
+    cta: "Ajouter ma photo",
+  },
   publishFirst: {
     title: "Publiez votre première prestation 🚀",
     body: () => "Les clients cherchent des services comme le vôtre. Publiez-la, puis partagez-la.",
@@ -65,6 +71,12 @@ const en: typeof fr = {
         ? `${n} missions completed. Keep it up, every review counts!`
         : "Your first mission is complete. Keep it up, every review counts!",
     cta: "View my orders",
+  },
+  addPhoto: {
+    title: "Add your professional photo 📸",
+    body: () =>
+      "Clients choose the people they see. A sharp photo in natural light builds trust and makes the difference. It appears on all your services.",
+    cta: "Add my photo",
   },
   publishFirst: {
     title: "Publish your first service 🚀",

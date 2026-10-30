@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
   const nudge = provider ? await getProviderPlanNudge(user.id) : null;
+  const photoMissing = provider ? !(await hasProfilePhoto(user.id)) : false;
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
         <OnboardingModal role={user.role} locale={user.preferredLocale} />
       )}
       {provider
-        ? <ProviderDashboard user={user} data={data} nudge={nudge} />
+        ? <ProviderDashboard user={user} data={data} nudge={nudge} photoMissing={photoMissing} />
         : <ClientDashboard user={user} data={data} />}
     </>
   );
@@ -62,14 +63,27 @@ async function getProviderPlanNudge(userId: string): Promise<PlanNudge | null> {
   });
 }
 
+/** Vrai si le prestataire a déjà une photo de profil. */
+async function hasProfilePhoto(userId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("provider_profiles")
+    .select("avatar_url")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  return Boolean(data?.avatar_url);
+}
+
 function ProviderDashboard({
   user,
   data,
   nudge,
+  photoMissing,
 }: {
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
   nudge: PlanNudge | null;
+  photoMissing: boolean;
 }) {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
@@ -93,6 +107,7 @@ function ProviderDashboard({
     completed: completedOrders,
     orders: receivedOrders.length,
     activeServices: data.servicesCount,
+    photoMissing,
   });
 
   return (

@@ -23,6 +23,8 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
         return { title: t.toValidate.title, body: t.toValidate.body(), cta: t.toValidate.cta, href: "/orders" };
       case "mission_done":
         return { title: t.missionDone.title, body: t.missionDone.body(encouragement.count), cta: t.missionDone.cta, href: "/orders" };
+      case "add_photo":
+        return { title: t.addPhoto.title, body: t.addPhoto.body(), cta: t.addPhoto.cta, href: "/dashboard/profil" };
       case "publish_first":
         return { title: t.publishFirst.title, body: t.publishFirst.body(), cta: t.publishFirst.cta, href: "/dashboard/prestations/nouveau" };
       case "share_services":

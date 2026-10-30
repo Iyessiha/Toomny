@@ -188,7 +188,7 @@ export function ProvidersCarouselTrack({
               </svg>
             </button>
             <Link
-              href="/services"
+              href="/prestataires"
               className="ml-2 hidden text-sm font-semibold text-[var(--color-brand-600)] hover:underline sm:block"
             >
               {ctaLabel}
@@ -214,7 +214,7 @@ export function ProvidersCarouselTrack({
         {/* CTA mobile */}
         <div className="mt-2 sm:hidden">
           <Link
-            href="/services"
+            href="/prestataires"
             className="text-sm font-semibold text-[var(--color-brand-600)] hover:underline"
           >
             {ctaLabel}

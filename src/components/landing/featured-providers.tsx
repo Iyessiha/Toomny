@@ -45,7 +45,7 @@ export async function FeaturedProviders({ locale }: { locale: Locale }) {
             <p className="mt-1 max-w-xl text-sm text-[var(--subtle)]">{t.subtitle}</p>
           </div>
           <Link
-            href="/services"
+            href="/prestataires"
             className="shrink-0 text-sm font-semibold text-[var(--color-brand-600)] hover:underline"
           >
             {t.all}
