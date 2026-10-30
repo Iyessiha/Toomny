@@ -7,6 +7,7 @@ import { PwaInstallBanner } from "@/components/pwa/install-banner";
 import type { Locale } from "@/i18n/dictionaries";
 import { getPixelSettings } from "@/lib/pixels-server";
 import { PixelScripts } from "@/components/analytics/pixel-scripts";
+import { Analytics } from "@vercel/analytics/next";
 
 // next/font héberge les fichiers au build : zéro requête vers Google au
 // runtime, ce qui compte sur les réseaux lents de nos marchés.
@@ -55,6 +56,7 @@ export async function RootShell({ locale, children }: { locale: Locale; children
         <PwaInstallBanner />
         {/* Pixels publicitaires, configurés dans l'admin (/admin/pixels). */}
         <PixelScripts settings={await getPixelSettings()} />
+        <Analytics />
       </body>
     </html>
   );
