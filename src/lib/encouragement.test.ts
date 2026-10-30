@@ -23,6 +23,18 @@ describe("pickEncouragement", () => {
     expect(pickEncouragement({ ...base, completed: 3, orders: 3 })).toEqual({ kind: "mission_done", count: 3 });
   });
 
+  it("invite un prestataire sans photo à en ajouter une", () => {
+    expect(pickEncouragement({ ...base, photoMissing: true, activeServices: 1 })).toEqual({ kind: "add_photo" });
+  });
+
+  it("invite un prestataire sans réalisation à montrer son travail", () => {
+    expect(pickEncouragement({ ...base, photoMissing: false, portfolioMissing: true, activeServices: 1 })).toEqual({ kind: "add_portfolio" });
+  });
+
+  it("ne demande pas de photo quand elle existe déjà", () => {
+    expect(pickEncouragement({ ...base, photoMissing: false, orders: 2, activeServices: 1 })).toBeNull();
+  });
+
   it("invite un prestataire sans prestation à publier la première", () => {
     expect(pickEncouragement(base)).toEqual({ kind: "publish_first" });
   });

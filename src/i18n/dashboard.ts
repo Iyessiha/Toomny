@@ -20,6 +20,7 @@ const fr = {
     notifications: "Notifications",
     services: "Mes prestations",
     payouts: "Versements",
+    showcase: "Ma vitrine",
     plan: "Mon plan",
     boost: "Boost visibilité",
     profile: "Mon profil",
@@ -287,7 +288,7 @@ const fr = {
     attachView: "Voir la pièce jointe",
     actionLabels: {
       cancel: "Annuler la commande",
-      start: "Commencer la mission",
+      start: "Accepter et démarrer la mission",
       deliver: "Marquer comme livrée",
       accept: "Valider la livraison",
       dispute: "Ouvrir un litige",
@@ -438,6 +439,7 @@ const en: DashboardTexts = {
     notifications: "Notifications",
     services: "My services",
     payouts: "Payouts",
+    showcase: "My showcase",
     plan: "My plan",
     boost: "Boost visibility",
     profile: "My profile",
@@ -700,7 +702,7 @@ const en: DashboardTexts = {
     attachView: "View attachment",
     actionLabels: {
       cancel: "Cancel order",
-      start: "Start the mission",
+      start: "Accept and start the mission",
       deliver: "Mark as delivered",
       accept: "Approve delivery",
       dispute: "Open a dispute",

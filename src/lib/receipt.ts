@@ -16,6 +16,10 @@ export type Receipt = {
   dueAt: Date | null;
   paidAt: Date;
   paymentRef: string | null;
+  /** Brief du client, tel qu'il l'a rédigé à la commande. */
+  requirements: string | null;
+  /** Montant net revenant au prestataire (après commission). */
+  providerNetMinor: bigint;
 };
 
 /**
@@ -27,7 +31,7 @@ export type Receipt = {
 export async function loadReceipt(db: SupabaseClient, orderId: string): Promise<Receipt | null> {
   const { data: order } = await db
     .from("orders")
-    .select("id, reference, currency, amount_minor, collect_fee_minor, client_charge_minor, due_at, client_id, provider_id, service:services(title)")
+    .select("id, reference, currency, amount_minor, collect_fee_minor, client_charge_minor, provider_net_minor, requirements, due_at, client_id, provider_id, service:services(title)")
     .eq("id", orderId)
     .maybeSingle();
   if (!order) return null;
@@ -64,5 +68,7 @@ export async function loadReceipt(db: SupabaseClient, orderId: string): Promise<
     dueAt: order.due_at ? new Date(order.due_at) : null,
     paidAt: new Date(hold.held_at),
     paymentRef: hold.partner_hold_ref ?? null,
+    requirements: order.requirements ?? null,
+    providerNetMinor: BigInt(order.provider_net_minor ?? 0),
   };
 }

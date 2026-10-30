@@ -337,3 +337,48 @@ export async function getServicesByIds(ids: string[]): Promise<ServiceCard[]> {
     };
   });
 }
+
+const BOOST_RANK: Record<string, number> = { elite: 0, pro: 1, starter: 2 };
+
+/**
+ * Prestations « En vedette » : celles des prestataires ayant un boost actif. Les formules
+ * les plus hautes passent d'abord ; chaque prestataire apporte au plus deux prestations.
+ */
+export async function getBoostedServices(limit = 4): Promise<ServiceCard[]> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data: boosts } = await supabase
+    .from("boosts")
+    .select("provider_id, tier")
+    .eq("status", "active")
+    .gt("period_end", now)
+    .limit(100);
+  const rows = (boosts ?? []) as { provider_id: string; tier: string }[];
+  if (rows.length === 0) return [];
+
+  const providerIds = [...new Set(rows.sort((a, b) => (BOOST_RANK[a.tier] ?? 9) - (BOOST_RANK[b.tier] ?? 9)).map((b) => b.provider_id))];
+
+  const { data: services } = await supabase
+    .from("services")
+    .select("id, provider_id")
+    .eq("status", "active")
+    .in("provider_id", providerIds)
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  const chosen: string[] = [];
+  for (const providerId of providerIds) {
+    const own = ((services ?? []) as { id: string; provider_id: string }[]).filter((s) => s.provider_id === providerId);
+    for (const s of own.slice(0, 2)) {
+      if (chosen.length >= limit) break;
+      chosen.push(s.id);
+    }
+    if (chosen.length >= limit) break;
+  }
+  if (chosen.length === 0) return [];
+
+  const cards = await getServicesByIds(chosen);
+  const order = new Map(chosen.map((id, i) => [id, i]));
+  return cards.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+}

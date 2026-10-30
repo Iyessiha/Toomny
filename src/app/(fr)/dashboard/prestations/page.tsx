@@ -7,6 +7,8 @@ import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
 import { hasAiAccess } from "@/lib/provider-assist";
+import { hasPaidPlan } from "@/lib/plans";
+import { getAddonTexts } from "@/i18n/addons";
 import { AiServicesPanel, AiUpsell } from "@/components/dashboard/ai-assist";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
@@ -55,6 +57,8 @@ export default async function PrestationsPage() {
     supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", user.id).maybeSingle(),
   ]);
   const aiAccess = hasAiAccess(planRow?.plan, planRow?.plan_expires_at ?? null);
+  const addonsUnlocked = hasPaidPlan(planRow?.plan, planRow?.plan_expires_at ?? null);
+  const ao = getAddonTexts(locale);
 
   const list = services ?? [];
 
@@ -120,6 +124,26 @@ export default async function PrestationsPage() {
             priceLabel: formatMoney(BigInt(s.price_minor), s.currency, locale),
           }))}
       />
+      <section className="mb-8 rounded-3xl border border-[var(--border)] bg-white p-6">
+        <h2 className="font-display text-lg font-bold">{ao.entryTitle}</h2>
+        <p className="mt-1 text-sm text-[var(--subtle)]">{ao.entryLead}</p>
+        {!addonsUnlocked ? (
+          <Link href="/dashboard/plan" className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+            {ao.locked} {ao.upgrade} →
+          </Link>
+        ) : list.filter((s) => s.status !== "removed").length === 0 ? null : (
+          <ul className="mt-4 divide-y divide-[var(--border)]">
+            {list.filter((s) => s.status !== "removed").map((s) => (
+              <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                <p className="min-w-0 truncate text-sm font-semibold">{s.title}</p>
+                <Link href={`/dashboard/prestations/${s.id}/supplements`} className="btn-ghost btn-sm whitespace-nowrap">
+                  {ao.entryManage}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <ServiceManage
         services={list}
         categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}

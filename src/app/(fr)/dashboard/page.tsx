@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
   const nudge = provider ? await getProviderPlanNudge(user.id) : null;
+  const gaps = provider ? await showcaseGaps(user.id) : { photoMissing: false, portfolioMissing: false };
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
         <OnboardingModal role={user.role} locale={user.preferredLocale} />
       )}
       {provider
-        ? <ProviderDashboard user={user} data={data} nudge={nudge} />
+        ? <ProviderDashboard user={user} data={data} nudge={nudge} gaps={gaps} />
         : <ClientDashboard user={user} data={data} />}
     </>
   );
@@ -62,14 +63,26 @@ async function getProviderPlanNudge(userId: string): Promise<PlanNudge | null> {
   });
 }
 
+/** Photo de profil et réalisations du prestataire : ce qui manque à sa vitrine. */
+async function showcaseGaps(userId: string): Promise<{ photoMissing: boolean; portfolioMissing: boolean }> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("avatar_url").eq("profile_id", userId).maybeSingle(),
+    supabase.from("portfolio_items").select("id", { count: "exact", head: true }).eq("provider_id", userId),
+  ]);
+  return { photoMissing: !profile?.avatar_url, portfolioMissing: (count ?? 0) === 0 };
+}
+
 function ProviderDashboard({
   user,
   data,
   nudge,
+  gaps,
 }: {
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
   nudge: PlanNudge | null;
+  gaps: { photoMissing: boolean; portfolioMissing: boolean };
 }) {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
@@ -93,6 +106,8 @@ function ProviderDashboard({
     completed: completedOrders,
     orders: receivedOrders.length,
     activeServices: data.servicesCount,
+    photoMissing: gaps.photoMissing,
+    portfolioMissing: gaps.portfolioMissing,
   });
 
   return (

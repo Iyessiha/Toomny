@@ -23,6 +23,10 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
         return { title: t.toValidate.title, body: t.toValidate.body(), cta: t.toValidate.cta, href: "/orders" };
       case "mission_done":
         return { title: t.missionDone.title, body: t.missionDone.body(encouragement.count), cta: t.missionDone.cta, href: "/orders" };
+      case "add_photo":
+        return { title: t.addPhoto.title, body: t.addPhoto.body(), cta: t.addPhoto.cta, href: "/dashboard/profil" };
+      case "add_portfolio":
+        return { title: t.addPortfolio.title, body: t.addPortfolio.body(), cta: t.addPortfolio.cta, href: "/dashboard/vitrine" };
       case "publish_first":
         return { title: t.publishFirst.title, body: t.publishFirst.body(), cta: t.publishFirst.cta, href: "/dashboard/prestations/nouveau" };
       case "share_services":
@@ -42,7 +46,7 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
   return (
     <section
       aria-live="polite"
-      className="mb-6 overflow-hidden rounded-3xl border border-[var(--color-brand-500)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
+      className="animate-rise mb-6 overflow-hidden rounded-3xl border border-[var(--color-brand-500)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">

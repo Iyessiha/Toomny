@@ -1,0 +1,83 @@
+import type { Locale } from "@/i18n/dictionaries";
+
+const fr = {
+  entryTitle: "Suppléments",
+  entryLead: "Ajoutez des options payantes à vos prestations (livraison express, révision, format supplémentaire). Vos clients les cochent au moment de commander.",
+  entryManage: "Gérer les suppléments",
+  entryCount: (n: number) => (n > 1 ? `${n} suppléments` : `${n} supplément`),
+  locked: "Les suppléments sont réservés aux plans payants.",
+  upgrade: "Passer à un plan payant",
+  managerTitle: "Suppléments",
+  backToServices: "Retour à mes prestations",
+  addTitle: "Ajouter un supplément",
+  fieldTitle: "Intitulé",
+  fieldDescription: "Description (facultatif)",
+  fieldPrice: "Prix (FCFA)",
+  fieldDays: "Jours supplémentaires",
+  submit: "Ajouter",
+  saving: "Ajout…",
+  active: "Actif",
+  inactive: "Masqué",
+  deactivate: "Masquer",
+  activate: "Afficher",
+  remove: "Supprimer",
+  empty: "Aucun supplément pour le moment.",
+  limit: (n: number) => `Vous avez atteint la limite de ${n} suppléments par prestation.`,
+  errors: {
+    title: "Intitulé requis (80 caractères maximum).",
+    description: "Description trop longue (300 caractères maximum).",
+    price: "Prix entre 1 000 et 1 000 000 FCFA.",
+    days: "Entre 0 et 60 jours supplémentaires.",
+    notOwner: "Prestation introuvable.",
+    locked: "Les suppléments nécessitent un plan payant.",
+    save: "Enregistrement impossible. Réessayez.",
+  },
+  clientTitle: "Options",
+  clientNote: "Cochez les options souhaitées. Le total et le délai sont mis à jour.",
+  clientAdded: (days: number) => (days > 0 ? `+${days} j` : ""),
+  orderAddons: "Suppléments",
+};
+
+const en: typeof fr = {
+  entryTitle: "Add-ons",
+  entryLead: "Add paid options to your services (express delivery, extra revision, extra format). Clients tick them when they order.",
+  entryManage: "Manage add-ons",
+  entryCount: (n: number) => (n > 1 ? `${n} add-ons` : `${n} add-on`),
+  locked: "Add-ons are reserved for paid plans.",
+  upgrade: "Upgrade to a paid plan",
+  managerTitle: "Add-ons",
+  backToServices: "Back to my services",
+  addTitle: "Add an add-on",
+  fieldTitle: "Title",
+  fieldDescription: "Description (optional)",
+  fieldPrice: "Price (XOF)",
+  fieldDays: "Extra days",
+  submit: "Add",
+  saving: "Adding…",
+  active: "Active",
+  inactive: "Hidden",
+  deactivate: "Hide",
+  activate: "Show",
+  remove: "Delete",
+  empty: "No add-on yet.",
+  limit: (n: number) => `You have reached the limit of ${n} add-ons per service.`,
+  errors: {
+    title: "Title required (80 characters maximum).",
+    description: "Description too long (300 characters maximum).",
+    price: "Price between 1,000 and 1,000,000 XOF.",
+    days: "Between 0 and 60 extra days.",
+    notOwner: "Service not found.",
+    locked: "Add-ons require a paid plan.",
+    save: "Could not save. Please try again.",
+  },
+  clientTitle: "Options",
+  clientNote: "Tick the options you want. The total and delivery time update.",
+  clientAdded: (days: number) => (days > 0 ? `+${days} d` : ""),
+  orderAddons: "Add-ons",
+};
+
+export type AddonTexts = typeof fr;
+
+export function getAddonTexts(locale: Locale): AddonTexts {
+  return locale === "en" ? en : fr;
+}

@@ -171,7 +171,7 @@ const fr = {
       ],
       guarantees: [
         { title: "Les fonds ne transitent pas par nous", body: "L'argent du client sera conservé par un établissement agréé pour détenir des fonds. Toomny déclenche la libération, mais ne touche jamais au dépôt." },
-        { title: "Identité vérifiée des deux côtés", body: "Pièce d'identité et numéro mobile money vérifiés. Notre vérification est pensée pour les pièces locales, pas pour les recaler." },
+        { title: "Identité des prestataires vérifiée", body: "Chaque prestataire présente une pièce d'identité vérifiée avant de publier. Notre vérification est pensée pour les pièces locales, pas pour les recaler." },
         { title: "Litige arbitré rapidement", body: "En cas de désaccord, un humain tranche à partir des échanges et des livrables conservés sur la plateforme. En français, sans attendre des semaines." },
         { title: "Validation automatique sous 72 h", body: "Si le client ne valide pas une livraison conforme, le paiement part quand même. Un client inactif ne bloque pas le revenu d'un prestataire." },
       ],
@@ -369,7 +369,7 @@ const en: LandingContent = {
       ],
       guarantees: [
         { title: "The funds never pass through us", body: "Client payments will be held by an institution licensed to hold funds, never in Toomny's own accounts. Toomny only triggers the release." },
-        { title: "Identity verified on both sides", body: "ID document, mobile money number and references are checked. Our verification is built for local ID documents, not to reject them." },
+        { title: "Provider identity verified", body: "Every provider presents a verified ID document before publishing. Our check is built for local ID documents, not to reject them." },
         { title: "Disputes settled quickly", body: "If you disagree, a human decides based on the messages and deliverables kept on the platform. Without waiting weeks." },
         { title: "Automatic approval after 72 hours", body: "If a client doesn't approve a delivery that meets the brief, the payment goes out anyway. An inactive client cannot hold a provider's income hostage." },
       ],

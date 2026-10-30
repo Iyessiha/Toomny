@@ -3,6 +3,8 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
+import { getAdminQueue } from "@/lib/admin-queue";
+import { WorkQueue } from "@/components/admin/work-queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
@@ -58,44 +60,6 @@ function fill(template: string, vars: Record<string, string | number>) {
   return Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), template);
 }
 
-function TodoCard({
-  href,
-  label,
-  count,
-  hint,
-  openLabel,
-  urgent = false,
-}: {
-  href: string;
-  label: string;
-  count: number;
-  hint: string;
-  openLabel: string;
-  urgent?: boolean;
-}) {
-  const active = count > 0;
-  const surface = !active
-    ? "border-[var(--border)] bg-[var(--background)]"
-    : urgent
-      ? "border-transparent bg-[var(--tone-danger-bg)]"
-      : "border-transparent bg-[var(--tone-warning-bg)]";
-  const ink = active ? (urgent ? "text-[var(--tone-danger-fg)]" : "text-[var(--tone-warning-fg)]") : "text-[var(--foreground)]";
-  return (
-    <Link href={href} className={`app-lift group flex flex-col gap-3 rounded-2xl border p-5 ${surface}`}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{label}</span>
-        <span className="text-xs font-semibold text-[var(--subtle)] opacity-0 transition-opacity group-hover:opacity-100">
-          {openLabel} →
-        </span>
-      </div>
-      <div className="flex items-end gap-2">
-        <span className={`font-display text-3xl font-bold ${ink}`}>{count}</span>
-        <span className="pb-1 text-xs text-[var(--subtle)]">{hint}</span>
-      </div>
-    </Link>
-  );
-}
-
 export default async function AdminPage() {
   const user = await requireAdmin();
   const locale: Locale = user.preferredLocale;
@@ -107,6 +71,7 @@ export default async function AdminPage() {
   const c = s.counts;
   const fmt = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "fr-FR");
 
+  const queue = await getAdminQueue(4);
   const queuedPayouts = c.queuedPayouts;
   const todoTotal =
     c.pendingKyc + c.servicesToValidate + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts + c.awaitingSupport;
@@ -130,77 +95,27 @@ export default async function AdminPage() {
       }
       nav={getAdminNavGroups(locale, "/admin")}
     >
-      {/* ── À traiter : ce qui demande une action aujourd'hui ── */}
+      <form action="/admin/recherche" method="get" className="mb-6 flex gap-2">
+        <input
+          name="q"
+          placeholder="Rechercher un compte, une commande, une prestation…"
+          className="input flex-1"
+          aria-label="Rechercher"
+        />
+        <button type="submit" className="btn-primary">Rechercher</button>
+      </form>
+
+      {/* ── File de travail : chaque élément concret, avec son action directe ── */}
       <Section
-        title={t.todoTitle}
+        title="File de travail"
+        subtitle={todoTotal > 0 ? `${queue.length} affiché(s) sur ${fmt(todoTotal)}, les plus urgents d'abord` : undefined}
         action={
           <Pill tone={todoTotal > 0 ? "warning" : "success"}>
             {todoTotal > 0 ? fmt(todoTotal) : t.todoOk}
           </Pill>
         }
       >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <TodoCard
-            href="/admin/verifications"
-            label={t.todoKyc}
-            count={c.pendingKyc}
-            hint={t.todoKycHint}
-            openLabel={t.open}
-          />
-          <TodoCard
-            href="/admin/services?queue=resubmitted"
-            label={t.todoServicesResubmitted}
-            count={c.servicesResubmitted}
-            hint={t.todoServicesResubmittedHint}
-            openLabel={t.open}
-            urgent={c.servicesResubmitted > 0}
-          />
-          <TodoCard
-            href="/admin/services?queue=to_validate"
-            label={t.todoServices}
-            count={c.servicesToValidate - c.servicesResubmitted}
-            hint={t.todoServicesHint}
-            openLabel={t.open}
-          />
-          <TodoCard
-            href="/admin/services?queue=rejected"
-            label={t.todoServicesRejected}
-            count={c.servicesRejected}
-            hint={t.todoServicesRejectedHint}
-            openLabel={t.open}
-          />
-          <TodoCard
-            href="/admin/disputes"
-            label={t.todoDisputes}
-            count={c.openDisputes}
-            hint={fill(t.todoDisputesHint, { n: c.staleDisputes })}
-            openLabel={t.open}
-            urgent={c.staleDisputes > 0}
-          />
-          <TodoCard
-            href="/admin/orders"
-            label={t.todoOrders}
-            count={c.overdueOrders}
-            hint={t.todoOrdersHint}
-            openLabel={t.open}
-            urgent={c.overdueOrders > 0}
-          />
-          <TodoCard
-            href="/admin/payouts"
-            label={t.todoPayouts}
-            count={queuedPayouts + c.failedPayouts}
-            hint={fill(t.todoPayoutsHint, { q: queuedPayouts, f: c.failedPayouts })}
-            openLabel={t.open}
-            urgent={c.failedPayouts > 0}
-          />
-          <TodoCard
-            href="/admin/support"
-            label={t.todoSupport}
-            count={c.awaitingSupport}
-            hint={t.todoSupportHint}
-            openLabel={t.open}
-          />
-        </div>
+        <WorkQueue items={queue} emptyLabel={t.todoOk} />
       </Section>
 
       {/* ── Volume : argent réellement acquis séparé de l'argent en séquestre ── */}

@@ -65,11 +65,7 @@ async function notifyOrderPaid(
   await notify(db, { recipientId: clientId, type: "order_payment_confirmed", params, link, sendEmail: false });
   await notify(db, { recipientId: providerId, type: "order_funded", params, link, sendEmail: false });
 
-  const receipt = await loadReceipt(db, orderId);
-  if (!receipt) return;
-
-  await sendReceiptTo(db, clientId, "client", receipt);
-  await sendReceiptTo(db, providerId, "provider", receipt);
+  await sendPaymentEmails(db, orderId);
 }
 
 async function sendReceiptTo(
@@ -89,4 +85,22 @@ async function sendReceiptTo(
   } catch (err) {
     console.error("[payments:receipt]", audience, (err as Error).message);
   }
+}
+
+/**
+ * Envoie (ou renvoie) les e-mails de paiement confirmé : reçu pour le client, commande
+ * payée pour le prestataire. Sert aussi au renvoi manuel depuis l'administration.
+ */
+export async function sendPaymentEmails(db: SupabaseClient, orderId: string): Promise<boolean> {
+  const { data: order } = await db
+    .from("orders")
+    .select("client_id, provider_id")
+    .eq("id", orderId)
+    .maybeSingle();
+  const receipt = await loadReceipt(db, orderId);
+  if (!order || !receipt) return false;
+
+  await sendReceiptTo(db, order.client_id, "client", receipt);
+  await sendReceiptTo(db, order.provider_id, "provider", receipt);
+  return true;
 }
