@@ -9,6 +9,7 @@ import { MarketingPopup } from "./marketing-popup";
 import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { ProvidersPreview } from "./providers-preview";
+import { TrustBar } from "./trust-bar";
 import { Faq } from "./faq";
 import { FinalCta } from "./cta";
 import { Footer } from "./footer";
@@ -21,6 +22,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
       <Header locale={locale} />
       <main>
         <Hero locale={locale} />
+        <TrustBar locale={locale} />
         <TalentStrip locale={locale} />
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />

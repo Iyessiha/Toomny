@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
+import { getShowcaseTexts } from "@/i18n/showcase";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { ShareButton } from "@/components/ui/share-button";
@@ -65,10 +66,11 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     { data: profile },
     { data: services },
     { data: reviews },
+    { data: portfolioRows },
     { data: statsRow },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
-    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages").eq("profile_id", id).maybeSingle(),
+    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages, business_type, company_name").eq("profile_id", id).maybeSingle(),
     supabase
       .from("services")
       .select("id, title, description, price_minor, currency, delivery_days, cover_url, tags, category:categories(slug)")
@@ -77,6 +79,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .order("created_at", { ascending: false })
       .limit(24),
     supabase.from("reviews").select("id, rating, comment, created_at, author_id").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("portfolio_items").select("id, kind, title, description, url").eq("provider_id", id).order("created_at", { ascending: true }).limit(12),
     supabase
       .from("provider_order_stats")
       .select("orders_received, orders_completed, reviews_count, stars_5, stars_4, stars_3, stars_2, stars_1")
@@ -130,6 +133,16 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       },
     };
   });
+  const st = getShowcaseTexts(locale);
+  const { data: memberRow } = await createAdminClient().from("profiles").select("created_at").eq("id", id).maybeSingle();
+  const memberSinceIso = (memberRow?.created_at as string | null) ?? null;
+  const portfolio = (portfolioRows ?? []) as { id: string; kind: string; title: string; description: string | null; url: string }[];
+  const kindLabel: Record<string, string> = { video: st.kindVideo, work: st.kindWork, link: st.kindLink };
+  const isCompany = profile?.business_type === "company";
+  const statusLabel = isCompany ? (profile?.company_name ? `${st.statusCompany} · ${profile.company_name}` : st.statusCompany) : st.statusIndividual;
+  const memberSince = memberSinceIso
+    ? new Date(memberSinceIso).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { month: "long", year: "numeric" })
+    : null;
   const reviewList = (reviews ?? []) as { id: string; rating: number; comment: string | null; created_at: string; author_id: string }[];
 
   // Noms des acheteurs (pseudo ou prénom + initiale). Résolution côté serveur :
@@ -213,6 +226,16 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                   </div>
                   {profile?.headline && <p className="mt-1 text-base text-[var(--subtle)]">{profile.headline}</p>}
                   {place && <p className="mt-1 text-sm text-[var(--subtle)]">{place}</p>}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isCompany ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]" : "bg-[var(--background)] text-[var(--subtle)]"}`}>
+                      {statusLabel}
+                    </span>
+                    {memberSince && (
+                      <span className="text-xs text-[var(--subtle)]">
+                        {locale === "en" ? "Member since" : "Membre depuis"} {memberSince}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -267,6 +290,32 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 </ul>
               )}
             </section>
+
+            {/* Réalisations : vidéos, travaux et liens fournis par le prestataire */}
+            {portfolio.length > 0 && (
+              <section>
+                <h2 className="font-display text-xl font-bold">{st.portfolioHeading}</h2>
+                <ul className="mt-5 grid gap-4 sm:grid-cols-2">
+                  {portfolio.map((item) => (
+                    <li key={item.id} className="flex flex-col gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5">
+                      <span className="w-fit rounded-full bg-[var(--color-brand-50)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--color-brand-700)]">
+                        {kindLabel[item.kind] ?? item.kind}
+                      </span>
+                      <p className="font-semibold">{item.title}</p>
+                      {item.description && <p className="text-sm leading-relaxed text-[var(--subtle)]">{item.description}</p>}
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="mt-auto text-sm font-semibold text-[var(--color-brand-600)] hover:underline"
+                      >
+                        {st.visit} →
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {/* Avis */}
             <section>

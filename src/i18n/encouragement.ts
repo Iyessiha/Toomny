@@ -28,6 +28,12 @@ const fr = {
       "Les clients choisissent les personnes qu'ils voient. Une photo nette, en lumière naturelle, rassure et fait la différence. Elle apparaît sur toutes vos prestations.",
     cta: "Ajouter ma photo",
   },
+  addPortfolio: {
+    title: "Montrez votre travail 🎬",
+    body: () =>
+      "Une vidéo ou une réalisation vaut mille mots. Ajoutez vos liens YouTube, TikTok ou Drive : les clients vous font davantage confiance.",
+    cta: "Ajouter une réalisation",
+  },
   publishFirst: {
     title: "Publiez votre première prestation 🚀",
     body: () => "Les clients cherchent des services comme le vôtre. Publiez-la, puis partagez-la.",
@@ -77,6 +83,12 @@ const en: typeof fr = {
     body: () =>
       "Clients choose the people they see. A sharp photo in natural light builds trust and makes the difference. It appears on all your services.",
     cta: "Add my photo",
+  },
+  addPortfolio: {
+    title: "Show your work 🎬",
+    body: () =>
+      "A video or a finished piece speaks louder than words. Add your YouTube, TikTok or Drive links: clients trust you more.",
+    cta: "Add a work",
   },
   publishFirst: {
     title: "Publish your first service 🚀",

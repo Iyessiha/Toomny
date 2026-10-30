@@ -1,0 +1,81 @@
+import type { Locale } from "@/i18n/dictionaries";
+
+const fr = {
+  pageTitle: "Ma vitrine",
+  pageSubtitle: "Montrez qui vous êtes et ce que vous avez déjà réalisé. Les clients font confiance à ce qu'ils peuvent vérifier.",
+  statusTitle: "Mon statut",
+  statusIndividual: "Particulier",
+  statusCompany: "Entreprise",
+  statusHelp: "Indiquez si vous travaillez à titre personnel ou au nom d'une entreprise. Cela apparaît sur votre profil.",
+  companyName: "Nom de l'entreprise",
+  save: "Enregistrer",
+  saved: "Enregistré",
+  saving: "Enregistrement…",
+  worksTitle: "Mes réalisations",
+  worksHelp: "Ajoutez vos vidéos, travaux ou pages (YouTube, Vimeo, TikTok, Drive, site web). Seuls les liens https sont acceptés.",
+  kindVideo: "Vidéo",
+  kindWork: "Travail",
+  kindLink: "Lien",
+  fieldTitle: "Titre",
+  fieldDescription: "Description (facultatif)",
+  fieldUrl: "Lien (https://…)",
+  add: "Ajouter la réalisation",
+  adding: "Ajout…",
+  remove: "Retirer",
+  empty: "Aucune réalisation pour le moment. Ajoutez votre première vidéo : c'est ce qui convainc le plus.",
+  limit: (n: number) => `Vous avez atteint la limite de ${n} réalisations.`,
+  visit: "Voir la réalisation",
+  portfolioHeading: "Réalisations",
+  errors: {
+    notProvider: "Espace réservé aux prestataires.",
+    companyName: "Indiquez le nom de l'entreprise (2 à 120 caractères).",
+    kind: "Choisissez un type de réalisation.",
+    title: "Titre requis (80 caractères maximum).",
+    description: "Description trop longue (300 caractères maximum).",
+    url: "Le lien doit commencer par https:// et être complet.",
+    save: "Enregistrement impossible. Réessayez.",
+  },
+};
+
+const en: typeof fr = {
+  pageTitle: "My showcase",
+  pageSubtitle: "Show who you are and what you have already delivered. Clients trust what they can check.",
+  statusTitle: "My status",
+  statusIndividual: "Individual",
+  statusCompany: "Company",
+  statusHelp: "Tell us whether you work as an individual or on behalf of a company. It appears on your profile.",
+  companyName: "Company name",
+  save: "Save",
+  saved: "Saved",
+  saving: "Saving…",
+  worksTitle: "My work",
+  worksHelp: "Add your videos, work or pages (YouTube, Vimeo, TikTok, Drive, website). Only https links are accepted.",
+  kindVideo: "Video",
+  kindWork: "Work",
+  kindLink: "Link",
+  fieldTitle: "Title",
+  fieldDescription: "Description (optional)",
+  fieldUrl: "Link (https://…)",
+  add: "Add the work",
+  adding: "Adding…",
+  remove: "Remove",
+  empty: "No work yet. Add your first video: it is what convinces the most.",
+  limit: (n: number) => `You have reached the limit of ${n} works.`,
+  visit: "View the work",
+  portfolioHeading: "Work",
+  errors: {
+    notProvider: "This space is for providers.",
+    companyName: "Enter the company name (2 to 120 characters).",
+    kind: "Choose a type of work.",
+    title: "Title required (80 characters maximum).",
+    description: "Description too long (300 characters maximum).",
+    url: "The link must start with https:// and be complete.",
+    save: "Could not save. Please try again.",
+  },
+};
+
+export type ShowcaseTexts = typeof fr;
+
+export function getShowcaseTexts(locale: Locale): ShowcaseTexts {
+  return locale === "en" ? en : fr;
+}

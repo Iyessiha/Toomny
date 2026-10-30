@@ -8,6 +8,7 @@ export type Encouragement =
   | { kind: "to_validate"; count: number }
   | { kind: "mission_done"; count: number }
   | { kind: "add_photo" }
+  | { kind: "add_portfolio" }
   | { kind: "publish_first" }
   | { kind: "share_services" }
   | { kind: "share_toomny" };
@@ -26,6 +27,8 @@ export type EncouragementInput = {
   activeServices: number;
   /** Le prestataire n'a pas encore de photo de profil. */
   photoMissing?: boolean;
+  /** Le prestataire n'a encore publié aucune réalisation. */
+  portfolioMissing?: boolean;
 };
 
 export function pickEncouragement(input: EncouragementInput): Encouragement | null {
@@ -33,6 +36,7 @@ export function pickEncouragement(input: EncouragementInput): Encouragement | nu
   if (input.toValidate > 0) return { kind: "to_validate", count: input.toValidate };
   if (input.isProvider && input.completed > 0) return { kind: "mission_done", count: input.completed };
   if (input.isProvider && input.photoMissing) return { kind: "add_photo" };
+  if (input.isProvider && input.portfolioMissing) return { kind: "add_portfolio" };
   if (input.orders === 0 && input.isProvider && input.activeServices === 0) return { kind: "publish_first" };
   if (input.orders === 0 && input.isProvider && input.activeServices > 0) return { kind: "share_services" };
   if (input.orders === 0) return { kind: "share_toomny" };

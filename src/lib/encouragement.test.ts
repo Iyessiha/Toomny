@@ -27,6 +27,10 @@ describe("pickEncouragement", () => {
     expect(pickEncouragement({ ...base, photoMissing: true, activeServices: 1 })).toEqual({ kind: "add_photo" });
   });
 
+  it("invite un prestataire sans réalisation à montrer son travail", () => {
+    expect(pickEncouragement({ ...base, photoMissing: false, portfolioMissing: true, activeServices: 1 })).toEqual({ kind: "add_portfolio" });
+  });
+
   it("ne demande pas de photo quand elle existe déjà", () => {
     expect(pickEncouragement({ ...base, photoMissing: false, orders: 2, activeServices: 1 })).toBeNull();
   });
