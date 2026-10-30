@@ -3,7 +3,7 @@ import { filterProviders, normalizeSearch, type ProviderCardData } from "./provi
 
 const base: ProviderCardData = {
   id: "1", name: "Fousseni Coulibaly", verified: true, country: "CI", avatar: null, headline: "Graphiste logo",
-  city: "Abidjan", skills: "Design, Logo", rating: null, ratingCount: 0, received: 0, services: 1, boosted: false,
+  city: "Abidjan", skills: "Design, Logo", rating: null, ratingCount: 0, received: 0, services: 1, boosted: false, businessType: "individual", companyName: null, fromPriceMinor: null,
 };
 
 describe("normalizeSearch", () => {
