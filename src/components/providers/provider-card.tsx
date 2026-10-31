@@ -1,10 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { formatMoney } from "@/lib/money";
-import { InitialsAvatar } from "@/components/providers/initials-avatar";
+import { ProviderAvatar } from "@/components/providers/provider-avatar";
 import { getCatalogTexts } from "@/i18n/catalog";
 import type { Locale } from "@/i18n/dictionaries";
-import { CATEGORY_ILLUSTRATIONS, type ProviderCardData } from "@/lib/provider-search";
+import type { ProviderCardData } from "@/lib/provider-search";
 
 /** Carte prestataire sobre : photo, nom, métier, indicateurs, compétences et tarif. */
 export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Locale }) {
@@ -15,19 +14,8 @@ export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Local
   return (
     <article className="flex h-full flex-col gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
       <div className="flex items-start gap-4">
-        {p.avatar ? (
-          <Image src={p.avatar} alt={p.name} width={56} height={56} className="h-14 w-14 flex-none rounded-full object-cover" />
-        ) : p.categorySlug && CATEGORY_ILLUSTRATIONS.has(p.categorySlug) ? (
-          <Image
-            src={`/images/categories/${p.categorySlug}.png`}
-            alt=""
-            width={56}
-            height={56}
-            className="h-14 w-14 flex-none rounded-xl"
-          />
-        ) : (
-          <InitialsAvatar name={p.name} size={56} />
-        )}
+        <ProviderAvatar name={p.name} photoUrl={p.avatar} categorySlug={p.categorySlug} size={56} />
+
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 truncate text-[15px] font-semibold">
             {p.name}

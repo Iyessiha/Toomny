@@ -13,6 +13,7 @@ import { visitorLocale } from "@/i18n/server-locale";
 import { detectLanguage } from "@/lib/detect-language";
 import { getServices } from "@/lib/catalog";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { ProviderAvatar } from "@/components/providers/provider-avatar";
 import { ReviewsList } from "@/components/catalog/reviews-list";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { ShareButton } from "@/components/ui/share-button";
@@ -286,23 +287,12 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   href={`/prestataires/${service.provider_id}`}
                   className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm transition-colors hover:border-[var(--color-brand-300)]"
                 >
-                  {providerProfile?.avatar_url ? (
-                    <Image
-                      src={providerProfile.avatar_url}
-                      alt={provider?.display_name ?? ""}
-                      width={28}
-                      height={28}
-                      className="h-7 w-7 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                      style={{ background: gradient }}
-                    >
-                      {providerInitials}
-                    </span>
-                  )}
+                  <ProviderAvatar
+                    name={provider?.display_name ?? t.detailProvider}
+                    photoUrl={providerProfile?.avatar_url}
+                    categorySlug={category?.slug}
+                    size={28}
+                  />
                   <span className="font-semibold">
                     {provider?.display_name ?? t.detailProvider}
                   </span>
@@ -370,23 +360,12 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                   {t.aboutProvider} {provider?.display_name ?? t.detailProvider}
                 </h2>
                 <div className="mt-5 flex items-start gap-4">
-                  {providerProfile?.avatar_url ? (
-                    <Image
-                      src={providerProfile.avatar_url}
-                      alt={provider?.display_name ?? ""}
-                      width={64}
-                      height={64}
-                      className="h-16 w-16 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white"
-                      style={{ background: gradient }}
-                    >
-                      {providerInitials}
-                    </span>
-                  )}
+                  <ProviderAvatar
+                    name={provider?.display_name ?? t.detailProvider}
+                    photoUrl={providerProfile?.avatar_url}
+                    categorySlug={category?.slug}
+                    size={64}
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-lg font-semibold">{provider?.display_name}</p>
                     {providerProfile.headline && (
