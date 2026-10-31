@@ -17,7 +17,21 @@ export type ProviderCardData = {
   companyName: string | null;
   /** Prix le plus bas parmi les prestations actives, en unités mineures XOF. */
   fromPriceMinor: number | null;
+  /** Catégorie la plus fréquente parmi les prestations actives (illustration de repli). */
+  categorySlug?: string | null;
 };
+
+/** Catégories qui ont une illustration PNG dans public/images/categories. */
+export const CATEGORY_ILLUSTRATIONS = new Set([
+  "design-graphique",
+  "developpement-web",
+  "community-management",
+  "montage-video",
+  "redaction-traduction",
+  "marketing-digital",
+  "comptabilite-admin",
+  "photographie",
+]);
 
 /** Mots de la recherche, normalisés : insensibles à la casse et aux accents. */
 export function normalizeSearch(value: string): string {
