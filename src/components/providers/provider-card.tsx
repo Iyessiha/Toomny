@@ -1,14 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { formatMoney } from "@/lib/money";
+import { InitialsAvatar } from "@/components/providers/initials-avatar";
 import { getCatalogTexts } from "@/i18n/catalog";
 import type { Locale } from "@/i18n/dictionaries";
-import type { ProviderCardData } from "@/lib/provider-search";
+import { CATEGORY_ILLUSTRATIONS, type ProviderCardData } from "@/lib/provider-search";
 
 /** Carte prestataire sobre : photo, nom, métier, indicateurs, compétences et tarif. */
 export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Locale }) {
   const t = getCatalogTexts(locale);
-  const initials = p.name.slice(0, 2).toUpperCase();
   const place = [p.city, p.country].filter(Boolean).join(", ");
   const skills = p.skills.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 4);
 
@@ -17,10 +17,16 @@ export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Local
       <div className="flex items-start gap-4">
         {p.avatar ? (
           <Image src={p.avatar} alt={p.name} width={56} height={56} className="h-14 w-14 flex-none rounded-full object-cover" />
+        ) : p.categorySlug && CATEGORY_ILLUSTRATIONS.has(p.categorySlug) ? (
+          <Image
+            src={`/images/categories/${p.categorySlug}.png`}
+            alt=""
+            width={56}
+            height={56}
+            className="h-14 w-14 flex-none rounded-xl"
+          />
         ) : (
-          <span aria-hidden className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-semibold text-[var(--color-brand-700)]">
-            {initials}
-          </span>
+          <InitialsAvatar name={p.name} size={56} />
         )}
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 truncate text-[15px] font-semibold">

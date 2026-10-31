@@ -12,7 +12,11 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const { data: active } = await supabase.from("services").select("provider_id, price_minor").eq("status", "active").limit(2000);
+  const { data: active } = await supabase
+    .from("services")
+    .select("provider_id, price_minor, category:categories(slug)")
+    .eq("status", "active")
+    .limit(2000);
   const ids = [...new Set((active ?? []).map((s) => s.provider_id as string))].slice(0, MAX_PROVIDERS);
   if (ids.length === 0) return [];
 
@@ -34,11 +38,33 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
     countById.set(id, (countById.get(id) ?? 0) + 1);
   }
   const fromById = new Map<string, number>();
+  const categoryCount = new Map<string, Map<string, number>>();
   for (const row of active ?? []) {
     const id = row.provider_id as string;
     const price = Number(row.price_minor);
     const current = fromById.get(id);
     if (current === undefined || price < current) fromById.set(id, price);
+
+    const rawCategory = row.category as { slug?: string } | { slug?: string }[] | null;
+    const slug = Array.isArray(rawCategory) ? rawCategory[0]?.slug : rawCategory?.slug;
+    if (slug) {
+      const counts = categoryCount.get(id) ?? new Map<string, number>();
+      counts.set(slug, (counts.get(slug) ?? 0) + 1);
+      categoryCount.set(id, counts);
+    }
+  }
+  /** Catégorie principale : la plus fréquente, à égalité la première rencontrée. */
+  const mainCategoryById = new Map<string, string>();
+  for (const [id, counts] of categoryCount) {
+    let best: string | null = null;
+    let bestCount = 0;
+    for (const [slug, n] of counts) {
+      if (n > bestCount) {
+        best = slug;
+        bestCount = n;
+      }
+    }
+    if (best) mainCategoryById.set(id, best);
   }
 
   const rows = ids
@@ -63,6 +89,7 @@ export async function listPublicProviders(fallbackName: string): Promise<Provide
         businessType: p?.business_type === "company" ? "company" : "individual",
         companyName: (p?.company_name as string | null) ?? null,
         fromPriceMinor: fromById.get(id) ?? null,
+        categorySlug: mainCategoryById.get(id) ?? null,
       };
     })
     .filter((r): r is ProviderCardData => r !== null);

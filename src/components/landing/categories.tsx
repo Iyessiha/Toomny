@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getLanding } from "@/content/landing";
-import { categoryMeta } from "@/lib/categories";
 import type { Locale } from "@/i18n/dictionaries";
 
 /** Catégories de services : cartes sobres, icône de marque, description et lien vers le catalogue filtré. */
@@ -23,16 +23,19 @@ export function Categories({ locale = "fr" }: { locale?: Locale }) {
 
         <ul className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {t.items.map((c) => {
-            const Icon = categoryMeta(c.slug)?.icon;
             return (
               <li key={c.slug} data-reveal>
                 <Link
                   href={`/services?categorie=${c.slug}`}
                   className="group flex h-full items-start gap-4 rounded-xl border border-[var(--border)] bg-[var(--background)] p-5 transition-colors hover:border-[var(--color-brand-500)]"
                 >
-                  <span className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-700)]">
-                    {Icon && <Icon className="h-5 w-5" aria-hidden />}
-                  </span>
+                  <Image
+                    src={`/images/categories/${c.slug}.png`}
+                    alt=""
+                    width={44}
+                    height={44}
+                    className="h-11 w-11 flex-none rounded-lg"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center justify-between gap-2">
                       <span className="truncate font-semibold text-[var(--foreground)]">{c.name}</span>

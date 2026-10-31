@@ -11,6 +11,7 @@ import { getCatalogTexts } from "@/i18n/catalog";
 import { getShowcaseTexts } from "@/i18n/showcase";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { InitialsAvatar } from "@/components/providers/initials-avatar";
 import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
 import { formatMoney } from "@/lib/money";
@@ -200,9 +201,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               {profile?.avatar_url ? (
                 <Image src={profile.avatar_url} alt={person.display_name ?? ""} width={96} height={96} className="h-24 w-24 flex-none rounded-full object-cover" />
               ) : (
-                <span aria-hidden className="flex h-24 w-24 flex-none items-center justify-center rounded-full bg-[var(--color-brand-100)] text-2xl font-bold text-[var(--color-brand-700)]">
-                  {initials}
-                </span>
+                <InitialsAvatar name={person.display_name ?? t.detailProvider} size={96} />
               )}
               <div className="min-w-0">
                 <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold sm:text-3xl">
