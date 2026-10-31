@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useState, useRef, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -711,15 +712,7 @@ export function ServiceManage({
               </div>
 
               <div>
-                <label htmlFor="edit-title" className="text-sm font-medium">{t.form.title}</label>
-                <input
-                  id="edit-title"
-                  name="title"
-                  required
-                  maxLength={120}
-                  defaultValue={editing.title}
-                  className={inputClass}
-                />
+                <TitleField id="edit-title" label={t.form.title} defaultTitle={editing.title} inputClassName={inputClass} />
               </div>
 
               <div>

@@ -1,5 +1,6 @@
 "use server";
 
+import { stripTitlePrefix, withTitlePrefix } from "@/lib/service-title";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
@@ -114,7 +115,8 @@ export async function editService(formData: FormData): Promise<{ error?: string 
   const id = String(formData.get("serviceId") ?? "");
   if (!UUID_RE.test(id)) return { error: "invalid id" };
 
-  const title = String(formData.get("title") ?? "").trim();
+  const titleRest = stripTitlePrefix(String(formData.get("title") ?? ""));
+  const title = titleRest ? withTitlePrefix(titleRest) : "";
   const description = String(formData.get("description") ?? "").trim();
   const priceRaw = Number(formData.get("price_minor"));
   const deliveryRaw = Number(formData.get("delivery_days"));

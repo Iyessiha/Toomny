@@ -1,5 +1,6 @@
 "use server";
 
+import { stripTitlePrefix, TITLE_REST_MAX, withTitlePrefix } from "@/lib/service-title";
 import { revalidatePath } from "next/cache";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -29,14 +30,15 @@ export async function createService(formData: FormData) {
   const e = getDashboardTexts(user.preferredLocale).services.errors;
   if (!isProvider(user.role)) return { error: e.notProvider };
 
-  const title = String(formData.get("title") ?? "").trim();
+  const rest = stripTitlePrefix(String(formData.get("title") ?? ""));
+  const title = withTitlePrefix(rest);
   const description = String(formData.get("description") ?? "").trim();
   const categoryId = String(formData.get("categoryId") ?? "");
   const priceRaw = String(formData.get("price") ?? "").trim();
   const deliveryDays = Number(formData.get("deliveryDays"));
   const coverUrl = String(formData.get("coverUrl") ?? "").trim() || null;
 
-  if (!title || title.length > 120) return { error: e.title };
+  if (!rest || rest.length > TITLE_REST_MAX) return { error: e.title };
   if (description.length < 30 || description.length > 3000) {
     return { error: e.description };
   }
@@ -152,7 +154,8 @@ export async function updateService(id: string, formData: FormData) {
   if (!isProvider(user.role)) return { error: e.notProvider };
   if (!UUID_RE.test(id)) return { error: e.notOwner };
 
-  const title = String(formData.get("title") ?? "").trim();
+  const rest = stripTitlePrefix(String(formData.get("title") ?? ""));
+  const title = withTitlePrefix(rest);
   const description = String(formData.get("description") ?? "").trim();
   const categoryId = String(formData.get("categoryId") ?? "");
   const priceRaw = String(formData.get("price") ?? "").trim();
@@ -167,7 +170,7 @@ export async function updateService(id: string, formData: FormData) {
     ? tagsRaw.split(",").map((t) => t.trim().slice(0, 30)).filter(Boolean).slice(0, 10)
     : [];
 
-  if (!title || title.length > 120) return { error: e.title };
+  if (!rest || rest.length > TITLE_REST_MAX) return { error: e.title };
   if (description.length < 30 || description.length > 3000) return { error: e.description };
   if (!categoryId) return { error: e.category };
   if (!Number.isInteger(deliveryDays) || deliveryDays < 1 || deliveryDays > 365) return { error: e.deliveryRange };

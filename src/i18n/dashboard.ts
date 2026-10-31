@@ -139,7 +139,7 @@ const fr = {
     deleted: "Prestation supprimée.",
     form: {
       title: "Titre",
-      titlePlaceholder: "Création de logo en 3 concepts",
+      titlePlaceholder: "créer un logo en trois propositions",
       category: "Catégorie",
       choose: "Choisir…",
       description: "Description",
@@ -553,7 +553,7 @@ const en: DashboardTexts = {
     deleted: "Service deleted.",
     form: {
       title: "Title",
-      titlePlaceholder: "Logo design in 3 concepts",
+      titlePlaceholder: "create a logo in three concepts",
       category: "Category",
       choose: "Choose…",
       description: "Description",
