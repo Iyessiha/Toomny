@@ -31,7 +31,39 @@ export const CATEGORY_ILLUSTRATIONS = new Set([
   "marketing-digital",
   "comptabilite-admin",
   "photographie",
+  "musique-audio",
+  "mode-textile-artisanat",
+  "evenementiel",
+  "formation-coaching",
+  "intelligence-artificielle",
+  "business-conseil",
+  "traduction-interpretation",
+  "voix-off-podcast",
+  "animation-motion",
+  "developpement-mobile",
+  "maintenance-reparation",
+  "cours-soutien-scolaire",
+  "gastronomie-traiteur",
+  "bien-etre-sante",
+  "immobilier",
 ]);
+
+/** Catégorie la plus fréquente parmi des prestations ; à égalité, la première rencontrée. */
+export function mainCategory(slugs: Array<string | null | undefined>): string | null {
+  const counts = new Map<string, number>();
+  for (const slug of slugs) {
+    if (slug) counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+  let best: string | null = null;
+  let bestCount = 0;
+  for (const [slug, n] of counts) {
+    if (n > bestCount) {
+      best = slug;
+      bestCount = n;
+    }
+  }
+  return best;
+}
 
 /** Mots de la recherche, normalisés : insensibles à la casse et aux accents. */
 export function normalizeSearch(value: string): string {

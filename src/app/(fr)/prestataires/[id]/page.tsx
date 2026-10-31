@@ -12,6 +12,7 @@ import { getShowcaseTexts } from "@/i18n/showcase";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
 import { InitialsAvatar } from "@/components/providers/initials-avatar";
+import { CATEGORY_ILLUSTRATIONS, mainCategory } from "@/lib/provider-search";
 import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
 import { formatMoney } from "@/lib/money";
@@ -88,6 +89,14 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .eq("provider_id", id)
       .maybeSingle(),
   ]);
+
+  // Illustration de repli : catégorie principale des prestations actives.
+  const profileCategory = mainCategory(
+    (services ?? []).map((s) => {
+      const raw = s.category as { slug?: string } | { slug?: string }[] | null;
+      return Array.isArray(raw) ? raw[0]?.slug : raw?.slug;
+    }),
+  );
 
   // Fallback : si le prestataire n'est pas dans la vue (role mal assigné),
   // on le cherche via le client admin tant qu'il a un provider_profile actif.
@@ -200,6 +209,8 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
             <header className="flex items-start gap-5">
               {profile?.avatar_url ? (
                 <Image src={profile.avatar_url} alt={person.display_name ?? ""} width={96} height={96} className="h-24 w-24 flex-none rounded-full object-cover" />
+              ) : profileCategory && CATEGORY_ILLUSTRATIONS.has(profileCategory) ? (
+                <Image src={`/images/categories/${profileCategory}.png`} alt="" width={96} height={96} className="h-24 w-24 flex-none rounded-2xl" />
               ) : (
                 <InitialsAvatar name={person.display_name ?? t.detailProvider} size={96} />
               )}
