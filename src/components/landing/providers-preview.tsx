@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { ProviderCard } from "@/components/providers/provider-card";
+import { ProvidersSlider } from "@/components/providers/provider-slider";
 import { listPublicProviders } from "@/lib/provider-cards";
 import { getCatalogTexts } from "@/i18n/catalog";
 import type { Locale } from "@/i18n/dictionaries";
 
-/** Aperçu des prestataires sur la landing : boostés et mieux notés d'abord, lien vers la liste complète. */
+const MAX_IN_SLIDER = 8;
+
+/** Aperçu des prestataires sur la landing : carrousel lent, boostés et mieux notés d'abord. */
 export async function ProvidersPreview({ locale }: { locale: Locale }) {
   const t = getCatalogTexts(locale);
-  const providers = (await listPublicProviders(t.detailProvider)).slice(0, 6);
+  const providers = (await listPublicProviders(t.detailProvider)).slice(0, MAX_IN_SLIDER);
   if (providers.length === 0) return null;
+
+  const prev = locale === "en" ? "Previous" : "Précédent";
+  const next = locale === "en" ? "Next" : "Suivant";
 
   return (
     <section className="border-t border-[var(--border)] bg-[var(--background)]">
@@ -24,13 +30,13 @@ export async function ProvidersPreview({ locale }: { locale: Locale }) {
           </Link>
         </div>
 
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {providers.map((p) => (
-            <li key={p.id} data-reveal>
-              <ProviderCard p={p} locale={locale} />
-            </li>
-          ))}
-        </ul>
+        <div data-reveal className="mt-10">
+          <ProvidersSlider label={t.providersPageTitle} prevLabel={prev} nextLabel={next}>
+            {providers.map((p) => (
+              <ProviderCard key={p.id} p={p} locale={locale} />
+            ))}
+          </ProvidersSlider>
+        </div>
       </div>
     </section>
   );
