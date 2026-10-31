@@ -8,12 +8,17 @@ const AUTO_MS = 5000;
 
 /**
  * Carrousel des garanties : défilement tactile et souris, flèches, points, et défilement
- * automatique qui s'arrête dès que l'utilisateur interagit. Même comportement sur mobile et ordinateur.
+ * automatique qui s'arrête dès que l'utilisateur interagit. Seule la liste horizontale défile,
+ * jamais la page.
  */
 export function TrustCarousel({ items, label, prevLabel, nextLabel }: { items: TrustPoint[]; label: string; prevLabel: string; nextLabel: string }) {
   const trackRef = useRef<HTMLUListElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const indexRef = useRef(0);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
 
   function go(next: number) {
     const track = trackRef.current;
@@ -21,15 +26,18 @@ export function TrustCarousel({ items, label, prevLabel, nextLabel }: { items: T
     const count = items.length;
     const target = ((next % count) + count) % count;
     const child = track.children[target] as HTMLElement | undefined;
-    child?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    if (child) track.scrollTo({ left: child.offsetLeft - track.offsetLeft, behavior: "smooth" });
     setIndex(target);
   }
 
+  // Un seul minuteur, relancé seulement quand la pause ou le nombre d'éléments change.
   useEffect(() => {
     if (paused || items.length < 2) return;
-    const timer = window.setInterval(() => go(index + 1), AUTO_MS);
+    const timer = window.setInterval(() => go(indexRef.current + 1), AUTO_MS);
     return () => window.clearInterval(timer);
-  });
+    // go est stable pour ce cycle de vie : il ne dépend que de items.length.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paused, items.length]);
 
   function onScroll() {
     const track = trackRef.current;
@@ -53,12 +61,12 @@ export function TrustCarousel({ items, label, prevLabel, nextLabel }: { items: T
       <ul
         ref={trackRef}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((p) => (
           <li
             key={p.title}
-            className="flex w-[82%] shrink-0 snap-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.7rem)]"
+            className="flex w-[82%] shrink-0 snap-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.7rem)]"
           >
             <span aria-hidden className="mt-0.5 flex h-7 w-7 flex-none items-center justify-center rounded-full bg-[var(--color-brand-500)] text-xs font-bold text-white">✓</span>
             <div>
@@ -70,14 +78,7 @@ export function TrustCarousel({ items, label, prevLabel, nextLabel }: { items: T
       </ul>
 
       <div className="mt-4 flex items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => go(index - 1)}
-          aria-label={prevLabel}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-sm hover:border-[var(--color-brand-500)]"
-        >
-          ←
-        </button>
+        <button type="button" onClick={() => go(index - 1)} aria-label={prevLabel} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-sm hover:border-[var(--foreground)]">←</button>
         <div className="flex items-center gap-1.5">
           {items.map((p, i) => (
             <button
@@ -90,14 +91,7 @@ export function TrustCarousel({ items, label, prevLabel, nextLabel }: { items: T
             />
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => go(index + 1)}
-          aria-label={nextLabel}
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-sm hover:border-[var(--color-brand-500)]"
-        >
-          →
-        </button>
+        <button type="button" onClick={() => go(index + 1)} aria-label={nextLabel} className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border)] text-sm hover:border-[var(--foreground)]">→</button>
       </div>
     </div>
   );
