@@ -26,6 +26,7 @@ const fr = {
   limit: (n: number) => `Vous avez atteint la limite de ${n} réalisations.`,
   visit: "Voir la réalisation",
   portfolioHeading: "Réalisations",
+  ordersReceivedShort: "commandes",
   errors: {
     notProvider: "Espace réservé aux prestataires.",
     companyName: "Indiquez le nom de l'entreprise (2 à 120 caractères).",
@@ -63,6 +64,7 @@ const en: typeof fr = {
   limit: (n: number) => `You have reached the limit of ${n} works.`,
   visit: "View the work",
   portfolioHeading: "Work",
+  ordersReceivedShort: "orders",
   errors: {
     notProvider: "This space is for providers.",
     companyName: "Enter the company name (2 to 120 characters).",
