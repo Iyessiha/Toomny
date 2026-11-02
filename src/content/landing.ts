@@ -30,12 +30,12 @@ const fr = {
           lead: "Payez en FCFA par mobile money. Votre paiement sera conservé jusqu'à la livraison, dès l'ouverture des paiements. Des prestataires d'Afrique de l'Ouest, dans votre langue et votre fuseau horaire.",
           cta: "Trouver un prestataire",
           href: "/services",
-          points: ["0 % de commission Toomny côté client", "Paiement conservé jusqu'à validation", "Litige arbitré en français"],
+          points: ["0 % de commission Toomny côté client", "Paiement conservé dès l'ouverture, jusqu'à validation", "Litige arbitré en français"],
         },
         provider: {
           label: "Je propose mes services",
           title: ["Vendez vos services,", "soyez payé chez vous"],
-          lead: "Vous gardez entre 88 % et 96 % de ce que vous facturez, versé sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
+          lead: "Vous gardez entre 90 % et 97 % de ce que vous facturez, versé sur votre Wave ou votre Orange Money. Sans société américaine, sans Payoneer.",
           cta: "Proposer mes services",
           href: "/auth?role=provider",
           points: ["Dès 3 % de commission", "Versement en mobile money", "Sans engagement"],
@@ -65,7 +65,7 @@ const fr = {
       tabs: { client: "Je recrute", provider: "Je travaille" },
       client: [
         { title: "Choisissez une prestation", body: "Parcourez le catalogue : chaque prestation affiche son prix et son délai. Pas de cahier des charges à rédiger, pas d'appel d'offres à gérer." },
-        { title: "Payez, le paiement est conservé", body: "Vous réglez en FCFA par mobile money. Le paiement est conservé jusqu'à votre validation : le prestataire sait qu'il sera payé, vous gardez la main." },
+        { title: "Payez, le paiement sera conservé", body: "Vous réglez en FCFA par mobile money ou par carte. Une fois les paiements ouverts, le montant est conservé jusqu'à votre validation : le prestataire sait qu'il sera payé, vous gardez la main." },
         { title: "Validez la livraison", body: "Le travail livré vous convient, vous validez et les fonds partent. Un problème ? Vous ouvrez un litige, arbitré en français, sans délai interminable." },
       ],
       provider: [
@@ -160,7 +160,7 @@ const fr = {
     },
     security: {
       eyebrow: "Sécurité",
-      title: "Votre argent est conservé, pas confié",
+      title: "Votre argent sera conservé, pas confié",
       lead: "La confiance ne se décrète pas sur une page d'accueil. Elle vient du fait que ni le client ni le prestataire n'a besoin de faire confiance à l'autre.",
       flowTitle: "Le parcours d'un paiement",
       flow: [
@@ -180,7 +180,7 @@ const fr = {
       title: "Questions fréquentes",
       items: [
         { q: "Faut-il créer une société américaine pour être payé ?", a: "Non. C'est précisément ce que Toomny évite. Vous êtes payé en tant que personne, sur votre compte mobile money, dans votre pays. Aucune LLC, aucun EIN, aucun compte Payoneer." },
-        { q: "Quels moyens de paiement acceptez-vous ?", a: "Wave, Orange Money, MTN MoMo et Moov Money, en FCFA. Nous ouvrons d'autres canaux au fur et à mesure de notre extension en Afrique de l'Ouest." },
+        { q: "Quels moyens de paiement acceptez-vous ?", a: "Mobile money en FCFA (Wave, Orange Money, MTN MoMo et Moov Money) et carte bancaire. Nous ouvrons d'autres canaux au fur et à mesure de notre extension en Afrique de l'Ouest." },
         { q: "Qui détient l'argent pendant la mission ?", a: "Un établissement agréé pour la détention de fonds, partenaire de Toomny une fois les paiements ouverts. Nous n'avons jamais les fonds sur nos propres comptes : nous ne faisons que déclencher leur libération une fois le travail validé." },
         { q: "Combien ça coûte ?", a: "Toomny ne facture aucune commission aux clients. Des frais de traitement mobile money de 2,5 % + 100 XOF s'appliquent à chaque paiement pour couvrir le coût du virement. Pour les prestataires, quatre plans sans engagement : Débutant (gratuit, 10 % de commission, 2 services publiés), Essentiel (10 000 FCFA/mois, 8 %, 8 services), Pro (15 000 FCFA/mois, 5 %, 20 services), Expert (25 000 FCFA/mois, 3 %, 50 services). Ni inscription, ni candidature payante." },
         { q: "Que se passe-t-il si le travail ne convient pas ?", a: "Vous ouvrez un litige avant de valider. Un arbitre humain tranche à partir des échanges et des livrables conservés sur la plateforme, et les fonds sont libérés ou rendus en conséquence." },
@@ -194,7 +194,7 @@ const fr = {
       secondary: "Parcourir le catalogue",
     },
     footer: {
-      blurb: "La marketplace de talents d'Afrique de l'Ouest. Paiement en mobile money, paiements conservés jusqu'à la livraison.",
+      blurb: "La marketplace de talents d'Afrique de l'Ouest. Paiements conservés jusqu'à la livraison, dès l'ouverture des paiements.",
       tagline: "Travailler ensemble, grandir ensemble.",
       columns: [
         { title: "Plateforme", links: [["Catalogue", "/services"], ["Comment ça marche", "/comment-ca-marche"], ["Tarifs", "/tarifs"], ["Sécurité", "/securite"]] },
@@ -228,12 +228,12 @@ const en: LandingContent = {
           lead: "Pay in CFA francs by mobile money. Your payment is held until delivery once payments open. Providers across West Africa, in your language and your time zone.",
           cta: "Find a provider",
           href: "/services",
-          points: ["0% Toomny commission for buyers", "Payment held until you approve", "Disputes settled locally"],
+          points: ["0% Toomny commission for buyers", "Payment held once payments open", "Disputes settled locally"],
         },
         provider: {
           label: "I'm selling my services",
           title: ["Sell your services,", "get paid where you live"],
-          lead: "You keep between 88% and 96% of what you charge, paid to your Wave or Orange Money. No US company, no Payoneer.",
+          lead: "You keep between 90% and 97% of what you charge, paid to your Wave or Orange Money. No US company, no Payoneer.",
           cta: "Offer my services",
           href: "/auth?role=provider",
           points: ["From 3% commission", "Paid by mobile money", "No commitment"],
@@ -263,7 +263,7 @@ const en: LandingContent = {
       tabs: { client: "I'm hiring", provider: "I'm working" },
       client: [
         { title: "Pick a service", body: "Browse the catalogue: every service shows its price and its delivery time. No brief to write, no job post to manage." },
-        { title: "Pay, and the payment is held", body: "You pay in CFA francs by mobile money. The payment is held until you approve: the provider knows they will be paid, and you stay in control." },
+        { title: "Pay, and the payment will be held", body: "You pay in CFA francs by mobile money or by card. Once payments open, the payment is held until you approve: the provider knows they will be paid, and you stay in control." },
         { title: "Approve the delivery", body: "Happy with the work? Approve it and the funds are released. A problem? Open a dispute, settled by a human, without endless delays." },
       ],
       provider: [
@@ -358,7 +358,7 @@ const en: LandingContent = {
     },
     security: {
       eyebrow: "Security",
-      title: "Your money is held, not handed over",
+      title: "Your money will be held, not handed over",
       lead: "Trust isn't something a homepage can claim. It comes from neither side having to trust the other in the first place.",
       flowTitle: "How a payment travels",
       flow: [
@@ -378,7 +378,7 @@ const en: LandingContent = {
       title: "Frequently asked questions",
       items: [
         { q: "Do I need a US company to get paid?", a: "No. That is exactly what Toomny removes. You are paid as an individual, to your mobile money account, in your own country. No LLC, no EIN, no Payoneer account." },
-        { q: "Which payment methods do you accept?", a: "Wave, Orange Money, MTN MoMo and Moov Money, in CFA francs. We add more channels as we expand across West Africa." },
+        { q: "Which payment methods do you accept?", a: "Mobile money in CFA francs (Wave, Orange Money, MTN MoMo and Moov Money) and bank card. We add more channels as we expand across West Africa." },
         { q: "Who holds the money during a job?", a: "An institution licensed to hold funds, partnered with Toomny once payments open. We never hold the money in our own accounts: we only trigger its release once the work is approved." },
         { q: "What does it cost?", a: "Toomny charges buyers no commission. A mobile money processing fee of 2.5% + 100 XOF applies to each payment to cover the cost of the transaction. For providers, four no-commitment plans: Starter (free, 10% commission, 2 published services), Essential (10,000 FCFA/month, 8%, 8 services), Pro (15,000 FCFA/month, 5%, 20 services), Expert (25,000 FCFA/month, 3%, 50 services). No sign-up fee, no paid application." },
         { q: "What if the work isn't right?", a: "You open a dispute before approving. A human arbitrator decides based on the messages and deliverables kept on the platform, and the funds are released or returned accordingly." },
@@ -392,7 +392,7 @@ const en: LandingContent = {
       secondary: "Browse the catalogue",
     },
     footer: {
-      blurb: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
+      blurb: "The talent marketplace for West Africa. Payments held until delivery, once payments open.",
       tagline: "Work together, grow together.",
       columns: [
         { title: "Platform", links: [["Catalogue", "/services"], ["How it works", "/comment-ca-marche"], ["Pricing", "/tarifs"], ["Security", "/securite"]] },

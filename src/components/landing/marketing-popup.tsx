@@ -35,7 +35,7 @@ const CONTENT = {
     fr: {
       eyebrow: "Rejoignez Toomny",
       title: "Trouvez un talent en 5 minutes — ou vendez vos services dès aujourd'hui",
-      lead: "Paiement conservé jusqu'à livraison. Auto-validation 72 h. Sans société américaine, sans Payoneer.",
+      lead: "Paiement conservé jusqu'à livraison, dès l'ouverture des paiements. Auto-validation 72 h. Sans société américaine, sans Payoneer.",
       primaryCta: "Créer un compte gratuit",
       primaryHref: "/auth",
       secondaryCta: "Explorer le catalogue",
@@ -44,7 +44,7 @@ const CONTENT = {
     en: {
       eyebrow: "Join Toomny",
       title: "Find talent in 5 minutes — or sell your services starting today",
-      lead: "Payment held until delivery. 72-hour auto-release. No US company, no Payoneer.",
+      lead: "Payment held until delivery once payments open. 72-hour auto-release. No US company, no Payoneer.",
       primaryCta: "Create a free account",
       primaryHref: "/auth",
       secondaryCta: "Browse the catalogue",

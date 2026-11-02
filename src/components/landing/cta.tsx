@@ -86,7 +86,7 @@ export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
               {/* Mini stats */}
               <div className="mt-10 flex flex-wrap gap-8 lg:justify-start justify-center">
                 {[
-                  { n: "10 %", label: locale === "fr" ? "de commission" : "commission" },
+                  { n: "3 %", label: locale === "fr" ? "commission minimum" : "minimum commission" },
                   { n: "0 %", label: locale === "fr" ? "côté client" : "client fee" },
                   { n: "72 h", label: locale === "fr" ? "validation auto" : "auto-approval" },
                 ].map(({ n, label }) => (

@@ -265,20 +265,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .btn-landing-primary:active { transform: scale(0.97); }
 
-/* Animation pour le point "en ligne" */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.online-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
 
 /* Variables ombre premium. */
 :root {
@@ -546,18 +532,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .input:focus { border-color: var(--color-brand-500); }
 .input::placeholder { color: var(--subtle); }
-
-/* ── Talent Strip ────────────────────────────────────────────────────────── */
-@keyframes talent-scroll {
-  from { transform: translateX(0) }
-  to   { transform: translateX(-50%) }
-}
-.talent-track {
-  display: flex;
-  gap: 0.875rem;
-  animation: talent-scroll 42s linear infinite;
-}
-.talent-track:hover { animation-play-state: paused; }
 
 /* ── Pricing 3D cards ────────────────────────────────────────────────────── */
 .pricing-scene { perspective: 1400px; }
