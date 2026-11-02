@@ -338,7 +338,7 @@ export function ConversationPane({
   }
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] lg:h-full">
+    <section className="flex h-[calc(100dvh-14rem)] min-h-[420px] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] lg:h-full lg:min-h-0">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] p-4">
         <div className="min-w-0">
           <Link href={backHref} className="mb-1 inline-block text-xs font-medium text-[var(--subtle)] hover:text-[var(--foreground)] lg:hidden">
@@ -380,7 +380,7 @@ export function ConversationPane({
               {readiness.canPublish ? t.canPublish : t.cannotPublish}
             </span>
           </summary>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 max-h-56 space-y-2 overflow-y-auto pr-1">
             {readiness.checks.map((c) => (
               <li key={c.key} className="flex items-start justify-between gap-3 text-sm">
                 <div className="min-w-0">
@@ -414,7 +414,7 @@ export function ConversationPane({
         </details>
       )}
 
-      <div ref={scroller} className="min-h-[260px] flex-1 space-y-4 overflow-y-auto bg-[var(--surface)] p-4 lg:min-h-0">
+      <div ref={scroller} className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-[var(--surface)] p-4">
         {messages.map((m) => {
           const mine = m.role === viewer;
           return (
