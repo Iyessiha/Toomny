@@ -26,11 +26,11 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <TalentStrip locale={locale} />
         <Categories locale={locale} />
         <FeaturedServices locale={locale} />
-        <HowItWorks locale={locale} />
-        <BoostSection locale={locale} />
-        <Pricing locale={locale} />
-        <Security locale={locale} />
         <ProvidersPreview locale={locale} />
+        <HowItWorks locale={locale} />
+        <Security locale={locale} />
+        <Pricing locale={locale} />
+        <BoostSection locale={locale} />
         <Faq locale={locale} />
         <FinalCta locale={locale} />
       </main>
