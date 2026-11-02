@@ -133,7 +133,12 @@ async function route(request: NextRequest, requestHeaders: Headers): Promise<Nex
     },
   );
 
-  await supabase.auth.getUser();
+  // Sans cookie de session Supabase (visiteur anonyme, robots), il n'y a rien à rafraîchir :
+  // on évite un aller-retour vers Supabase Auth à chaque requête.
+  const hasSessionCookie = request.cookies.getAll().some(({ name }) => /^sb-.+-auth-token/.test(name));
+  if (hasSessionCookie) {
+    await supabase.auth.getUser();
+  }
 
   // Posé en dernier : le rafraîchissement de session ci-dessus recrée la réponse.
   if (syncLocale && pathLocale) {
