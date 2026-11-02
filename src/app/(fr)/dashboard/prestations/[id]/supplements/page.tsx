@@ -23,7 +23,7 @@ export default async function ServiceAddonsPage({ params }: { params: Promise<{ 
   if (!UUID_RE.test(id)) notFound();
 
   const locale = user.preferredLocale;
-  const t = getAddonTexts(locale);
+  const { limit: limitText, ...t } = getAddonTexts(locale);
   const nav = getDashboardTexts(locale).nav;
 
   const db = createAdminClient();
@@ -68,7 +68,7 @@ export default async function ServiceAddonsPage({ params }: { params: Promise<{ 
           </Link>
         </Notice>
       ) : (
-        <AddonsManager serviceId={id} addons={list} texts={t} limit={MAX_ADDONS_PER_SERVICE} />
+        <AddonsManager serviceId={id} addons={list} texts={t} limit={MAX_ADDONS_PER_SERVICE} limitLabel={limitText(MAX_ADDONS_PER_SERVICE)} />
       )}
     </DashboardShell>
   );

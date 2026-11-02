@@ -17,7 +17,7 @@ export default async function ShowcasePage() {
   const user = await requireAuth();
   if (!isProvider(user.role)) redirect("/dashboard");
   const locale = user.preferredLocale;
-  const t = getShowcaseTexts(locale);
+  const { limit: limitText, ...t } = getShowcaseTexts(locale);
   const nav = getDashboardTexts(locale).nav;
 
   const db = createAdminClient();
@@ -52,6 +52,7 @@ export default async function ShowcasePage() {
       </div>
       <ShowcaseManager
         texts={t}
+        limitLabel={limitText(MAX_PORTFOLIO_ITEMS)}
         businessType={profile?.business_type === "company" ? "company" : "individual"}
         companyName={(profile?.company_name as string | null) ?? ""}
         items={rows}

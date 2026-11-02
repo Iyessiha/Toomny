@@ -14,8 +14,10 @@ export function ShowcaseManager({
   companyName,
   items,
   limit,
+  limitLabel,
 }: {
-  texts: ShowcaseTexts;
+  texts: Omit<ShowcaseTexts, "limit">;
+  limitLabel: string;
   businessType: "individual" | "company";
   companyName: string;
   items: PortfolioRow[];
@@ -130,7 +132,7 @@ export function ShowcaseManager({
       <aside className="h-fit rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="font-display text-base font-bold">{texts.add}</h2>
         {items.length >= limit ? (
-          <p className="mt-3 text-sm text-[var(--subtle)]">{texts.limit(limit)}</p>
+          <p className="mt-3 text-sm text-[var(--subtle)]">{limitLabel}</p>
         ) : (
           <form onSubmit={addItem} className="mt-4 space-y-3">
             <label className="block text-xs font-semibold">

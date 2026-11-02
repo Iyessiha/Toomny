@@ -22,10 +22,12 @@ export function AddonsManager({
   addons,
   texts,
   limit,
+  limitLabel,
 }: {
   serviceId: string;
   addons: ManagedAddon[];
-  texts: AddonTexts;
+  texts: Omit<AddonTexts, "limit">;
+  limitLabel: string;
   limit: number;
 }) {
   const router = useRouter();
@@ -117,7 +119,7 @@ export function AddonsManager({
       <aside className="h-fit rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="font-display text-base font-bold">{texts.addTitle}</h2>
         {atLimit ? (
-          <p className="mt-3 text-sm text-[var(--subtle)]">{texts.limit(limit)}</p>
+          <p className="mt-3 text-sm text-[var(--subtle)]">{limitLabel}</p>
         ) : (
           <form onSubmit={submit} className="mt-4 space-y-3">
             <label className="block text-xs font-semibold">
