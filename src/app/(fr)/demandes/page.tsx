@@ -6,10 +6,13 @@ import { DashboardShell, EmptyState } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Avatar, Pill } from "@/components/dashboard/pro";
 import { InquiryReplyForm } from "@/components/inquiries/reply-form";
+import { InquiryThread } from "@/components/inquiries/inquiry-thread";
 import { MarkConversationReadButton } from "@/components/inquiries/mark-read-button";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { groupInquiries } from "@/lib/inquiries";
+import { hasAiAccess } from "@/lib/provider-assist";
+import { isProvider } from "@/lib/auth";
 import { resolveDisplayNames } from "@/lib/names";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
@@ -30,7 +33,7 @@ export default async function DemandesPage() {
   // RLS : seules mes demandes (envoyées ou reçues) sont lisibles.
   const { data: rows } = await supabase
     .from("inquiries")
-    .select("id, from_id, to_id, service_id, message, read_at, created_at")
+    .select("id, from_id, to_id, service_id, message, read_at, created_at, edited_at")
     .or(`from_id.eq.${user.id},to_id.eq.${user.id}`)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -55,6 +58,17 @@ export default async function DemandesPage() {
   const serviceTitles = new Map((serviceRows ?? []).map((s) => [s.id as string, s.title as string]));
 
   const dateTag = locale === "en" ? "en-GB" : "fr-FR";
+
+  // Brouillon IA : prestataires ayant un plan payant actif uniquement.
+  let aiAvailable = false;
+  if (isProvider(user.role)) {
+    const { data: plan } = await supabase
+      .from("provider_profiles")
+      .select("plan, plan_expires_at")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    aiAvailable = hasAiAccess(plan?.plan, plan?.plan_expires_at ?? null);
+  }
 
   return (
     <DashboardShell
@@ -108,47 +122,24 @@ export default async function DemandesPage() {
                   />
                 </div>
 
-                {/* Fil */}
-                <ul className="app-stagger mt-4 space-y-2.5">
-                  {c.messages.map((m) => {
-                    const mine = m.from_id === user.id;
-                    return (
-                      <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[85%] ${mine ? "text-right" : "text-left"}`}>
-                          <p
-                            className={`inline-block whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm ${
-                              mine
-                                ? "rounded-br-md bg-[var(--color-brand-500)] text-white"
-                                : "rounded-bl-md bg-[var(--surface)]"
-                            }`}
-                          >
-                            {m.message}
-                          </p>
-                          <p className="mt-1 text-[11px] text-[var(--subtle)]">
-                            {new Date(m.created_at).toLocaleString(dateTag, {
-                              day: "numeric",
-                              month: "short",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                            {mine && (
-                              <>
-                                {" · "}
-                                {m.read_at
-                                  ? `${t.readOn} ${new Date(m.read_at).toLocaleDateString(dateTag, { day: "numeric", month: "short" })}`
-                                  : t.sentState}
-                              </>
-                            )}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-
-                {/* Réponse */}
-                <div className="mt-4 border-t border-[var(--border)] pt-4">
-                  <InquiryReplyForm toId={c.otherId} serviceId={c.serviceId} locale={locale} />
+                {/* Fil de discussion + réponse */}
+                <div className="mt-4">
+                  <InquiryThread
+                    locale={locale}
+                    messages={c.messages.map((m) => ({
+                      id: m.id,
+                      mine: m.from_id === user.id,
+                      message: m.message,
+                      createdAt: m.created_at,
+                      readAt: m.read_at,
+                      editedAt: m.edited_at ?? null,
+                    }))}
+                    footer={
+                      <div className="border-t border-[var(--border)] pt-4">
+                        <InquiryReplyForm toId={c.otherId} serviceId={c.serviceId} locale={locale} aiAvailable={aiAvailable} />
+                      </div>
+                    }
+                  />
                 </div>
               </li>
             );
