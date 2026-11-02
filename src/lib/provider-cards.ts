@@ -1,15 +1,33 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { ProviderCardData } from "@/lib/provider-search";
 
 const MAX_PROVIDERS = 200;
 
 /**
+ * Client anonyme sans cookies : la liste est identique pour tous les visiteurs,
+ * elle peut donc être mise en cache. La RLS reste appliquée (ce n'est pas le
+ * client de service).
+ */
+function createPublicClient() {
+  return createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
+
+/**
  * Prestataires visibles : ceux qui ont au moins une prestation publiée.
  * Ordre : boostés d'abord, puis avec photo, puis mieux notés, puis plus de commandes reçues.
+ * Résultat mis en cache 5 minutes : évite six requêtes et un traitement de 2 000 lignes à chaque visite.
  */
-export async function listPublicProviders(fallbackName: string): Promise<ProviderCardData[]> {
-  const supabase = await createClient();
+export const listPublicProviders = unstable_cache(lirePrestatairesPublics, ["public-providers"], {
+  revalidate: 300,
+  tags: ["public-providers"],
+});
+
+async function lirePrestatairesPublics(fallbackName: string): Promise<ProviderCardData[]> {
+  const supabase = createPublicClient();
   const now = new Date().toISOString();
 
   const { data: active } = await supabase
