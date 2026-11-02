@@ -136,7 +136,7 @@ export function BoostSection({ locale = "fr" }: { locale?: Locale }) {
   }, []);
 
   return (
-    <section className="border-t border-[var(--border)] bg-[var(--surface)]">
+    <section className="border-t border-[var(--border)] bg-[var(--background)]">
       <style>{`
         .boost-card {
           position: relative;

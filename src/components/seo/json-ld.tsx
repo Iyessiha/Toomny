@@ -28,7 +28,7 @@ export function OrganizationJsonLd() {
           height: 200,
         },
         description:
-          "La marketplace de talents d'Afrique de l'Ouest. Paiement en mobile money, conservé jusqu'à la livraison.",
+          "La marketplace de talents d'Afrique de l'Ouest. Paiement en mobile money, conservé jusqu'à la livraison dès l'ouverture des paiements.",
         areaServed: "West Africa",
         contactPoint: {
           "@type": "ContactPoint",
