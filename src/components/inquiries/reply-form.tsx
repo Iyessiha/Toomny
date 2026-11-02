@@ -24,13 +24,14 @@ export function InquiryReplyForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [drafting, setDrafting] = useState(false);
+  const [language, setLanguage] = useState<"auto" | "fr" | "en">("auto");
   const fr = locale !== "en";
 
   /** Pré-remplit le champ avec un brouillon. Rien n'est envoyé : le prestataire relit. */
   async function onDraft() {
     setDrafting(true);
     setError(null);
-    const result = await draftInquiryReplyWithAi({ toId, serviceId });
+    const result = await draftInquiryReplyWithAi({ toId, serviceId, language });
     setDrafting(false);
     if ("error" in result) {
       setError(result.error);
@@ -64,6 +65,17 @@ export function InquiryReplyForm({
           <p className="text-xs text-[var(--subtle)]">
             {fr ? "Le brouillon IA est à relire avant envoi." : "The AI draft must be reviewed before sending."}
           </p>
+          <div className="flex items-center gap-2">
+          <select
+            aria-label={fr ? "Langue du brouillon" : "Draft language"}
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as "auto" | "fr" | "en")}
+            className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs"
+          >
+            <option value="auto">{fr ? "Langue du client" : "Client's language"}</option>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
           <button
             type="button"
             onClick={onDraft}
@@ -72,6 +84,7 @@ export function InquiryReplyForm({
           >
             {drafting ? (fr ? "Rédaction…" : "Drafting…") : fr ? "Rédiger avec l'IA" : "Draft with AI"}
           </button>
+          </div>
         </div>
       )}
       <div className="flex items-end gap-2">

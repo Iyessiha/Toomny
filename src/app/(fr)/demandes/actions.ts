@@ -117,6 +117,7 @@ const AI_REPLY_MAX_PER_HOUR = 30;
 export async function draftInquiryReplyWithAi(input: {
   toId: string;
   serviceId: string | null;
+  language?: "auto" | "fr" | "en";
 }): Promise<{ text: string } | { error: string }> {
   const user: CurrentUser = await requireAuth();
   const locale = user.preferredLocale;
@@ -168,7 +169,8 @@ export async function draftInquiryReplyWithAi(input: {
     serviceTitle = (service?.title as string | undefined) ?? null;
   }
 
-  return draftInquiryReply({ turns, serviceTitle, locale: fr ? "fr" : "en" });
+  const language = input.language === "fr" || input.language === "en" ? input.language : "auto";
+  return draftInquiryReply({ turns, serviceTitle, language });
 }
 
 /** Modifier mon propre message (le texte seul, via une fonction SQL réservée à l'expéditeur). */
