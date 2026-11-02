@@ -70,13 +70,13 @@ export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
 
               <div className="mt-9 flex flex-wrap gap-3 lg:justify-start justify-center">
                 <Link
-                  href="/auth"
+                  href={t.primaryHref}
                   className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-700)] shadow-xl shadow-black/20 transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl active:scale-95"
                 >
                   {t.primary}
                 </Link>
                 <Link
-                  href="/services"
+                  href={t.secondaryHref}
                   className="rounded-full border border-white/25 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
                 >
                   {t.secondary}
@@ -103,7 +103,7 @@ export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
               <div className="relative w-[380px] overflow-hidden rounded-2xl shadow-2xl shadow-black/40 border border-white/10">
                 <Image
                   src="/images/toomny-cover.jpg"
-                  alt="Toomny — Meilleure plateforme de talents africains"
+                  alt="Toomny — marketplace de talents d'Afrique de l'Ouest"
                   width={760}
                   height={428}
                   className="w-full h-auto"

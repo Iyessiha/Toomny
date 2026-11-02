@@ -182,7 +182,7 @@ const fr = {
         { q: "Faut-il créer une société américaine pour être payé ?", a: "Non. C'est précisément ce que Toomny évite. Vous êtes payé en tant que personne, sur votre compte mobile money, dans votre pays. Aucune LLC, aucun EIN, aucun compte Payoneer." },
         { q: "Quels moyens de paiement acceptez-vous ?", a: "Mobile money en FCFA (Wave, Orange Money, MTN MoMo et Moov Money) et carte bancaire. Nous ouvrons d'autres canaux au fur et à mesure de notre extension en Afrique de l'Ouest." },
         { q: "Qui détient l'argent pendant la mission ?", a: "Un établissement agréé pour la détention de fonds, partenaire de Toomny une fois les paiements ouverts. Nous n'avons jamais les fonds sur nos propres comptes : nous ne faisons que déclencher leur libération une fois le travail validé." },
-        { q: "Combien ça coûte ?", a: "Toomny ne facture aucune commission aux clients. Des frais de traitement mobile money de 2,5 % + 100 XOF s'appliquent à chaque paiement pour couvrir le coût du virement. Pour les prestataires, quatre plans sans engagement : Débutant (gratuit, 10 % de commission, 2 services publiés), Essentiel (10 000 FCFA/mois, 8 %, 8 services), Pro (15 000 FCFA/mois, 5 %, 20 services), Expert (25 000 FCFA/mois, 3 %, 50 services). Ni inscription, ni candidature payante." },
+        { q: "Combien ça coûte ?", a: "Toomny ne prend aucune commission aux clients. Pour les prestataires, la commission dépend du plan choisi : de 10 % (Débutant, gratuit) à 3 % (Expert). Les plans sont mensuels, sans engagement, de 0 à 25 000 FCFA par mois. Des frais de traitement mobile money (2,5 % + 100 XOF) s'appliquent à chaque paiement. Le détail est sur la page Tarifs." },
         { q: "Que se passe-t-il si le travail ne convient pas ?", a: "Vous ouvrez un litige avant de valider. Un arbitre humain tranche à partir des échanges et des livrables conservés sur la plateforme, et les fonds sont libérés ou rendus en conséquence." },
         { q: "Dans quels pays Toomny est-il disponible ?", a: "Nous démarrons en Afrique de l'Ouest francophone, puis nous ouvrons aux marchés anglophones de la région. La plateforme est bilingue français-anglais dès maintenant." },
       ],
@@ -190,8 +190,10 @@ const fr = {
     cta: {
       title: "Travailler ensemble, grandir ensemble",
       lead: "Rejoignez Toomny, que vous cherchiez un prestataire de confiance ou que vous vouliez enfin être payé correctement pour votre travail.",
-      primary: "Créer mon compte",
-      secondary: "Parcourir le catalogue",
+      primary: "Trouver un prestataire",
+      primaryHref: "/services",
+      secondary: "Proposer mes services",
+      secondaryHref: "/auth?role=provider",
     },
     footer: {
       blurb: "La marketplace de talents d'Afrique de l'Ouest. Paiements conservés jusqu'à la livraison, dès l'ouverture des paiements.",
@@ -380,7 +382,7 @@ const en: LandingContent = {
         { q: "Do I need a US company to get paid?", a: "No. That is exactly what Toomny removes. You are paid as an individual, to your mobile money account, in your own country. No LLC, no EIN, no Payoneer account." },
         { q: "Which payment methods do you accept?", a: "Mobile money in CFA francs (Wave, Orange Money, MTN MoMo and Moov Money) and bank card. We add more channels as we expand across West Africa." },
         { q: "Who holds the money during a job?", a: "An institution licensed to hold funds, partnered with Toomny once payments open. We never hold the money in our own accounts: we only trigger its release once the work is approved." },
-        { q: "What does it cost?", a: "Toomny charges buyers no commission. A mobile money processing fee of 2.5% + 100 XOF applies to each payment to cover the cost of the transaction. For providers, four no-commitment plans: Starter (free, 10% commission, 2 published services), Essential (10,000 FCFA/month, 8%, 8 services), Pro (15,000 FCFA/month, 5%, 20 services), Expert (25,000 FCFA/month, 3%, 50 services). No sign-up fee, no paid application." },
+        { q: "What does it cost?", a: "Toomny charges buyers no commission. For providers, the commission depends on the plan: 10% (Starter, free) down to 3% (Expert). Plans are billed monthly with no commitment, from free to 25,000 FCFA per month. A mobile money processing fee of 2.5% + 100 XOF applies to each payment. Details are on the Pricing page." },
         { q: "What if the work isn't right?", a: "You open a dispute before approving. A human arbitrator decides based on the messages and deliverables kept on the platform, and the funds are released or returned accordingly." },
         { q: "Which countries is Toomny available in?", a: "We are starting in French-speaking West Africa, then opening to the region's English-speaking markets. The platform is bilingual French-English already." },
       ],
@@ -388,8 +390,10 @@ const en: LandingContent = {
     cta: {
       title: "Work together, grow together",
       lead: "Join Toomny, whether you're looking for a provider you can trust or you want to finally be paid properly for your work.",
-      primary: "Create my account",
-      secondary: "Browse the catalogue",
+      primary: "Find a provider",
+      primaryHref: "/services",
+      secondary: "Offer my services",
+      secondaryHref: "/auth?role=provider",
     },
     footer: {
       blurb: "The talent marketplace for West Africa. Payments held until delivery, once payments open.",
