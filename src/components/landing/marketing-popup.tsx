@@ -14,7 +14,7 @@ const CONTENT = {
   exit: {
     fr: {
       eyebrow: "Avant de partir…",
-      title: "Vos projets méritent les meilleurs talents africains",
+      title: "Vos projets méritent des talents africains vérifiés",
       lead: "Identité visuelle, développement web, marketing digital. Des experts vérifiés, payés en mobile money. Commission 0 % côté client.",
       primaryCta: "Voir les prestataires",
       primaryHref: "/services",
@@ -34,7 +34,7 @@ const CONTENT = {
   timed: {
     fr: {
       eyebrow: "Rejoignez Toomny",
-      title: "Trouvez un talent en 5 minutes — ou vendez vos services dès aujourd'hui",
+      title: "Trouvez un talent vérifié en quelques minutes — ou vendez vos services dès aujourd'hui",
       lead: "Paiement conservé jusqu'à livraison, dès l'ouverture des paiements. Auto-validation 72 h. Sans société américaine, sans Payoneer.",
       primaryCta: "Créer un compte gratuit",
       primaryHref: "/auth",
@@ -43,7 +43,7 @@ const CONTENT = {
     },
     en: {
       eyebrow: "Join Toomny",
-      title: "Find talent in 5 minutes — or sell your services starting today",
+      title: "Find verified talent in minutes — or sell your services starting today",
       lead: "Payment held until delivery once payments open. 72-hour auto-release. No US company, no Payoneer.",
       primaryCta: "Create a free account",
       primaryHref: "/auth",

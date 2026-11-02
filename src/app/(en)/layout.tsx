@@ -4,7 +4,7 @@ import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Toomny — Hire the best talent in West Africa", template: "%s · Toomny" },
+  title: { default: "Toomny — Hire verified talent in West Africa", template: "%s · Toomny" },
   description:
     "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery once payments open. From 3% commission, 0% for buyers.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"),

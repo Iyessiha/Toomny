@@ -26,7 +26,7 @@ const fr = {
       audiences: {
         client: {
           label: "Je cherche un prestataire",
-          title: ["Recrutez les meilleurs", "talents d'Afrique de l'Ouest"],
+          title: ["Recrutez des talents vérifiés", "d'Afrique de l'Ouest"],
           lead: "Payez en FCFA par mobile money. Votre paiement sera conservé jusqu'à la livraison, dès l'ouverture des paiements. Des prestataires d'Afrique de l'Ouest, dans votre langue et votre fuseau horaire.",
           cta: "Trouver un prestataire",
           href: "/services",
@@ -77,7 +77,7 @@ const fr = {
     pricing: {
       eyebrow: "Tarifs",
       title: "Des tarifs pensés pour l'Afrique de l'Ouest",
-      lead: "Quatre plans pour les prestataires. Les clients ne paient jamais rien.",
+      lead: "Quatre plans pour les prestataires. Aucune commission Toomny pour les clients.",
       clientNote: "Clients : 0 % de commission Toomny",
       clientNoteDetail: "Toomny ne vous facture rien. Des frais de traitement mobile money (2,5 % + 100 XOF par transaction) s'appliquent pour couvrir le coût du paiement.",
       plansFor: "Pour les prestataires",
@@ -224,7 +224,7 @@ const en: LandingContent = {
       audiences: {
         client: {
           label: "I'm hiring",
-          title: ["Hire the best talent", "in West Africa"],
+          title: ["Hire verified talent", "in West Africa"],
           lead: "Pay in CFA francs by mobile money. Your payment is held until delivery once payments open. Providers across West Africa, in your language and your time zone.",
           cta: "Find a provider",
           href: "/services",
@@ -275,7 +275,7 @@ const en: LandingContent = {
     pricing: {
       eyebrow: "Pricing",
       title: "Pricing built for West Africa",
-      lead: "Four plans for providers. Clients never pay a thing.",
+      lead: "Four plans for providers. No Toomny commission for clients.",
       clientNote: "Clients: 0% Toomny commission",
       clientNoteDetail: "Toomny charges you nothing. A mobile money processing fee (2.5% + 100 XOF per transaction) applies to cover the cost of the payment.",
       plansFor: "For providers",
