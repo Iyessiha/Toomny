@@ -21,11 +21,28 @@ export async function savePayoutSettings(formData: FormData) {
   if (!/^\+?[0-9]{8,15}$/.test(msisdn)) return { error: t.number };
 
   const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("provider_profiles")
+    .select("payout_channel, payout_msisdn")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  const changed = current?.payout_channel !== channel || current?.payout_msisdn !== msisdn;
+
   const { error } = await supabase
     .from("provider_profiles")
     .update({ payout_channel: channel, payout_msisdn: msisdn })
     .eq("profile_id", user.id);
   if (error) return { error: t.save };
+
+  // Nouveau numéro : il doit être revérifié par l'admin. La colonne n'est pas
+  // accessible au client (grant), on passe par le client admin, clé du compte.
+  if (changed) {
+    const db = createAdminClient();
+    await db
+      .from("provider_profiles")
+      .update({ payout_verified_at: null })
+      .eq("profile_id", user.id);
+  }
 
   revalidatePath("/dashboard/versements");
   return { success: true };

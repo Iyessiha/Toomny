@@ -18,6 +18,8 @@ export type AdminAction =
   | "payout.mark_paid"
   | "payout.mark_failed"
   | "payout.requeue"
+  | "payout_number.verify"
+  | "payout_number.unverify"
   | "plan.set"
   | "pixels.update"
   | "support.reply"
