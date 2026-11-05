@@ -21,6 +21,8 @@ export async function callClaude(opts: {
   schema?: Record<string, unknown>;
   /** Le système est stable entre les appels (connaissance du site) : on le met en cache. */
   cacheSystem?: boolean;
+  /** Images jointes au message utilisateur (base64, sans préfixe data:). */
+  images?: { mediaType: "image/jpeg" | "image/png" | "image/webp"; base64: string }[];
 }): Promise<ClaudeResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     return { ok: false, error: "L'assistant IA n'est pas configuré. Contactez l'équipe Toomny." };
@@ -34,7 +36,20 @@ export async function callClaude(opts: {
       system: opts.cacheSystem
         ? [{ type: "text", text: opts.system, cache_control: { type: "ephemeral" } }]
         : opts.system,
-      messages: [{ role: "user", content: opts.user }],
+      messages: [
+        {
+          role: "user",
+          content: opts.images?.length
+            ? [
+                ...opts.images.map((img) => ({
+                  type: "image" as const,
+                  source: { type: "base64" as const, media_type: img.mediaType, data: img.base64 },
+                })),
+                { type: "text" as const, text: opts.user },
+              ]
+            : opts.user,
+        },
+      ],
       thinking: { type: "disabled" },
       output_config: {
         effort: "low",

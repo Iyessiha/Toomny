@@ -183,3 +183,89 @@ export async function getKycSignedUrls(storagePath: string) {
 
   return results;
 }
+
+/** Limite de l'API pour une image : au-delà, l'analyse est refusée. */
+const AI_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const EXT_MEDIA: Record<string, "image/jpeg" | "image/png" | "image/webp"> = {
+  jpg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+/**
+ * Avis de l'IA sur un dossier KYC. Déclenché à la demande de l'administrateur
+ * uniquement ; rien n'est approuvé ni rejeté, et rien n'est conservé hors du
+ * journal (verdict et nombre de constats).
+ */
+export async function analyzeKycDossier(
+  verificationId: string,
+): Promise<{ review: import("@/lib/ai/kyc-review").KycAiReview } | { error: string }> {
+  const admin = await requireAdmin();
+  const e = getAdminTexts(admin.preferredLocale).errors;
+  const fr = admin.preferredLocale !== "en";
+  const msg = (f: string, en: string) => (fr ? f : en);
+  if (!/^[0-9a-f-]{36}$/i.test(verificationId)) return { error: e.notFound };
+
+  const db = createAdminClient();
+  const { data: verif } = await db
+    .from("verifications")
+    .select("id, profile_id, document_type, document_country, declared_first_name, declared_last_name, declared_dob, storage_path")
+    .eq("id", verificationId)
+    .maybeSingle();
+  if (!verif) return { error: e.notFound };
+
+  let paths: { front?: string; selfie?: string } = {};
+  try {
+    paths = JSON.parse(verif.storage_path);
+  } catch {
+    return { error: e.invalidPath };
+  }
+  if (!paths.front || !paths.selfie) {
+    return { error: msg("Recto et selfie sont requis pour l'analyse.", "Front and selfie are required for the analysis.") };
+  }
+
+  const images: { mediaType: "image/jpeg" | "image/png" | "image/webp"; base64: string }[] = [];
+  for (const path of [paths.front, paths.selfie]) {
+    const ext = path.split(".").pop()?.toLowerCase() ?? "";
+    const mediaType = EXT_MEDIA[ext];
+    if (!mediaType) {
+      return {
+        error: msg(
+          "Ce fichier est un PDF : l'analyse IA ne lit que les images (JPEG, PNG, WebP). Vérifiez manuellement.",
+          "This file is a PDF: the AI analysis only reads images (JPEG, PNG, WebP). Check it manually.",
+        ),
+      };
+    }
+    const { data: blob, error: dlErr } = await db.storage.from("kyc-documents").download(path);
+    if (dlErr || !blob) return { error: e.frontMissing };
+    if (blob.size > AI_IMAGE_MAX_BYTES) {
+      return { error: msg("Image trop lourde pour l'analyse IA (5 Mo maximum).", "Image too large for the AI analysis (5 MB max).") };
+    }
+    images.push({ mediaType, base64: Buffer.from(await blob.arrayBuffer()).toString("base64") });
+  }
+
+  const { reviewKycDossier } = await import("@/lib/ai/kyc-review");
+  const result = await reviewKycDossier({
+    documentType: verif.document_type,
+    documentCountry: verif.document_country,
+    declaredFirstName: verif.declared_first_name,
+    declaredLastName: verif.declared_last_name,
+    declaredDob: verif.declared_dob,
+    images,
+    labels: {
+      front: "recto du document d'identité",
+      selfie: "selfie du titulaire tenant le document",
+    },
+  });
+  if ("error" in result) return { error: result.error };
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "kyc.ai_review",
+    targetType: "verification",
+    targetId: verificationId,
+    details: { verdict: result.review.verdict, findings: result.review.findings.length },
+  });
+
+  return { review: result.review };
+}

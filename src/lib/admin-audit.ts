@@ -7,6 +7,7 @@ export type AdminAction =
   | "service.reject"
   | "service.photos"
   | "kyc.flag"
+  | "kyc.ai_review"
   | "service.moderate"
   | "order.confirm_payment"
   | "order.force_in_progress"
