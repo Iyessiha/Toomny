@@ -62,7 +62,10 @@ export async function saveProviderProfile(formData: FormData) {
     },
     { onConflict: "profile_id" },
   );
-  if (error) return { error: e.save };
+  if (error) {
+    console.error("saveProviderProfile:", error.message);
+    return { error: e.save };
+  }
 
   revalidatePath(`/prestataires/${user.id}`);
   revalidatePath("/dashboard/profil");

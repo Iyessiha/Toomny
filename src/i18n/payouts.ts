@@ -43,7 +43,7 @@ const fr = {
   errors: {
     channel: "Choisissez un canal de versement.",
     number: "Numéro invalide : 8 à 15 chiffres, indicatif pays possible.",
-    save: "Le canal n'a pas pu être enregistré.",
+    save: "Le canal n'a pas pu être enregistré. Réessayez. Si cela continue, écrivez-nous depuis Support en indiquant votre numéro.",
     notProvider: "Réservé aux comptes prestataires.",
     request: "La demande de versement a échoué. Réessayez.",
     alreadyRequested: "Ce versement a déjà été demandé. Actualisez la page.",
@@ -92,7 +92,7 @@ const en: typeof fr = {
   errors: {
     channel: "Choose a payout channel.",
     number: "Invalid number: 8 to 15 digits, country code allowed.",
-    save: "The channel could not be saved.",
+    save: "The payout channel could not be saved. Please try again. If it keeps failing, write to us from Support with your number.",
     notProvider: "Reserved for provider accounts.",
     request: "The payout request failed. Please try again.",
     alreadyRequested: "This payout has already been requested. Refresh the page.",
