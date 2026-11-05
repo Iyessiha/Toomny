@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
 import { formatMoney, splitOrderAmount } from "@/lib/money";
+import { PricingScene } from "@/components/pricing/pricing-scene";
 
 const CheckIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -122,6 +123,8 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               </div>
             );
           })}
+        </div>
+
         {/* Provider plans */}
         <p data-reveal className="mb-5 mt-14 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--subtle)]">
           {t.plansFor}
