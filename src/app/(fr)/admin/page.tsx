@@ -58,44 +58,6 @@ function fill(template: string, vars: Record<string, string | number>) {
   return Object.entries(vars).reduce((acc, [k, v]) => acc.replace(`{${k}}`, String(v)), template);
 }
 
-function TodoCard({
-  href,
-  label,
-  count,
-  hint,
-  openLabel,
-  urgent = false,
-}: {
-  href: string;
-  label: string;
-  count: number;
-  hint: string;
-  openLabel: string;
-  urgent?: boolean;
-}) {
-  const active = count > 0;
-  const surface = !active
-    ? "border-[var(--border)] bg-[var(--background)]"
-    : urgent
-      ? "border-transparent bg-[var(--tone-danger-bg)]"
-      : "border-transparent bg-[var(--tone-warning-bg)]";
-  const ink = active ? (urgent ? "text-[var(--tone-danger-fg)]" : "text-[var(--tone-warning-fg)]") : "text-[var(--foreground)]";
-  return (
-    <Link href={href} className={`app-lift group flex flex-col gap-3 rounded-2xl border p-5 ${surface}`}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{label}</span>
-        <span className="text-xs font-semibold text-[var(--subtle)] opacity-0 transition-opacity group-hover:opacity-100">
-          {openLabel} →
-        </span>
-      </div>
-      <div className="flex items-end gap-2">
-        <span className={`font-display text-3xl font-bold ${ink}`}>{count}</span>
-        <span className="pb-1 text-xs text-[var(--subtle)]">{hint}</span>
-      </div>
-    </Link>
-  );
-}
-
 export default async function AdminPage() {
   const user = await requireAdmin();
   const locale: Locale = user.preferredLocale;
@@ -106,9 +68,6 @@ export default async function AdminPage() {
   const audit = await getRecentAdminActions(createAdminClient());
   const c = s.counts;
   const fmt = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "fr-FR");
-
-  const queuedPayouts = c.queuedPayouts;
-  const todoTotal = c.pendingKyc + c.draftServices + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts;
 
   const orderDelta = deltaOf(s.trend.ordersLast7, s.trend.ordersPrev7, t.vsPrev);
   const volumeDelta = deltaOf(Number(s.trend.amountLast7), Number(s.trend.amountPrev7), t.vsPrev);
@@ -129,56 +88,15 @@ export default async function AdminPage() {
       }
       nav={getAdminNavGroups(locale, "/admin")}
     >
-      {/* ── À traiter : ce qui demande une action aujourd'hui ── */}
-      <Section
-        title={t.todoTitle}
-        action={
-          <Pill tone={todoTotal > 0 ? "warning" : "success"}>
-            {todoTotal > 0 ? fmt(todoTotal) : t.todoOk}
-          </Pill>
-        }
-      >
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <TodoCard
-            href="/admin/verifications"
-            label={t.todoKyc}
-            count={c.pendingKyc}
-            hint={t.todoKycHint}
-            openLabel={t.open}
-          />
-          <TodoCard
-            href="/admin/services?status=draft"
-            label={t.todoServices}
-            count={c.draftServices}
-            hint={t.todoServicesHint}
-            openLabel={t.open}
-          />
-          <TodoCard
-            href="/admin/disputes"
-            label={t.todoDisputes}
-            count={c.openDisputes}
-            hint={fill(t.todoDisputesHint, { n: c.staleDisputes })}
-            openLabel={t.open}
-            urgent={c.staleDisputes > 0}
-          />
-          <TodoCard
-            href="/admin/orders"
-            label={t.todoOrders}
-            count={c.overdueOrders}
-            hint={t.todoOrdersHint}
-            openLabel={t.open}
-            urgent={c.overdueOrders > 0}
-          />
-          <TodoCard
-            href="/admin/payouts"
-            label={t.todoPayouts}
-            count={queuedPayouts + c.failedPayouts}
-            hint={fill(t.todoPayoutsHint, { q: queuedPayouts, f: c.failedPayouts })}
-            openLabel={t.open}
-            urgent={c.failedPayouts > 0}
-          />
-        </div>
-      </Section>
+      <form action="/admin/recherche" method="get" className="mb-6 flex gap-2">
+        <input
+          name="q"
+          placeholder="Rechercher un compte, une commande, une prestation…"
+          className="input flex-1"
+          aria-label="Rechercher"
+        />
+        <button type="submit" className="btn-primary">Rechercher</button>
+      </form>
 
       {/* ── Volume : argent réellement acquis séparé de l'argent en séquestre ── */}
       <section className="mt-10">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
+import { AccountAdminPanel } from "@/components/admin/account-admin-panel";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
@@ -42,7 +43,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
     db.from("provider_profiles").select("headline, plan, plan_expires_at, rating_avg, rating_count, completed_orders").eq("profile_id", id).maybeSingle(),
     db.from("orders").select("id, reference, status, amount_minor, currency, created_at").eq("client_id", id).order("created_at", { ascending: false }).limit(20),
     db.from("orders").select("id, reference, status, amount_minor, currency, created_at").eq("provider_id", id).order("created_at", { ascending: false }).limit(20),
-    db.from("kyc_verifications").select("id, status, created_at, rejection_reason").eq("profile_id", id).order("created_at", { ascending: false }).limit(5),
+    db.from("verifications").select("id, status, created_at, rejection_reason").eq("profile_id", id).order("created_at", { ascending: false }).limit(5),
     db.from("payouts").select("id, order_id, amount_minor, currency, status, created_at").eq("provider_id", id).order("created_at", { ascending: false }).limit(20),
   ]);
 
@@ -118,6 +119,11 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             <UserRoleManager userId={profile.id} currentRole={profile.role} locale={locale} />
           </div>
         </div>
+      </Section>
+
+      {/* Compte : lien de réinitialisation et adresse e-mail */}
+      <Section title={locale === "en" ? "Account access" : "Accès au compte"} className="mt-6">
+        <AccountAdminPanel userId={profile.id} email={profile.email ?? ""} />
       </Section>
 
       {/* KYC */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useRef, useState, type FormEvent, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -298,8 +299,7 @@ export function ServiceForm({
 
       {/* Titre */}
       <div>
-        <label htmlFor="title" className="text-sm font-medium">{t.form.title}</label>
-        <input id="title" name="title" required maxLength={120} placeholder={t.form.titlePlaceholder} className={inputClass} />
+        <TitleField id="title" label={t.form.title} placeholder={t.form.titlePlaceholder} inputClassName={inputClass} />
       </div>
 
       {/* Catégorie */}

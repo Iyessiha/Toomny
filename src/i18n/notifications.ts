@@ -11,6 +11,7 @@ export type NotificationParams = {
   rating?: string;
   amount?: string;
   plan?: string;
+  items?: string;
 };
 
 export type NotificationCopy = { title: string; body: (p: NotificationParams) => string };
@@ -38,10 +39,40 @@ const fr = {
       title: "Nouvelle réponse",
       body: (p) => `${p.from ?? "Un membre"} a répondu à votre message.`,
     },
+    order_payment_reminder: {
+      title: "Votre commande attend le paiement",
+      body: (p) =>
+        p.ref
+          ? `La commande ${p.ref} n'est pas encore lancée. Payez-la pour que le prestataire démarre.`
+          : "Une de vos commandes n'est pas encore lancée. Payez-la pour que le prestataire démarre.",
+    },
+    service_changes_requested: {
+      title: "Prestation à corriger",
+      body: (p) =>
+        p.service
+          ? `Votre prestation « ${p.service} » demande quelques corrections. Les points à corriger sont affichés sur la prestation.`
+          : "Une de vos prestations demande quelques corrections. Les points sont affichés sur la prestation.",
+    },
+    account_missing: {
+      title: "Votre compte est à compléter",
+      body: (p) =>
+        p.items
+          ? `Pour publier vos prestations, il reste à faire : ${p.items}.`
+          : "Il reste des éléments à compléter sur votre compte.",
+    },
+    support_replied: {
+      title: "Réponse de l'équipe Toomny",
+      body: () => "L'équipe Toomny a répondu à votre demande de contact. Ouvrez-la pour lire la réponse.",
+    },
     order_funded: {
       title: "Commande payée",
       body: (p) =>
         `La commande ${p.ref ?? ""} est financée : le paiement est séquestré, vous pouvez démarrer.`,
+    },
+    order_payment_confirmed: {
+      title: "Paiement confirmé",
+      body: (p) =>
+        `Votre paiement pour la commande ${p.ref ?? ""} est confirmé. Le prestataire peut démarrer, votre reçu est disponible.`,
     },
     order_payment_failed: {
       title: "Paiement refusé",
@@ -180,10 +211,40 @@ const en: typeof fr = {
       title: "New reply",
       body: (p) => `${p.from ?? "A member"} replied to your message.`,
     },
+    order_payment_reminder: {
+      title: "Your order is awaiting payment",
+      body: (p) =>
+        p.ref
+          ? `Order ${p.ref} has not started yet. Pay it so the provider can start.`
+          : "One of your orders has not started yet. Pay it so the provider can start.",
+    },
+    service_changes_requested: {
+      title: "Service to correct",
+      body: (p) =>
+        p.service
+          ? `Your service "${p.service}" needs a few corrections. The points to correct are shown on the service.`
+          : "One of your services needs a few corrections. The points are shown on the service.",
+    },
+    account_missing: {
+      title: "Your account needs completing",
+      body: (p) =>
+        p.items
+          ? `To publish your services, you still need to: ${p.items}.`
+          : "Some items on your account still need completing.",
+    },
+    support_replied: {
+      title: "Reply from the Toomny team",
+      body: () => "The Toomny team replied to your contact request. Open it to read the reply.",
+    },
     order_funded: {
       title: "Order paid",
       body: (p) =>
         `Order ${p.ref ?? ""} is funded: the payment is held in escrow, you can start.`,
+    },
+    order_payment_confirmed: {
+      title: "Payment confirmed",
+      body: (p) =>
+        `Your payment for order ${p.ref ?? ""} is confirmed. The provider can start, your receipt is available.`,
     },
     order_payment_failed: {
       title: "Payment declined",

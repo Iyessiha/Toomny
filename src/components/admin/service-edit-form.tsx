@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useState, type FormEvent } from "react";
 import { editService } from "@/app/(fr)/admin/services/actions";
 import { getAdminTexts } from "@/i18n/admin";
@@ -49,8 +50,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
       <input type="hidden" name="serviceId" value={service.id} />
 
       <div>
-        <label className={labelCls}>{t.fieldTitle}</label>
-        <input name="title" defaultValue={service.title} required className={inputCls} />
+        <TitleField id="admin-title" label={t.fieldTitle} defaultTitle={service.title} inputClassName={inputCls} />
       </div>
 
       <div>

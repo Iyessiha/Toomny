@@ -15,6 +15,7 @@ export type InquiryRow = {
   message: string;
   read_at: string | null;
   created_at: string;
+  edited_at?: string | null;
 };
 
 export type InquiryConversation = {

@@ -9,6 +9,7 @@ import { recordFunding, recordCompletion } from "@/lib/order-ledger";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
 import { fundedDueAt } from "@/lib/order-deadline";
+import { sendPaymentEmails } from "@/lib/payments/fund-hold";
 
 /**
  * Confirmer un paiement reçu chez le partenaire agréé : pending_payment -> funded.
@@ -56,6 +57,7 @@ export async function confirmPaymentReceived(formData: FormData): Promise<void> 
     params: { ref: order.reference },
     link: `/orders/${orderId}`,
   });
+  await sendPaymentEmails(db, orderId);
   await recordAdminAction(db, {
     actorId: admin.id,
     action: "order.confirm_payment",
@@ -169,4 +171,26 @@ export async function forceOrderTransition(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/orders");
   revalidatePath(`/orders/${orderId}`);
+}
+
+/**
+ * Renvoie les e-mails de paiement confirmé (reçu client, commande payée prestataire).
+ * Utile pour une commande payée avant leur mise en service, ou un e-mail perdu.
+ */
+export async function resendPaymentEmails(formData: FormData): Promise<void> {
+  const admin = await requireAdmin();
+
+  const orderId = String(formData.get("orderId") ?? "");
+  if (!UUID_RE.test(orderId)) return;
+
+  const db = createAdminClient();
+  const sent = await sendPaymentEmails(db, orderId);
+  if (!sent) return;
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: "order.payment_emails",
+    targetType: "order",
+    targetId: orderId,
+  });
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { PresenceHeartbeat } from "@/components/dashboard/presence-heartbeat";
+import { LiveAlerts } from "@/components/dashboard/live-alerts";
+import { useNavBadges } from "@/components/dashboard/nav-badges";
 import { useState } from "react";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import Link from "next/link";
@@ -13,6 +16,8 @@ export type NavItem = {
   label: string;
   icon?: React.ReactNode;
   badge?: number;
+  /** Clé d'un compteur fourni par le layout du tableau de bord (voir nav-badges). */
+  badgeKey?: string;
   current?: boolean;
 };
 
@@ -102,6 +107,8 @@ const HREF_ICONS: Record<string, React.ReactNode> = {
 function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
   const active = item.current ?? pathname === item.href;
   const icon = item.icon ?? HREF_ICONS[item.href];
+  const liveBadges = useNavBadges();
+  const badge = item.badge ?? (item.badgeKey ? liveBadges[item.badgeKey] : undefined);
   return (
     <li>
       <Link
@@ -126,9 +133,9 @@ function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string;
           </span>
         )}
         <span className="flex-1 truncate">{item.label}</span>
-        {item.badge !== undefined && item.badge > 0 && (
-          <span className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
-            {item.badge}
+        {badge !== undefined && badge > 0 && (
+          <span aria-label={`${badge} nouveau(x)`} className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+            {badge}
           </span>
         )}
       </Link>
@@ -334,6 +341,8 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-dvh bg-[var(--surface)]">
+      <PresenceHeartbeat />
+      <LiveAlerts locale={locale === "en" ? "en" : "fr"} />
       {/* Sidebar desktop */}
       <aside className="hidden w-[220px] shrink-0 border-r border-[var(--border)] bg-[var(--background)] lg:fixed lg:inset-y-0 lg:flex lg:flex-col">
         <SidebarContent />

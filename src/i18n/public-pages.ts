@@ -20,11 +20,11 @@ const fr = {
     retry: "Réessayer",
   },
   site: {
-    title: "Toomny — Recrutez les meilleurs talents d'Afrique de l'Ouest",
+    title: "Toomny — Recrutez des talents vérifiés d'Afrique de l'Ouest",
     description:
-      "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money, paiement conservé jusqu'à la livraison. Dès 3 % de commission côté prestataire, 0 % côté client.",
+      "Toomny connecte les entreprises d'Afrique de l'Ouest aux prestataires du continent. Paiement en mobile money ou par carte, conservé jusqu'à la livraison dès l'ouverture des paiements. Dès 3 % de commission côté prestataire, 0 % côté client.",
     ogTitle: "Toomny — Travailler ensemble, grandir ensemble",
-    ogDescription: "La marketplace de talents d'Afrique de l'Ouest. Paiement mobile money, conservé jusqu'à la livraison.",
+    ogDescription: "La marketplace de talents d'Afrique de l'Ouest. Paiement conservé jusqu'à la livraison, dès l'ouverture des paiements.",
   },
   titles: {
     auth: "Créer un compte",
@@ -67,11 +67,11 @@ const en: typeof fr = {
     retry: "Try again",
   },
   site: {
-    title: "Toomny — Hire the best talent in West Africa",
+    title: "Toomny — Hire verified talent in West Africa",
     description:
-      "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery. From 3% commission, 0% for buyers.",
+      "Toomny connects West African businesses with providers across the continent. Mobile money payments, held until delivery once payments open. From 3% commission, 0% for buyers.",
     ogTitle: "Toomny — Work together, grow together",
-    ogDescription: "The talent marketplace for West Africa. Mobile money payments, held until delivery.",
+    ogDescription: "The talent marketplace for West Africa. Mobile money payments, held until delivery once payments open.",
   },
   titles: {
     auth: "Create an account",

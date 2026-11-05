@@ -5,7 +5,15 @@ import Link from "next/link";
 // de code serveur (next/headers, supabase/server…) : il est compilé aussi
 // pour le navigateur.
 
-export type NavItem = { href: string; label: string; current?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  current?: boolean;
+  /** Badge fixe (ex. compteur passé par la page). */
+  badge?: number;
+  /** Clé d'un compteur fourni par le layout du tableau de bord (voir nav-badges). */
+  badgeKey?: string;
+};
 export type NavSection = { title: string; items: NavItem[] };
 
 export function EmptyState({

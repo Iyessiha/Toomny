@@ -17,6 +17,8 @@ import { ReviewsList } from "@/components/catalog/reviews-list";
 import { WishlistButton } from "@/components/catalog/wishlist-button";
 import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
+import { hasPaidPlan } from "@/lib/plans";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -108,6 +110,21 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
         .eq("service_id", service.id)
         .order("tier"),
     ]);
+
+  // Suppléments : affichés seulement si le prestataire a un plan payant (règle aussi vérifiée à la commande).
+  // Le plan n'est pas lisible par les visiteurs : on le lit côté serveur, seul le résultat est utilisé.
+  const [{ data: planRow }, { data: addonRows }] = await Promise.all([
+    createAdminClient().from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", service.provider_id).maybeSingle(),
+    supabase
+      .from("service_addons")
+      .select("id, title, description, price_minor, currency, extra_delivery_days")
+      .eq("service_id", service.id)
+      .eq("active", true)
+      .order("created_at", { ascending: true }),
+  ]);
+  const addons = hasPaidPlan(planRow?.plan, planRow?.plan_expires_at ?? null)
+    ? ((addonRows ?? []) as { id: string; title: string; description: string | null; price_minor: number; currency: string; extra_delivery_days: number }[])
+    : [];
 
   const packages = (pkgRows ?? []) as {
     id: string; tier: 1 | 2 | 3; name: string; description: string | null;
@@ -460,6 +477,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
               providerId={service.provider_id}
               providerName={provider?.display_name ?? undefined}
               packages={packages}
+              addons={addons}
               basePrice={service.price_minor}
               baseCurrency={service.currency}
               baseDelivery={service.delivery_days}

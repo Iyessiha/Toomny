@@ -8,10 +8,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { UUID_RE } from "@/lib/orders";
 import { getCatalogTexts } from "@/i18n/catalog";
+import { getShowcaseTexts } from "@/i18n/showcase";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceCard } from "@/components/catalog/service-card";
+import { InitialsAvatar } from "@/components/providers/initials-avatar";
 import { ShareButton } from "@/components/ui/share-button";
 import { resolveDisplayNames } from "@/lib/names";
+import { formatMoney } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -65,9 +68,11 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     { data: profile },
     { data: services },
     { data: reviews },
+    { data: portfolioRows },
+    { data: statsRow },
   ] = await Promise.all([
     supabase.from("provider_directory").select("id, display_name, country_code, verification_status").eq("id", id).maybeSingle(),
-    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages").eq("profile_id", id).maybeSingle(),
+    supabase.from("provider_profiles").select("headline, bio, city, rating_avg, rating_count, completed_orders, avatar_url, skills, spoken_languages, business_type, company_name").eq("profile_id", id).maybeSingle(),
     supabase
       .from("services")
       .select("id, title, description, price_minor, currency, delivery_days, cover_url, tags, category:categories(slug)")
@@ -76,6 +81,12 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       .order("created_at", { ascending: false })
       .limit(24),
     supabase.from("reviews").select("id, rating, comment, created_at, author_id").eq("target_id", id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("portfolio_items").select("id, kind, title, description, url").eq("provider_id", id).order("created_at", { ascending: true }).limit(12),
+    supabase
+      .from("provider_order_stats")
+      .select("orders_received, orders_completed, reviews_count, stars_5, stars_4, stars_3, stars_2, stars_1")
+      .eq("provider_id", id)
+      .maybeSingle(),
   ]);
 
   // Fallback : si le prestataire n'est pas dans la vue (role mal assigné),
@@ -124,6 +135,16 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
       },
     };
   });
+  const st = getShowcaseTexts(locale);
+  const { data: memberRow } = await createAdminClient().from("profiles").select("created_at").eq("id", id).maybeSingle();
+  const memberSinceIso = (memberRow?.created_at as string | null) ?? null;
+  const portfolio = (portfolioRows ?? []) as { id: string; kind: string; title: string; description: string | null; url: string }[];
+  const kindLabel: Record<string, string> = { video: st.kindVideo, work: st.kindWork, link: st.kindLink };
+  const isCompany = profile?.business_type === "company";
+  const statusLabel = isCompany ? (profile?.company_name ? `${st.statusCompany} · ${profile.company_name}` : st.statusCompany) : st.statusIndividual;
+  const memberSince = memberSinceIso
+    ? new Date(memberSinceIso).toLocaleDateString(locale === "en" ? "en-GB" : "fr-FR", { month: "long", year: "numeric" })
+    : null;
   const reviewList = (reviews ?? []) as { id: string; rating: number; comment: string | null; created_at: string; author_id: string }[];
 
   // Noms des acheteurs (pseudo ou prénom + initiale). Résolution côté serveur :
@@ -136,227 +157,224 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
     return found && found !== "—" ? found : t.verifiedClient;
   }
   const avg = profile?.rating_avg ? Number(profile.rating_avg) : null;
+  const stats = {
+    ordersReceived: Number(statsRow?.orders_received ?? 0),
+    ordersCompleted: Number(statsRow?.orders_completed ?? 0),
+    reviewsCount: Number(statsRow?.reviews_count ?? 0),
+    stars: [
+      { value: 5, count: Number(statsRow?.stars_5 ?? 0) },
+      { value: 4, count: Number(statsRow?.stars_4 ?? 0) },
+      { value: 3, count: Number(statsRow?.stars_3 ?? 0) },
+      { value: 2, count: Number(statsRow?.stars_2 ?? 0) },
+      { value: 1, count: Number(statsRow?.stars_1 ?? 0) },
+    ],
+  };
+  const satisfiedCount = (statsRow?.stars_5 ?? 0) + (statsRow?.stars_4 ?? 0);
+  const satisfaction = stats.reviewsCount > 0 ? Math.round((Number(satisfiedCount) / stats.reviewsCount) * 100) : null;
   const initials = (person.display_name ?? "P").slice(0, 2).toUpperCase();
   const isVerified = person.verification_status === "verified";
+
+  const languages = (profile?.spoken_languages ?? "")
+    .split(",")
+    .map((code: string) => code.trim().toLowerCase())
+    .filter(Boolean);
+  const place = [profile?.city, person.country_code].filter(Boolean).join(", ");
+  const shareTitle = person.display_name ?? "Prestataire Toomny";
+  const fromMinor = list.length > 0 ? Math.min(...list.map((s) => Number(s.price_minor))) : null;
+  const starsOf = (value: number) => (stats.reviewsCount === 0 ? 0 : Math.round((value / stats.reviewsCount) * 100));
+  const skills = (profile?.skills ?? "").split(",").map((x: string) => x.trim()).filter(Boolean);
 
   return (
     <>
       <Header locale={locale} />
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        {/* En-tête prestataire */}
-        <header className="relative overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 sm:p-8">
-          {/* Halo de marque */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-40"
-            style={{
-              background:
-                "radial-gradient(60% 80% at 10% 0%, var(--color-brand-200) 0%, transparent 70%)",
-            }}
-          />
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6">
+        <nav aria-label="Fil d'Ariane" className="mb-6 text-xs text-[var(--subtle)]">
+          <Link href="/prestataires" className="hover:text-[var(--foreground)]">{t.providersPageTitle}</Link>
+          <span className="mx-2">/</span>
+          <span className="text-[var(--foreground)]">{person.display_name ?? t.detailProvider}</span>
+        </nav>
 
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
-            {/* Avatar */}
-            <div className="flex-none">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0">
+            {/* En-tête */}
+            <header className="flex items-start gap-5">
               {profile?.avatar_url ? (
-                <Image
-                  src={profile.avatar_url}
-                  alt={person.display_name ?? ""}
-                  width={80}
-                  height={80}
-                  className="h-20 w-20 rounded-2xl object-cover shadow-lg"
-                />
+                <Image src={profile.avatar_url} alt={person.display_name ?? ""} width={96} height={96} className="h-24 w-24 flex-none rounded-full object-cover" />
               ) : (
-                <span
-                  aria-hidden
-                  className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--color-brand-500)] text-2xl font-extrabold text-white shadow-lg shadow-[var(--color-brand-500)]/30"
-                >
-                  {initials}
-                </span>
+                <InitialsAvatar name={person.display_name ?? t.detailProvider} size={96} />
               )}
-            </div>
-
-            {/* Infos */}
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-extrabold sm:text-3xl">
+              <div className="min-w-0">
+                <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold sm:text-3xl">
                   {person.display_name ?? t.detailProvider}
+                  {isVerified && (
+                    <span title={t.identityVerified} className="rounded-md bg-[var(--color-brand-50)] px-2 py-0.5 text-xs font-semibold text-[var(--color-brand-700)]">
+                      ✓ {t.badgeVerified}
+                    </span>
+                  )}
                 </h1>
-                {isVerified && (
-                  <span
-                    title={t.identityVerified}
-                    className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-500)] px-2.5 py-0.5 text-[11px] font-bold text-white"
-                  >
-                    ✓ {t.badgeVerified}
-                  </span>
-                )}
+                {profile?.headline && <p className="mt-1 text-base text-[var(--foreground)]">{profile.headline}</p>}
+                <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--subtle)]">
+                  <span className="font-semibold text-[var(--foreground)]">{avg !== null ? `★ ${avg.toFixed(1)}` : "★ —"}</span>
+                  <span>({stats.reviewsCount} {t.reviewsCount.toLowerCase()})</span>
+                  <span aria-hidden>·</span>
+                  <span>{stats.ordersReceived} {st.ordersReceivedShort}</span>
+                  {place && (<><span aria-hidden>·</span><span>{place}</span></>)}
+                </p>
               </div>
+            </header>
 
-              {profile?.headline && (
-                <p className="mt-1 text-base text-[var(--subtle)]">{profile.headline}</p>
+            {/* Présentation */}
+            {profile?.bio && (
+              <section className="mt-10 border-t border-[var(--border)] pt-8">
+                <h2 className="text-lg font-bold">{t.detailAbout}</h2>
+                <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-[var(--foreground)]">{profile.bio}</p>
+              </section>
+            )}
+
+            {/* Compétences */}
+            {skills.length > 0 && (
+              <section className="mt-10 border-t border-[var(--border)] pt-8">
+                <h2 className="text-lg font-bold">{t.skillsTitle}</h2>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {skills.map((skill: string) => (
+                    <li key={skill} className="rounded-full border border-[var(--border)] px-3.5 py-1.5 text-sm">
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Services : chaque titre commence par « Je vais » */}
+            <section className="mt-10 border-t border-[var(--border)] pt-8">
+              <h2 className="text-lg font-bold">{t.providerTitle}</h2>
+              {list.length === 0 ? (
+                <p className="mt-4 text-sm text-[var(--subtle)]">{t.providerEmpty}</p>
+              ) : (
+                <ul className="mt-5 grid gap-5 sm:grid-cols-2">
+                  {list.map((s) => (
+                    <li key={s.id}>
+                      <ServiceCard service={s} locale={locale} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Réalisations */}
+            {portfolio.length > 0 && (
+              <section className="mt-10 border-t border-[var(--border)] pt-8">
+                <h2 className="text-lg font-bold">{st.portfolioHeading}</h2>
+                <ul className="mt-4 divide-y divide-[var(--border)]">
+                  {portfolio.map((item) => (
+                    <li key={item.id} className="flex items-center justify-between gap-4 py-4">
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">{kindLabel[item.kind] ?? item.kind}</p>
+                        <p className="mt-0.5 truncate font-semibold">{item.title}</p>
+                        {item.description && <p className="mt-0.5 text-sm text-[var(--subtle)]">{item.description}</p>}
+                      </div>
+                      <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" className="flex-none text-sm font-semibold text-[var(--color-brand-700)] hover:underline">
+                        {st.visit} →
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Avis : synthèse et répartition */}
+            <section className="mt-10 border-t border-[var(--border)] pt-8">
+              <h2 className="text-lg font-bold">{t.reviews}</h2>
+              {stats.reviewsCount === 0 ? (
+                <p className="mt-4 text-sm text-[var(--subtle)]">{t.noReviewsList}</p>
+              ) : (
+                <div className="mt-5 grid gap-8 sm:grid-cols-[180px_1fr]">
+                  <div>
+                    <p className="font-display text-5xl font-bold">{avg?.toFixed(1)}</p>
+                    <p className="mt-1 text-sm text-[var(--subtle)]">{stats.reviewsCount} {t.reviewsCount.toLowerCase()}</p>
+                  </div>
+                  <ul className="space-y-2">
+                    {stats.stars.map((star) => (
+                      <li key={star.value} className="grid grid-cols-[2.5rem_1fr_2rem] items-center gap-3 text-sm">
+                        <span>{star.value} ★</span>
+                        <span className="h-1.5 overflow-hidden rounded-full bg-[var(--border)]" aria-hidden="true">
+                          <span className="block h-full rounded-full bg-[var(--foreground)]" style={{ width: `${starsOf(star.count)}%` }} />
+                        </span>
+                        <span className="text-right text-[var(--subtle)]">{star.count}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
-              <p className="mt-1 text-sm text-[var(--subtle)]">
-                {[profile?.city, person.country_code].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-
-            {/* Stats + partage */}
-            <dl className="grid grid-cols-3 gap-4 text-center sm:gap-6 flex-none">
-              <div>
-                <dt className="text-xs text-[var(--subtle)]">{t.rating}</dt>
-                <dd className="mt-0.5 font-display text-xl font-extrabold">
-                  {avg !== null ? `★ ${avg.toFixed(1)}` : "—"}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs text-[var(--subtle)]">{t.reviewsCount}</dt>
-                <dd className="mt-0.5 font-display text-xl font-extrabold">
-                  {profile?.rating_count ?? 0}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs text-[var(--subtle)]">{t.missions}</dt>
-                <dd className="mt-0.5 font-display text-xl font-extrabold">
-                  {profile?.completed_orders ?? 0}
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="relative mt-4 flex items-center gap-3">
-            <ShareButton title={person.display_name ?? "Prestataire Toomny"} locale={locale} />
-          </div>
-
-          {profile?.bio && (
-            <p className="relative mt-6 max-w-3xl whitespace-pre-line text-sm leading-relaxed text-[var(--subtle)]">
-              {profile.bio}
-            </p>
-          )}
-
-          {/* Compétences */}
-          {profile?.skills && (
-            <div className="relative mt-5">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
-                {t.skillsTitle}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {profile.skills.split(",").map((s: string) => s.trim()).filter(Boolean).map((skill: string) => (
-                  <span
-                    key={skill}
-                    className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Langues */}
-          {profile?.spoken_languages && (
-            <div className="relative mt-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--subtle)]">
-                {t.languagesTitle}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {profile.spoken_languages.split(",").map((l: string) => l.trim()).filter(Boolean).map((code: string) => (
-                  <span
-                    key={code}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-medium"
-                  >
-                    <span aria-hidden className="text-sm">
-                      {LANG_FLAG[code.toLowerCase()] ?? "🌐"}
-                    </span>
-                    {LANG_LABEL[code.toLowerCase()] ?? code.toUpperCase()}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* CTA Contacter */}
-          {currentUser && currentUser.id !== id && (
-            <div className="relative mt-6 flex flex-wrap gap-3">
-              <Link
-                href={`/prestataires/${id}/contact`}
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                {t.contactCta}
-              </Link>
-            </div>
-          )}
-          {!currentUser && (
-            <div className="relative mt-6">
-              <Link
-                href="/auth"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-5 py-2.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
-              >
-                {t.loginToContact}
-              </Link>
-            </div>
-          )}
-        </header>
-
-        {/* Prestations */}
-        <section className="mt-12">
-          <h2 className="font-display text-xl font-bold">{t.providerTitle}</h2>
-          {list.length === 0 ? (
-            <p className="mt-4 text-sm text-[var(--subtle)]">{t.providerEmpty}</p>
-          ) : (
-            <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.map((s) => (
-                <li key={s.id}>
-                  <ServiceCard service={s} locale={locale} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Avis */}
-        <section className="mt-12">
-          <h2 className="font-display text-xl font-bold">{t.reviews}</h2>
-          {reviewList.length === 0 ? (
-            <p className="mt-4 text-sm text-[var(--subtle)]">{t.noReviewsList}</p>
-          ) : (
-            <ul className="mt-4 space-y-4">
-              {reviewList.map((r) => (
-                <li key={r.id} className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5">
-                  <div className="flex items-start gap-3">
-                    <span
-                      aria-hidden
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
-                    >
-                      {authorName(r.author_id).charAt(0).toUpperCase()}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold leading-none">{authorName(r.author_id)}</p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-sm font-semibold">
-                          {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+              {reviewList.length > 0 && (
+                <ul className="mt-8 divide-y divide-[var(--border)]">
+                  {reviewList.map((r) => (
+                    <li key={r.id} className="py-6">
+                      <div className="flex items-center gap-3">
+                        <span aria-hidden className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--background)] text-xs font-bold">
+                          {authorName(r.author_id).charAt(0).toUpperCase()}
                         </span>
-                        <span className="text-sm text-[var(--subtle)]">{r.rating} {t.ratingOutOf}</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold">{authorName(r.author_id)}</p>
+                          <p className="text-xs text-[var(--subtle)]" aria-label={`${r.rating} / 5`}>
+                            <span className="text-[var(--foreground)]">{"★".repeat(r.rating)}</span>
+                            <span>{"★".repeat(5 - r.rating)}</span>
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  {r.comment && (
-                    <p className="mt-2 text-sm leading-relaxed">{r.comment}</p>
-                  )}
-                  <p className="mt-2 text-xs text-[var(--subtle)]">
-                    {new Date(r.created_at).toLocaleDateString(
-                      locale === "en" ? "en-GB" : "fr-FR",
-                      { day: "numeric", month: "long", year: "numeric" }
-                    )}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                      {r.comment && <p className="mt-3 text-[15px] leading-relaxed">{r.comment}</p>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          {/* Colonne latérale : tarif et contact, toujours visibles */}
+          <aside className="h-fit space-y-6 lg:sticky lg:top-24">
+            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
+              {fromMinor !== null && (
+                <>
+                  <p className="text-xs text-[var(--subtle)]">{t.from}</p>
+                  <p className="mt-1 font-display text-3xl font-bold">{formatMoney(BigInt(fromMinor), "XOF", locale)}</p>
+                </>
+              )}
+              <div className="mt-5 space-y-3">
+                {currentUser && currentUser.id !== id && (
+                  <Link href={`/prestataires/${id}/contact`} className="block rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]">
+                    {t.contactCta}
+                  </Link>
+                )}
+                {!currentUser && (
+                  <Link href="/auth" className="block rounded-full border border-[var(--border)] px-5 py-3 text-center text-sm font-semibold hover:border-[var(--foreground)]">
+                    {t.loginToContact}
+                  </Link>
+                )}
+                <div className="flex justify-center">
+                  <ShareButton title={shareTitle} locale={locale} />
+                </div>
+              </div>
+            </div>
+
+            <dl className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 text-sm">
+              <div className="flex justify-between gap-4"><dt className="text-[var(--subtle)]">{st.statusTitle}</dt><dd className="text-right font-medium">{statusLabel}</dd></div>
+              {memberSince && (
+                <div className="flex justify-between gap-4"><dt className="text-[var(--subtle)]">{locale === "en" ? "Member since" : "Membre depuis"}</dt><dd className="text-right font-medium">{memberSince}</dd></div>
+              )}
+              <div className="flex justify-between gap-4"><dt className="text-[var(--subtle)]">{t.ordersCompleted}</dt><dd className="text-right font-medium">{stats.ordersCompleted}</dd></div>
+              {stats.reviewsCount > 0 && (
+                <div className="flex justify-between gap-4"><dt className="text-[var(--subtle)]">{t.satisfaction}</dt><dd className="text-right font-medium">{satisfaction !== null ? `${satisfaction} %` : "—"}</dd></div>
+              )}
+              {languages.length > 0 && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-[var(--subtle)]">{t.languagesTitle}</dt>
+                  <dd className="text-right font-medium">{languages.map((code: string) => LANG_LABEL[code] ?? code.toUpperCase()).join(", ")}</dd>
+                </div>
+              )}
+            </dl>
+          </aside>
+        </div>
       </main>
       <Footer locale={locale} />
     </>

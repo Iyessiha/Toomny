@@ -10,7 +10,7 @@ import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { visitorLocale } from "@/i18n/server-locale";
 import { formatMoney } from "@/lib/money";
-import { confirmPaymentReceived, forceOrderTransition } from "../actions";
+import { confirmPaymentReceived, forceOrderTransition, resendPaymentEmails } from "../actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).orderDetailPage.metaTitle };
@@ -143,6 +143,12 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
               <form action={forceOrderTransition}>
                 <input type="hidden" name="orderId" value={order.id} />
                 <button type="submit" className="btn-success btn-sm">{tOrders.forceComplete}</button>
+              </form>
+            )}
+            {["funded", "in_progress", "delivered", "completed"].includes(order.status) && (
+              <form action={resendPaymentEmails}>
+                <input type="hidden" name="orderId" value={order.id} />
+                <button type="submit" className="btn-ghost btn-sm">Renvoyer les e-mails de paiement</button>
               </form>
             )}
             {order.status === "disputed" && (

@@ -10,6 +10,16 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { PlanNudgeCard } from "@/components/dashboard/plan-nudge-card";
+import { planNudge, type PlanNudge } from "@/lib/plan-nudge";
+import { createClient } from "@/lib/supabase/server";
+import { EncouragementCard } from "@/components/dashboard/encouragement-card";
+import { pickEncouragement } from "@/lib/encouragement";
+
+/** Adresse publique de Toomny, pour les liens de partage. */
+function siteBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
+}
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -18,6 +28,8 @@ export default async function DashboardPage() {
   const user = await requireAuth();
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
+  const nudge = provider ? await getProviderPlanNudge(user.id) : null;
+  const gaps = provider ? await showcaseGaps(user.id) : { photoMissing: false, portfolioMissing: false };
 
   return (
     <>
@@ -25,7 +37,7 @@ export default async function DashboardPage() {
         <OnboardingModal role={user.role} locale={user.preferredLocale} />
       )}
       {provider
-        ? <ProviderDashboard user={user} data={data} />
+        ? <ProviderDashboard user={user} data={data} nudge={nudge} gaps={gaps} />
         : <ClientDashboard user={user} data={data} />}
     </>
   );
@@ -33,12 +45,44 @@ export default async function DashboardPage() {
 
 // ─── Dashboard PRESTATAIRE ──────────────────────────────────────────────────
 
+/** Plan effectif et prestations actives du prestataire, pour le bandeau d'abonnement. */
+async function getProviderPlanNudge(userId: string): Promise<PlanNudge | null> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", userId).maybeSingle(),
+    supabase
+      .from("services")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", userId)
+      .not("status", "eq", "removed"),
+  ]);
+  return planNudge({
+    plan: profile?.plan,
+    expiresAt: profile?.plan_expires_at ?? null,
+    activeServices: count ?? 0,
+  });
+}
+
+/** Photo de profil et réalisations du prestataire : ce qui manque à sa vitrine. */
+async function showcaseGaps(userId: string): Promise<{ photoMissing: boolean; portfolioMissing: boolean }> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("avatar_url").eq("profile_id", userId).maybeSingle(),
+    supabase.from("portfolio_items").select("id", { count: "exact", head: true }).eq("provider_id", userId),
+  ]);
+  return { photoMissing: !profile?.avatar_url, portfolioMissing: (count ?? 0) === 0 };
+}
+
 function ProviderDashboard({
   user,
   data,
+  nudge,
+  gaps,
 }: {
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
+  nudge: PlanNudge | null;
+  gaps: { photoMissing: boolean; portfolioMissing: boolean };
 }) {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
@@ -54,6 +98,17 @@ function ProviderDashboard({
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   ).length;
+  const siteUrl = siteBaseUrl();
+  const encouragement = pickEncouragement({
+    isProvider: true,
+    toStart: data.orders.filter((o) => o.provider_id === user.id && o.status === "funded").length,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: completedOrders,
+    orders: receivedOrders.length,
+    activeServices: data.servicesCount,
+    photoMissing: gaps.photoMissing,
+    portfolioMissing: gaps.portfolioMissing,
+  });
 
   return (
     <DashboardShell
@@ -73,6 +128,16 @@ function ProviderDashboard({
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteUrl}
+          profileUrl={`${siteUrl}/prestataires/${user.id}`}
+        />
+      )}
+      {nudge && <PlanNudgeCard nudge={nudge} locale={locale} />}
+
       {/* ── KYC Banner ─────────────────────────────────────────────────── */}
       {!kycDone && !kycPending && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50">
@@ -309,6 +374,14 @@ function ClientDashboard({
   const t = getDashboardTexts(locale);
   const cur = data.currency;
   const firstName = user.firstName ?? user.displayName?.split(" ")[0] ?? t.home.fallbackName;
+  const encouragement = pickEncouragement({
+    isProvider: false,
+    toStart: 0,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: 0,
+    orders: data.orders.length,
+    activeServices: 0,
+  });
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   );
@@ -332,6 +405,15 @@ function ClientDashboard({
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteBaseUrl()}
+          profileUrl={`${siteBaseUrl()}/prestataires/${user.id}`}
+        />
+      )}
+
       {/* ── Litiges en cours ────────────────────────────────────────────── */}
       {disputedOrders.length > 0 && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">

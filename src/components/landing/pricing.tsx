@@ -122,6 +122,12 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
               </div>
             );
           })}
+        {/* Provider plans */}
+        <p data-reveal className="mb-5 mt-14 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--subtle)]">
+          {t.plansFor}
+        </p>
+        <div data-reveal>
+          <PricingScene plans={t.plans} locale={locale} />
         </div>
 
         {/* How the commission works, in plain words */}

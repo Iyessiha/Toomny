@@ -265,20 +265,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .btn-landing-primary:active { transform: scale(0.97); }
 
-/* Animation pour le point "en ligne" */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.online-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
 
 /* Variables ombre premium. */
 :root {
@@ -547,18 +533,6 @@ html.lenis, html.lenis body { height: auto; }
 .input:focus { border-color: var(--color-brand-500); }
 .input::placeholder { color: var(--subtle); }
 
-/* ── Talent Strip ────────────────────────────────────────────────────────── */
-@keyframes talent-scroll {
-  from { transform: translateX(0) }
-  to   { transform: translateX(-50%) }
-}
-.talent-track {
-  display: flex;
-  gap: 0.875rem;
-  animation: talent-scroll 42s linear infinite;
-}
-.talent-track:hover { animation-play-state: paused; }
-
 /* ── Pricing 3D cards ────────────────────────────────────────────────────── */
 /* Pricing staircase: four 3D plates, one colour per level, rising toward the viewer.
    Each plate carries its own dark palette, so it reads the same in light and dark themes. */
@@ -689,4 +663,26 @@ html.lenis, html.lenis body { height: auto; }
   .tier-slot { animation: none; opacity: 1; }
   .tier-t3 .tier-plate, .tier-sheen { animation: none; }
   .tier-plate { transition: none; }
+}
+
+/* Entrée douce des blocs clés (suivi de commande, encouragements, alertes). */
+@keyframes toomny-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: toomny-rise 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
+  }
 }

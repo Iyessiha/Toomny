@@ -3,12 +3,23 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
-import { EmptyState } from "@/components/dashboard/shell";
-import { Pill, Section, TableCard } from "@/components/dashboard/pro";
+import { ConversationList, type ConversationItem } from "@/components/messaging/conversation-list";
+import { ConversationPane, type PaneRequest } from "@/components/messaging/conversation-pane";
+import type { Readiness } from "@/lib/account-readiness";
 import { formatSubmittedAt } from "@/i18n/auth";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
-import { closeSupportRequest } from "./actions";
+import { attachmentsForRequests, signedUrlsFor } from "@/lib/support-attachments-server";
+import { readinessForUser } from "@/lib/account-readiness-server";
+import { buildThread, previewOf, type RawRequest } from "@/lib/support-view";
+import {
+  analyzeRequesterAccount,
+  closeSupportRequest,
+  draftSupportReply,
+  notifyRequesterMissing,
+  reopenSupportRequest,
+  replySupportRequest,
+} from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).nav.support };
@@ -17,51 +28,99 @@ export const dynamic = "force-dynamic";
 
 const copy = {
   fr: {
-    title: "Demandes de contact",
-    subtitle: "Messages envoyés par les prestataires et clients depuis « Contacter Toomny ».",
-    open: "En cours",
+    title: "Messagerie",
+    subtitle: "Conversations avec les prestataires et clients. Votre réponse arrive dans leur espace.",
+    toAnswer: "À répondre",
+    waitingRequester: "En attente du demandeur",
     closed: "Traitée",
-    close: "Marquer traitée",
-    emptyTitle: "Aucune demande",
-    emptyBody: "Les demandes de contact apparaîtront ici.",
-    colFrom: "De",
-    colSubject: "Sujet",
-    colMessage: "Message",
-    colDate: "Reçue le",
-    colStatus: "Statut",
+    close: "Clôturer",
+    emptyList: "Aucune conversation pour l'instant.",
+    emptyPane: "Sélectionnez une conversation.",
+    newBadge: "Nouveau",
+    team: "Équipe Toomny",
+    closedLabel: "Traitée",
   },
   en: {
-    title: "Contact requests",
-    subtitle: "Messages sent by providers and clients from “Contact Toomny”.",
-    open: "Open",
+    title: "Messaging",
+    subtitle: "Conversations with providers and clients. Your reply appears in their space.",
+    toAnswer: "To answer",
+    waitingRequester: "Waiting for requester",
     closed: "Closed",
-    close: "Mark as closed",
-    emptyTitle: "No requests",
-    emptyBody: "Contact requests will appear here.",
-    colFrom: "From",
-    colSubject: "Subject",
-    colMessage: "Message",
-    colDate: "Received on",
-    colStatus: "Status",
+    close: "Close",
+    emptyList: "No conversation yet.",
+    emptyPane: "Select a conversation.",
+    newBadge: "New",
+    team: "Toomny team",
+    closedLabel: "Closed",
   },
 } as const;
 
-export default async function AdminSupportPage() {
+export default async function AdminSupportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
   const user = await requireAdmin();
   const locale = user.preferredLocale;
   const t = copy[locale];
+  const { id: selectedParam } = await searchParams;
 
   const db = createAdminClient();
   const { data: rows } = await db
     .from("support_requests")
-    .select("id, subject, body, status, created_at, profile:profiles(display_name, email, role)")
+    .select(
+      "id, subject, body, status, created_at, awaiting_admin, requester_seen_at, text_purged_at, profile_id, profile:profiles(display_name, email), replies:support_replies(id, body, created_at, author_role, quoted_role, quoted_body)",
+    )
     .order("created_at", { ascending: false })
     .limit(100);
 
   const list = (rows ?? []).map((r) => {
     const profile = Array.isArray(r.profile) ? r.profile[0] : r.profile;
-    return { ...r, profile };
+    return { ...r, profile, replies: r.replies ?? [] };
   });
+  const attachments = await attachmentsForRequests(db, list.map((r) => r.id));
+  const urls = await signedUrlsFor(db, attachments.filter((a) => a.reply_id !== null));
+
+  const selected = list.find((r) => r.id === selectedParam) ?? list[0] ?? null;
+
+  const items: ConversationItem[] = list.map((r) => {
+    const isClosed = r.status === "closed";
+    const tone = isClosed ? "neutral" : r.awaiting_admin ? "warning" : "neutral";
+    return {
+      id: r.id,
+      title: r.subject,
+      subtitle: r.profile?.display_name ?? r.profile?.email ?? null,
+      preview: previewOf(r as RawRequest),
+      timeLabel: formatSubmittedAt(
+        r.replies.length ? [...r.replies].sort((a, b) => a.created_at.localeCompare(b.created_at)).at(-1)!.created_at : r.created_at,
+        locale,
+      ),
+      unread: !isClosed && r.awaiting_admin,
+      statusLabel: isClosed ? t.closed : r.awaiting_admin ? t.toAnswer : t.waitingRequester,
+      statusTone: tone,
+    };
+  });
+
+  let pane: PaneRequest | null = null;
+  let messages: ReturnType<typeof buildThread> = [];
+  let readiness: Readiness | undefined = undefined;
+  if (selected) {
+    const isClosed = selected.status === "closed";
+    pane = {
+      id: selected.id,
+      subject: selected.subject,
+      closed: isClosed,
+      requesterName: selected.profile?.display_name ?? "—",
+      requesterEmail: selected.profile?.email ?? null,
+      statusLabel: isClosed ? t.closed : selected.awaiting_admin ? t.toAnswer : t.waitingRequester,
+      statusTone: isClosed ? "neutral" : selected.awaiting_admin ? "warning" : "neutral",
+      createdLabel: formatSubmittedAt(selected.created_at, locale),
+      reopenable: !selected.text_purged_at,
+    };
+    messages = buildThread(selected as RawRequest, attachments, urls, (iso) => formatSubmittedAt(iso, locale));
+    const requester = await readinessForUser(db, selected.profile_id);
+    readiness = requester?.readiness;
+  }
 
   return (
     <AdminShell
@@ -72,51 +131,37 @@ export default async function AdminSupportPage() {
       subtitle={t.subtitle}
       nav={getAdminNavGroups(locale, "/admin/support")}
     >
-      {list.length === 0 ? (
-        <Section title={t.emptyTitle}>
-          <EmptyState title={t.emptyTitle} body={t.emptyBody} />
-        </Section>
-      ) : (
-        <TableCard>
-          <thead>
-            <tr>
-              <th>{t.colFrom}</th>
-              <th>{t.colSubject}</th>
-              <th>{t.colDate}</th>
-              <th>{t.colStatus}</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((r) => (
-              <tr key={r.id}>
-                <td className="whitespace-normal!">
-                  <span className="block font-semibold">{r.profile?.display_name ?? "—"}</span>
-                  <span className="block text-xs text-[var(--subtle)]">{r.profile?.email}</span>
-                </td>
-                <td className="whitespace-normal!">
-                  <span className="block font-semibold">{r.subject}</span>
-                  <span className="mt-1 block whitespace-pre-line text-sm text-[var(--subtle)]">{r.body}</span>
-                </td>
-                <td className="text-xs text-[var(--subtle)]">{formatSubmittedAt(r.created_at, locale)}</td>
-                <td>
-                  <Pill tone={r.status === "closed" ? "neutral" : "warning"}>
-                    {r.status === "closed" ? t.closed : t.open}
-                  </Pill>
-                </td>
-                <td className="text-right">
-                  {r.status !== "closed" && (
-                    <form action={closeSupportRequest}>
-                      <input type="hidden" name="requestId" value={r.id} />
-                      <button type="submit" className="btn-ghost btn-sm">{t.close}</button>
-                    </form>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </TableCard>
-      )}
+      <div className="grid gap-4 lg:h-[calc(100dvh-14rem)] lg:grid-cols-[340px_1fr] lg:grid-rows-[minmax(0,1fr)]">
+        <ConversationList
+          items={items}
+          selectedId={selected?.id ?? null}
+          basePath="/admin/support"
+          emptyLabel={t.emptyList}
+          hidden={Boolean(selectedParam)}
+        />
+        {pane ? (
+          <ConversationPane
+            key={pane.id}
+            viewer="admin"
+            locale={locale}
+            request={pane}
+            messages={messages}
+            backHref="/admin/support"
+            sendAction={replySupportRequest}
+            closeAction={closeSupportRequest}
+            closeLabel={t.close}
+            draftAction={draftSupportReply}
+            analyzeAction={analyzeRequesterAccount}
+            reopenAction={reopenSupportRequest}
+            readiness={readiness}
+            notifyAction={notifyRequesterMissing}
+          />
+        ) : (
+          <div className="flex items-center justify-center rounded-2xl border border-dashed border-[var(--border)] p-10 text-sm text-[var(--subtle)]">
+            {t.emptyPane}
+          </div>
+        )}
+      </div>
     </AdminShell>
   );
 }
