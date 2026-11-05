@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import { MotionProvider } from "@/components/motion-provider";
 import { SwRegister } from "@/components/pwa/sw-register";
@@ -9,18 +9,27 @@ import { getPixelSettings } from "@/lib/pixels-server";
 import { PixelScripts } from "@/components/analytics/pixel-scripts";
 import { Analytics } from "@vercel/analytics/next";
 
-// next/font héberge les fichiers au build : zéro requête vers Google au
-// runtime, ce qui compte sur les réseaux lents de nos marchés.
-const display = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
+// Polices auto-hébergées dans src/fonts (Plus Jakarta Sans, Inter, latin, SIL OFL).
+// Pas de téléchargement depuis Google au build ni au runtime : le build Vercel
+// échouait quand fonts.googleapis.com n'était pas joignable, et les réseaux lents
+// de nos marchés ne subissent aucune requête externe.
+const display = localFont({
+  src: [
+    { path: "../fonts/plus-jakarta-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/plus-jakarta-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/plus-jakarta-sans-latin-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/plus-jakarta-sans-latin-800-normal.woff2", weight: "800", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
 });
 
-const text = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const text = localFont({
+  src: [
+    { path: "../fonts/inter-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/inter-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/inter-latin-600-normal.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-text",
   display: "swap",
 });
