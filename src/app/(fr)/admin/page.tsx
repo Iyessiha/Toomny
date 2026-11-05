@@ -3,8 +3,6 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAdminStats } from "@/lib/admin-stats";
 import { getRecentAdminActions } from "@/lib/admin-audit";
-import { getAdminQueue } from "@/lib/admin-queue";
-import { WorkQueue } from "@/components/admin/work-queue";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
@@ -71,11 +69,6 @@ export default async function AdminPage() {
   const c = s.counts;
   const fmt = (n: number) => n.toLocaleString(locale === "en" ? "en-GB" : "fr-FR");
 
-  const queue = await getAdminQueue(4);
-  const queuedPayouts = c.queuedPayouts;
-  const todoTotal =
-    c.pendingKyc + c.servicesToValidate + c.openDisputes + c.overdueOrders + queuedPayouts + c.failedPayouts + c.awaitingSupport;
-
   const orderDelta = deltaOf(s.trend.ordersLast7, s.trend.ordersPrev7, t.vsPrev);
   const volumeDelta = deltaOf(Number(s.trend.amountLast7), Number(s.trend.amountPrev7), t.vsPrev);
 
@@ -104,19 +97,6 @@ export default async function AdminPage() {
         />
         <button type="submit" className="btn-primary">Rechercher</button>
       </form>
-
-      {/* ── File de travail : chaque élément concret, avec son action directe ── */}
-      <Section
-        title="File de travail"
-        subtitle={todoTotal > 0 ? `${queue.length} affiché(s) sur ${fmt(todoTotal)}, les plus urgents d'abord` : undefined}
-        action={
-          <Pill tone={todoTotal > 0 ? "warning" : "success"}>
-            {todoTotal > 0 ? fmt(todoTotal) : t.todoOk}
-          </Pill>
-        }
-      >
-        <WorkQueue items={queue} emptyLabel={t.todoOk} />
-      </Section>
 
       {/* ── Volume : argent réellement acquis séparé de l'argent en séquestre ── */}
       <section className="mt-10">
