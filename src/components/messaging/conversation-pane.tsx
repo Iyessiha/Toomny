@@ -423,7 +423,7 @@ export function ConversationPane({
                 type="button"
                 onClick={() => setQuote(m)}
                 aria-label={t.replyTo}
-                className={`group max-w-[88%] rounded-2xl px-4 py-3 text-left text-sm shadow-sm transition hover:ring-2 hover:ring-[var(--color-brand-300)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-500)] ${
+                className={`group max-w-[88%] rounded-2xl px-4 py-3 text-left text-sm shadow-sm transition hover:ring-2 hover:ring-[var(--color-brand-300)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-text-2)] ${
                   mine
                     ? "rounded-br-md bg-[var(--color-brand-50)]"
                     : "rounded-bl-md border border-[var(--border)] bg-[var(--background)]"
@@ -466,7 +466,7 @@ export function ConversationPane({
       ) : (
         <form onSubmit={send} className="shrink-0 space-y-3 border-t border-[var(--border)] bg-[var(--background)] p-4">
           {quote && (
-            <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[var(--color-brand-500)] bg-[var(--surface)] p-3 text-xs">
+            <div className="flex items-start justify-between gap-3 rounded-xl border-l-2 border-[var(--brand-text-2)] bg-[var(--surface)] p-3 text-xs">
               <div className="min-w-0">
                 <p className="font-semibold">{t.quotingFrom(roleName(quote.role))}</p>
                 <p className="truncate text-[var(--subtle)]">{quote.body}</p>
@@ -503,7 +503,7 @@ export function ConversationPane({
             maxLength={SUPPORT_REPLY_MAX}
             disabled={sending}
             placeholder={t.placeholder}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--color-brand-500)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--brand-text-2)]"
           />
 
           <div className="flex flex-wrap items-center gap-2">

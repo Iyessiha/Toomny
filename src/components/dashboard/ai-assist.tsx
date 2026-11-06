@@ -39,7 +39,7 @@ const copy = {
 } as const;
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--brand-text-2)]";
 
 export function AiUpsell({ locale }: { locale: Locale }) {
   const t = copy[locale];

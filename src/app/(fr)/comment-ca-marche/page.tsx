@@ -31,7 +31,7 @@ export default async function HowItWorksPage() {
         {/* Hero */}
         <section className="border-b border-[var(--border)] bg-[var(--surface)] py-16 text-center">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-500)]">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-text-2)]">
               {h.eyebrow}
             </p>
             <h1 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
@@ -88,7 +88,7 @@ export default async function HowItWorksPage() {
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/auth"
-                className="rounded-full bg-[var(--color-brand-500)] px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+                className="rounded-full btn-fill px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
               >
                 {t.cta.primary}
               </Link>

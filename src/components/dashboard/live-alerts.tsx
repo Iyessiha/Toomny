@@ -184,7 +184,7 @@ export function LiveAlerts({ locale }: { locale: Locale }) {
           key={toast.id}
           role="status"
           aria-live="polite"
-          className="pointer-events-auto animate-rise rounded-2xl border border-[var(--color-brand-500)] bg-white p-4 shadow-xl"
+          className="pointer-events-auto animate-rise rounded-2xl border border-[var(--color-brand-600)] bg-white p-4 shadow-xl"
         >
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full bg-[var(--color-brand-500)] text-sm font-bold text-white" aria-hidden>

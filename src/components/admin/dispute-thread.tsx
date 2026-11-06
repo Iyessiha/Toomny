@@ -60,7 +60,7 @@ export function DisputeThread({
             messages.map((m) => (
               <div key={m.id} className="rounded-xl bg-[var(--surface)] px-4 py-3 text-sm">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-xs font-semibold text-[var(--color-brand-600)]">
+                  <span className="text-xs font-semibold text-[var(--brand-text-1)]">
                     {m.senderName}
                     <span className="ml-1.5 font-normal text-[var(--subtle)]">· {m.senderRole}</span>
                   </span>

@@ -74,7 +74,7 @@ export function ShareServices({ services, locale, siteUrl }: Props) {
                     href={shareHref(network, serviceUrl(siteUrl, s.id, network), text)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold hover:border-[var(--color-brand-500)] hover:text-[var(--color-brand-600)]"
+                    className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold hover:border-[var(--brand-text-2)] hover:text-[var(--brand-text-1)]"
                   >
                     {t.networks[network]}
                   </a>
@@ -82,7 +82,7 @@ export function ShareServices({ services, locale, siteUrl }: Props) {
                 <button
                   type="button"
                   onClick={() => copy(s.id)}
-                  className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold hover:border-[var(--color-brand-500)] hover:text-[var(--color-brand-600)]"
+                  className="rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-semibold hover:border-[var(--brand-text-2)] hover:text-[var(--brand-text-1)]"
                 >
                   {copiedId === s.id ? t.copied : t.copy}
                 </button>

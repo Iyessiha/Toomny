@@ -13,7 +13,7 @@ type Mode = "signup" | "login";
 type Role = "client" | "provider";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20";
 
 function passwordStrength(pw: string): 0 | 1 | 2 | 3 {
   if (pw.length < 8) return 0;
@@ -157,7 +157,7 @@ export function AuthForm({
   if (sent) {
     return (
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full btn-fill text-white">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 13 4 4L19 7" />
           </svg>
@@ -204,7 +204,7 @@ export function AuthForm({
                     aria-pressed={role === r}
                     className={`flex flex-col items-start rounded-xl border px-4 py-3 text-left transition-colors ${
                       role === r
-                        ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
+                        ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)] text-[var(--brand-text-2)]"
                         : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)]"
                     }`}
                   >
@@ -256,7 +256,7 @@ export function AuthForm({
                 <select
                   value={dialCode}
                   onChange={(e) => setDialCode(e.target.value)}
-                  className="w-28 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+                  className="w-28 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20"
                   aria-label="Indicatif pays"
                 >
                   {KYC_COUNTRIES.map((c) => {
@@ -276,7 +276,7 @@ export function AuthForm({
                   placeholder="07 00 00 00 00"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+                  className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20"
                 />
               </div>
               <p className="mt-1.5 text-xs text-[var(--subtle)]">
@@ -296,7 +296,7 @@ export function AuthForm({
             {mode === "login" && (
               <Link
                 href={locale === "en" ? "/en/auth/forgot-password" : "/auth/forgot-password"}
-                className="text-xs text-[var(--color-brand-500)] hover:underline underline-offset-2"
+                className="text-xs text-[var(--brand-text-2)] hover:underline underline-offset-2"
               >
                 {t.forgotPassword}
               </Link>
@@ -363,7 +363,7 @@ export function AuthForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
+          className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
         >
           {pending ? t.submit.pending : mode === "signup" ? t.submit.signup : t.submit.login}
         </button>

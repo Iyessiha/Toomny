@@ -207,7 +207,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                 <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold sm:text-3xl">
                   {person.display_name ?? t.detailProvider}
                   {isVerified && (
-                    <span title={t.identityVerified} className="rounded-md bg-[var(--color-brand-50)] px-2 py-0.5 text-xs font-semibold text-[var(--color-brand-700)]">
+                    <span title={t.identityVerified} className="rounded-md bg-[var(--color-brand-50)] px-2 py-0.5 text-xs font-semibold text-[var(--brand-text-2)]">
                       ✓ {t.badgeVerified}
                     </span>
                   )}
@@ -273,7 +273,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
                         <p className="mt-0.5 truncate font-semibold">{item.title}</p>
                         {item.description && <p className="mt-0.5 text-sm text-[var(--subtle)]">{item.description}</p>}
                       </div>
-                      <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" className="flex-none text-sm font-semibold text-[var(--color-brand-700)] hover:underline">
+                      <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" className="flex-none text-sm font-semibold text-[var(--brand-text-2)] hover:underline">
                         {st.visit} →
                       </a>
                     </li>
@@ -342,7 +342,7 @@ export default async function ProviderPage({ params }: { params: Promise<{ id: s
               )}
               <div className="mt-5 space-y-3">
                 {currentUser && currentUser.id !== id && (
-                  <Link href={`/prestataires/${id}/contact`} className="block rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]">
+                  <Link href={`/prestataires/${id}/contact`} className="block rounded-full btn-fill px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]">
                     {t.contactCta}
                   </Link>
                 )}

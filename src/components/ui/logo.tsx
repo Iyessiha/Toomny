@@ -14,7 +14,7 @@ export function Logo({ size = 32, withWordmark = true, className }: Props) {
         alt="Toomny"
         width={size}
         height={size}
-        className="shrink-0"
+        className="logo-mark shrink-0"
         style={{ width: size, height: size, objectFit: "contain" }}
         priority
       />

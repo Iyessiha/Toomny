@@ -39,7 +39,7 @@ export function ReviewForm({ orderId, locale = "fr" }: { orderId: string; locale
               aria-pressed={rating === n}
               onClick={() => setRating(n)}
               className={`h-10 w-10 rounded-full border text-sm font-semibold ${
-                rating === n ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)] text-[var(--color-brand-700)]" : "border-[var(--border)]"
+                rating === n ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)] text-[var(--brand-text-2)]" : "border-[var(--border)]"
               }`}
             >
               {n}
@@ -49,10 +49,10 @@ export function ReviewForm({ orderId, locale = "fr" }: { orderId: string; locale
       </fieldset>
       <div>
         <label htmlFor="comment" className="text-sm font-medium">{t.comment}</label>
-        <textarea id="comment" name="comment" rows={3} maxLength={1000} className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]" />
+        <textarea id="comment" name="comment" rows={3} maxLength={1000} className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]" />
       </div>
       {error && <p role="alert" className="notice notice-danger">{error}</p>}
-      <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
+      <button type="submit" disabled={pending} className="rounded-full btn-fill px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.submitting : t.submit}
       </button>
     </form>

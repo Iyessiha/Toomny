@@ -72,7 +72,7 @@ export function SupportReplyForm({
         maxLength={SUPPORT_REPLY_MAX}
         placeholder={copy.placeholder}
         disabled={pending}
-        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--color-brand-500)]"
+        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 text-sm outline-none focus:border-[var(--brand-text-2)]"
       />
       <div className="flex flex-wrap items-center gap-2">
         <button type="button" onClick={onDraft} disabled={pending} className="btn-ghost btn-sm">

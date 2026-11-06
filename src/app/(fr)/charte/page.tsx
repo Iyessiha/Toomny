@@ -208,7 +208,7 @@ export default function ChartePage() {
             <tbody>
               {["TOO-4821", "TOO-4820", "TOO-4819"].map((ref, i) => (
                 <tr key={ref}>
-                  <td className="font-semibold text-[var(--color-brand-600)]">{ref}</td>
+                  <td className="font-semibold text-[var(--brand-text-1)]">{ref}</td>
                   <td>
                     <Pill tone={orderTone(orders[i])}>{orders[i]}</Pill>
                   </td>

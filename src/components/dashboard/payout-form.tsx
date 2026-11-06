@@ -7,7 +7,7 @@ import { getPayoutTexts } from "@/i18n/payouts";
 import type { Locale } from "@/i18n/dictionaries";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]";
 
 export function PayoutForm({
   locale,
@@ -56,8 +56,8 @@ export function PayoutForm({
         <p className="mt-1.5 text-xs text-[var(--subtle)]">{t.numberHint}</p>
       </div>
       {error && <p role="alert" className="notice notice-danger">{error}</p>}
-      {saved && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.saved}</p>}
-      <button type="submit" disabled={pending} className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
+      {saved && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{t.saved}</p>}
+      <button type="submit" disabled={pending} className="rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.saving : t.save}
       </button>
     </form>

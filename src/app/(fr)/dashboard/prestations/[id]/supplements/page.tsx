@@ -57,7 +57,7 @@ export default async function ServiceAddonsPage({ params }: { params: Promise<{ 
       locale={locale}
       navSections={dashboardNavSections(nav, user.role, "/dashboard/prestations")}
     >
-      <Link href="/dashboard/prestations" className="mb-6 inline-block text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+      <Link href="/dashboard/prestations" className="mb-6 inline-block text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
         ← {t.backToServices}
       </Link>
 

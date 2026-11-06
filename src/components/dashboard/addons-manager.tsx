@@ -96,7 +96,7 @@ export function AddonsManager({
               </div>
               {addon.description && <p className="mt-0.5 text-xs text-[var(--subtle)]">{addon.description}</p>}
               <p className="mt-1 text-sm">
-                <span className="font-display font-bold text-[var(--color-brand-600)]">
+                <span className="font-display font-bold text-[var(--brand-text-1)]">
                   +{formatMoney(BigInt(addon.price_minor), addon.currency, "fr")}
                 </span>
                 {addon.extra_delivery_days > 0 && (

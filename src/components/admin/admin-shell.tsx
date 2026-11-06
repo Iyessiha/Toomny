@@ -46,7 +46,7 @@ export async function AdminShell({
     <div className="min-h-dvh bg-[var(--surface)]">
       {/* ── Mobile top bar ── */}
       <header className="flex h-14 items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--background)] px-4 sm:hidden">
-        <Link href="/" className="text-[var(--color-brand-500)]" aria-label="Toomny">
+        <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
           <Logo size={24} withWordmark={false} />
         </Link>
         <span className="truncate font-display text-sm font-bold">{title}</span>
@@ -82,7 +82,7 @@ export async function AdminShell({
         <aside className="hidden sm:flex sm:w-64 sm:shrink-0 sm:flex-col sm:min-h-dvh sm:sticky sm:top-0 sm:max-h-dvh sm:border-r sm:border-[var(--border)] sm:bg-[var(--background)]">
           {/* Brand */}
           <div className="flex h-16 flex-none items-center gap-2.5 border-b border-[var(--border)] px-5">
-            <Link href="/" className="text-[var(--color-brand-500)]" aria-label="Toomny">
+            <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
               <Logo size={26} withWordmark={false} />
             </Link>
             <div className="leading-none">

@@ -74,7 +74,7 @@ export function ReviewsList({
             <div className="flex items-start gap-3">
               <span
                 aria-hidden
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--brand-text-2)]"
               >
                 {review.authorName.charAt(0).toUpperCase()}
               </span>
@@ -114,7 +114,7 @@ export function ReviewsList({
         <button
           type="button"
           onClick={() => setShowAll((v) => !v)}
-          className="w-full rounded-full border border-[var(--border)] py-2.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+          className="w-full rounded-full border border-[var(--border)] py-2.5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--brand-text-1)]"
         >
           {showAll
             ? locale === "en"

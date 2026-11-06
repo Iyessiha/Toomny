@@ -46,7 +46,7 @@ export async function TrustBar({ locale }: { locale: Locale }) {
             {shown.map((key) => (
               <div key={key} className="flex items-baseline gap-2">
                 <dt className="sr-only">{t.stats[key]}</dt>
-                <dd className="font-display text-2xl font-extrabold text-[var(--color-brand-600)]">{stats[key].toLocaleString(locale === "en" ? "en-GB" : "fr-FR")}</dd>
+                <dd className="font-display text-2xl font-extrabold text-[var(--brand-text-1)]">{stats[key].toLocaleString(locale === "en" ? "en-GB" : "fr-FR")}</dd>
                 <span className="text-sm text-[var(--subtle)]">{t.stats[key]}</span>
               </div>
             ))}

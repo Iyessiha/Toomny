@@ -65,7 +65,7 @@ export default async function DisputesPage() {
                       {t.order}{" "}
                       <Link
                         href={`/orders/${d.order?.id}`}
-                        className="text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                        className="text-[var(--brand-text-1)] underline-offset-2 hover:underline"
                       >
                         {d.order?.reference}
                       </Link>

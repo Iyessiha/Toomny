@@ -71,7 +71,7 @@ export function FinalCta({ locale = "fr" }: { locale?: Locale }) {
               <div className="mt-9 flex flex-wrap gap-3 lg:justify-start justify-center">
                 <Link
                   href={t.primaryHref}
-                  className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-700)] shadow-xl shadow-black/20 transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl active:scale-95"
+                  className="rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--color-brand-600)] shadow-xl shadow-black/20 transition-all duration-200 hover:scale-[1.03] hover:shadow-2xl active:scale-95"
                 >
                   {t.primary}
                 </Link>

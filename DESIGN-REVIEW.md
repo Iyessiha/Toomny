@@ -257,3 +257,70 @@ Points d'exécution :
    renvoi court vers les tarifs. La page dédiée porte les quatre plans,
    l'exemple chiffré « où part chaque franc », le comparatif Fiverr/Upwork et
    les questions récurrentes sur le prix.
+
+---
+
+## 7. Le design passe sur tout le SaaS
+
+La proposition n'est plus une maquette à part : elle est devenue l'identité du
+produit. Le point qui rend cela possible, c'est que les espaces connectés
+étaient déjà écrits en **jetons de couleur** (`--background`, `--surface`,
+`--border`, `--foreground`, `--subtle`, `--tone-*`) et en **primitives
+partagées** (`.card`, `.btn-primary`, `.input`, `.chip`, `.notice`). Retoucher
+`globals.css` suffit donc à reteinter les 70+ routes — dashboards client,
+prestataire et admin, catalogue, formulaires, pages légales.
+
+### Ce qui a changé, et pourquoi
+
+1. **Palette racine nocturne** (section « AURORA GLASS » de `globals.css`) :
+   fond `#04110b`, surfaces translucides (`rgba(6,24,15,.72)`) pour que l'aurore
+   traverse les pages, bordures en blanc translucide, accent menthe `#9ff2c2`,
+   or de la charte conservé. Le thème système sombre est aligné sur les mêmes
+   valeurs : aucun `media query` ne peut contredire la marque.
+2. **Nappes d'aurore globales** (`body::before`) : trois nappes radiales fixes
+   et une base presque noire. Un seul élément décoratif, aucune image.
+3. **Primitives relues** : `.card` devient du verre (un seul `backdrop-filter`,
+   ombre interne en arête), `.input` devient creusé, `.chip` actif prend le
+   dégradé, `.notice` gagne une bordure teintée.
+4. **La rampe `brand` est inversée pour le fond sombre**, pas supprimée :
+   - les **fonds pleins** (500/600) gardent le vert du logo — 85 boutons
+     portaient `bg-brand-500` + `text-white`, les repeindre aurait cassé leur
+     contraste ;
+   - les **textes** passent par trois jetons dédiés
+     (`--brand-text-1/2/3`) éclaircis pour le noir. 96 fichiers concernés.
+   - `bg-brand-50/100/200` deviennent des voiles translucides.
+5. **CTA harmonisés** : une classe `.btn-fill` remplace le vert plat des 68
+   boutons pilulaires par le dégradé menthe→émeraude de la proposition, texte
+   en encre sombre. C'est le détail qui fait « cliquer » un bouton.
+
+### Défauts trouvés en regardant les pages, et corrigés
+
+- **La marque du logo disparaissait** : `public/icon.png` est un vert sombre
+  dessiné pour du blanc. Une classe `.logo-mark` l'éclaircit (`brightness`)
+  sans redessiner la marque déposée.
+- **Le reçu de commande serait devenu illisible** : il s'imprime sur papier
+  blanc. Ajout d'une zone `.paper-sheet` qui rétablit les jetons clairs à
+  l'intérieur, accents compris ; le reçu n'est plus une page du SaaS.
+- **Onze boutons blancs portaient un accent clair** (menthe sur blanc) : leur
+  texte repasse en `brand-600`, la teinte foncée.
+- **Le palier « Pro » du tarifaire était violet**, hors charte : passé en
+  émeraude, et le palier « Starter » quitte son bleu nuit pour un vert neutre.
+- **Les pastels d'alerte** (`bg-red-50`, `bg-amber-50`, `bg-violet-50`…) sont
+  des taches opaques sur fond noir : relus en translucide avec un texte
+  éclairci, sans perdre le sens (rouge = erreur, ambre = attention).
+- **Le panneau d'inscription était un aplat vert saturé** : devenu bandeau
+  d'aurore (`.hero-band`), comme les en-têtes du produit.
+- **Les vignettes de catégories** sont des PNG à fond pastel : traitées comme
+  des tuiles de verre teinté plutôt que régénérées.
+
+### Vérifications
+
+`npx tsc --noEmit`, `npm run build`, `npx vitest run` (262 tests) et
+`npx eslint src` sont verts — le lint affiche les mêmes 14 problèmes
+préexistants qu'avant ces changements, aucun ajouté. `/`, `/services`,
+`/prestataires`, `/tarifs`, `/comment-ca-marche`, `/securite`, `/auth`,
+`/dashboard`, `/messages`, `/orders`, `/admin` répondent 200. Contrôlé à
+l'écran en 1280 px et en 390 px.
+
+La maquette reste consultable sur `/design-glassy` (et `/en/design-glassy`)
+comme référence de la direction, mais la racine ne redirige plus vers elle.

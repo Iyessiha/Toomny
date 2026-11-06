@@ -50,13 +50,13 @@ export default function ForgotPasswordPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-[var(--background)] px-4 py-12">
       <div className="w-full max-w-md">
-        <Link href={texts.home} className="inline-flex text-[var(--color-brand-500)] mb-10">
+        <Link href={texts.home} className="inline-flex text-[var(--brand-text-2)] mb-10">
           <Logo size={28} />
         </Link>
 
         {sent ? (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full btn-fill text-white">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m5 13 4 4L19 7" />
               </svg>
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
             <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">{texts.sent.body}</p>
             <Link
               href={texts.loginHref}
-              className="mt-6 inline-block text-sm text-[var(--color-brand-500)] hover:underline underline-offset-2"
+              className="mt-6 inline-block text-sm text-[var(--brand-text-2)] hover:underline underline-offset-2"
             >
               {texts.backToLogin}
             </Link>
@@ -85,7 +85,7 @@ export default function ForgotPasswordPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+                  className="mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20"
                 />
               </div>
 
@@ -101,14 +101,14 @@ export default function ForgotPasswordPage() {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
+                className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
               >
                 {pending ? texts.pending : texts.submit}
               </button>
             </form>
 
             <p className="mt-6 text-center text-sm text-[var(--subtle)]">
-              <Link href={texts.loginHref} className="text-[var(--color-brand-500)] hover:underline underline-offset-2">
+              <Link href={texts.loginHref} className="text-[var(--brand-text-2)] hover:underline underline-offset-2">
                 {texts.backToLogin}
               </Link>
             </p>

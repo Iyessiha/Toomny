@@ -23,7 +23,7 @@ export function TitleField({
   return (
     <div className={className}>
       <label htmlFor={id} className="text-sm font-medium">{label}</label>
-      <div className="mt-1.5 flex items-stretch overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--color-brand-500)]">
+      <div className="mt-1.5 flex items-stretch overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--brand-text-2)]">
         <span className="flex items-center border-r border-[var(--border)] bg-[var(--background)] px-4 text-sm font-semibold text-[var(--foreground)] whitespace-nowrap">
           {TITLE_PREFIX.trim()}
         </span>

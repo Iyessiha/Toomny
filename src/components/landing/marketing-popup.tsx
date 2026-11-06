@@ -166,7 +166,7 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
           </button>
 
           {/* Eyebrow */}
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-600)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-text-1)]">
             {c.eyebrow}
           </p>
 
@@ -184,7 +184,7 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
           <ul className="mt-4 flex flex-col gap-1.5">
             {perks.map((perk) => (
               <li key={perk} className="flex items-center gap-2 text-xs font-medium text-[var(--foreground)]">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" className="shrink-0 text-[var(--color-brand-500)]" aria-hidden>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" className="shrink-0 text-[var(--brand-text-2)]" aria-hidden>
                   <path d="M11.854 3.646a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L5.5 9.293l5.646-5.647a.5.5 0 0 1 .708 0Z" />
                 </svg>
                 {perk}
@@ -197,14 +197,14 @@ export function MarketingPopup({ locale = "fr" }: { locale?: Locale }) {
             <Link
               href={c.primaryHref}
               onClick={dismiss}
-              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_4px_16px_rgba(16,128,67,0.3)] transition-all hover:bg-[var(--color-brand-600)] hover:-translate-y-px active:scale-95"
+              className="flex-1 rounded-full btn-fill px-5 py-3 text-center text-sm font-semibold text-white shadow-[0_4px_16px_rgba(16,128,67,0.3)] transition-all hover:bg-[var(--color-brand-600)] hover:-translate-y-px active:scale-95"
             >
               {c.primaryCta}
             </Link>
             <Link
               href={c.secondaryHref}
               onClick={dismiss}
-              className="flex-1 rounded-full border border-[var(--color-brand-300)] px-5 py-3 text-center text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
+              className="flex-1 rounded-full border border-[var(--color-brand-300)] px-5 py-3 text-center text-sm font-semibold text-[var(--brand-text-1)] transition-colors hover:bg-[var(--color-brand-50)]"
             >
               {c.secondaryCta}
             </Link>

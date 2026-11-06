@@ -167,7 +167,7 @@ export function MessageSection({
               key={m.id}
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
                 mine
-                  ? "ml-auto bg-[var(--color-brand-100)] text-[var(--color-brand-900)]"
+                  ? "ml-auto bg-[var(--color-brand-100)] text-[var(--brand-text-3)]"
                   : "bg-[var(--background)]"
               }`}
             >
@@ -198,7 +198,7 @@ export function MessageSection({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={attachPreview} alt="" className="h-12 w-12 rounded-lg object-cover" />
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--color-brand-100)] text-[var(--color-brand-700)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--color-brand-100)] text-[var(--brand-text-2)]">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
                 </svg>
@@ -223,7 +223,7 @@ export function MessageSection({
           rows={3}
           maxLength={2000}
           placeholder={t.messagePlaceholder}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20"
+          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20"
           onChange={handleTextChange}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -250,7 +250,7 @@ export function MessageSection({
           <button
             type="submit"
             disabled={pending}
-            className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95 disabled:opacity-60"
+            className="rounded-full btn-fill px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95 disabled:opacity-60"
           >
             {pending ? t.sending : t.send}
           </button>

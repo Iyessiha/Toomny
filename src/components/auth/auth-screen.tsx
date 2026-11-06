@@ -21,7 +21,7 @@ export function AuthScreen({
 
   return (
     <main className="grid min-h-dvh lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-[var(--color-brand-700)] px-12 py-14 lg:flex lg:flex-col lg:justify-between">
+      <aside className="hero-band relative hidden overflow-hidden px-12 py-14 lg:flex lg:flex-col lg:justify-between">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-30"
@@ -55,7 +55,7 @@ export function AuthScreen({
 
       <div className="flex flex-col justify-center px-4 py-12 sm:px-10">
         <div className="app-enter mx-auto w-full max-w-md">
-          <Link href={home} className="inline-flex text-[var(--color-brand-500)] lg:hidden">
+          <Link href={home} className="inline-flex text-[var(--brand-text-2)] lg:hidden">
             <Logo size={28} />
           </Link>
 

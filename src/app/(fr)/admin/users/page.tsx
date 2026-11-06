@@ -116,7 +116,7 @@ export default async function AdminUsersPage({
                   <Link href={`/admin/users/${u.id}`} className="flex items-center gap-3 hover:underline">
                     <Avatar name={u.display_name ?? u.email} size="sm" />
                     <span className="min-w-0">
-                      <span className="block truncate font-semibold text-[var(--color-brand-600)]">{u.display_name ?? "—"}</span>
+                      <span className="block truncate font-semibold text-[var(--brand-text-1)]">{u.display_name ?? "—"}</span>
                       <span className="block truncate text-xs text-[var(--subtle)]">{u.email}</span>
                     </span>
                   </Link>

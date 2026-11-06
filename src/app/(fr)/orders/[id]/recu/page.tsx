@@ -30,7 +30,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     return (
       <main className="mx-auto max-w-2xl px-4 py-16">
         <p className="text-sm text-[var(--subtle)]">{t.notAvailable}</p>
-        <Link href={`/orders/${id}`} className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand-600)]">
+        <Link href={`/orders/${id}`} className="mt-4 inline-block text-sm font-semibold text-[var(--brand-text-1)]">
           {t.backToOrder}
         </Link>
       </main>
@@ -54,12 +54,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-10 print:max-w-none print:py-0">
-      <article className="overflow-hidden rounded-3xl border border-[var(--border)] bg-white print:rounded-none print:border-0">
+      <article className="paper-sheet overflow-hidden rounded-3xl border border-[#e2eae5] bg-white print:rounded-none print:border-0">
         <div className="h-1.5 bg-gradient-to-r from-[#108043] to-[#2fa36a]" />
         <div className="p-6 sm:p-10">
           <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="font-display text-lg font-bold text-[var(--color-brand-600)]">Toomny</p>
+              <p className="font-display text-lg font-bold text-[var(--brand-text-1)]">Toomny</p>
               <p className="text-xs text-[var(--subtle)]">{t.issuer}</p>
             </div>
             <div className="sm:text-right">
@@ -95,7 +95,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
               </div>
               <div className="flex justify-between gap-6 py-4">
                 <dt className="font-display text-base font-bold">{t.total}</dt>
-                <dd className="font-display text-xl font-bold text-[var(--color-brand-600)]">{money(receipt.totalMinor)}</dd>
+                <dd className="font-display text-xl font-bold text-[var(--brand-text-1)]">{money(receipt.totalMinor)}</dd>
               </div>
             </dl>
           </section>
@@ -119,7 +119,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
           <footer className="mt-10 flex flex-col gap-3 print:hidden sm:flex-row">
             <Link
               href={`/orders/${id}`}
-              className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]"
+              className="rounded-full btn-fill px-5 py-2.5 text-center text-sm font-semibold text-white hover:bg-[var(--color-brand-600)]"
             >
               {t.backToOrder}
             </Link>

@@ -116,7 +116,7 @@ function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string;
         onClick={onClose}
         className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
           active
-            ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
+            ? "bg-[var(--color-brand-50)] text-[var(--brand-text-2)]"
             : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
         }`}
       >
@@ -128,13 +128,13 @@ function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string;
           />
         )}
         {icon && (
-          <span className={`shrink-0 transition-colors ${active ? "text-[var(--color-brand-500)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}`}>
+          <span className={`shrink-0 transition-colors ${active ? "text-[var(--brand-text-2)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}`}>
             {icon}
           </span>
         )}
         <span className="flex-1 truncate">{item.label}</span>
         {badge !== undefined && badge > 0 && (
-          <span aria-label={`${badge} nouveau(x)`} className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+          <span aria-label={`${badge} nouveau(x)`} className="rounded-full btn-fill px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
             {badge}
           </span>
         )}
@@ -229,7 +229,7 @@ export function DashboardShell({
       <div className="flex h-full flex-col overflow-hidden">
         {/* Logo area + sign out top-right */}
         <div className="relative flex h-[60px] shrink-0 items-center justify-between px-4">
-          <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--color-brand-500)]">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--brand-text-2)]">
             <Logo size={26} />
           </Link>
           <div className="flex items-center gap-1">
@@ -264,7 +264,7 @@ export function DashboardShell({
                 {initials}
               </div>
               {kycVerified && (
-                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white ring-2 ring-[var(--background)]">
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full btn-fill text-white ring-2 ring-[var(--background)]">
                   <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4 4L19 7"/></svg>
                 </span>
               )}
@@ -277,7 +277,7 @@ export function DashboardShell({
 
           {/* Role + KYC pill */}
           <div className="mt-2.5 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-brand-700)]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--brand-text-2)]">
               {roleLabel[user.role] ?? user.role}
             </span>
             {(user.role === "provider" || user.role === "both") && (
@@ -365,7 +365,7 @@ export function DashboardShell({
           <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-[var(--subtle)] hover:bg-[var(--surface)]" aria-label="Menu">
             {sidebarOpen ? <IcX /> : <IcMenu />}
           </button>
-          <Link href="/" className="text-[var(--color-brand-500)]"><Logo size={22} /></Link>
+          <Link href="/" className="text-[var(--brand-text-2)]"><Logo size={22} /></Link>
           <div className="flex items-center gap-2">
             {bell}
             <button
@@ -392,7 +392,7 @@ export function DashboardShell({
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
               {kicker && (
-                <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--color-brand-600)]">
+                <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--brand-text-1)]">
                   {kicker}
                 </p>
               )}
@@ -427,7 +427,7 @@ export function StatCard({
 }) {
   if (accent) {
     return (
-      <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-[var(--color-brand-500)]/20"
+      <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-[var(--brand-text-2)]/20"
         style={{ background: "linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-brand-800) 100%)" }}
       >
         {/* Decorative circle */}
@@ -463,7 +463,7 @@ export function StatCard({
       <div className="mt-1.5 flex items-center justify-between gap-2">
         {hint && <p className="text-xs text-[var(--subtle)]">{hint}</p>}
         {trend && (
-          <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend.up ? "text-[var(--color-brand-600)]" : "text-red-500"}`}>
+          <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend.up ? "text-[var(--brand-text-1)]" : "text-red-500"}`}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
               {trend.up ? <path d="M12 5l7 7H5l7-7Z" /> : <path d="M12 19l7-7H5l7 7Z" />}
             </svg>
@@ -500,7 +500,7 @@ export function EmptyState({
       {action && (
         <Link
           href={action.href}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-[var(--color-brand-500)]/30 transition-all hover:scale-[1.03] hover:bg-[var(--color-brand-600)] active:scale-95"
+          className="mt-6 inline-flex items-center gap-2 rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-[var(--brand-text-2)]/30 transition-all hover:scale-[1.03] hover:bg-[var(--color-brand-600)] active:scale-95"
         >
           {action.label}
         </Link>

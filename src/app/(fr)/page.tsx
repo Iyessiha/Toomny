@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { LandingPage } from "@/components/landing/landing-page";
 import { FaqJsonLd } from "@/components/seo/json-ld";
 import { getLanding } from "@/content/landing";
@@ -15,11 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  // Serveur d'aperçu uniquement : PREVIEW_GLASSY=1 renvoie la racine vers la
-  // maquette « Aurora Glass », pour qu'elle soit visible dès l'ouverture de
-  // l'aperçu sans avoir à taper /design-glassy. Jamais définie ailleurs.
-  if (process.env.PREVIEW_GLASSY === "1") redirect("/design-glassy");
-
+  // La maquette « Aurora Glass » n'est plus une destination : son identité est
+  // désormais celle du produit (voir la section Aurora de globals.css). La
+  // racine sert donc la vraie landing.
   const locale = await visitorLocale();
   const faqItems = getLanding(locale).faq.items;
   return (

@@ -142,7 +142,7 @@ export default async function ServicesPage({
 
               <button
                 type="submit"
-                className="h-10 shrink-0 rounded-full bg-[var(--color-brand-500)] px-5 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)]"
+                className="h-10 shrink-0 rounded-full btn-fill px-5 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)]"
               >
                 {locale === "fr" ? "Rechercher" : "Search"}
               </button>
@@ -157,7 +157,7 @@ export default async function ServicesPage({
               href={buildUrl({ q, sort, budget, jours }, { categorie: undefined })}
               className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                 !categorie
-                  ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
+                  ? "border-[var(--brand-text-2)] btn-fill text-white"
                   : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)]"
               }`}
             >
@@ -172,7 +172,7 @@ export default async function ServicesPage({
                   href={buildUrl({ q, sort, budget, jours }, { categorie: c.slug })}
                   className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
-                      ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white"
+                      ? "border-[var(--brand-text-2)] btn-fill text-white"
                       : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)] hover:text-[var(--foreground)]"
                   }`}
                 >
@@ -193,7 +193,7 @@ export default async function ServicesPage({
                 <Link
                   key={chip.label}
                   href={chip.removeUrl}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-3 py-1 text-xs font-semibold text-[var(--color-brand-700)] transition-colors hover:border-[var(--color-brand-500)]"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-3 py-1 text-xs font-semibold text-[var(--brand-text-2)] transition-colors hover:border-[var(--brand-text-2)]"
                 >
                   {chip.label}
                   <span aria-hidden className="font-normal opacity-60">✕</span>
@@ -257,7 +257,7 @@ export default async function ServicesPage({
                   {page > 1 ? (
                     <Link
                       href={buildUrl(currentParams, { page: page > 2 ? String(page - 1) : undefined })}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--brand-text-1)]"
                     >
                       ← {locale === "fr" ? "Précédent" : "Previous"}
                     </Link>
@@ -274,7 +274,7 @@ export default async function ServicesPage({
                   {hasMore ? (
                     <Link
                       href={buildUrl(currentParams, { page: String(page + 1) })}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-[var(--border)] px-5 text-sm font-semibold transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--brand-text-1)]"
                     >
                       {locale === "fr" ? "Suivant" : "Next"} →
                     </Link>
@@ -293,7 +293,7 @@ export default async function ServicesPage({
               <div className="mt-7 flex flex-wrap justify-center gap-3">
                 <Link
                   href="/auth?role=provider"
-                  className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+                  className="rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
                 >
                   {t.publish}
                 </Link>

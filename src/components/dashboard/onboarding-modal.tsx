@@ -162,7 +162,7 @@ export function OnboardingModal({
         {/* En-tête */}
         <div className="px-8 pt-8 pb-6">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-500)]">
+            <span className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-text-2)]">
               {locale === "en" ? "Getting started" : "Prise en main"}
             </span>
             <button
@@ -174,7 +174,7 @@ export function OnboardingModal({
           </div>
 
           {/* Icône de l'étape */}
-          <div className="mt-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-brand-100)] text-[var(--color-brand-700)]">
+          <div className="mt-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--color-brand-100)] text-[var(--brand-text-2)]">
             {current.icon}
           </div>
 
@@ -217,14 +217,14 @@ export function OnboardingModal({
           {isLast ? (
             <button
               onClick={finish}
-              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95"
+              className="flex-1 rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95"
             >
               {t.finish}
             </button>
           ) : (
             <button
               onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}
-              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95"
+              className="flex-1 rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95"
             >
               {t.next} →
             </button>

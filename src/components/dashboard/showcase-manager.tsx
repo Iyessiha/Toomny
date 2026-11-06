@@ -84,7 +84,7 @@ export function ShowcaseManager({
                   onClick={() => setStatus(value)}
                   className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
                     status === value
-                      ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
+                      ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)] text-[var(--brand-text-2)]"
                       : "border-[var(--border)] text-[var(--subtle)] hover:border-[var(--color-brand-300)]"
                   }`}
                 >
@@ -113,11 +113,11 @@ export function ShowcaseManager({
           {items.map((item) => (
             <div key={item.id} className="flex flex-col gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
-                <span className="rounded-full bg-[var(--color-brand-50)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--color-brand-700)]">
+                <span className="rounded-full bg-[var(--color-brand-50)] px-2 py-0.5 text-[10px] font-bold uppercase text-[var(--brand-text-2)]">
                   {kindLabel[item.kind] ?? item.kind}
                 </span>
                 <p className="mt-1 truncate font-semibold">{item.title}</p>
-                <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" className="truncate text-xs text-[var(--color-brand-600)] underline-offset-2 hover:underline">
+                <a href={item.url} target="_blank" rel="noopener noreferrer nofollow" className="truncate text-xs text-[var(--brand-text-1)] underline-offset-2 hover:underline">
                   {item.url}
                 </a>
               </div>

@@ -42,7 +42,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
     setPending(false);
   }
 
-  const inputCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  const inputCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]";
   const labelCls = "block text-sm font-medium mb-1";
 
   return (

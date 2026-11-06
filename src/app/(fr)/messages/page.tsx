@@ -139,7 +139,7 @@ export default async function MessagesPage() {
                         : t.noMessage}
                     </p>
                     {c.unread > 0 && (
-                      <span className="flex-none rounded-full bg-[var(--color-brand-500)] px-2 py-0.5 text-[10px] font-bold text-white">
+                      <span className="flex-none rounded-full btn-fill px-2 py-0.5 text-[10px] font-bold text-white">
                         {c.unread}
                       </span>
                     )}

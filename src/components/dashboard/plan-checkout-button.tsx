@@ -55,7 +55,7 @@ export function PlanCheckoutButton({
         className={`w-full rounded-xl px-4 py-3 text-center text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${
           highlight
             ? "bg-white text-[var(--color-brand-600)] hover:bg-white/90"
-            : "bg-[var(--color-brand-500)] text-white hover:bg-[var(--color-brand-600)]"
+            : "btn-fill text-white hover:bg-[var(--color-brand-600)]"
         }`}
       >
         {loading ? redirectingLabel : label}

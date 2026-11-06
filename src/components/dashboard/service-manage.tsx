@@ -66,7 +66,7 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)]";
 
 const copy: Record<Locale, { close: string; cancel: string; removePhoto: string; priceLabel: string; delayLabel: string }> = {
   fr: {
@@ -521,7 +521,7 @@ export function ServiceManage({
                           />
                           <span className="text-sm font-semibold">{tierLabel}</span>
                           {slot.enabled && slot.price && (
-                            <span className="ml-auto text-xs font-semibold text-[var(--color-brand-600)]">
+                            <span className="ml-auto text-xs font-semibold text-[var(--brand-text-1)]">
                               {Number(slot.price).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA
                             </span>
                           )}
@@ -602,7 +602,7 @@ export function ServiceManage({
                     )}
                   </div>
                 ) : (
-                  <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]">
+                  <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" stroke="currentColor" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                     </svg>
@@ -643,7 +643,7 @@ export function ServiceManage({
                     </div>
                   ))}
                   {galleryUrls.length < 4 && (
-                    <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] ${galleryUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                    <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)] ${galleryUploading ? "opacity-50 pointer-events-none" : ""}`}>
                       {galleryUploading ? (
                         <span className="text-[10px] font-semibold">{t.form.galleryUploading}</span>
                       ) : (
@@ -676,7 +676,7 @@ export function ServiceManage({
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-700)]"
+                      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--brand-text-2)]"
                     >
                       {tag}
                       <button
@@ -777,7 +777,7 @@ export function ServiceManage({
                 <p role="alert" className="notice notice-danger">{error}</p>
               )}
               {success && (
-                <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{success}</p>
+                <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{success}</p>
               )}
 
               <div className="flex gap-3">
@@ -791,7 +791,7 @@ export function ServiceManage({
                 <button
                   type="submit"
                   disabled={pending || uploading}
-                  className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  className="flex-1 rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
                 >
                   {pending ? t.editing : t.editSave}
                 </button>
