@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Aperçus en développement : le serveur est ouvert dans une iframe servie
+  // depuis le bac à sable Arena (*.e2b.app), donc une origine différente de
+  // localhost. Sans cette liste, Next.js refuse les ressources de développement
+  // et les scripts d'hydratation ne se chargent pas. Sans effet en production.
+  allowedDevOrigins: ["*.e2b.app", "**.e2b.app"],
   // Mobile-first et réseau lent : on garde les images strictement optimisées.
   images: {
     formats: ["image/avif", "image/webp"],
