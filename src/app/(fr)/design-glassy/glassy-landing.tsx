@@ -9,7 +9,8 @@ import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
 import { GlassyEffects } from "./glassy-effects";
 import { GlassyShell } from "./glassy-shell";
 import { GlassServiceCard, GlassProviderCard } from "./glassy-cards";
-import { CATEGORY_COVER, DEMO_PROVIDERS, DEMO_SERVICES } from "./glassy-demo";
+import { ProviderStrip, Testimonials, TradeSections } from "./glassy-trades";
+import { ALL_PROVIDERS, CATEGORY_COVER, DEMO_PROVIDERS, DEMO_SERVICES } from "./glassy-demo";
 
 const BRAND_MARK = (
   <svg viewBox="0 0 120 120" fill="none" aria-hidden>
@@ -58,6 +59,44 @@ const LABELS = {
     servicesLead: "Les services mis en avant par leurs prestataires.",
     servicesAll: "Voir le catalogue",
     servicesEmpty: "Le catalogue s'ouvre au fur et à mesure des vérifications.",
+    providerStrip: "Prestataires en vedette",
+    trades: {
+      p01: {
+        kicker: "Design graphique",
+        title: "Une marque qui tient debout partout",
+        lead: "Logo, charte, packaging : la même main du premier croquis au fichier livré, avec les formats d'impression locaux.",
+        cta: "Voir les prestations de design",
+      },
+      p02: {
+        kicker: "Développement web",
+        title: "Un site qui se paie tout seul",
+        lead: "Vitrine, boutique, application : des développeurs qui livrent un site mesuré sur un réseau lent, pas une démo de salon.",
+        cta: "Voir les prestations web",
+      },
+      p03: {
+        kicker: "Marketing & communauté",
+        title: "Être trouvé par les bonnes personnes",
+        lead: "Campagnes Meta et TikTok, calendrier éditorial, contenus : des chiffres suivis, pas des promesses de portée.",
+        cta: "Voir les prestations marketing",
+      },
+      p04: {
+        kicker: "Image & vidéo",
+        title: "Des visuels qui font vendre",
+        lead: "Réels, photos produit, montage publicitaire : tournés et montés ici, avec les codes de vos clients.",
+        cta: "Voir les prestations vidéo",
+      },
+      testimonials: {
+        kicker: "Témoignages",
+        title: "Ils ont commandé, ils racontent",
+        lead: "Avis laissés après une commande terminée uniquement. Aucun avis acheté, aucun avis retiré parce qu'il déplaisait.",
+      },
+    },
+    testimonials: [
+      { name: "Boutique Adjoua", role: "Cliente · Abidjan", avatar: "/images/glassy/avatars/adjoua-kouassi.jpg", body: "J'ai eu mon identité visuelle en cinq jours, fichiers prêts pour l'imprimeur du quartier. Le paiement bloqué m'a rassurée : je ne payais qu'une fois la maquette validée." },
+      { name: "Cabinet Kéita", role: "Client · Bouaké", avatar: "/images/glassy/avatars/brahim-coulibaly.jpg", body: "Le site vitrine tourne depuis six mois sans que j'y touche. Le prestataire a compris qu'on n'a pas la fibre partout et a allégé les pages." },
+      { name: "Fatou D.", role: "Prestataire · Dakar", avatar: "/images/glassy/avatars/fatou-diallo.jpg", body: "Je suis payée sur Wave dès la validation, sans société à l'étranger ni frais de change. C'est la première plateforme où je garde ce que je facture." },
+      { name: "Maison Daba", role: "Cliente · Abidjan", avatar: "/images/glassy/avatars/estelle-nkodo.jpg", body: "Trois prestataires, trois commandes, aucune mauvaise surprise. La commission côté client est à zéro, et c'est écrit avant de payer." },
+    ],
     providersKicker: "Prestataires",
     providersTitle: "Des visages, pas des profils anonymes",
     providersLead: "Identité vérifiée, avis laissés après commande, présence en ligne quand ils sont disponibles.",
@@ -131,6 +170,44 @@ const LABELS = {
     servicesLead: "Services highlighted by their providers.",
     servicesAll: "Browse catalogue",
     servicesEmpty: "The catalogue opens as verifications complete.",
+    providerStrip: "Featured providers",
+    trades: {
+      p01: {
+        kicker: "Graphic design",
+        title: "A brand that holds up everywhere",
+        lead: "Logo, brand guide, packaging: the same hand from first sketch to delivered file, with local print formats.",
+        cta: "See design services",
+      },
+      p02: {
+        kicker: "Web development",
+        title: "A website that pays for itself",
+        lead: "Showcase, shop, application: developers who ship sites measured on a slow network, not a showroom demo.",
+        cta: "See web services",
+      },
+      p03: {
+        kicker: "Marketing & community",
+        title: "Be found by the right people",
+        lead: "Meta and TikTok campaigns, content calendar, posts: numbers you can follow, not reach promises.",
+        cta: "See marketing services",
+      },
+      p04: {
+        kicker: "Image & video",
+        title: "Visuals that actually sell",
+        lead: "Reels, product photos, ad edits: shot and cut here, with the codes your customers know.",
+        cta: "See video services",
+      },
+      testimonials: {
+        kicker: "Testimonials",
+        title: "They ordered, they tell it",
+        lead: "Reviews only left after a completed order. None bought, none removed for being unflattering.",
+      },
+    },
+    testimonials: [
+      { name: "Boutique Adjoua", role: "Client · Abidjan", avatar: "/images/glassy/avatars/adjoua-kouassi.jpg", body: "I had my brand identity in five days, files ready for the local printer. The held payment reassured me: I only paid once the artwork was approved." },
+      { name: "Cabinet Kéita", role: "Client · Bouaké", avatar: "/images/glassy/avatars/brahim-coulibaly.jpg", body: "The site has been running for six months untouched. The provider understood we do not have fast broadband everywhere and kept pages light." },
+      { name: "Fatou D.", role: "Provider · Dakar", avatar: "/images/glassy/avatars/fatou-diallo.jpg", body: "I get paid to Wave as soon as the client approves, with no foreign company and no conversion fees. First platform where I keep what I charge." },
+      { name: "Maison Daba", role: "Client · Abidjan", avatar: "/images/glassy/avatars/estelle-nkodo.jpg", body: "Three providers, three orders, no nasty surprises. Buyer commission is zero, and that is stated before you pay." },
+    ],
     providersKicker: "Providers",
     providersTitle: "Faces, not anonymous profiles",
     providersLead: "Verified identity, reviews left after an order, online presence when available.",
@@ -533,6 +610,15 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
             ))}
           </ul>
         </section>
+
+        {/* ── Métiers : texte + mosaïque de portraits + cartes ──────────── */}
+        <TradeSections labels={t.trades} />
+
+        {/* ── Témoignages ────────────────────────────────────────────────── */}
+        <Testimonials labels={t.trades.testimonials} items={[...t.testimonials]} />
+
+        {/* ── Prestataires en vedette ────────────────────────────────────── */}
+        <ProviderStrip providers={ALL_PROVIDERS.slice(0, 6)} label={t.providerStrip} />
 
         {/* ── Fonctionnement ─────────────────────────────────────────────── */}
         <section id="fonctionnement" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">

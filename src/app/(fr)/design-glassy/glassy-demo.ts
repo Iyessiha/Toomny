@@ -154,6 +154,116 @@ export const DEMO_SERVICES: DemoService[] = [
   },
 ];
 
+
+/** Prestataires supplémentaires : ils peuplent les collages de chaque métier. */
+export const DEMO_EXTRA: DemoProvider[] = [
+  {
+    id: "mariam",
+    name: "Mariam Traoré",
+    avatar: "/images/glassy/avatars/mariam-traore.jpg",
+    headline: "Community management",
+    country: "Abidjan, Côte d'Ivoire",
+    flag: "🇨🇮",
+    rating: 4.8,
+    reviews: 19,
+    completed: 23,
+    skills: ["Calendrier", "Modération"],
+    online: true,
+  },
+  {
+    id: "ibrahima",
+    name: "Ibrahima Sow",
+    avatar: "/images/glassy/avatars/ibrahima-sow.jpg",
+    headline: "Applications mobiles",
+    country: "Dakar, Sénégal",
+    flag: "🇸🇳",
+    rating: 4.9,
+    reviews: 12,
+    completed: 14,
+    skills: ["React Native", "API"],
+  },
+  {
+    id: "nadia",
+    name: "Nadia Bamba",
+    avatar: "/images/glassy/avatars/nadia-bamba.jpg",
+    headline: "Direction artistique",
+    country: "Abidjan, Côte d'Ivoire",
+    flag: "🇨🇮",
+    rating: 5,
+    reviews: 33,
+    completed: 36,
+    skills: ["Identité", "Édition"],
+  },
+  {
+    id: "seydou",
+    name: "Seydou Koné",
+    avatar: "/images/glassy/avatars/seydou-kone.jpg",
+    headline: "Photographie produit",
+    country: "Bamako, Mali",
+    flag: "🇲🇱",
+    rating: 4.7,
+    reviews: 15,
+    completed: 18,
+    skills: ["Studio", "Retouche"],
+  },
+  {
+    id: "estelle",
+    name: "Estelle Nkodo",
+    avatar: "/images/glassy/avatars/estelle-nkodo.jpg",
+    headline: "Rédaction & traduction",
+    country: "Douala, Cameroun",
+    flag: "🇨🇲",
+    rating: 4.9,
+    reviews: 28,
+    completed: 31,
+    skills: ["FR/EN", "Fiches produit"],
+    online: true,
+  },
+  {
+    id: "brahim",
+    name: "Brahim Coulibaly",
+    avatar: "/images/glassy/avatars/brahim-coulibaly.jpg",
+    headline: "Comptabilité & admin",
+    country: "Bamako, Mali",
+    flag: "🇲🇱",
+    rating: 4.6,
+    reviews: 9,
+    completed: 11,
+    skills: ["Saisie", "Facturation"],
+  },
+  {
+    id: "adjoua",
+    name: "Adjoua Kouassi",
+    avatar: "/images/glassy/avatars/adjoua-kouassi.jpg",
+    headline: "Contenus sociaux",
+    country: "Abidjan, Côte d'Ivoire",
+    flag: "🇨🇮",
+    rating: 4.8,
+    reviews: 21,
+    completed: 25,
+    skills: ["Réels", "UGC"],
+    online: true,
+  },
+];
+
+export const ALL_PROVIDERS: DemoProvider[] = [...DEMO_PROVIDERS, ...DEMO_EXTRA];
+
+/**
+ * Collage de portraits par métier : c'est la composition de la référence
+ * (ComeUp) — une mosaïque de visages à côté de chaque rubrique métier.
+ */
+export const CATEGORY_FACES: Record<string, string[]> = {
+  "design-graphique": ["nadia", "awa", "seydou", "adjoua", "estelle"],
+  "developpement-web": ["koffi", "ibrahima", "brahim", "nadia"],
+  "montage-video": ["fatou", "adjoua", "seydou", "mariam"],
+  "marketing-digital": ["yann", "mariam", "adjoua", "ibrahima"],
+};
+
+export function avatarOf(id: string): string {
+  const found = ALL_PROVIDERS.find((p) => p.id === id);
+  return found?.avatar ?? DEMO_PROVIDERS[0].avatar;
+}
+
 /** Image de couverture par catégorie, pour les cartes qui n'ont pas de photo. */
 export const CATEGORY_COVER: Record<string, string> = {
   "design-graphique": "/images/glassy/design-graphique.jpg",

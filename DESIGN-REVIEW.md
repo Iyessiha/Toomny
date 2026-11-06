@@ -188,3 +188,44 @@ les montants suivent le modèle réel du site.
 Le sélecteur de rôle, le menu mobile, la FAQ, les onglets et le filtre de
 catalogue sont tous en HTML natif ou en liens. Aucune maquette ne dépend d'un
 état client pour s'afficher.
+
+---
+
+## 5. Composition par métier (référence ComeUp)
+
+La référence fournie (page d'accueil ComeUp) apporte un motif que la maquette
+n'avait pas : **chaque rubrique métier est un bloc de texte à gauche, une
+mosaïque de portraits à droite, puis deux ou trois cartes de prestations.**
+Le visage fait le travail qu'aucune illustration abstraite ne fait.
+
+Reproduit en `glassy-trades.tsx`, en gardant le verre émeraude validé :
+
+| Élément | Référence | Maquette |
+|---|---|---|
+| Mosaïque de portraits | photos en vrac, inclinées | 6 portraits, rotations de −6° à +9°, halo émeraude derrière |
+| Cartes | visuel + titre + prix | visuel recadré différemment par carte + teinte propre, prestataire en incrustation, prix et délai |
+| Sections | une par métier, très aérées | 4 sections : design, web, marketing, image & vidéo |
+| Témoignages | 8 cartes empilées | 4 cartes en verre : auteur, métier, note, avis |
+| Bandeau prestataires | absent chez ComeUp | 6 prestataires en fin de page |
+
+Points d'exécution :
+
+- La mosaïque est **masquée sous 1024 px** : sur mobile les cartes suffisent,
+  et la page reste légère sur un réseau lent.
+- Les trois cartes d'une même section partagent souvent une photo : elles sont
+  donc **recadrées et teintées différemment** (`pos` et `tint`), sinon la
+  répétition se voit immédiatement.
+- Onze portraits au total (`public/images/glassy/avatars/`), tirés au sort par
+  métier via `CATEGORY_FACES`, pour que deux sections voisines ne montrent pas
+  les mêmes visages.
+- Le contenu des témoignages suit le ton du site (« avis laissés après une
+  commande terminée uniquement »), pas une promesse marketing.
+
+### Ce qui n'a pas été repris de la référence
+
+- La vidéo de fond du hero : c'est justement le point de l'audit (629 Ko de
+  vidéo recouverte à 80 %). Les nappes d'aurore en CSS coûtent ~0.
+- Les cartes « jeu de cartes » empilées : très joli, mais chaque carte est une
+  image à charger, et le prix se paie sur le premier écran.
+- Le bandeau de logos de paiement en couleur pleine : la maquette garde les
+  pastilles rondes, plus sobres sur fond nocturne.
