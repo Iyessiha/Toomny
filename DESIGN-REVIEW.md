@@ -324,3 +324,47 @@ l'écran en 1280 px et en 390 px.
 
 La maquette reste consultable sur `/design-glassy` (et `/en/design-glassy`)
 comme référence de la direction, mais la racine ne redirige plus vers elle.
+
+---
+
+## 8. Les tableaux de bord reprennent la maquette
+
+Les maquettes validées (`/design-glassy/dashboards?role=client|prestataire|admin`)
+ont été appliquées aux **vraies coques**, pas recopiées à côté : `DashboardShell`
+(espace client et prestataire) et `AdminShell` (administration).
+
+### Ce qui a été repris de la maquette
+
+1. **Le rail de verre flottant.** La barre latérale était une colonne collée au
+   bord, bordée d'un trait : ça se lit comme un panneau d'administration, pas
+   comme du verre. Elle devient une plaque `card-solid` arrondie (22 px), en
+   retrait du bord (`p-3`), sur 248 px. Le tiroir mobile suit.
+2. **Le lien actif en pastille menthe** (`bg-[#8bf0b6]/12` + texte
+   `--brand-text-2`), au lieu d'un fond `brand-50` souligné d'une barre. C'est
+   le marqueur de position de la maquette.
+3. **Les KPI en verre, avec un seul accent lumineux.** La première carte garde
+   le halo émeraude→or de la maquette (nappe radiale, pas d'aplat), les autres
+   passent en `card`. Les quatre gardent la même hauteur et le même alignement.
+4. **Titres plus francs** : 26 px en mobile, 32 px en desktop, en `extrabold`.
+   Même échelle côté admin.
+5. **Avatar en dégradé menthe avec encre sombre** : le blanc y était illisible.
+6. **États vides et bandeaux d'alerte en verre**, plus aucune plaque blanche.
+
+### Détail qui change le confort
+
+La grille de KPI passait de une à deux colonnes dès 640 px : sur un téléphone
+courant (390 px), on n'en voyait qu'**une par écran**. Elle passe maintenant en
+deux colonnes à partir de 640 px de large, soit deux KPI visibles d'un coup sur
+un mobile un peu large, et une seule sur un écran étroit — sans jamais casser.
+
+### Vérification
+
+Les deux coques exigent une session Supabase, indisponible dans l'environnement
+de prévisualisation. Pour juger le rendu réel, une route de contrôle temporaire
+a rendu `DashboardShell` avec des données fictives (KPI, commandes, état vide,
+bandeau d'alerte) : contrôlée en 1280 px et en 390 px, puis **supprimée**.
+`AdminShell` est un composant serveur qui interroge la base pour ses compteurs :
+sa modification est structurelle (même balisage, enveloppe retirée) et validée
+par le build.
+
+`npm run build` et `npx vitest run` (262 tests) sont verts.
