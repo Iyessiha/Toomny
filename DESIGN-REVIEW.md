@@ -229,3 +229,31 @@ Points d'exécution :
   image à charger, et le prix se paie sur le premier écran.
 - Le bandeau de logos de paiement en couleur pleine : la maquette garde les
   pastilles rondes, plus sobres sur fond nocturne.
+
+---
+
+## 6. Corrections de la revue (retours intégrés)
+
+1. **Chaque carte a sa propre couverture.** Douze visuels dédiés dans
+   `public/images/glassy/covers/` (logo, packaging, e-commerce, app, réels,
+   photo produit, calendrier, analytics…). Plus aucune photo ne se répète
+   dans une même section. Les prestataires, eux, gardent leur portrait.
+2. **Trois photos en grand par section métier** (au lieu de six petites) :
+   `MOSAIC` ne contient plus que trois positions, en 116–132 px.
+3. **Cartes de service aux bonnes dimensions** : couverture en `aspect-[16/10]`
+   constant et titre sur deux lignes à hauteur fixe (`min-h-[2.2em]`), donc
+   toutes les cartes d'une rangée ont exactement la même hauteur.
+4. **Textes réécrits en accroche**, sans jargon :
+   - « Un logo, ce n'est pas un dessin joli »
+   - « Un site qui rapporte, pas un site qui existe »
+   - « Arrêtez de payer des vues »
+   - « La photo qui fait sortir le produit du lot »
+   (et leurs équivalents anglais, vérifiés séparément — une première passe
+   avait écrasé le bloc français par le bloc anglais.)
+5. **Section « Prestations en lumière » supprimée** : elle réaffichait les
+   mêmes couvertures que les sections métier et que le catalogue.
+6. **Tarifs déplacés sur `/design-glassy/tarifs`** : la landing redevient une
+   page marketing (visages, preuves, métiers, sécurité, FAQ) et garde un
+   renvoi court vers les tarifs. La page dédiée porte les quatre plans,
+   l'exemple chiffré « où part chaque franc », le comparatif Fiverr/Upwork et
+   les questions récurrentes sur le prix.
