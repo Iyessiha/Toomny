@@ -182,59 +182,77 @@ export function GlassProviderCard({ provider }: { provider: DemoProvider }) {
   return (
     <Link
       href={`/design-glassy/prestataires/${provider.id}`}
-      className="glass glass-edge glass-specular glass-interactive g-round-md group relative flex flex-col items-center overflow-hidden p-5 text-center"
+      className="glass glass-edge glass-specular glass-interactive g-round-md group relative flex h-full flex-col overflow-hidden p-4"
     >
-      {provider.online && (
-        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-[#8bf0b6]/30 bg-[#8bf0b6]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#9ff2c2]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#8bf0b6]" aria-hidden />
-          En ligne
+      {/* En-tête : pastille de présence et favori sur la même ligne, dans le
+          flux. Ils ne flottent plus au-dessus du portrait, et les deux
+          occupent la même hauteur d'un bout à l'autre de la grille. */}
+      <div className="flex h-6 items-center justify-between gap-2">
+        {provider.online ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#8bf0b6]/30 bg-[#8bf0b6]/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[#9ff2c2]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#8bf0b6]" aria-hidden />
+            En ligne
+          </span>
+        ) : (
+          <span aria-hidden />
+        )}
+        {/* Maquette : favori décoratif. Dans le vrai catalogue, c'est un bouton
+            client (voir src/components/catalog/wishlist-button.tsx). */}
+        <span
+          aria-hidden
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/6 text-white/45 transition-colors group-hover:border-[#ff9db4]/40 group-hover:text-[#ff9db4]"
+        >
+          <Heart width={12} height={12} />
         </span>
-      )}
-      {/* Maquette : le favori est décoratif, la vraie carte catalogue a son
-          bouton client (voir src/components/catalog/wishlist-button.tsx). */}
-      <span aria-hidden className="absolute right-3 top-3 text-white/35">
-        <Heart width={15} height={15} />
-      </span>
-
-      <div className="relative mt-3 h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/20">
-        <Image src={provider.avatar} alt="" fill sizes="64px" className="object-cover" />
       </div>
 
-      <p className="mt-3 flex items-center gap-1.5 text-sm font-bold text-white">
-        {provider.name}
-        <ShieldCheck width={12} height={12} className="text-[#8bf0b6]" aria-hidden />
-      </p>
-      <p className="mt-0.5 line-clamp-1 text-[11px] text-white/65">{provider.headline}</p>
+      <div className="mt-3 flex flex-col items-center text-center">
+        <div className="relative h-14 w-14 overflow-hidden rounded-full ring-2 ring-white/20">
+          <Image src={provider.avatar} alt="" fill sizes="56px" className="object-cover" />
+        </div>
 
-      <p className="mt-1.5 flex items-center gap-1 text-[10px] text-white/55">
-        <MapPin width={9} height={9} aria-hidden />
-        {provider.country}
-      </p>
+        {/* Nom et accroche : deux lignes réservées, donc le bloc note/compétences
+            démarre à la même hauteur sur toutes les cartes. */}
+        <p className="mt-2 flex w-full items-center justify-center gap-1 text-[13px] font-bold text-white">
+          <span className="truncate">{provider.name}</span>
+          <ShieldCheck width={11} height={11} className="shrink-0 text-[#8bf0b6]" aria-hidden />
+        </p>
+        <p className="mt-0.5 line-clamp-1 w-full min-h-[1.1rem] text-[10px] leading-4 text-white/65">
+          {provider.headline}
+        </p>
+        <p className="mt-1 flex w-full items-center justify-center gap-1 truncate text-[9px] text-white/55">
+          <MapPin width={8} height={8} className="shrink-0" aria-hidden />
+          <span className="truncate">{provider.country}</span>
+        </p>
 
-      <div className="mt-2.5 flex items-center gap-1.5">
-        <Stars value={provider.rating} />
-        <span className="text-[11px] font-semibold text-white">{provider.rating}</span>
-        <span className="text-[10px] text-white/50">({provider.reviews})</span>
+        <div className="mt-2 flex items-center gap-1.5">
+          <Stars value={provider.rating} size={10} />
+          <span className="text-[10px] font-semibold text-white">{provider.rating}</span>
+          <span className="text-[9px] text-white/50">({provider.reviews})</span>
+        </div>
       </div>
 
-      <ul className="mt-3 flex flex-wrap justify-center gap-1">
-        {provider.skills.map((s) => (
+      {/* Compétences : deux lignes réservées, au plus trois badges. Au-delà,
+          la carte grandirait pour un détail qui n'aide pas à choisir. */}
+      <ul className="mt-2.5 flex min-h-[2.4rem] flex-wrap content-start justify-center gap-1 overflow-hidden">
+        {provider.skills.slice(0, 3).map((s) => (
           <li
             key={s}
-            className="rounded-full border border-white/12 bg-white/6 px-2 py-0.5 text-[10px] text-white/70"
+            className="max-w-full truncate rounded-full border border-white/12 bg-white/6 px-1.5 py-0.5 text-[9px] text-white/70"
           >
             {s}
           </li>
         ))}
       </ul>
 
-      <div className="mt-4 flex w-full items-center justify-between gap-2 border-t border-white/10 pt-3 text-[10px] text-white/55">
+      {/* Pied de carte collé en bas : c'est lui qui aligne toutes les cartes. */}
+      <div className="mt-auto flex w-full items-center justify-between gap-2 border-t border-white/10 pt-2.5 text-[9px] text-white/55">
         <span>
           <b className="text-white">{provider.completed}</b> commandes
         </span>
         <span className="flex items-center gap-1 font-semibold text-[#9ff2c2]">
           Voir le profil
-          <ArrowRight width={11} height={11} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
+          <ArrowRight width={10} height={10} className="transition-transform group-hover:translate-x-0.5" aria-hidden />
         </span>
       </div>
     </Link>
