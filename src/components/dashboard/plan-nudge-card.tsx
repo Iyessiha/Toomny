@@ -100,7 +100,7 @@ export function PlanNudgeCard({ nudge, locale }: { nudge: PlanNudge; locale: Loc
       </div>
       <Link
         href={ctaHref}
-        className="shrink-0 rounded-xl bg-[var(--color-brand-500)] px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90 active:scale-95"
+        className="shrink-0 rounded-xl btn-fill px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90 active:scale-95"
       >
         {ctaLabel}
       </Link>

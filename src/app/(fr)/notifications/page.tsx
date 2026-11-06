@@ -136,7 +136,7 @@ export default async function NotificationsPage() {
                       aria-hidden
                       className={`flex h-9 w-9 flex-none items-center justify-center rounded-full ${
                         n.unread
-                          ? "bg-[var(--color-brand-500)] text-white"
+                          ? "btn-fill text-white"
                           : "bg-[var(--surface)] text-[var(--subtle)]"
                       }`}
                     >

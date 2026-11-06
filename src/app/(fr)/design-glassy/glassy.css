@@ -1,0 +1,390 @@
+/* ---------------------------------------------------------------------------
+   Toomny — proposition « Aurora Glass ».
+
+   Direction : fond nocturne vert profond, nappes d'aurore, et surfaces de
+   verre dépoli. Aucune couleur n'est inventée : l'émeraude et l'or viennent
+   de la charte (globals.css), le verre est du blanc translucide.
+
+   Tout est en CSS pur : pas d'image décorative téléchargée, pas de librairie.
+   Un seul filtre `backdrop-filter` par surface, pas de blur imbriqué, pour
+   que ça tienne sur un mobile d'entrée de gamme.
+   --------------------------------------------------------------------------- */
+
+.glass-scope {
+  color-scheme: dark;
+
+  /* Fond de page : trois nappes très larges + une base presque noire. */
+  background:
+    radial-gradient(120% 90% at 8% -10%, rgba(16, 128, 67, 0.55), transparent 60%),
+    radial-gradient(90% 70% at 100% 0%, rgba(210, 154, 56, 0.28), transparent 55%),
+    radial-gradient(80% 80% at 50% 120%, rgba(51, 164, 114, 0.32), transparent 60%),
+    #04110b;
+  color: #eaf4ef;
+}
+
+/* Un grain de 140 octets, en data URI : casse le dégradé et donne la matière
+   du verre. Très faible opacité, jamais au-dessus du texte. */
+.glass-scope::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Les nappes d'aurore et le grain sont fixes (donc peints au-dessus des
+   blocs statiques) : chaque enfant direct doit donc se poser sur son propre
+   plan. On exclut l'en-tête, qui est `sticky`, et le calque d'aurore. */
+.glass-scope > *:not(header):not(.aurora) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Nappes d'aurore ──────────────────────────────────────────────────────── */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aurora-orb {
+    animation: aurora-drift 22s ease-in-out infinite alternate;
+  }
+  .aurora-orb:nth-child(2) { animation-duration: 28s; animation-delay: -6s; }
+  .aurora-orb:nth-child(3) { animation-duration: 34s; animation-delay: -12s; }
+
+  @keyframes aurora-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(4%, -6%, 0) scale(1.12); }
+  }
+}
+
+/* Grille très fine, masquée en dégradé : la « table » sous le verre. */
+.aurora-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 78%);
+}
+
+/* ── Surfaces de verre ────────────────────────────────────────────────────── */
+
+.glass {
+  position: relative;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.10),
+    rgba(255, 255, 255, 0.045) 45%,
+    rgba(255, 255, 255, 0.025)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 24px 60px -30px rgba(0, 0, 0, 0.85);
+}
+
+/* Verre plus dense : barre de navigation, panneaux de premier plan. */
+.glass-solid {
+  background: linear-gradient(160deg, rgba(9, 26, 18, 0.82), rgba(6, 18, 13, 0.72));
+  border-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+}
+
+/* Arête lumineuse : le reflet qui court sur le bord supérieur-gauche. */
+.glass-edge::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.65),
+    rgba(255, 255, 255, 0.06) 34%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(163, 219, 193, 0.42)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Reflet spéculaire qui suit la souris (variables posées en JS). */
+.glass-specular::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    340px circle at var(--gx, 50%) var(--gy, 0%),
+    rgba(255, 255, 255, 0.14),
+    transparent 62%
+  );
+}
+.glass-specular:hover::before { opacity: 1; }
+/* Le reflet passe sous le contenu : il ne lave jamais le texte. */
+.glass-specular > * { position: relative; z-index: 1; }
+
+/* Carte cliquable : léger soulèvement, halo émeraude. */
+.glass-interactive {
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.glass-interactive:hover {
+  transform: translateY(-3px);
+  border-color: rgba(108, 195, 155, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 30px 70px -32px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(108, 195, 155, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-interactive { transition: none; }
+  .glass-interactive:hover { transform: none; }
+}
+
+/* ── Boutons ──────────────────────────────────────────────────────────────── */
+
+.g-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.g-btn:active { transform: scale(0.97); }
+
+.g-btn-primary {
+  color: #04140c;
+  background: linear-gradient(160deg, #8bf0b6, #33d17a 45%, #14a05a);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 12px 30px -12px rgba(51, 209, 122, 0.75);
+}
+.g-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 18px 40px -14px rgba(51, 209, 122, 0.9);
+}
+
+.g-btn-ghost {
+  color: #f2fbf6;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.g-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+/* ── Typographie & détails ────────────────────────────────────────────────── */
+
+.g-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+}
+
+.g-gradient-text {
+  background: linear-gradient(120deg, #d8ffe8 0%, #6ee7a8 42%, #e0b566 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.g-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a9dbc1;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.g-hairline {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+}
+
+/* Pastille de verre pour les icônes. */
+.g-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* ── Apparition au défilement ───────────────────────────────────────────────
+   Le masquage n'existe que si le document porte la classe `js`, posée par un
+   script inline (voir glassy-effects.tsx) et retirée au bout de 3 s si
+   l'observateur ne prend pas le relais. Sans JavaScript, ou si le bundle ne
+   charge pas, le contenu est donc simplement visible. */
+
+@media (prefers-reduced-motion: no-preference) {
+  .glass-scope.js [data-g-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .glass-scope.js [data-g-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @keyframes g-float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-8px); }
+  }
+  .g-float { animation: g-float 6s ease-in-out infinite; }
+  .g-float-slow { animation: g-float 8s ease-in-out infinite; }
+
+  @keyframes g-pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(51, 209, 122, 0.45); }
+    70%  { box-shadow: 0 0 0 12px rgba(51, 209, 122, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(51, 209, 122, 0); }
+  }
+  .g-pulse { animation: g-pulse-ring 2.8s ease-out infinite; }
+}
+
+/* Le focus reste visible sur le verre : anneau clair, pas d'ombre. */
+.glass-scope :focus-visible {
+  outline: 2px solid #8bf0b6;
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Le hero et les sections pleines largeur n'ont pas de gouttière propre. */
+.glass-scope ::selection {
+  background: rgba(51, 209, 122, 0.35);
+  color: #fff;
+}
+
+/* Barre de recherche en verre : le champ n'a aucun fond propre. */
+.g-search input::placeholder { color: rgba(255, 255, 255, 0.58); }
+.g-search input::-webkit-search-cancel-button { filter: invert(1); opacity: 0.5; }
+
+/* La grille tarifaire se déforme en 1 colonne sur mobile, sans défilement
+   horizontal : chaque carte reste dans son conteneur. */
+.g-grid-plans {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .g-grid-plans { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .g-grid-plans { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* FAQ : <details> natif, ouvert/fermé sans JS. */
+.g-faq summary { cursor: pointer; list-style: none; }
+.g-faq summary::-webkit-details-marker { display: none; }
+.g-faq[open] .g-faq-plus { transform: rotate(135deg); }
+.g-faq-plus { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* ── Variantes de taille ──────────────────────────────────────────────────────
+   Les classes `.glass` et `.g-btn` vivent hors des couches Tailwind : leurs
+   rayons et leurs paddings ne peuvent pas être écrasés par un utilitaire.
+   On expose donc des variantes explicites, plutôt qu'un `!important` partout. */
+
+.g-round-sm   { border-radius: 16px; }
+.g-round-md   { border-radius: 20px; }
+.g-round-lg   { border-radius: 28px; }
+.g-round-xl   { border-radius: 32px; }
+.g-round-pill { border-radius: 9999px; }
+
+.g-btn-sm { padding: 0.65rem 1.15rem; font-size: 0.875rem; }
+.g-btn-xs { padding: 0.55rem 1rem; font-size: 0.8125rem; }
+
+/* Pastille d'accent émeraude (badges du hero, colonne Toomny du comparatif). */
+.g-accent { color: #9ff2c2; }
+.g-accent-soft {
+  color: #9ff2c2;
+  border-color: rgba(139, 240, 182, 0.42);
+  background: rgba(139, 240, 182, 0.1);
+}
+.g-ring-accent { border-color: rgba(139, 240, 182, 0.45); }
+
+/* Menu mobile en <details> : on masque la flèche native et on ferme au clic
+   sur un lien (le navigateur referme tout seul au changement de page). */
+.g-menu > summary { list-style: none; cursor: pointer; }
+.g-menu > summary::-webkit-details-marker { display: none; }
+.g-menu:not([open]) > div { display: none; }
+
+/* Panneau du menu mobile : verre plus dense que les cartes, parce qu'il passe
+   au-dessus du titre du hero — le texte du dessous ne doit pas le traverser. */
+.g-menu-panel {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(5, 17, 12, 0.97);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 24px 50px -20px rgba(0, 0, 0, 0.9);
+}

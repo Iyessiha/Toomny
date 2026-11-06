@@ -143,7 +143,7 @@ export function PwaInstallBanner() {
               type="button"
               onClick={install}
               disabled={installing}
-              className="mt-4 w-full rounded-full bg-[var(--color-brand-500)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95 disabled:opacity-60"
+              className="mt-4 w-full rounded-full btn-fill px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] active:scale-95 disabled:opacity-60"
             >
               {installing ? "Installation…" : "Installer l'application"}
             </button>

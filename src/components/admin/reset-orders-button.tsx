@@ -25,7 +25,7 @@ export function ResetOrdersButton() {
   if (step === "done") {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-brand-200)] bg-[var(--color-brand-50)] px-5 py-3 text-sm">
-        <svg className="h-5 w-5 shrink-0 text-[var(--color-brand-500)]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+        <svg className="h-5 w-5 shrink-0 text-[var(--brand-text-2)]" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
         </svg>
         <span>

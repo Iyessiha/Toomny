@@ -65,7 +65,7 @@ export function ServiceCard({ service: s, locale }: Props) {
         <div className="flex items-center gap-2 text-xs">
           <span
             aria-hidden
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--color-brand-700)]"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--brand-text-2)]"
           >
             {initials}
           </span>
@@ -81,7 +81,7 @@ export function ServiceCard({ service: s, locale }: Props) {
             <span className="min-w-0 truncate font-semibold">{s.provider?.display_name ?? t.provider}</span>
           )}
           {s.provider?.verified && (
-            <span title={t.identityVerified} className="flex-none text-[var(--color-brand-600)]" aria-label={t.identityVerified}>✓</span>
+            <span title={t.identityVerified} className="flex-none text-[var(--brand-text-1)]" aria-label={t.identityVerified}>✓</span>
           )}
         </div>
 

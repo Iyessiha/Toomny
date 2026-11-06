@@ -137,7 +137,7 @@ export function KycSelfieGuide({ locale = "fr" }: { locale?: "fr" | "en" }) {
       {/* Légende texte sous l'illustration */}
       <div className="mt-3 flex justify-around gap-2 text-[11px] text-[var(--subtle)]">
         <span className="flex items-center gap-1">
-          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full btn-fill text-white">
             <svg viewBox="0 0 12 12" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 6l3 3 5-5" />
             </svg>
@@ -145,7 +145,7 @@ export function KycSelfieGuide({ locale = "fr" }: { locale?: "fr" | "en" }) {
           {labels.face}
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full btn-fill text-white">
             <svg viewBox="0 0 12 12" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 6l3 3 5-5" />
             </svg>
@@ -153,7 +153,7 @@ export function KycSelfieGuide({ locale = "fr" }: { locale?: "fr" | "en" }) {
           {labels.doc}
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full btn-fill text-white">
             <svg viewBox="0 0 12 12" width="8" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 6l3 3 5-5" />
             </svg>

@@ -114,11 +114,11 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
         <div className="flex items-center justify-between gap-3 px-4 py-3.5">
           <div>
             <p className="text-[10px] text-[var(--subtle)]">À partir de</p>
-            <p className="font-display text-lg font-extrabold text-[var(--color-brand-600)]">
+            <p className="font-display text-lg font-extrabold text-[var(--brand-text-1)]">
               150 000 <span className="text-sm font-semibold text-[var(--subtle)]">FCFA</span>
             </p>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[var(--color-brand-500)]/25">
+          <div className="flex items-center gap-1.5 rounded-full btn-fill px-4 py-2 text-xs font-bold text-white shadow-md shadow-[var(--brand-text-2)]/25">
             Commander
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden>
               <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -134,7 +134,7 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
               </svg>
               {t.escrowBadge}
             </span>
-            <span className="font-semibold text-[var(--color-brand-600)]">{t.step}</span>
+            <span className="font-semibold text-[var(--brand-text-1)]">{t.step}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
             <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)]" />
@@ -152,7 +152,7 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
             <span className="text-[10px] text-[var(--subtle)]">4.8</span>
           </div>
         </div>
-        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">75k</p>
+        <p className="shrink-0 text-[11px] font-bold text-[var(--brand-text-1)]">75k</p>
       </div>
 
       <div className="slide-in-3 absolute -right-16 top-[142px] z-30 hidden w-48 items-center gap-2.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
@@ -164,19 +164,19 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
             <span className="text-[10px] text-[var(--subtle)]">4.6</span>
           </div>
         </div>
-        <p className="shrink-0 text-[11px] font-bold text-[var(--color-brand-600)]">60k</p>
+        <p className="shrink-0 text-[11px] font-bold text-[var(--brand-text-1)]">60k</p>
       </div>
 
       {/* Badge flottant bas-gauche */}
       <div className="float-a absolute -bottom-4 -left-6 z-20 w-52 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-3.5 shadow-[var(--shadow-lg)] sm:-left-10">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white shadow-md">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full btn-fill text-white shadow-md">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="m5 13 4 4L19 7" />
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="font-display text-xs font-bold text-[var(--color-brand-700)]">{t.payoutTitle}</p>
+            <p className="font-display text-xs font-bold text-[var(--brand-text-2)]">{t.payoutTitle}</p>
             <p className="truncate text-[10px] text-[var(--subtle)]">{t.payoutMeta}</p>
           </div>
         </div>
@@ -260,7 +260,7 @@ function ProviderVisual({ locale }: { locale: Locale }) {
         {/* Stats 3 colonnes */}
         <div className="grid grid-cols-3 divide-x divide-[var(--border)] border-b border-[var(--border)]">
           <div className="count-up-1 px-3 py-3.5 text-center">
-            <p className="font-display text-base font-extrabold text-[var(--color-brand-600)]">347k</p>
+            <p className="font-display text-base font-extrabold text-[var(--brand-text-1)]">347k</p>
             <p className="mt-0.5 text-[10px] text-[var(--subtle)]">FCFA</p>
             <p className="text-[10px] font-semibold">{isEn ? "Revenue" : "Revenus"}</p>
           </div>
@@ -307,7 +307,7 @@ function ProviderVisual({ locale }: { locale: Locale }) {
             {isEn ? "Latest order" : "Dernière commande"}
           </p>
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-brand-50)] text-[var(--color-brand-600)] text-xs font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--color-brand-50)] text-[var(--brand-text-1)] text-xs font-bold">
               SK
             </div>
             <div className="flex-1 min-w-0">
@@ -315,7 +315,7 @@ function ProviderVisual({ locale }: { locale: Locale }) {
               <p className="text-[10px] text-[var(--subtle)]">Seydou Konaté</p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-xs font-bold text-[var(--color-brand-600)]">85 000</p>
+              <p className="text-xs font-bold text-[var(--brand-text-1)]">85 000</p>
               <p className="text-[9px] text-[var(--subtle)]">FCFA</p>
             </div>
           </div>
@@ -330,7 +330,7 @@ function ProviderVisual({ locale }: { locale: Locale }) {
               </svg>
               {isEn ? "Funds secured" : "Fonds sécurisés"}
             </span>
-            <span className="font-semibold text-[var(--color-brand-600)]">{isEn ? "Delivery" : "Livraison"}</span>
+            <span className="font-semibold text-[var(--brand-text-1)]">{isEn ? "Delivery" : "Livraison"}</span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface)]">
             <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-[var(--color-brand-400)] to-[var(--color-brand-600)]" />

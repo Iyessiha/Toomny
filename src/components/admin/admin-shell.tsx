@@ -46,7 +46,7 @@ export async function AdminShell({
     <div className="min-h-dvh bg-[var(--surface)]">
       {/* ── Mobile top bar ── */}
       <header className="flex h-14 items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--background)] px-4 sm:hidden">
-        <Link href="/" className="text-[var(--color-brand-500)]" aria-label="Toomny">
+        <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
           <Logo size={24} withWordmark={false} />
         </Link>
         <span className="truncate font-display text-sm font-bold">{title}</span>
@@ -79,10 +79,11 @@ export async function AdminShell({
 
       <div className="flex">
         {/* ── Sidebar ── */}
-        <aside className="hidden sm:flex sm:w-64 sm:shrink-0 sm:flex-col sm:min-h-dvh sm:sticky sm:top-0 sm:max-h-dvh sm:border-r sm:border-[var(--border)] sm:bg-[var(--background)]">
+        <aside className="hidden sm:flex sm:w-[268px] sm:shrink-0 sm:flex-col sm:min-h-dvh sm:sticky sm:top-0 sm:max-h-dvh">
+          <div className="card card-solid m-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px]">
           {/* Brand */}
           <div className="flex h-16 flex-none items-center gap-2.5 border-b border-[var(--border)] px-5">
-            <Link href="/" className="text-[var(--color-brand-500)]" aria-label="Toomny">
+            <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
               <Logo size={26} withWordmark={false} />
             </Link>
             <div className="leading-none">
@@ -167,6 +168,7 @@ export async function AdminShell({
               <SignOutButton label={tDash.shell.signOut} />
             </div>
           </div>
+          </div>
         </aside>
 
         {/* ── Main content ── */}
@@ -179,7 +181,7 @@ export async function AdminShell({
                     {kicker}
                   </p>
                 )}
-                <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+                <h1 className="font-display text-[26px] font-extrabold leading-tight tracking-tight sm:text-[32px]">
                   {title}
                 </h1>
                 {subtitle && <p className="mt-1 text-sm text-[var(--subtle)]">{subtitle}</p>}

@@ -238,7 +238,7 @@ export default async function PlanPage({
               key={tier}
               className={`relative flex flex-col rounded-2xl border p-6 transition-shadow duration-200 ${
                 card.highlight
-                  ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)]"
+                  ? "border-[var(--brand-text-2)] bg-[var(--color-brand-500)]"
                   : "border-[var(--border)] bg-[var(--background)]"
               }`}
             >
@@ -247,7 +247,7 @@ export default async function PlanPage({
                   className={`absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1 text-xs font-semibold ${
                     card.highlight
                       ? "bg-white text-[var(--color-brand-600)]"
-                      : "bg-[var(--color-brand-500)] text-white"
+                      : "btn-fill text-white"
                   }`}
                 >
                   {isCurrent ? p.activeBadge : card.badge}
@@ -265,14 +265,14 @@ export default async function PlanPage({
               >
                 <span
                   className={`font-display text-2xl font-bold ${
-                    card.highlight ? "text-white" : "text-[var(--color-brand-600)]"
+                    card.highlight ? "text-white" : "text-[var(--brand-text-1)]"
                   }`}
                 >
                   {card.commission}
                 </span>
                 <span
                   className={`text-sm ${
-                    card.highlight ? "text-white/75" : "text-[var(--color-brand-500)]"
+                    card.highlight ? "text-white/75" : "text-[var(--brand-text-2)]"
                   }`}
                 >
                   {c.commission}
@@ -301,7 +301,7 @@ export default async function PlanPage({
                   <li key={f} className="flex items-center gap-2.5 text-sm">
                     <span
                       className={`shrink-0 ${
-                        card.highlight ? "text-white/80" : "text-[var(--color-brand-500)]"
+                        card.highlight ? "text-white/80" : "text-[var(--brand-text-2)]"
                       }`}
                     >
                       <svg

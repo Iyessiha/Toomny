@@ -97,7 +97,7 @@ export function ShareButton({ title, text, url, locale = "fr", size = "md" }: Pr
         </svg>
       ),
       action: handleCopy,
-      color: copied ? "text-[var(--color-brand-600)]" : "",
+      color: copied ? "text-[var(--brand-text-1)]" : "",
     },
     {
       key: "whatsapp",
@@ -136,8 +136,8 @@ export function ShareButton({ title, text, url, locale = "fr", size = "md" }: Pr
   ];
 
   const btnClass = size === "sm"
-    ? "flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--background)] text-[var(--subtle)] shadow-sm transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]"
-    : "inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3.5 py-2 text-sm font-medium text-[var(--subtle)] shadow-sm transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--color-brand-600)]";
+    ? "flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--background)] text-[var(--subtle)] shadow-sm transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--brand-text-1)]"
+    : "inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--background)] px-3.5 py-2 text-sm font-medium text-[var(--subtle)] shadow-sm transition-colors hover:border-[var(--color-brand-300)] hover:text-[var(--brand-text-1)]";
 
   return (
     <div ref={ref} className="relative">

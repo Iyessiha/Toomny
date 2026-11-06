@@ -27,7 +27,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
 
         {/* Header */}
         <div data-reveal className="max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-600)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-text-1)]">
             {t.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{t.title}</h2>
@@ -136,7 +136,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
         {/* How the commission works, in plain words */}
         <section data-reveal className="mt-16 rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6 sm:p-7">
           <h3 className="font-display text-lg font-bold">{t.howTitle}</h3>
-          <ol className="mt-4 grid list-decimal gap-2.5 pl-5 text-sm leading-relaxed text-[var(--subtle)] marker:font-semibold marker:text-[var(--color-brand-600)]">
+          <ol className="mt-4 grid list-decimal gap-2.5 pl-5 text-sm leading-relaxed text-[var(--subtle)] marker:font-semibold marker:text-[var(--brand-text-1)]">
             {t.howSteps.map((step) => (
               <li key={step}>{step}</li>
             ))}
@@ -158,7 +158,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                   <th className="px-6 py-4 font-medium text-[var(--subtle)]"></th>
                   <th className="px-6 py-4 font-display text-sm font-bold">Fiverr</th>
                   <th className="px-6 py-4 font-display text-sm font-bold">ComeUp</th>
-                  <th className="bg-[var(--color-brand-500)] px-6 py-4 font-display text-sm font-bold text-white">
+                  <th className="btn-fill px-6 py-4 font-display text-sm font-bold text-white">
                     Toomny
                   </th>
                 </tr>
@@ -172,7 +172,7 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                     <td className="px-6 py-4 font-medium">{r.label}</td>
                     <td className="px-6 py-4 text-[var(--subtle)]">{r.fiverr}</td>
                     <td className="px-6 py-4 text-[var(--subtle)]">{r.upwork as string}</td>
-                    <td className="bg-[var(--color-brand-50)] px-6 py-4 font-semibold text-[var(--color-brand-700)]">
+                    <td className="bg-[var(--color-brand-50)] px-6 py-4 font-semibold text-[var(--brand-text-2)]">
                       {r.toomny}
                     </td>
                   </tr>
@@ -200,8 +200,8 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                     <dd className="text-right text-[var(--subtle)]">{r.upwork as string}</dd>
                   </div>
                   <div className="flex justify-between gap-4 border-t border-[var(--border)] pt-1">
-                    <dt className="font-semibold text-[var(--color-brand-700)]">Toomny</dt>
-                    <dd className="text-right font-semibold text-[var(--color-brand-700)]">
+                    <dt className="font-semibold text-[var(--brand-text-2)]">Toomny</dt>
+                    <dd className="text-right font-semibold text-[var(--brand-text-2)]">
                       {r.toomny}
                     </dd>
                   </div>

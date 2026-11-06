@@ -20,7 +20,7 @@ interface FeatureCardsProps {
 const colorPalettes = [
   { c1: '#cbd5e1', c2: '#475569', ink: '#1e293b', edge: 'rgba(148, 163, 184, .35)', glow: 'rgba(148, 163, 184, .12)' },
   { c1: '#6ee7b7', c2: '#059669', ink: '#064e3b', edge: 'rgba(52, 211, 153, .55)', glow: 'rgba(52, 211, 153, .28)' },
-  { c1: '#a5b4fc', c2: '#4338ca', ink: '#1e1b4b', edge: 'rgba(129, 140, 248, .6)', glow: 'rgba(129, 140, 248, .38)' },
+  { c1: '#9ff2c2', c2: '#14a05a', ink: '#04110b', edge: 'rgba(139, 240, 182, .6)', glow: 'rgba(51, 209, 122, .4)' },
   { c1: '#fde68a', c2: '#b45309', ink: '#451a03', edge: 'rgba(251, 191, 36, .8)', glow: 'rgba(251, 191, 36, .5)' },
 ];
 

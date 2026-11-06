@@ -31,7 +31,7 @@ export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Local
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 truncate text-[15px] font-semibold">
             {p.name}
-            {p.verified && <span title={t.cardVerified} aria-label={t.cardVerified} className="text-[var(--color-brand-600)]">✓</span>}
+            {p.verified && <span title={t.cardVerified} aria-label={t.cardVerified} className="text-[var(--brand-text-1)]">✓</span>}
           </p>
           <p className="mt-0.5 line-clamp-2 text-sm text-[var(--foreground)]">{p.headline ?? p.companyName ?? ""}</p>
           {place && <p className="mt-0.5 truncate text-xs text-[var(--subtle)]">{place}</p>}
@@ -68,7 +68,7 @@ export function ProviderCard({ p, locale }: { p: ProviderCardData; locale: Local
         </p>
         <Link
           href={`/prestataires/${p.id}`}
-          className="flex-none rounded-full border border-[var(--color-brand-500)] px-4 py-1.5 text-sm font-semibold text-[var(--color-brand-700)] hover:bg-[var(--color-brand-50)]"
+          className="flex-none rounded-full border border-[var(--brand-text-2)] px-4 py-1.5 text-sm font-semibold text-[var(--brand-text-2)] hover:bg-[var(--color-brand-50)]"
         >
           {t.viewProfile}
         </Link>

@@ -8,7 +8,7 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import type { Locale } from "@/i18n/dictionaries";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]";
 
 export function ProfileForm({
   defaults,
@@ -113,7 +113,7 @@ export function ProfileForm({
             )}
           </div>
           <div className="flex flex-col gap-2">
-            <label className="cursor-pointer rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]">
+            <label className="cursor-pointer rounded-lg border border-[var(--border)] px-4 py-2 text-xs font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]">
               {p.avatarUpload}
               <input
                 ref={fileInputRef}
@@ -248,7 +248,7 @@ export function ProfileForm({
 
       {error && <p role="alert" className="notice notice-danger">{error}</p>}
       {saved && (
-        <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">
+        <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">
           {p.saved}{" "}
           <Link href={publicPath} className="underline">{p.viewPublic}</Link>
         </p>
@@ -257,7 +257,7 @@ export function ProfileForm({
       <button
         type="submit"
         disabled={pending || uploading}
-        className="rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        className="rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
       >
         {pending ? t.common.saving : t.common.save}
       </button>
@@ -303,7 +303,7 @@ function SkillsField({
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center rounded-full bg-[var(--color-brand-50)] px-3 py-1 text-[12px] font-medium text-[var(--color-brand-700)]"
+              className="inline-flex items-center rounded-full bg-[var(--color-brand-50)] px-3 py-1 text-[12px] font-medium text-[var(--brand-text-2)]"
             >
               {tag}
             </span>

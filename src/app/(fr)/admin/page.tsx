@@ -240,7 +240,7 @@ export default async function AdminPage() {
           <TableCard
             title={t.recentUsers}
             action={
-              <Link href="/admin/users" className="shrink-0 text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+              <Link href="/admin/users" className="shrink-0 text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
                 {t.latestAllUsers}
               </Link>
             }
@@ -279,7 +279,7 @@ export default async function AdminPage() {
           <TableCard
             title={t.recentOrders}
             action={
-              <Link href="/admin/orders" className="shrink-0 text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+              <Link href="/admin/orders" className="shrink-0 text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
                 {nav.orders}
               </Link>
             }

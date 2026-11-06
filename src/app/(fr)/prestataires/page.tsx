@@ -31,7 +31,7 @@ export default async function ProvidersPage({ searchParams }: { searchParams: Pr
       <Header locale={locale} />
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         <header className="mb-8 max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-brand-600)]">{t.providersKicker}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--brand-text-1)]">{t.providersKicker}</p>
           <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{t.providersPageTitle}</h1>
           <p className="mt-2 text-[var(--subtle)]">{t.providersPageSubtitle}</p>
         </header>

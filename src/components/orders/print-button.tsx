@@ -7,7 +7,7 @@ export function PrintButton({ label }: Props) {
     <button
       type="button"
       onClick={() => window.print()}
-      className="rounded-full border border-[var(--color-brand-500)] px-5 py-2.5 text-center text-sm font-semibold text-[var(--color-brand-600)] hover:bg-white"
+      className="rounded-full border border-[var(--color-brand-600)] px-5 py-2.5 text-center text-sm font-semibold text-[var(--color-brand-600)] hover:bg-white"
     >
       {label}
     </button>

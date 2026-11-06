@@ -22,8 +22,8 @@ export type ClientOrderSummaryProps = {
 };
 
 const STATE_CLASS: Record<StepState, string> = {
-  done: "border-[var(--color-brand-500)] bg-[var(--color-brand-500)] text-white",
-  next: "border-[var(--color-brand-500)] bg-white text-[var(--color-brand-600)] animate-pulse",
+  done: "border-[var(--brand-text-2)] btn-fill text-white",
+  next: "border-[var(--color-brand-600)] bg-white text-[var(--color-brand-600)] animate-pulse",
   upcoming: "border-[var(--border)] bg-white text-[var(--subtle)]",
 };
 
@@ -51,7 +51,7 @@ export function ClientOrderSummary(props: ClientOrderSummaryProps) {
         <Pill tone={orderTone(props.status)}>{t.badge[props.status as keyof typeof t.badge] ?? props.status}</Pill>
       </header>
 
-      <p className="rounded-2xl bg-[var(--color-brand-50)] px-5 py-4 text-sm font-medium text-[var(--color-brand-700,#0b5d30)]">
+      <p className="rounded-2xl bg-[var(--color-brand-50)] px-5 py-4 text-sm font-medium text-[var(--brand-text-2)]">
         {t.headline[props.status as keyof typeof t.headline] ?? ""}
       </p>
 
@@ -104,13 +104,13 @@ export function ClientOrderSummary(props: ClientOrderSummaryProps) {
             </div>
             <div className="flex justify-between gap-4 py-3">
               <dt className="font-display font-bold">{t.total}</dt>
-              <dd className="font-display text-lg font-bold text-[var(--color-brand-600)]">{money(props.totalMinor)}</dd>
+              <dd className="font-display text-lg font-bold text-[var(--brand-text-1)]">{money(props.totalMinor)}</dd>
             </div>
           </dl>
           {isPaid && (
             <Link
               href={`/orders/${props.orderId}/recu`}
-              className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+              className="mt-4 inline-block text-sm font-semibold text-[var(--brand-text-1)] underline-offset-2 hover:underline"
             >
               {t.viewReceipt} →
             </Link>

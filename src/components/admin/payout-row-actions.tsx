@@ -119,7 +119,7 @@ export function PayoutRowActions({
               onChange={(e) => setField(e.target.value)}
               maxLength={120}
               placeholder={t.providerRefPlaceholder}
-              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-[var(--color-brand-500)]"
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-1.5 text-xs outline-none focus:border-[var(--brand-text-2)]"
             />
           </label>
           <div className="flex justify-end gap-2">

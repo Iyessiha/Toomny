@@ -46,7 +46,7 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
   return (
     <section
       aria-live="polite"
-      className="animate-rise mb-6 overflow-hidden rounded-3xl border border-[var(--color-brand-500)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
+      className="animate-rise mb-6 overflow-hidden rounded-3xl border border-[var(--brand-text-2)]/30 bg-gradient-to-br from-[var(--color-brand-50)] via-white to-[var(--color-gold-50,#fbf6e6)] p-5 shadow-sm sm:p-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
@@ -56,7 +56,7 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
         {!shares && (
           <Link
             href={copy.href}
-            className="shrink-0 rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
+            className="shrink-0 rounded-full btn-fill px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
           >
             {copy.cta}
           </Link>
@@ -73,7 +73,7 @@ export function EncouragementCard({ encouragement, locale, siteUrl, profileUrl }
                 href={shareHref(network, trackedUrl(shareBase, network, shareMedium, shareCampaign), shareMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-[var(--border)] bg-white px-3.5 py-2 text-xs font-semibold shadow-sm hover:border-[var(--color-brand-500)] hover:text-[var(--color-brand-600)]"
+                className="rounded-full border border-[var(--border)] bg-white px-3.5 py-2 text-xs font-semibold shadow-sm hover:border-[var(--color-brand-600)] hover:text-[var(--color-brand-600)]"
               >
                 {t.networks[network]}
               </a>

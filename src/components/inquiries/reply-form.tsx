@@ -95,12 +95,12 @@ export function InquiryReplyForm({
           maxLength={1000}
           placeholder={t.replyPlaceholder}
           aria-label={t.reply}
-          className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--color-brand-500)]"
+          className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm outline-none focus:border-[var(--brand-text-2)]"
         />
         <button
           type="submit"
           disabled={pending}
-          className="flex-none rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="flex-none rounded-full btn-fill px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {pending ? t.replying : t.reply}
         </button>

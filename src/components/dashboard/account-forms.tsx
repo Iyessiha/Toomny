@@ -6,7 +6,7 @@ import { getAccountTexts } from "@/i18n/account";
 import type { Locale } from "@/i18n/dictionaries";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]";
 
 const copy: Record<Locale, { labelColon: string }> = {
   fr: { labelColon: " :" },
@@ -67,11 +67,11 @@ export function AccountEmailForm({
           />
         </div>
         {error && <p role="alert" className="notice notice-danger">{error}</p>}
-        {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.emailSent}</p>}
+        {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{t.emailSent}</p>}
         <button
           type="submit"
           disabled={pending || done}
-          className="rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {pending ? t.emailUpdating : t.emailButton}
         </button>
@@ -140,11 +140,11 @@ export function AccountPasswordForm({ locale = "fr" }: { locale?: Locale }) {
           />
         </div>
         {error && <p role="alert" className="notice notice-danger">{error}</p>}
-        {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.passwordDone}</p>}
+        {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{t.passwordDone}</p>}
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          className="rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
           {pending ? t.passwordUpdating : t.passwordButton}
         </button>

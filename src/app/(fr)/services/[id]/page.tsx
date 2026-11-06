@@ -352,7 +352,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                     href={translateLink.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-[var(--color-brand-600)] underline underline-offset-2"
+                    className="font-semibold text-[var(--brand-text-1)] underline underline-offset-2"
                   >
                     {translateLink.label}
                   </a>
@@ -427,7 +427,7 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
                 )}
                 <Link
                   href={`/prestataires/${service.provider_id}`}
-                  className="mt-4 inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+                  className="mt-4 inline-flex items-center gap-1 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
                 >
                   {t.viewFullProfile}
                 </Link>
@@ -514,13 +514,13 @@ export default async function ServicePage({ params }: { params: Promise<{ id: st
           <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
             <div>
               <p className="text-[10px] text-[var(--subtle)]">{t.from}</p>
-              <p className="font-display text-lg font-bold text-[var(--color-brand-600)]">
+              <p className="font-display text-lg font-bold text-[var(--brand-text-1)]">
                 {(service.price_minor).toLocaleString(locale === "fr" ? "fr-FR" : "en-US")} FCFA
               </p>
             </div>
             <a
               href="#commande"
-              className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+              className="flex-1 rounded-full btn-fill px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
             >
               {user ? t.order : t.loginToOrder}
             </a>

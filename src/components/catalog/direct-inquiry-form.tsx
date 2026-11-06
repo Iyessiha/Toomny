@@ -39,11 +39,11 @@ export function DirectInquiryForm({
       <div className="mt-6 space-y-5">
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-[var(--color-brand-50)] px-6 py-8 text-center">
           <span className="text-4xl" aria-hidden>✅</span>
-          <p className="font-semibold text-[var(--color-brand-700)]">{t.contactDone}</p>
+          <p className="font-semibold text-[var(--brand-text-2)]">{t.contactDone}</p>
         </div>
         <Link
           href={backHref}
-          className="flex items-center justify-center rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+          className="flex items-center justify-center rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
         >
           ← {locale === "fr" ? "Retour au profil" : "Back to profile"}
         </Link>
@@ -71,7 +71,7 @@ export function DirectInquiryForm({
           rows={6}
           placeholder={t.contactPlaceholder}
           onChange={(e) => setChars(e.target.value.length)}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
+          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]"
         />
       </div>
 
@@ -85,13 +85,13 @@ export function DirectInquiryForm({
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)] disabled:opacity-60"
+          className="flex-1 rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)] disabled:opacity-60"
         >
           {pending ? t.contactSending : t.contactSend}
         </button>
         <Link
           href={backHref}
-          className="flex items-center justify-center rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+          className="flex items-center justify-center rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
         >
           {locale === "fr" ? "Retour" : "Back"}
         </Link>

@@ -70,7 +70,7 @@ export async function FeaturedServices({ locale }: { locale: Locale }) {
                 <h2 className="text-2xl font-bold leading-tight sm:text-3xl">{t.title}</h2>
                 <p className="mt-1 text-sm text-[var(--subtle)]">{t.subtitle}</p>
               </div>
-              <Link href="/services" className="shrink-0 text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+              <Link href="/services" className="shrink-0 text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
                 {t.all}
               </Link>
             </div>

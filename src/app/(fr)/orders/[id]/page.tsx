@@ -88,7 +88,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
           {isProvider && order.status === "funded" && (
-            <div className="animate-rise rounded-3xl border border-[var(--color-brand-500)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-500)] p-6 text-white shadow-lg">
+            <div className="animate-rise rounded-3xl border border-[var(--brand-text-2)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-500)] p-6 text-white shadow-lg">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-100">✓ {receiptText.steps.paid}</p>
               <p className="mt-2 font-display text-xl font-bold">{receiptText.newOrderTitle}</p>
               <p className="mt-1 text-sm text-emerald-50">{receiptText.newOrderBody}</p>
@@ -107,7 +107,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             </div>
           )}
           {isClient && order.status === "pending_payment" && (
-            <div className="rounded-2xl border-2 border-[var(--color-brand-500)] bg-[var(--color-brand-50)] p-5">
+            <div className="rounded-2xl border-2 border-[var(--brand-text-2)] bg-[var(--color-brand-50)] p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-display text-base font-bold">{t.payBannerTitle}</p>

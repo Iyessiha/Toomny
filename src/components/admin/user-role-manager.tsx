@@ -45,7 +45,7 @@ export function UserRoleManager({
         value={role}
         disabled={busy}
         onChange={(e) => handleChange(e.target.value)}
-        className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs outline-none focus:border-[var(--color-brand-500)] disabled:opacity-50"
+        className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1 text-xs outline-none focus:border-[var(--brand-text-2)] disabled:opacity-50"
       >
         {ROLES.map((r) => (
           <option key={r} value={r}>{t.roles[r] ?? r}</option>

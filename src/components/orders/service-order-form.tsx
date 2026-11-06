@@ -71,7 +71,7 @@ export function ServiceOrderForm({
                 onClick={() => setSelectedPkg(pkg)}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition-colors ${
                   selectedPkg?.id === pkg.id
-                    ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
+                    ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)] text-[var(--brand-text-2)]"
                     : "border-[var(--border)] hover:border-[var(--color-brand-300)]"
                 }`}
               >
@@ -84,7 +84,7 @@ export function ServiceOrderForm({
                     {t.pkgDelivery} {pkg.delivery_days} {pkg.delivery_days > 1 ? t.days : t.day}
                   </p>
                 </div>
-                <p className="ml-4 shrink-0 font-display text-base font-bold text-[var(--color-brand-600)]">
+                <p className="ml-4 shrink-0 font-display text-base font-bold text-[var(--brand-text-1)]">
                   {formatMoney(BigInt(pkg.price_minor), pkg.currency, locale)}
                 </p>
               </button>
@@ -102,10 +102,10 @@ export function ServiceOrderForm({
         maxLength={2000}
         rows={5}
         placeholder={t.orderPlaceholder}
-        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]"
+        className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]"
       />
       {error && <p role="alert" className="notice notice-danger">{error}</p>}
-      <button type="submit" disabled={pending} className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60">
+      <button type="submit" disabled={pending} className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60">
         {pending ? t.ordering : t.order}
       </button>
       <p className="text-xs text-[var(--subtle)]">{t.orderNote}</p>

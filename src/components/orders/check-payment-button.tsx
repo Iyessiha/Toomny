@@ -43,7 +43,7 @@ export function CheckPaymentButton({ orderId, action, labels }: Props) {
         type="button"
         onClick={handleCheck}
         disabled={pending}
-        className="w-full rounded-full border border-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-[var(--color-brand-600)] transition hover:bg-white disabled:opacity-60"
+        className="w-full rounded-full border border-[var(--color-brand-600)] px-5 py-2.5 text-sm font-semibold text-[var(--color-brand-600)] transition hover:bg-white disabled:opacity-60"
       >
         {pending ? labels.checkingPayment : labels.checkPayment}
       </button>

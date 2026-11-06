@@ -128,7 +128,7 @@ export default async function PrestationsPage() {
         <h2 className="font-display text-lg font-bold">{ao.entryTitle}</h2>
         <p className="mt-1 text-sm text-[var(--subtle)]">{ao.entryLead}</p>
         {!addonsUnlocked ? (
-          <Link href="/dashboard/plan" className="mt-4 inline-block text-sm font-semibold text-[var(--color-brand-600)] hover:underline">
+          <Link href="/dashboard/plan" className="mt-4 inline-block text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
             {ao.locked} {ao.upgrade} →
           </Link>
         ) : list.filter((s) => s.status !== "removed").length === 0 ? null : (

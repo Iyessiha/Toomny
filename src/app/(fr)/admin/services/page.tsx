@@ -85,7 +85,7 @@ export default async function AdminServicesPage({
             key={card.key}
             href={`/admin/services?queue=${card.key}`}
             aria-current={queue === card.key ? "true" : undefined}
-            className={`rounded-2xl border p-4 transition-shadow hover:shadow-md ${card.tone} ${queue === card.key ? "ring-2 ring-[var(--color-brand-500)]" : ""}`}
+            className={`rounded-2xl border p-4 transition-shadow hover:shadow-md ${card.tone} ${queue === card.key ? "ring-2 ring-[var(--brand-text-2)]" : ""}`}
           >
             <p className="text-xs font-semibold uppercase tracking-wide opacity-70">{card.label}</p>
             <p className="mt-1 font-display text-3xl font-bold">{card.count}</p>

@@ -14,7 +14,7 @@ export function Faq({ locale = "fr" }: { locale?: Locale }) {
             <details key={item.q} data-reveal className="group py-5">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-base font-semibold [&::-webkit-details-marker]:hidden">
                 {item.q}
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0 text-[var(--color-brand-500)] transition-transform duration-300 group-open:rotate-45">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="shrink-0 text-[var(--brand-text-2)] transition-transform duration-300 group-open:rotate-45">
                   <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </summary>

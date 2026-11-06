@@ -226,7 +226,7 @@ export default async function VersementsPage() {
                     <td>
                       <Link
                         href={`/orders/${o.id}`}
-                        className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                        className="font-semibold text-[var(--brand-text-1)] underline-offset-2 hover:underline"
                       >
                         {o.reference}
                       </Link>

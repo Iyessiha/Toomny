@@ -14,6 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
+  // La maquette « Aurora Glass » n'est plus une destination : son identité est
+  // désormais celle du produit (voir la section Aurora de globals.css). La
+  // racine sert donc la vraie landing.
   const locale = await visitorLocale();
   const faqItems = getLanding(locale).faq.items;
   return (

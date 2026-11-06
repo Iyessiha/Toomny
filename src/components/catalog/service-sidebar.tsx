@@ -118,7 +118,7 @@ export function ServiceSidebar({
                 onClick={() => setSelectedPkg(pkg)}
                 className={`flex-1 py-3 text-sm font-semibold transition-colors ${
                   selectedPkg?.id === pkg.id
-                    ? "border-b-2 border-[var(--color-brand-500)] text-[var(--color-brand-600)]"
+                    ? "border-b-2 border-[var(--brand-text-2)] text-[var(--brand-text-1)]"
                     : "text-[var(--subtle)] hover:text-[var(--foreground)]"
                 }`}
               >
@@ -133,7 +133,7 @@ export function ServiceSidebar({
           {selectedPkg && (
             <p className="mb-1 text-sm font-semibold">{selectedPkg.name}</p>
           )}
-          <p className="font-display text-3xl font-bold text-[var(--color-brand-600)]">
+          <p className="font-display text-3xl font-bold text-[var(--brand-text-1)]">
             {formatMoney(BigInt(displayPrice), displayCurrency, locale)}
           </p>
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--subtle)]">
@@ -165,7 +165,7 @@ export function ServiceSidebar({
                   key={addon.id}
                   className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition-colors ${
                     checked
-                      ? "border-[var(--color-brand-500)] bg-[var(--color-brand-50)]"
+                      ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)]"
                       : "border-[var(--border)] hover:border-[var(--color-brand-300)]"
                   }`}
                 >
@@ -186,7 +186,7 @@ export function ServiceSidebar({
                       </span>
                     )}
                   </span>
-                  <span className="shrink-0 font-display text-sm font-bold text-[var(--color-brand-600)]">
+                  <span className="shrink-0 font-display text-sm font-bold text-[var(--brand-text-1)]">
                     +{formatMoney(BigInt(addon.price_minor), addon.currency, locale)}
                   </span>
                 </label>
@@ -200,7 +200,7 @@ export function ServiceSidebar({
           {isGuest ? (
             <Link
               href="/auth"
-              className="flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+              className="flex items-center justify-center gap-2 rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
             >
               {t.loginToOrder}
             </Link>
@@ -216,7 +216,7 @@ export function ServiceSidebar({
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition-colors hover:bg-[var(--color-brand-600)]"
+                className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition-colors hover:bg-[var(--color-brand-600)]"
               >
                 {pending ? t.ordering : t.order}
               </button>
@@ -228,7 +228,7 @@ export function ServiceSidebar({
             <>
               <Link
                 href={`/services/${serviceId}/contact`}
-                className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--brand-text-1)] transition-colors hover:bg-[var(--color-brand-50)]"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -237,7 +237,7 @@ export function ServiceSidebar({
               </Link>
               <Link
                 href={`/prestataires/${providerId}`}
-                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
               >
                 {locale === "en" ? "View profile" : "Voir le profil"}
               </Link>
@@ -276,7 +276,7 @@ export function ServiceSidebar({
                   <span className="line-clamp-1 flex-1 font-medium leading-snug">
                     {s.title}
                   </span>
-                  <span className="shrink-0 font-semibold text-[var(--color-brand-600)]">
+                  <span className="shrink-0 font-semibold text-[var(--brand-text-1)]">
                     {formatMoney(BigInt(s.price_minor), s.currency, locale)}
                   </span>
                 </Link>
@@ -285,7 +285,7 @@ export function ServiceSidebar({
           </ul>
           <Link
             href={`/prestataires/${providerId}`}
-            className="mt-3 block text-center text-xs font-semibold text-[var(--color-brand-600)] hover:underline"
+            className="mt-3 block text-center text-xs font-semibold text-[var(--brand-text-1)] hover:underline"
           >
             {locale === "en" ? "View all services →" : "Voir toutes les prestations →"}
           </Link>

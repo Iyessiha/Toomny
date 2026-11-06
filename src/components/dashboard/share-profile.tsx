@@ -32,7 +32,7 @@ export function ShareProfile({ locale, siteUrl, profileUrl, name }: { locale: Lo
             href={shareHref(network, trackedUrl(base, network, "provider_share", "profile_share"), message)}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-full border border-[var(--border)] px-3.5 py-2 text-xs font-semibold hover:border-[var(--color-brand-500)] hover:text-[var(--color-brand-600)]"
+            className="rounded-full border border-[var(--border)] px-3.5 py-2 text-xs font-semibold hover:border-[var(--brand-text-2)] hover:text-[var(--brand-text-1)]"
           >
             {t.networks[network]}
           </a>

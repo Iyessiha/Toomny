@@ -86,7 +86,7 @@ export function InquiryThread({
       >
         {messages.map((m) => {
           const bubble = m.mine
-            ? "rounded-2xl rounded-br-md bg-[var(--color-brand-500)] text-white"
+            ? "rounded-2xl rounded-br-md btn-fill text-white"
             : "rounded-2xl rounded-bl-md bg-[var(--surface)]";
           const editing = editingId === m.id;
           return (
@@ -99,7 +99,7 @@ export function InquiryThread({
                       onChange={(e) => setDraft(e.target.value)}
                       rows={3}
                       maxLength={1000}
-                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--color-brand-500)]"
+                      className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm outline-none focus:border-[var(--brand-text-2)]"
                     />
                     <div className="flex justify-end gap-2">
                       <button type="button" onClick={() => setEditingId(null)} disabled={busy} className="btn-ghost btn-sm">

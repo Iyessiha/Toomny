@@ -338,7 +338,7 @@ export function CguBody({ locale = "fr" }: { locale?: Locale }) {
             <li key={i}>
               <a
                 href={`#section-${i}`}
-                className="text-xs text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                className="text-xs text-[var(--brand-text-1)] underline-offset-2 hover:underline"
               >
                 {s.title}
               </a>
@@ -364,7 +364,7 @@ export function CguBody({ locale = "fr" }: { locale?: Locale }) {
           <a href="mailto:support@toomny.com" className="underline underline-offset-2">support@toomny.com</a>
         </p>
         <p className="mt-4">
-          <Link href="/" className="text-sm underline underline-offset-4 text-[var(--color-brand-600)]">
+          <Link href="/" className="text-sm underline underline-offset-4 text-[var(--brand-text-1)]">
             {locale === "en" ? "← Back to home" : "← Retour à l'accueil"}
           </Link>
         </p>

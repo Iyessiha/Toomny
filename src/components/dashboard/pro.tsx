@@ -76,9 +76,9 @@ export function roleTone(role: string): Tone {
 }
 
 const TILE: Record<"brand" | "gold" | "plain", string> = {
-  brand: "bg-[var(--color-brand-500)] text-white",
+  brand: "btn-fill text-white",
   gold: "bg-[var(--color-gold-500)] text-white",
-  plain: "bg-[var(--surface)] text-[var(--color-brand-600)]",
+  plain: "bg-[var(--surface)] text-[var(--brand-text-1)]",
 };
 
 /**
@@ -276,7 +276,7 @@ export function QuickAction({
     >
       <span
         aria-hidden
-        className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--color-brand-600)] transition-colors group-hover:bg-[var(--color-brand-500)] group-hover:text-white"
+        className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-[var(--surface)] text-[var(--brand-text-1)] transition-colors group-hover:bg-[var(--color-brand-500)] group-hover:text-white"
       >
         {icon}
       </span>

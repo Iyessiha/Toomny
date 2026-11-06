@@ -162,7 +162,7 @@ export default async function AdminPayoutsPage({
                 <td>
                   <Link
                     href={`/orders/${p.order_id}`}
-                    className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                    className="font-semibold text-[var(--brand-text-1)] underline-offset-2 hover:underline"
                   >
                     {orderRef.get(p.order_id) ?? p.order_id.slice(0, 8)}
                   </Link>

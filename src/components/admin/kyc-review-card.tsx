@@ -175,7 +175,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
           type="button"
           onClick={handleViewDocs}
           disabled={loadingDocs}
-          className="text-sm font-medium text-[var(--color-brand-600)] hover:underline disabled:opacity-50"
+          className="text-sm font-medium text-[var(--brand-text-1)] hover:underline disabled:opacity-50"
         >
           {loadingDocs ? a.loading : docs ? a.hideDocs : a.viewDocs}
         </button>
@@ -196,7 +196,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
                       const el = e.currentTarget;
                       el.style.display = "none";
                       const p = document.createElement("p");
-                      p.className = "text-sm text-[var(--color-brand-600)] underline";
+                      p.className = "text-sm text-[var(--brand-text-1)] underline";
                       p.textContent = a.openPdf;
                       el.parentElement?.appendChild(p);
                     }}
@@ -228,7 +228,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
             type="button"
             onClick={handleAiReview}
             disabled={aiLoading}
-            className="text-sm font-medium text-[var(--color-brand-600)] hover:underline disabled:opacity-50"
+            className="text-sm font-medium text-[var(--brand-text-1)] hover:underline disabled:opacity-50"
           >
             {aiLoading ? (fr ? "Analyse en cours…" : "Analyzing…") : fr ? "Analyser avec l'IA" : "Analyze with AI"}
           </button>
