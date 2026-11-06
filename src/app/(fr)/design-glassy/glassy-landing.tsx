@@ -471,7 +471,9 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
 
             <div className="glass glass-edge g-float absolute -bottom-6 -left-4 hidden rounded-2xl px-4 py-3 sm:block">
               <p className="text-[10px] uppercase tracking-wider text-white/60">{landing.visual.verified}</p>
-              <p className="mt-0.5 text-sm font-bold text-white">47 avis · 4.9 ★</p>
+              <p className="mt-0.5 text-sm font-bold text-white">
+                47 {locale === "en" ? "reviews" : "avis"} · 4.9 ★
+              </p>
             </div>
           </div>
         </section>

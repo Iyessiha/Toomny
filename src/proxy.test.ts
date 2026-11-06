@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { buildCsp } from "./proxy";
+import { afterEach, describe, expect, it } from "vitest";
+import { buildCsp, embedPreviews } from "./proxy";
 
 function directive(csp: string, name: string): string {
   return csp.split(";").map((d) => d.trim()).find((d) => d.startsWith(`${name} `)) ?? "";
@@ -54,5 +54,28 @@ describe("buildCsp", () => {
     for (const origin of new Set(external)) {
       expect(autorisees).toContain(origin);
     }
+  });
+});
+
+describe("embedPreviews", () => {
+  const env = process.env;
+
+  afterEach(() => {
+    process.env = env;
+  });
+
+  it("autorise l'encadrement en développement", () => {
+    process.env = { ...env, NODE_ENV: "development" };
+    delete process.env.PREVIEW_EMBED;
+    expect(embedPreviews()).toBe(true);
+  });
+
+  it("le refuse en production, sauf demande explicite d'aperçu", () => {
+    process.env = { ...env, NODE_ENV: "production" };
+    delete process.env.PREVIEW_EMBED;
+    expect(embedPreviews()).toBe(false);
+
+    process.env.PREVIEW_EMBED = "1";
+    expect(embedPreviews()).toBe(true);
   });
 });
