@@ -51,7 +51,7 @@ export function ServiceCard({ service: s, locale }: Props) {
           <CoverImage src={s.cover_url} alt={s.title} categorySlug={s.category_slug} />
         </div>
         {s.boosted && (
-          <span className="absolute left-2.5 top-2.5 z-10 rounded-md bg-white px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground)] shadow-sm">
+          <span className="absolute left-2.5 top-2.5 z-10 rounded-md border border-[#e0b566]/40 bg-[#2a1d05]/85 px-2 py-0.5 text-[11px] font-semibold text-[#f4dca6] shadow-sm backdrop-blur-sm">
             {t.featured}
           </span>
         )}
