@@ -9,8 +9,8 @@ import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
 import { GlassyEffects } from "./glassy-effects";
 import { GlassyShell } from "./glassy-shell";
 import { GlassServiceCard, GlassProviderCard } from "./glassy-cards";
-import { ProviderStrip, Testimonials, TradeSections } from "./glassy-trades";
-import { ALL_PROVIDERS, CATEGORY_COVER, DEMO_PROVIDERS, DEMO_SERVICES } from "./glassy-demo";
+import { Testimonials, TradeSections } from "./glassy-trades";
+import { CATEGORY_COVER, DEMO_PROVIDERS } from "./glassy-demo";
 
 const BRAND_MARK = (
   <svg viewBox="0 0 120 120" fill="none" aria-hidden>
@@ -56,33 +56,33 @@ const LABELS = {
     categoriesAll: "Tout le catalogue",
     servicesKicker: "Sélection",
     servicesTitle: "Prestations en lumière",
-    servicesLead: "Les services mis en avant par leurs prestataires.",
+    servicesLead: "",
     servicesAll: "Voir le catalogue",
     servicesEmpty: "Le catalogue s'ouvre au fur et à mesure des vérifications.",
     providerStrip: "Prestataires en vedette",
     trades: {
       p01: {
         kicker: "Design graphique",
-        title: "Une marque qui tient debout partout",
-        lead: "Logo, charte, packaging : la même main du premier croquis au fichier livré, avec les formats d'impression locaux.",
+        title: "Un logo, ce n'est pas un dessin joli",
+        lead: "C'est ce que vos clients verront sur un sac, une facture, un camion. Nos designers livrent des fichiers prêts pour l'imprimeur du coin, pas un PDF qui plante.",
         cta: "Voir les prestations de design",
       },
       p02: {
         kicker: "Développement web",
-        title: "Un site qui se paie tout seul",
-        lead: "Vitrine, boutique, application : des développeurs qui livrent un site mesuré sur un réseau lent, pas une démo de salon.",
+        title: "Un site qui rapporte, pas un site qui existe",
+        lead: "Des développeurs qui livrent un site mesuré sur un réseau lent, testé sur un vrai téléphone, et qui vous expliquent comment le mettre à jour.",
         cta: "Voir les prestations web",
       },
       p03: {
         kicker: "Marketing & communauté",
-        title: "Être trouvé par les bonnes personnes",
-        lead: "Campagnes Meta et TikTok, calendrier éditorial, contenus : des chiffres suivis, pas des promesses de portée.",
+        title: "Arrêtez de payer des vues",
+        lead: "Campagnes Meta et TikTok, calendrier éditorial, contenus : vous suivez les commandes et les messages reçus, sur un tableau de bord que vous comprenez.",
         cta: "Voir les prestations marketing",
       },
       p04: {
         kicker: "Image & vidéo",
-        title: "Des visuels qui font vendre",
-        lead: "Réels, photos produit, montage publicitaire : tournés et montés ici, avec les codes de vos clients.",
+        title: "La photo qui fait sortir le produit du lot",
+        lead: "Réels, photos produit, films publicitaires : tournés ici, avec un téléphone ou en studio, et montés pour vendre en trois secondes sur un fil d'actualité.",
         cta: "Voir les prestations vidéo",
       },
       testimonials: {
@@ -112,7 +112,7 @@ const LABELS = {
       { key: "admin", label: "Administration", hint: "Litiges, vérifications, volume" },
     ],
     howKicker: "Fonctionnement",
-    howTitle: "Trois étapes sous verre",
+    howTitle: "Trois étapes, zéro mauvaise surprise",
     steps: [
       { n: "01", title: "Choisissez", body: "Prix et délai affichés sur chaque prestation. Pas de cahier des charges." },
       { n: "02", title: "Payez, fonds conservés", body: "Mobile money ou carte. Le montant reste bloqué jusqu'à validation." },
@@ -129,6 +129,9 @@ const LABELS = {
       { title: "Validation automatique à 72 h", body: "Un client inactif ne bloque pas le revenu d'un prestataire." },
     ],
     pricingKicker: "Tarifs",
+    pricingTeaserTitle: "0 % côté client, de 3 % à 10 % côté prestataire",
+    pricingTeaserLead: "Le détail complet — plans, exemple chiffré, comparatif Fiverr et Upwork — vit sur sa propre page. Ici, on vous montre surtout le travail.",
+    pricingTeaserCta: "Voir les tarifs",
     pricingTitle: "Quatre paliers, aucun engagement",
     pricingLead: "Aucune commission côté client. Côté prestataire, la part Toomny baisse à mesure que vous montez.",
     perMonth: "par mois",
@@ -174,26 +177,26 @@ const LABELS = {
     trades: {
       p01: {
         kicker: "Graphic design",
-        title: "A brand that holds up everywhere",
-        lead: "Logo, brand guide, packaging: the same hand from first sketch to delivered file, with local print formats.",
+        title: "A logo is not a pretty drawing",
+        lead: "It is what your customers see on a bag, an invoice, a truck. Our designers deliver files ready for the local printer, not a PDF that crashes.",
         cta: "See design services",
       },
       p02: {
         kicker: "Web development",
-        title: "A website that pays for itself",
-        lead: "Showcase, shop, application: developers who ship sites measured on a slow network, not a showroom demo.",
+        title: "A site that earns, not just a site that exists",
+        lead: "Developers who ship a site measured on a slow network, tested on a real phone, and who teach you how to update it.",
         cta: "See web services",
       },
       p03: {
         kicker: "Marketing & community",
-        title: "Be found by the right people",
-        lead: "Meta and TikTok campaigns, content calendar, posts: numbers you can follow, not reach promises.",
+        title: "Stop paying for views",
+        lead: "Meta and TikTok campaigns, content calendar, posts: you follow the orders and messages you get, on a dashboard you understand.",
         cta: "See marketing services",
       },
       p04: {
         kicker: "Image & video",
-        title: "Visuals that actually sell",
-        lead: "Reels, product photos, ad edits: shot and cut here, with the codes your customers know.",
+        title: "The photo that makes a product stand out",
+        lead: "Reels, product photos, ad films: shot here, on a phone or in a studio, cut to sell in three seconds on a feed.",
         cta: "See video services",
       },
       testimonials: {
@@ -223,7 +226,7 @@ const LABELS = {
       { key: "admin", label: "Administration", hint: "Disputes, verifications, volume" },
     ],
     howKicker: "How it works",
-    howTitle: "Three steps under glass",
+    howTitle: "Three steps, zero nasty surprises",
     steps: [
       { n: "01", title: "Pick", body: "Price and delivery time on every service. No brief to write." },
       { n: "02", title: "Pay, funds held", body: "Mobile money or card. The amount stays locked until approval." },
@@ -240,6 +243,9 @@ const LABELS = {
       { title: "Auto-approval at 72 h", body: "An inactive client does not block a provider's income." },
     ],
     pricingKicker: "Pricing",
+    pricingTeaserTitle: "0% for buyers, 3% to 10% for providers",
+    pricingTeaserLead: "The full detail — plans, a worked example, the Fiverr and Upwork comparison — lives on its own page. Here, we mostly show you the work.",
+    pricingTeaserCta: "See pricing",
     pricingTitle: "Four tiers, no commitment",
     pricingLead: "No buyer commission. On the provider side, Toomny's share drops as you climb.",
     perMonth: "per month",
@@ -262,7 +268,6 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
   // Maquette : les cartes viennent d'un jeu de démonstration, pour que la
   // vitrine reste peuplée même sans base. Le catalogue réel reprend la main
   // dès qu'il y a des prestations (voir la note en fin de page).
-  const services = DEMO_SERVICES;
   const providers = DEMO_PROVIDERS.slice(0, 4);
 
   const plans = landing.pricing.plans;
@@ -289,15 +294,19 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </Link>
 
           <nav className="hidden items-center gap-1 text-sm lg:flex">
-            {landing.nav.links.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="rounded-full px-3.5 py-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-              >
-                {l.label}
-              </Link>
-            ))}
+            {landing.nav.links.map((l) => {
+              // La rubrique « Tarifs » mène à la page dédiée de la maquette.
+              const href = l.href === "/tarifs" ? "/design-glassy/tarifs" : l.href;
+              return (
+                <Link
+                  key={l.href}
+                  href={href}
+                  className="rounded-full px-3.5 py-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
             <span className="mx-1 h-5 w-px bg-white/15" aria-hidden />
             <Link
               href={locale === "en" ? "/design-glassy" : "/en/design-glassy"}
@@ -331,7 +340,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
                   {landing.nav.links.map((l) => (
                     <li key={l.href}>
                       <Link
-                        href={l.href}
+                        href={l.href === "/tarifs" ? "/design-glassy/tarifs" : l.href}
                         className="block rounded-xl px-3 py-2.5 text-white/75 hover:bg-white/10 hover:text-white"
                       >
                         {l.label}
@@ -567,28 +576,6 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </ul>
         </section>
 
-        {/* ── Prestations ────────────────────────────────────────────────── */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
-          <div className="flex flex-wrap items-end justify-between gap-4" data-g-reveal>
-            <div>
-              <span className="g-eyebrow">{t.servicesKicker}</span>
-              <h2 className="g-display mt-4 text-2xl font-extrabold text-white sm:text-3xl">{t.servicesTitle}</h2>
-              <p className="mt-2 text-sm text-white/60">{t.servicesLead}</p>
-            </div>
-            <Link href="/services" className="text-sm font-semibold text-[#9ff2c2] underline-offset-4 hover:underline">
-              {t.servicesAll} →
-            </Link>
-          </div>
-
-          <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {services.map((s) => (
-              <li key={s.id} data-g-reveal>
-                <GlassServiceCard service={s} />
-              </li>
-            ))}
-          </ul>
-        </section>
-
         {/* ── Prestataires ───────────────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4" data-g-reveal>
@@ -616,9 +603,6 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
 
         {/* ── Témoignages ────────────────────────────────────────────────── */}
         <Testimonials labels={t.trades.testimonials} items={[...t.testimonials]} />
-
-        {/* ── Prestataires en vedette ────────────────────────────────────── */}
-        <ProviderStrip providers={ALL_PROVIDERS.slice(0, 6)} label={t.providerStrip} />
 
         {/* ── Fonctionnement ─────────────────────────────────────────────── */}
         <section id="fonctionnement" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
@@ -677,113 +661,6 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </div>
         </section>
 
-        {/* ── Tarifs ─────────────────────────────────────────────────────── */}
-        <section id="tarifs" className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
-          <div data-g-reveal>
-            <span className="g-eyebrow">{t.pricingKicker}</span>
-            <h2 className="g-display mt-4 text-2xl font-extrabold text-white sm:text-3xl">{t.pricingTitle}</h2>
-            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/60">{t.pricingLead}</p>
-          </div>
-
-          <div className="g-grid-plans mt-8">
-            {plans.map((p) => (
-              <div
-                key={p.name}
-                data-g-reveal
-                className={`glass glass-edge glass-specular g-round-md relative flex flex-col p-5 ${
-                  p.highlight ? "g-ring-accent" : ""
-                }`}
-                style={
-                  p.highlight
-                    ? { boxShadow: "inset 0 1px 0 rgba(255,255,255,.3), 0 26px 60px -28px rgba(51,209,122,.55)" }
-                    : undefined
-                }
-              >
-                {p.badge && (
-                  <span className="absolute -top-2.5 left-5 rounded-full border border-[#8bf0b6]/50 bg-[#07231a] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#9ff2c2]">
-                    {p.badge}
-                  </span>
-                )}
-                <p className="text-sm font-bold text-white">{p.name}</p>
-                <p className="mt-3 font-display text-2xl font-extrabold text-white">{p.price}</p>
-                {p.priceNote && <p className="text-[11px] text-white/60">{p.priceNote}</p>}
-
-                <p className="mt-4 flex items-baseline gap-1.5">
-                  <span className="font-display text-3xl font-extrabold text-[#8bf0b6]">{p.commission}</span>
-                  <span className="text-[11px] text-white/65">{t.commission}</span>
-                </p>
-
-                <hr className="g-hairline my-4" />
-
-                <ul className="space-y-2 text-xs text-white/65">
-                  {p.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2">
-                      <span className="mt-0.5 text-[#8bf0b6]" aria-hidden>✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={p.href}
-                  className={`g-btn g-btn-sm mt-5 w-full ${p.highlight ? "g-btn-primary" : "g-btn-ghost"}`}
-                >
-                  {p.cta}
-                </Link>
-              </div>
-            ))}
-          </div>
-
-          {/* Comparatif mondial : tableau en verre, lisible, sans débordement. */}
-          <div className="glass glass-edge mt-8 overflow-hidden" data-g-reveal>
-            <p className="px-5 pt-5 text-sm font-bold text-white">{t.compareTitle}</p>
-            {/* Mobile : chaque critère en bloc, la valeur Toomny mise en avant. */}
-            <ul className="mt-3 sm:hidden">
-              {landing.pricing.rows.map((r) => (
-                <li key={r.label} className="border-t border-white/10 px-5 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-white/60">{r.label}</p>
-                  <p className="mt-1 flex items-baseline gap-1.5 text-sm font-semibold text-[#9ff2c2]">
-                    <span aria-hidden>✓</span> {r.toomny}
-                  </p>
-                  <p className="mt-1 text-[11px] text-white/50">
-                    {t.compareCols[1]} : {r.fiverr} · {t.compareCols[2]} : {r.upwork}
-                  </p>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-3 hidden overflow-x-auto sm:block">
-              <table className="w-full min-w-[540px] border-collapse text-left text-xs">
-                <thead>
-                  <tr className="text-[10px] uppercase tracking-wider text-white/60">
-                    <th scope="col" className="px-5 py-2 font-semibold">{t.compareCols[0]}</th>
-                    <th scope="col" className="px-3 py-2 font-semibold">{t.compareCols[1]}</th>
-                    <th scope="col" className="px-3 py-2 font-semibold">{t.compareCols[2]}</th>
-                    <th scope="col" className="px-5 py-2 font-semibold text-[#9ff2c2]">{t.compareCols[3]}</th>
-                  </tr>
-                </thead>
-                <tbody className="text-white/65">
-                  {landing.pricing.rows.map((r) => (
-                    <tr key={r.label} className="border-t border-white/10">
-                      <th scope="row" className="px-5 py-2.5 font-semibold text-white/80">{r.label}</th>
-                      <td className="px-3 py-2.5">{r.fiverr}</td>
-                      <td className="px-3 py-2.5">{r.upwork}</td>
-                      <td className="px-5 py-2.5 font-semibold text-[#9ff2c2]">{r.toomny}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="px-5 py-3 text-[10px] leading-relaxed text-white/60">
-              {landing.pricing.sourcesPrefix}
-              {landing.pricing.sourceA}
-              {landing.pricing.sourcesMid}
-              {landing.pricing.sourceB}
-              {landing.pricing.sourcesSuffix}
-            </p>
-          </div>
-        </section>
-
         {/* ── FAQ ────────────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6 sm:pb-24">
           <h2 className="g-display text-2xl font-extrabold text-white sm:text-3xl" data-g-reveal>
@@ -803,6 +680,24 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
                 <p className="mt-3 max-w-[62ch] text-xs leading-relaxed text-white/60">{item.a}</p>
               </details>
             ))}
+          </div>
+        </section>
+
+        {/* ── Renvoi tarifs : la landing vend, la page tarifs chiffre ────── */}
+        <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-20">
+          <div className="glass glass-edge g-round-lg flex flex-col items-start gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6" data-g-reveal>
+            <div className="min-w-0">
+              <span className="g-eyebrow">{t.pricingKicker}</span>
+              <h2 className="g-display mt-3 text-xl font-extrabold text-white sm:text-2xl">
+                {t.pricingTeaserTitle}
+              </h2>
+              <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-white/65 sm:text-sm">
+                {t.pricingTeaserLead}
+              </p>
+            </div>
+            <Link href="/design-glassy/tarifs" className="g-btn g-btn-primary g-btn-sm shrink-0">
+              {t.pricingTeaserCta}
+            </Link>
           </div>
         </section>
 

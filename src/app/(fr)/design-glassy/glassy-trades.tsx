@@ -16,14 +16,11 @@ import { avatarOf, type DemoProvider } from "./glassy-demo";
    suffisent et la page reste légère.
    ──────────────────────────────────────────────────────────────────────────── */
 
-/** Positions de la mosaïque : 6 visages, tailles variées, léger décalage. */
+/** Positions de la mosaïque : trois portraits, en grand, légèrement inclinés. */
 const MOSAIC = [
-  { top: "2%", left: "6%", size: 92, rotate: -6, z: 2 },
-  { top: "0%", left: "52%", size: 74, rotate: 5, z: 1 },
-  { top: "34%", left: "34%", size: 84, rotate: -3, z: 3 },
-  { top: "62%", left: "2%", size: 78, rotate: 7, z: 1 },
-  { top: "66%", left: "56%", size: 88, rotate: -5, z: 2 },
-  { top: "18%", left: "78%", size: 62, rotate: 9, z: 1 },
+  { top: "1%", left: "14%", size: 132, rotate: -6, z: 2 },
+  { top: "30%", left: "52%", size: 116, rotate: 6, z: 1 },
+  { top: "46%", left: "2%", size: 122, rotate: -3, z: 3 },
 ];
 
 export function PortraitMosaic({
@@ -35,7 +32,7 @@ export function PortraitMosaic({
 }) {
   return (
     <div
-      className="relative hidden h-[300px] w-full min-w-[280px] max-w-[360px] shrink-0 lg:block"
+      className="relative hidden h-[330px] w-full min-w-[300px] max-w-[380px] shrink-0 lg:block"
       aria-label={label}
       role="img"
     >
@@ -45,9 +42,9 @@ export function PortraitMosaic({
         className="pointer-events-none absolute inset-0"
         style={{ background: "radial-gradient(60% 60% at 50% 45%, rgba(51,209,122,0.22), transparent 70%)" }}
       />
-      {MOSAIC.slice(0, ids.length).map((pos, i) => (
+      {MOSAIC.slice(0, 3).map((pos, i) => (
         <div
-          key={`${ids[i]}-${i}`}
+          key={`${ids[i] ?? i}-${i}`}
           className="absolute overflow-hidden rounded-2xl ring-1 ring-white/25"
           style={{
             top: pos.top,
@@ -60,7 +57,7 @@ export function PortraitMosaic({
           }}
         >
           <Image
-            src={avatarOf(ids[i])}
+            src={avatarOf(ids[i] ?? ids[0])}
             alt=""
             fill
             sizes="96px"
@@ -92,42 +89,42 @@ type Card = {
   cover: string;
   face: string;
   slug: string;
-  /** Cadrage : la même photo, recadrée autrement, fait un autre projet. */
+  /** Cadrage de la couverture. */
   pos: string;
-  /** Voile de couleur : distingue deux cartes qui partagent une photo. */
-  tint: string;
 };
 
 const CARDS: Record<string, Card[]> = {
   p01: [
-    { title: "Identité visuelle complète", price: "150 000 FCFA", delivery: "5 jours", cover: "/images/glassy/design-graphique.jpg", face: "nadia", slug: "design-graphique", pos: "50% 30%", tint: "rgba(4,17,11,0.05)" },
-    { title: "Logo + charte graphique", price: "85 000 FCFA", delivery: "3 jours", cover: "/images/glassy/design-graphique.jpg", face: "awa", slug: "design-graphique", pos: "18% 60%", tint: "rgba(210,154,56,0.18)" },
-    { title: "Packaging, 5 références", price: "240 000 FCFA", delivery: "7 jours", cover: "/images/glassy/design-graphique.jpg", face: "seydou", slug: "design-graphique", pos: "82% 45%", tint: "rgba(16,128,67,0.22)" },
+    { title: "Identité visuelle complète", price: "150 000 FCFA", delivery: "5 jours", cover: "/images/glassy/design-graphique.jpg", face: "nadia", slug: "identite-visuelle", pos: "50% 35%" },
+    { title: "Logo + charte graphique", price: "85 000 FCFA", delivery: "3 jours", cover: "/images/glassy/covers/design-logo.jpg", face: "awa", slug: "logo-charte", pos: "50% 50%" },
+    { title: "Packaging, 5 références", price: "240 000 FCFA", delivery: "7 jours", cover: "/images/glassy/covers/design-packaging.jpg", face: "nadia", slug: "packaging", pos: "50% 50%" },
   ],
   p02: [
-    { title: "Site vitrine responsive", price: "180 000 FCFA", delivery: "10 jours", cover: "/images/glassy/developpement-web.jpg", face: "koffi", slug: "developpement-web", pos: "40% 40%", tint: "rgba(4,17,11,0.05)" },
-    { title: "Boutique en ligne complète", price: "320 000 FCFA", delivery: "15 jours", cover: "/images/glassy/developpement-web.jpg", face: "ibrahima", slug: "developpement-web", pos: "78% 60%", tint: "rgba(51,164,114,0.18)" },
-    { title: "Application mobile", price: "450 000 FCFA", delivery: "25 jours", cover: "/images/glassy/developpement-web.jpg", face: "brahim", slug: "developpement-web", pos: "12% 30%", tint: "rgba(210,154,56,0.16)" },
+    { title: "Site vitrine responsive", price: "180 000 FCFA", delivery: "10 jours", cover: "/images/glassy/developpement-web.jpg", face: "koffi", slug: "site-vitrine", pos: "50% 45%" },
+    { title: "Boutique en ligne complète", price: "320 000 FCFA", delivery: "15 jours", cover: "/images/glassy/covers/web-ecommerce.jpg", face: "koffi", slug: "boutique-en-ligne", pos: "50% 50%" },
+    { title: "Application mobile", price: "450 000 FCFA", delivery: "25 jours", cover: "/images/glassy/covers/web-app.jpg", face: "ibrahima", slug: "application-mobile", pos: "50% 50%" },
   ],
   p03: [
-    { title: "Identité de marque complète", price: "150 000 FCFA", delivery: "5 jours", cover: "/images/glassy/design-graphique.jpg", face: "nadia", slug: "design-graphique", pos: "50% 30%", tint: "rgba(4,17,11,0.05)" },
-    { title: "Réseaux sociaux, 4 mois", price: "120 000 FCFA", delivery: "30 jours", cover: "/images/glassy/community-management.jpg", face: "mariam", slug: "community-management", pos: "60% 40%", tint: "rgba(4,17,11,0.08)" },
-    { title: "Publicités Meta & TikTok", price: "180 000 FCFA", delivery: "30 jours", cover: "/images/glassy/marketing-digital.jpg", face: "yann", slug: "marketing-digital", pos: "30% 50%", tint: "rgba(16,128,67,0.2)" },
+    { title: "Calendrier éditorial, 4 mois", price: "120 000 FCFA", delivery: "30 jours", cover: "/images/glassy/covers/social-calendar.jpg", face: "mariam", slug: "calendrier-editorial", pos: "50% 50%" },
+    { title: "Publicités Meta & TikTok", price: "180 000 FCFA", delivery: "30 jours", cover: "/images/glassy/covers/ads-analytics.jpg", face: "yann", slug: "publicites-meta", pos: "50% 50%" },
+    { title: "Pack de 8 visuels animés", price: "95 000 FCFA", delivery: "6 jours", cover: "/images/glassy/community-management.jpg", face: "adjoua", slug: "visuels-animes", pos: "45% 45%" },
   ],
   p04: [
-    { title: "Site vitrine responsive", price: "180 000 FCFA", delivery: "10 jours", cover: "/images/glassy/developpement-web.jpg", face: "koffi", slug: "developpement-web", pos: "40% 40%", tint: "rgba(4,17,11,0.05)" },
-    { title: "Montage de 4 réels", price: "80 000 FCFA", delivery: "5 jours", cover: "/images/glassy/montage-video.jpg", face: "fatou", slug: "montage-video", pos: "70% 45%", tint: "rgba(4,17,11,0.05)" },
-    { title: "Pack de 10 photos produit", price: "60 000 FCFA", delivery: "4 jours", cover: "/images/glassy/photographie.jpg", face: "seydou", slug: "photographie", pos: "55% 35%", tint: "rgba(210,154,56,0.15)" },
+    { title: "Montage de 4 réels", price: "80 000 FCFA", delivery: "5 jours", cover: "/images/glassy/covers/video-reels.jpg", face: "fatou", slug: "montage-reels", pos: "50% 50%" },
+    { title: "Pack de 10 photos produit", price: "60 000 FCFA", delivery: "4 jours", cover: "/images/glassy/covers/photo-product.jpg", face: "seydou", slug: "photos-produit", pos: "50% 50%" },
+    { title: "Film publicitaire 30 s", price: "210 000 FCFA", delivery: "12 jours", cover: "/images/glassy/montage-video.jpg", face: "fatou", slug: "film-publicitaire", pos: "60% 40%" },
   ],
 };
 
 function TradeCard({ card, from }: { card: Card; from: string }) {
   return (
     <Link
-      href={`/design-glassy/services/${card.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+      href={`/design-glassy/services/${card.slug}`}
       className="glass glass-edge glass-specular glass-interactive g-round-sm group flex min-w-0 flex-1 flex-col overflow-hidden"
     >
-      <div className="relative h-24 w-full overflow-hidden">
+      {/* Couverture au format 16:10, identique pour toutes les cartes : les
+          titres s'alignent d'une carte à l'autre, la grille reste droite. */}
+      <div className="relative aspect-[16/10] w-full overflow-hidden">
         <Image
           src={card.cover}
           alt=""
@@ -136,17 +133,21 @@ function TradeCard({ card, from }: { card: Card; from: string }) {
           className="object-cover transition-transform duration-700 group-hover:scale-105"
           style={{ objectPosition: card.pos }}
         />
-        <div aria-hidden className="absolute inset-0" style={{ background: card.tint }} />
-        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(4,17,11,0.05), rgba(4,17,11,0.85))" }} />
-        <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/40 px-1.5 py-0.5 text-[9px] font-semibold text-white/90 backdrop-blur-md">
+        <div aria-hidden className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(4,17,11,0.05), rgba(4,17,11,0.8))" }} />
+        <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full bg-black/45 px-1.5 py-0.5 text-[9px] font-semibold text-white/90 backdrop-blur-md">
           <span className="relative h-3.5 w-3.5 overflow-hidden rounded-full ring-1 ring-white/30">
             <Image src={avatarOf(card.face)} alt="" fill sizes="14px" className="object-cover" />
           </span>
           {from} {card.price}
         </span>
       </div>
-      <div className="flex flex-1 flex-col justify-between gap-1.5 p-2.5">
-        <p className="line-clamp-2 text-[11px] font-semibold leading-snug text-white">{card.title}</p>
+
+      {/* Hauteur de texte fixe (deux lignes de titre) : toutes les cartes
+          d'une même rangée font exactement la même hauteur. */}
+      <div className="flex flex-1 flex-col justify-between gap-1 p-2.5">
+        <p className="line-clamp-2 min-h-[2.2em] text-[11px] font-semibold leading-snug text-white">
+          {card.title}
+        </p>
         <p className="text-[9px] text-white/60">
           {CARD_LABELS.days} {card.delivery}
         </p>
@@ -237,10 +238,10 @@ export function Testimonials({
 export function TradeSections({ labels }: { labels: TradesLabels }) {
   return (
     <>
-      <TradeRow labels={labels.p01} ids={["nadia", "awa", "seydou", "adjoua", "estelle", "mariam"]} cards={CARDS.p01} />
-      <TradeRow labels={labels.p02} ids={["koffi", "ibrahima", "brahim", "nadia", "yann", "mariam"]} cards={CARDS.p02} />
-      <TradeRow labels={labels.p03} ids={["nadia", "mariam", "adjoua", "yann", "estelle", "awa"]} cards={CARDS.p03} />
-      <TradeRow labels={labels.p04} ids={["koffi", "fatou", "seydou", "adjoua", "ibrahima", "estelle"]} cards={CARDS.p04} />
+      <TradeRow labels={labels.p01} ids={["nadia", "awa", "seydou"]} cards={CARDS.p01} />
+      <TradeRow labels={labels.p02} ids={["koffi", "ibrahima", "brahim"]} cards={CARDS.p02} />
+      <TradeRow labels={labels.p03} ids={["mariam", "yann", "adjoua"]} cards={CARDS.p03} />
+      <TradeRow labels={labels.p04} ids={["fatou", "seydou", "estelle"]} cards={CARDS.p04} />
     </>
   );
 }
