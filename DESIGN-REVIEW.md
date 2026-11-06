@@ -126,3 +126,65 @@ compris. Trois façons d'y aller, de la moins chère à la plus engageante :
    corrige le point 1 de l'audit (les trois directions) pour un coût minime.
 3. **Tout en sombre** : cohérent, mais il faut reprendre les tableaux de bord et
    les formulaires ; à planifier, pas à improviser.
+
+---
+
+## 4. Suite de la proposition (design validé)
+
+La direction est validée. Ont été ajoutés, dans le même esprit :
+
+### Images
+
+Sept visuels générés pour la maquette, tous dans la même lumière (émeraude +
+or, fond sombre, grain) : `public/images/glassy/`.
+
+| Fichier | Usage |
+|---|---|
+| `design-graphique.jpg` | couverture de catégorie + carte prestation |
+| `developpement-web.jpg` | idem |
+| `montage-video.jpg` | idem |
+| `community-management.jpg` | idem |
+| `marketing-digital.jpg` | idem |
+| `photographie.jpg` | idem |
+| `avatars/*.jpg` (4) | portraits prestataires et pastilles de la maquette |
+
+Ils servent uniquement la démonstration `/design-glassy`. Le vrai catalogue
+continue d'utiliser `cover_url` (voir `src/components/catalog/cover-image.tsx`).
+
+### Cartes
+
+`src/app/(fr)/design-glassy/glassy-cards.tsx` — trois formats, un seul langage :
+
+- **`GlassServiceCard`** — grille du catalogue : photo, catégorie, badge
+  « Vedette », prestataire + KYC, prix et délai.
+- **`GlassListCard`** — résultat de recherche horizontal : photo à gauche,
+  prix et note à droite.
+- **`GlassProviderCard`** — prestataire : portrait, présence en ligne, note,
+  compétences, nombre de commandes.
+
+Règles communes : un seul `backdrop-filter` par carte, voile sombre sous le
+texte posé sur la photo (lisibilité garantie quelle que soit l'image).
+
+### Tableaux de bord
+
+`/design-glassy/dashboards?role=client|prestataire|admin`
+
+Trois rôles, une seule coquille (barre latérale de verre, barre supérieure,
+contenu). Le sélecteur de rôle est fait de liens — aucun état client.
+
+- **Client** : dépenses, commandes en cours avec bouton « Valider la livraison »,
+  reprises de prestations, messages, rappel des garanties.
+- **Prestataire** : encaissements (histogramme CSS, pas de librairie de
+  graphiques), encart de versement avec le détail des frais (5 % + 1 %),
+  commandes à traiter, relance « prestations sans photo », boost.
+- **Administration** : volume, commissions, litiges, vérifications, courbe en
+  SVG, dernières commandes.
+
+Les données sont fictives (`glassy-demo.ts`) mais le vocabulaire, les statuts et
+les montants suivent le modèle réel du site.
+
+### Repli sans JavaScript
+
+Le sélecteur de rôle, le menu mobile, la FAQ, les onglets et le filtre de
+catalogue sont tous en HTML natif ou en liens. Aucune maquette ne dépend d'un
+état client pour s'afficher.

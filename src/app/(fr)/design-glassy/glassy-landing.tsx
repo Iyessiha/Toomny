@@ -1,22 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getBoostedServices, getServices } from "@/lib/catalog";
-import { interleaveByProvider } from "@/lib/interleave";
-import { categoryGradient, categoryMeta } from "@/lib/categories";
-import { formatMoney } from "@/lib/money";
+import { categoryMeta } from "@/lib/categories";
 import { getLanding } from "@/content/landing";
 import { Logo } from "@/components/ui/logo";
 import { headers } from "next/headers";
 import type { Locale } from "@/i18n/dictionaries";
 import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
 import { GlassyEffects } from "./glassy-effects";
-import "./glassy.css";
-
-const AURORA = [
-  { top: "-18%", left: "-12%", size: "58vw", color: "rgba(16, 128, 67, 0.75)" },
-  { top: "-26%", right: "-14%", size: "52vw", color: "rgba(210, 154, 56, 0.42)" },
-  { bottom: "-30%", left: "22%", size: "66vw", color: "rgba(51, 164, 114, 0.55)" },
-];
+import { GlassyShell } from "./glassy-shell";
+import { GlassServiceCard, GlassProviderCard } from "./glassy-cards";
+import { CATEGORY_COVER, DEMO_PROVIDERS, DEMO_SERVICES } from "./glassy-demo";
 
 const BRAND_MARK = (
   <svg viewBox="0 0 120 120" fill="none" aria-hidden>
@@ -65,6 +58,20 @@ const LABELS = {
     servicesLead: "Les services mis en avant par leurs prestataires.",
     servicesAll: "Voir le catalogue",
     servicesEmpty: "Le catalogue s'ouvre au fur et à mesure des vérifications.",
+    providersKicker: "Prestataires",
+    providersTitle: "Des visages, pas des profils anonymes",
+    providersLead: "Identité vérifiée, avis laissés après commande, présence en ligne quand ils sont disponibles.",
+    providersAll: "Tous les prestataires",
+    dashboardsCta: "Voir les tableaux de bord",
+    dashboardsKicker: "Espaces connectés",
+    dashboardsTitle: "Le même verre, une fois connecté",
+    dashboardsLead:
+      "La vitrine tient sa promesse jusqu'aux tableaux de bord : client, prestataire, administration. Trois rôles, une seule coquille.",
+    dashboardRoles: [
+      { key: "client", label: "Client", hint: "Commandes, validation, garanties" },
+      { key: "prestataire", label: "Prestataire", hint: "Encaissements, versements, boost" },
+      { key: "admin", label: "Administration", hint: "Litiges, vérifications, volume" },
+    ],
     howKicker: "Fonctionnement",
     howTitle: "Trois étapes sous verre",
     steps: [
@@ -124,6 +131,20 @@ const LABELS = {
     servicesLead: "Services highlighted by their providers.",
     servicesAll: "Browse catalogue",
     servicesEmpty: "The catalogue opens as verifications complete.",
+    providersKicker: "Providers",
+    providersTitle: "Faces, not anonymous profiles",
+    providersLead: "Verified identity, reviews left after an order, online presence when available.",
+    providersAll: "All providers",
+    dashboardsCta: "See the dashboards",
+    dashboardsKicker: "Connected spaces",
+    dashboardsTitle: "The same glass, once you're signed in",
+    dashboardsLead:
+      "The promise holds all the way into the dashboards: client, provider, administration. Three roles, one shell.",
+    dashboardRoles: [
+      { key: "client", label: "Client", hint: "Orders, approval, guarantees" },
+      { key: "prestataire", label: "Provider", hint: "Earnings, payouts, boost" },
+      { key: "admin", label: "Administration", hint: "Disputes, verifications, volume" },
+    ],
     howKicker: "How it works",
     howTitle: "Three steps under glass",
     steps: [
@@ -158,108 +179,20 @@ const LABELS = {
   },
 } as const;
 
-/** Carte de prestation en verre, réutilise les vraies données du catalogue. */
-function GlassServiceCard({ service, locale, popular }: { service: ServiceCardData; locale: Locale; popular?: string }) {
-  const meta = categoryMeta(service.category_slug ?? "");
-  const Icon = meta?.icon;
-  const name = service.provider?.display_name ?? (locale === "en" ? "Provider" : "Prestataire");
-  const initials = name.slice(0, 2).toUpperCase();
-
-  return (
-    <Link
-      href={`/services/${service.id}`}
-      className="glass glass-edge glass-specular glass-interactive g-round-md group flex h-full flex-col overflow-hidden"
-    >
-      <div className="relative h-32 w-full overflow-hidden" style={{ background: categoryGradient(service.category_slug) }}>
-        {service.cover_url ? (
-          <Image
-            src={service.cover_url}
-            alt={service.title}
-            fill
-            sizes="(max-width: 640px) 100vw, 25vw"
-            className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            {Icon ? <Icon className="h-9 w-9 text-white/80" /> : null}
-          </div>
-        )}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(4,17,11,0.05), rgba(4,17,11,0.85))" }} />
-        {service.boosted && (
-          <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-md">
-            ✦ {popular ?? "Boost"}
-          </span>
-        )}
-        <p className="absolute bottom-3 left-3 right-3 line-clamp-2 text-sm font-semibold leading-snug text-white">
-          {service.title}
-        </p>
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-center gap-2 text-xs text-white/70">
-          <span
-            aria-hidden
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/10 text-[10px] font-bold text-white"
-          >
-            {initials}
-          </span>
-          <span className="min-w-0 truncate font-semibold text-white/85">{name}</span>
-          {service.provider?.verified && <span className="text-[#8bf0b6]">✓</span>}
-        </div>
-
-        <div className="mt-auto flex items-end justify-between gap-2">
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-white/60">
-              {locale === "en" ? "From" : "À partir de"}
-            </p>
-            <p className="font-display text-base font-extrabold text-white">
-              {formatMoney(BigInt(service.price_minor), service.currency, locale)}
-            </p>
-          </div>
-          <p className="text-[11px] text-white/70">
-            {service.delivery_days} {locale === "en" ? "days" : "jours"}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 export async function GlassyLanding({ locale }: { locale: Locale }) {
   const t = LABELS[locale];
   const landing = getLanding(locale);
-  const [boosted, all] = await Promise.all([getBoostedServices(4), getServices({ sort: "recent" })]);
-  const boostedIds = new Set(boosted.map((s) => s.id));
-  const services = [
-    ...boosted,
-    ...interleaveByProvider(all.filter((s) => !boostedIds.has(s.id)), (s) => s.provider?.id ?? s.id),
-  ].slice(0, 8);
+  // Maquette : les cartes viennent d'un jeu de démonstration, pour que la
+  // vitrine reste peuplée même sans base. Le catalogue réel reprend la main
+  // dès qu'il y a des prestations (voir la note en fin de page).
+  const services = DEMO_SERVICES;
+  const providers = DEMO_PROVIDERS.slice(0, 4);
 
   const plans = landing.pricing.plans;
 
   return (
-    <div className="glass-scope relative min-h-screen">
+    <GlassyShell>
       <GlassyEffects />
-
-      {/* Nappes d'aurore + grille, derrière tout le contenu. */}
-      <div className="aurora" aria-hidden>
-        {AURORA.map((o, i) => (
-          <span
-            key={i}
-            className="aurora-orb"
-            style={{
-              top: o.top,
-              left: o.left,
-              right: o.right,
-              bottom: o.bottom,
-              width: o.size,
-              height: o.size,
-              background: o.color,
-            }}
-          />
-        ))}
-        <span className="aurora-grid" />
-      </div>
 
       {/* Bandeau de contexte : on n'oublie pas qu'il s'agit d'une proposition. */}
       <div className="border-b border-white/10 bg-black/25 backdrop-blur-md">
@@ -430,10 +363,10 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
 
               <div className="mt-4 flex items-center gap-3">
                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-white/25">
-                  <Image src="/images/hero-provider.jpg" alt="" fill sizes="44px" className="object-cover object-top" />
+                  <Image src={DEMO_PROVIDERS[0].avatar} alt="" fill sizes="44px" className="object-cover" />
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-white">Awa Konaté</p>
+                  <p className="truncate text-sm font-bold text-white">{DEMO_PROVIDERS[0].name}</p>
                   <p className="truncate text-[11px] text-white/70">
                     {landing.visual.serviceTitle} · Abidjan
                   </p>
@@ -519,10 +452,26 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
                 <li key={c.slug} data-g-reveal>
                   <Link
                     href={`/services?categorie=${c.slug}`}
-                    className="glass glass-edge glass-specular glass-interactive group flex h-full items-start gap-3 p-4"
+                    className="glass glass-edge glass-specular glass-interactive g-round-md group flex h-full items-start gap-3 overflow-hidden p-4"
                   >
-                    <span className="g-chip h-10 w-10 shrink-0 text-[#9ff2c2]">
-                      {Icon ? <Icon className="h-5 w-5" /> : null}
+                    <span className="g-chip relative h-11 w-11 shrink-0 overflow-hidden !rounded-xl text-[#9ff2c2]">
+                      {CATEGORY_COVER[c.slug] && (
+                        <>
+                          <Image
+                            src={CATEGORY_COVER[c.slug]}
+                            alt=""
+                            fill
+                            sizes="44px"
+                            className="object-cover opacity-80"
+                          />
+                          <span
+                            aria-hidden
+                            className="absolute inset-0"
+                            style={{ background: "linear-gradient(160deg, rgba(4,17,11,0.25), rgba(4,17,11,0.8))" }}
+                          />
+                        </>
+                      )}
+                      {Icon ? <Icon className="relative h-4 w-4" /> : null}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-sm font-bold leading-snug text-white">{c.name}</span>
@@ -554,17 +503,35 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
             </Link>
           </div>
 
-          {services.length > 0 ? (
-            <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {services.map((s) => (
-                <li key={s.id} data-g-reveal>
-                  <GlassServiceCard service={s} locale={locale} popular={t.popular} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="glass glass-edge mt-8 p-6 text-sm text-white/60">{t.servicesEmpty}</p>
-          )}
+          <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((s) => (
+              <li key={s.id} data-g-reveal>
+                <GlassServiceCard service={s} />
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ── Prestataires ───────────────────────────────────────────────── */}
+        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
+          <div className="flex flex-wrap items-end justify-between gap-4" data-g-reveal>
+            <div>
+              <span className="g-eyebrow">{t.providersKicker}</span>
+              <h2 className="g-display mt-4 text-2xl font-extrabold text-white sm:text-3xl">{t.providersTitle}</h2>
+              <p className="mt-2 max-w-xl text-sm text-white/60">{t.providersLead}</p>
+            </div>
+            <Link href="/design-glassy/prestataires" className="text-sm font-semibold text-[#9ff2c2] underline-offset-4 hover:underline">
+              {t.providersAll} →
+            </Link>
+          </div>
+
+          <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {providers.map((p) => (
+              <li key={p.id} data-g-reveal>
+                <GlassProviderCard provider={p} />
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ── Fonctionnement ─────────────────────────────────────────────── */}
@@ -753,6 +720,40 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </div>
         </section>
 
+        {/* ── Renvoi vers les maquettes de tableaux de bord ──────────────── */}
+        <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
+          <div className="glass glass-edge glass-solid g-round-xl relative overflow-hidden p-6 sm:p-8" data-g-reveal>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-40"
+              style={{ background: "radial-gradient(60% 80% at 100% 0%, rgba(51,209,122,0.3), transparent 70%)" }}
+            />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center">
+              <div className="min-w-0 flex-1">
+                <span className="g-eyebrow">{t.dashboardsKicker}</span>
+                <h2 className="g-display mt-4 text-xl font-extrabold text-white sm:text-2xl">
+                  {t.dashboardsTitle}
+                </h2>
+                <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/65">{t.dashboardsLead}</p>
+              </div>
+              <ul className="grid flex-1 gap-2 sm:grid-cols-3 lg:max-w-md">
+                {t.dashboardRoles.map((r) => (
+                  <li key={r.label}>
+                    <Link
+                      href={`/design-glassy/dashboards?role=${r.key}`}
+                      className="glass glass-edge glass-specular glass-interactive g-round-sm flex h-full flex-col justify-between gap-2 p-3"
+                    >
+                      <span className="text-xs font-bold text-white">{r.label}</span>
+                      <span className="text-[10px] leading-snug text-white/60">{r.hint}</span>
+                      <span aria-hidden className="text-[#9ff2c2]">→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* ── Appel final ────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
           <div className="glass glass-edge glass-solid g-round-xl relative overflow-hidden px-6 py-14 text-center sm:px-14 sm:py-20" data-g-reveal>
@@ -819,6 +820,6 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </div>
         </div>
       </footer>
-    </div>
+    </GlassyShell>
   );
 }
