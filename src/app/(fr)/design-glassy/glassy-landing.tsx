@@ -6,6 +6,9 @@ import { Logo } from "@/components/ui/logo";
 import { headers } from "next/headers";
 import type { Locale } from "@/i18n/dictionaries";
 import type { ServiceCard as ServiceCardData } from "@/lib/catalog";
+import type { ProviderCardData } from "@/lib/provider-search";
+import { getCountry } from "@/lib/countries";
+import type { DemoProvider } from "./glassy-demo";
 import { GlassyEffects } from "./glassy-effects";
 import { GlassyShell } from "./glassy-shell";
 import { GlassServiceCard, GlassProviderCard } from "./glassy-cards";
@@ -36,6 +39,7 @@ const LABELS = {
     badge: "Proposition de design",
     badgeBack: "← Design actuel",
     heroKicker: "Aurora Glass — piste 2",
+    heroKickerLive: "Marché de talents vérifiés",
     heroLine1: "La confiance,",
     heroLine2: "en transparence",
     heroLead:
@@ -150,6 +154,7 @@ const LABELS = {
     badge: "Design proposal",
     badgeBack: "← Current design",
     heroKicker: "Aurora Glass — option 2",
+    heroKickerLive: "A verified talent marketplace",
     heroLine1: "Trust,",
     heroLine2: "made transparent",
     heroLead:
@@ -262,13 +267,70 @@ const LABELS = {
   },
 } as const;
 
-export async function GlassyLanding({ locale }: { locale: Locale }) {
+/**
+ * Un compte réel présenté comme une carte de la vitrine.
+ *
+ * La carte du site a besoin d'un portrait, d'un drapeau et d'un nombre de
+ * commandes ; la fiche prestataire ne fournit pas tout. Ce qui manque est
+ * laissé vide plutôt qu'inventé : mieux vaut une carte sobre qu'une note
+ * ou un compteur fictif sur un vrai compte.
+ */
+function toDemoProvider(p: ProviderCardData): DemoProvider {
+  const country = p.country ? getCountry(p.country) : undefined;
+  const place = [p.city, country ? country.fr : null].filter(Boolean).join(", ");
+  return {
+    id: p.id,
+    name: p.name,
+    avatar: p.avatar ?? "",
+    headline: p.headline ?? "",
+    country: place || (country ? country.fr : ""),
+    flag: country?.flag ?? "",
+    rating: p.rating ?? 0,
+    reviews: p.ratingCount,
+    completed: p.received,
+    skills: p.skills
+      ? p.skills.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 3)
+      : [],
+    online: false,
+  };
+}
+
+/**
+ * Landing « Aurora Glass ».
+ *
+ * Deux modes, une seule composition :
+ * - `preview` (défaut) : la maquette de comparaison sur /design-glassy, avec
+ *   son bandeau et ses liens internes.
+ * - `production` : c'est la landing servie sur `/`. Plus de bandeau, liens
+ *   réels, prestations et prestataires lus en base quand il y en a.
+ *
+ * Seuls les **témoignages** restent des exemples en production : il n'y a pas
+ * encore d'avis client à afficher. Tout le reste est branché sur le réel, avec
+ * un repli lisible quand la base est vide.
+ */
+export async function GlassyLanding({
+  locale,
+  mode = "preview",
+  services = [],
+  providers: realProviders = [],
+}: {
+  locale: Locale;
+  mode?: "preview" | "production";
+  services?: ServiceCardData[];
+  providers?: ProviderCardData[];
+}) {
   const t = LABELS[locale];
   const landing = getLanding(locale);
-  // Maquette : les cartes viennent d'un jeu de démonstration, pour que la
-  // vitrine reste peuplée même sans base. Le catalogue réel reprend la main
-  // dès qu'il y a des prestations (voir la note en fin de page).
-  const providers = DEMO_PROVIDERS.slice(0, 4);
+  const isLive = mode === "production";
+
+  // En production, les cartes montrent les vrais comptes dès qu'il y en a.
+  // Sinon (et toujours dans la maquette) on garde le jeu de démonstration :
+  // une vitrine vide ne vend rien.
+  const withPhoto = realProviders.filter((p) => Boolean(p.avatar)).slice(0, 4);
+  const providers: DemoProvider[] =
+    withPhoto.length > 0 ? withPhoto.map(toDemoProvider) : DEMO_PROVIDERS.slice(0, 4);
+  // Les prestations n'existent qu'en production : la maquette n'a pas de base.
+  const liveServices = services.filter((s) => Boolean(CATEGORY_COVER[s.category_slug ?? ""])).slice(0, 6);
 
   const plans = landing.pricing.plans;
 
@@ -276,7 +338,9 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
     <GlassyShell>
       <GlassyEffects />
 
-      {/* Bandeau de contexte : on n'oublie pas qu'il s'agit d'une proposition. */}
+      {/* Bandeau de contexte : uniquement sur la maquette de comparaison.
+          Sur le vrai site, le visiteur n'a rien à savoir de nos chantiers. */}
+      {!isLive && (
       <div className="border-b border-white/10 bg-black/25 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2 text-[11px] sm:px-6">
           <span className="font-semibold uppercase tracking-[0.18em] text-[#8bf0b6]">{t.badge}</span>
@@ -285,18 +349,19 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </Link>
         </div>
       </div>
+      )}
 
       {/* ── En-tête ──────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#04110b]/55 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link href="/design-glassy" className="flex items-center text-white" aria-label="Toomny">
+          <Link href={isLive ? "/" : "/design-glassy"} className="flex items-center text-white" aria-label="Toomny">
             <Logo size={28} />
           </Link>
 
           <nav className="hidden items-center gap-1 text-sm lg:flex">
             {landing.nav.links.map((l) => {
-              // La rubrique « Tarifs » mène à la page dédiée de la maquette.
-              const href = l.href === "/tarifs" ? "/design-glassy/tarifs" : l.href;
+              // Les tarifs ont leur propre page : celle du site en production.
+              const href = l.href === "/tarifs" && !isLive ? "/design-glassy/tarifs" : l.href;
               return (
                 <Link
                   key={l.href}
@@ -309,7 +374,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
             })}
             <span className="mx-1 h-5 w-px bg-white/15" aria-hidden />
             <Link
-              href={locale === "en" ? "/design-glassy" : "/en/design-glassy"}
+              href={isLive ? (locale === "en" ? "/" : "/en") : locale === "en" ? "/design-glassy" : "/en/design-glassy"}
               className="rounded-full px-3 py-2 text-xs font-bold uppercase tracking-wide text-white/70 hover:text-white"
               title={locale === "en" ? "Passer en français" : "Switch to English"}
             >
@@ -340,7 +405,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
                   {landing.nav.links.map((l) => (
                     <li key={l.href}>
                       <Link
-                        href={l.href === "/tarifs" ? "/design-glassy/tarifs" : l.href}
+                        href={l.href === "/tarifs" && !isLive ? "/design-glassy/tarifs" : l.href}
                         className="block rounded-xl px-3 py-2.5 text-white/75 hover:bg-white/10 hover:text-white"
                       >
                         {l.label}
@@ -371,7 +436,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           <div>
             <span className="g-eyebrow" data-g-reveal>
               <span className="h-1.5 w-1.5 rounded-full bg-[#8bf0b6]" aria-hidden />
-              {t.heroKicker}
+              {isLive ? t.heroKickerLive : t.heroKicker}
             </span>
 
             <h1 className="g-display mt-6 text-[2.4rem] font-extrabold sm:text-[3.2rem] lg:text-[3.7rem]" data-g-reveal>
@@ -584,7 +649,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
               <h2 className="g-display mt-4 text-2xl font-extrabold text-white sm:text-3xl">{t.providersTitle}</h2>
               <p className="mt-2 max-w-xl text-sm text-white/60">{t.providersLead}</p>
             </div>
-            <Link href="/design-glassy/prestataires" className="text-sm font-semibold text-[#9ff2c2] underline-offset-4 hover:underline">
+            <Link href={isLive ? "/prestataires" : "/design-glassy/prestataires"} className="text-sm font-semibold text-[#9ff2c2] underline-offset-4 hover:underline">
               {t.providersAll} →
             </Link>
           </div>
@@ -695,13 +760,14 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
                 {t.pricingTeaserLead}
               </p>
             </div>
-            <Link href="/design-glassy/tarifs" className="g-btn g-btn-primary g-btn-sm shrink-0">
+            <Link href={isLive ? "/tarifs" : "/design-glassy/tarifs"} className="g-btn g-btn-primary g-btn-sm shrink-0">
               {t.pricingTeaserCta}
             </Link>
           </div>
         </section>
 
-        {/* ── Renvoi vers les maquettes de tableaux de bord ──────────────── */}
+        {/* Renvoi vers les maquettes : présent sur la maquette seulement. */}
+        {!isLive && (
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
           <div className="glass glass-edge glass-solid g-round-xl relative overflow-hidden p-6 sm:p-8" data-g-reveal>
             <div
@@ -735,6 +801,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </div>
         </section>
 
+        )}
         {/* ── Appel final ────────────────────────────────────────────────── */}
         <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 sm:pb-24">
           <div className="glass glass-edge glass-solid g-round-xl relative overflow-hidden px-6 py-14 text-center sm:px-14 sm:py-20" data-g-reveal>
@@ -797,7 +864,7 @@ export async function GlassyLanding({ locale }: { locale: Locale }) {
           </div>
           <div className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-5 text-[11px] text-white/60">
             <p>© {new Date().getFullYear()} Toomny</p>
-            <p>{t.legal}</p>
+            <p>{isLive ? `© ${new Date().getFullYear()} Toomny` : t.legal}</p>
           </div>
         </div>
       </footer>

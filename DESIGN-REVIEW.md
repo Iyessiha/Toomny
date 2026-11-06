@@ -368,3 +368,47 @@ sa modification est structurelle (même balisage, enveloppe retirée) et validé
 par le build.
 
 `npm run build` et `npx vitest run` (262 tests) sont verts.
+
+---
+
+## 9. La maquette remplace vraiment la landing
+
+### Ce que j'avais raté
+
+Le chantier précédent a changé la **peau** (couleurs, verre, boutons) mais pas la
+**structure**. `/` continuait de servir l'ancienne landing
+(`src/components/landing/*`, 14 composants, ~2 600 lignes) : hero vidéo, pas de
+sections métier, pas de galerie de prestataires, pas de témoignages, tarifs
+toujours dans la page. La maquette validée restait visitable sur
+`/design-glassy` — **à côté** du vrai site, pas dedans.
+
+### Ce qui a changé
+
+`GlassyLanding` accepte maintenant un `mode` :
+
+- **`preview`** (défaut) — la page de comparaison `/design-glassy`, inchangée :
+  bandeau, liens internes, renvoi vers les maquettes de dashboards.
+- **`production`** — la landing de `/` **et** de `/en` : plus de bandeau, liens
+  réels (`/tarifs`, `/prestataires`, `/en`), renvoi vers les dashboards retiré,
+  et le kicker du hero devient « Marché de talents vérifiés » au lieu de
+  « Aurora Glass — piste 2 ».
+
+Les deux langues passent par le même composant, donc plus de risque de
+divergence entre la version française et anglaise.
+
+### Branché sur le réel, avec repli
+
+- **Prestations** : `getBoostedServices` + `getServices`, entrelacées pour
+  qu'un même prestataire ne s'aligne pas avec lui-même, limitées à 6.
+- **Prestataires** : `listPublicProviders`. Seuls les comptes **avec photo**
+  sont retenus — une carte sans portrait serait vide. Ce qui manque (note,
+  commandes, drapeau) est laissé vide plutôt qu'inventé : pas de fausse note
+  sur un vrai compte.
+- **Base vide ou injoignable** : les exemples de la maquette reprennent la
+  main, pour que la vitrine ne soit jamais un désert.
+- **Témoignages** : restent des exemples, assumés. Il n'y a pas encore d'avis
+  client à afficher.
+
+Les anciens composants de `src/components/landing/` ne sont plus importés par
+les pages d'accueil ; ils restent en place le temps de vérifier qu'aucune autre
+route ne s'en sert.
