@@ -412,3 +412,73 @@ divergence entre la version française et anglaise.
 Les anciens composants de `src/components/landing/` ne sont plus importés par
 les pages d'accueil ; ils restent en place le temps de vérifier qu'aucune autre
 route ne s'en sert.
+
+---
+
+## 10. Retour à la composition d'origine, avec la peau Aurora
+
+### La correction de périmètre
+
+La demande initiale était un **changement de design**, pas de contenu. Le
+chantier précédent avait remplacé la composition de la landing par celle de la
+maquette : hero vidéo supprimé, sections Sécurité, garanties, étapes détaillées,
+boost et FAQ complète perdues, et des chiffres écrits en dur à la place des
+chiffres réels.
+
+`/` et `/en` repassent sur `LandingPage`, la composition d'origine. **Seule la
+peau change** (palette, verre, boutons, coques), ce qui était l'objet de la
+demande depuis le début.
+
+### Ce que la restauration rétablit
+
+- **La vidéo de fond** du héros (`/video/hero.mp4` + affiche).
+- **Les chiffres réels** de la plateforme (`getTrustStats`), qui ne s'affichent
+  qu'au-dessus d'un seuil : mieux vaut rien qu'un zéro qui décrédibilise.
+- **La section Sécurité** : paiement conservé, fonds qui ne transitent pas par
+  nous, identité vérifiée, litige arbitré, validation sous 72 h.
+- **Les garanties** en carrousel, **les trois étapes** des deux parcours
+  (client et prestataire), **le boost** prestataire, et la **FAQ complète**.
+
+### Les services sont branchés sur la base réelle
+
+Point important, qui était faux dans la PR précédente : la composition
+d'origine lit déjà la base et n'a jamais eu besoin d'être « branchée ».
+
+- `FeaturedServices` → `getBoostedServices(4)` + `getServices({ sort:"recent" })`,
+  entrelacées par prestataire.
+- `ProvidersPreview` → `listPublicProviders`.
+- Les couvertures passent par `CoverImage`, qui prend `cover_url` quand la
+  prestation en a une, et **retombe sur un dégradé de catégorie** sinon.
+
+Il n'y a donc **aucun filtre sur des images de maquette** : toute prestation
+publiée en base peut apparaître, y compris dans une catégorie sans visuel.
+
+### Correction de contraste au passage
+
+Le badge « En vedette » posé sur les couvertures était un aplat blanc avec du
+texte clair : illisible depuis l'inversion de la palette. Il devient une
+pastille sombre bordée d'or.
+
+### Vérification
+
+Contrôlé sur le **HTML réellement servi** par `/`, pas sur le code :
+
+| Élément | Présent |
+|---|---|
+| `hero.mp4` (vidéo de fond) | ✅ |
+| « Recrutez des talents vérifiés » | ✅ |
+| « Trois étapes… » | ✅ |
+| « Votre argent sera conservé » | ✅ |
+| « Boostez votre visibilité » | ✅ |
+| « Questions fréquentes » | ✅ |
+| « Nos garanties » / « Paiement conservé » | ✅ |
+
+`npm run build`, `npx tsc --noEmit` et `npx vitest run` (262) sont verts.
+
+**Limite assumée** : le bac à sable n'a pas de navigateur (le téléchargement de
+Chromium y est bloqué) et aucune base joignable. Je n'ai donc pas pu produire de
+capture d'écran ni vérifier des cartes de service réelles : les sections
+alimentées par la base sont **absentes du HTML ici, ce qui est le comportement
+attendu** (`FeaturedServices` renvoie `null` quand il n'y a aucune prestation,
+`ProvidersPreview` idem). Sur votre environnement, avec vos données, elles
+doivent apparaître — c'est le premier point à confirmer à la mise en ligne.
