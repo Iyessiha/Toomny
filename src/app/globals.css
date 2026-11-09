@@ -631,8 +631,6 @@ html.lenis, html.lenis body { height: auto; }
   border: 1px solid var(--edge);
   box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 60px -20px var(--glow);
 }
-/* Épaisseur physique : une plaque plus sombre derrière la face. */
-.tier-card::before {
 /* ── Pricing 3D cards ────────────────────────────────────────────────────── */
 /* Pricing staircase: four 3D plates, one colour per level, rising toward the viewer.
    Each plate carries its own dark palette, so it reads the same in light and dark themes. */

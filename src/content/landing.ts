@@ -147,7 +147,6 @@ const fr = {
           href: "/auth?role=provider",
         },
       ],
-      levelWord: "Niveau",
       tiers: [
         { step: "Départ", tagline: "Recevez vos premiers clients gratuitement", feeLine: "Commission Toomny : 10 %. Sur 100 000 FCFA, vous touchez 89 100 FCFA après le versement de 1 %." },
         { step: "Croissance", tagline: "Publiez davantage de services pour être vu", feeLine: "Commission Toomny : 8 %. Sur 100 000 FCFA, vous touchez 91 080 FCFA après le versement de 1 %." },
@@ -370,7 +369,6 @@ const en: LandingContent = {
           href: "/auth?role=provider",
         },
       ],
-      levelWord: "Level",
       tiers: [
         { step: "Start", tagline: "Get your first clients for free", feeLine: "Toomny commission: 10%. On 100,000 FCFA you receive 89,100 FCFA after the 1% payout fee." },
         { step: "Growth", tagline: "Publish more services to be seen more", feeLine: "Toomny commission: 8%. On 100,000 FCFA you receive 91,080 FCFA after the 1% payout fee." },
