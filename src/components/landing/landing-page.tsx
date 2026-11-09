@@ -6,7 +6,6 @@ import { FeaturedServices } from "./featured-services";
 import { HowItWorks } from "./how-it-works";
 import { BoostSection } from "./boost-section";
 import { MarketingPopup } from "./marketing-popup";
-import { Pricing } from "./pricing";
 import { Security } from "./security";
 import { ProvidersPreview } from "./providers-preview";
 import { Faq } from "./faq";
@@ -27,7 +26,6 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <ProvidersPreview locale={locale} />
         <HowItWorks locale={locale} />
         <Security locale={locale} />
-        <Pricing locale={locale} />
         <BoostSection locale={locale} />
         <Faq locale={locale} />
         <FinalCta locale={locale} />
