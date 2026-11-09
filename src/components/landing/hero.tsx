@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
-import { HeroVisual } from "./hero-visual";
+import { useState } from "react";
 import { getLanding } from "@/content/landing";
 import type { Locale } from "@/i18n/dictionaries";
 
@@ -20,38 +19,6 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
   const t = getLanding(locale).hero;
   const [key, setKey] = useState<Key>("client");
   const a = t.audiences[key];
-  const sceneRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // 3D tilt sur la carte hero — desktop seulement, réduit si prefers-reduced-motion.
-  useEffect(() => {
-    const scene = sceneRef.current;
-    const card = cardRef.current;
-    if (!scene || !card) return;
-    if (!matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)").matches) return;
-
-    let raf = 0;
-    const onMove = (e: MouseEvent) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const b = scene.getBoundingClientRect();
-        const rx = ((e.clientY - b.top - b.height / 2) / b.height) * -12;
-        const ry = ((e.clientX - b.left - b.width / 2) / b.width) * 12;
-        card.style.transform = `perspective(1200px) rotateX(${rx}deg) rotateY(${ry}deg) scale3d(1.02,1.02,1.02)`;
-      });
-    };
-    const onLeave = () => {
-      card.style.transform = "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)";
-    };
-
-    scene.addEventListener("mousemove", onMove);
-    scene.addEventListener("mouseleave", onLeave);
-    return () => {
-      scene.removeEventListener("mousemove", onMove);
-      scene.removeEventListener("mouseleave", onLeave);
-      cancelAnimationFrame(raf);
-    };
-  }, []);
 
   return (
     <section className="hero-video relative overflow-hidden">
@@ -87,7 +54,7 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
         }}
       />
 
-      <div className="relative mx-auto grid max-w-6xl gap-16 px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
+      <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20">
         {/* Contenu toujours sur fond sombre (vidéo + overlay) → text-white */}
         <div className="text-white">
           {/* Sélecteur d'audience — glassmorphisme */}
@@ -205,20 +172,6 @@ export function Hero({ locale = "fr" }: { locale?: Locale }) {
           </div>
         </div>
 
-        {/* Colonne droite : visuel 3D */}
-        <div
-          ref={sceneRef}
-          className="hidden lg:flex lg:items-start lg:justify-center"
-          data-reveal
-          style={{ transitionDelay: "120ms" }}
-        >
-          <div
-            ref={cardRef}
-            style={{ transition: "transform 0.08s linear", willChange: "transform" }}
-          >
-            <HeroVisual locale={locale} mode={key} />
-          </div>
-        </div>
       </div>
     </section>
   );

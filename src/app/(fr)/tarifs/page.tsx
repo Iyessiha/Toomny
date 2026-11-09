@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { Pricing } from "@/components/landing/pricing";
+import { BoostSection } from "@/components/landing/boost-section";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
@@ -46,6 +47,9 @@ export default async function PricingPage() {
       <main>
         {/* Tarifs complets : bandeau client, paliers, prestataires, commission, comparatif */}
         <Pricing locale={locale} />
+
+        {/* Boost : options de visibilité pour les prestataires */}
+        <BoostSection locale={locale} />
 
         {/* FAQ excerpt */}
         <section className="border-t border-[var(--border)] bg-[var(--surface)] py-16">
