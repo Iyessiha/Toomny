@@ -45,21 +45,7 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
         .slide-in-3 { animation: slideInRight 0.5s ease both 0.46s; }
       `}</style>
 
-      {/* Badge flottant haut-droite : identité vérifiée */}
-      <div className="float-b absolute -right-4 -top-3 z-20 hidden items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-3.5 py-2.5 shadow-[var(--shadow-lg)] sm:flex">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-            <path d="m9 12 2 2 4-4" />
-          </svg>
-        </div>
-        <div>
-          <p className="text-xs font-bold text-green-700">{t.verified}</p>
-          <p className="text-[10px] text-[var(--subtle)]">KYC approuvé</p>
-        </div>
-      </div>
 
-      {/* Carte service principale */}
       <div className="slide-in-1 w-[300px] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--background)] shadow-[var(--shadow-xl)] sm:w-[340px]">
         <div className="relative flex h-36 items-end p-4">
           <Image src="/images/hero-provider.jpg" alt="" fill className="object-cover object-top" priority sizes="340px" />
@@ -93,16 +79,11 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
             <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border-2 border-[var(--background)]">
               <Image src="/images/hero-provider.jpg" alt="Awa Konaté" fill className="object-cover object-top" sizes="40px" />
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--background)] bg-green-500 text-[8px] text-white">✓</span>
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="truncate text-sm font-semibold">Awa Konaté</p>
               <span className="text-[11px]">🇨🇮</span>
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <Stars n={5} />
-              <span className="text-[11px] text-[var(--subtle)]">4.9 · 47 avis</span>
             </div>
           </div>
           <div className="shrink-0 text-right">
@@ -147,10 +128,6 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600 text-sm font-bold">DK</div>
         <div className="min-w-0">
           <p className="truncate text-xs font-semibold">Dev Kouyaté</p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <Stars n={5} />
-            <span className="text-[10px] text-[var(--subtle)]">4.8</span>
-          </div>
         </div>
         <p className="shrink-0 text-[11px] font-bold text-[var(--brand-text-1)]">75k</p>
       </div>
@@ -159,10 +136,6 @@ function ClientVisual({ t }: { t: ReturnType<typeof getLanding>["visual"] }) {
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 text-sm font-bold">MB</div>
         <div className="min-w-0">
           <p className="truncate text-xs font-semibold">Marie Bamba</p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <Stars n={4} />
-            <span className="text-[10px] text-[var(--subtle)]">4.6</span>
-          </div>
         </div>
         <p className="shrink-0 text-[11px] font-bold text-[var(--brand-text-1)]">60k</p>
       </div>
@@ -366,8 +339,21 @@ export function HeroVisual({ locale = "fr", mode = "client" }: { locale?: Locale
   const t = getLanding(locale).visual;
 
   if (mode === "provider") {
-    return <ProviderVisual locale={locale} />;
+    return (
+      <div>
+        <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-widest text-[var(--subtle)]">
+          {locale === "en" ? "Illustrative example" : "Exemple illustratif"}
+        </p>
+        <ProviderVisual locale={locale} />
+      </div>
+    );
   }
 
-  return <ClientVisual t={t} />;
+  const caption = locale === "en" ? "Illustrative example" : "Exemple illustratif";
+  return (
+    <div>
+      <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-widest text-[var(--subtle)]">{caption}</p>
+      <ClientVisual t={t} />
+    </div>
+  );
 }
