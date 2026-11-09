@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
-import { PricingScene } from "@/components/pricing/pricing-scene";
+import { Pricing } from "@/components/landing/pricing";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
@@ -16,7 +16,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PricingPage() {
   const locale = await visitorLocale();
   const t = getLanding(locale);
-  const p = t.pricing;
   const faqItems = t.faq.items.filter((_, i) => i === 3 || i === 0 || i === 1 || i === 2);
 
   const highlights =
@@ -45,61 +44,8 @@ export default async function PricingPage() {
       <BreadcrumbJsonLd items={breadcrumb} />
       <Header locale={locale} />
       <main>
-        {/* Hero */}
-        <section className="border-b border-[var(--border)] bg-[var(--surface)] py-16 text-center">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-text-2)]">
-              {p.eyebrow}
-            </p>
-            <h1 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
-              {p.title}
-            </h1>
-            <p className="mt-4 text-base leading-relaxed text-[var(--subtle)]">{p.lead}</p>
-          </div>
-        </section>
-
-        {/* Pricing Plans */}
-        <PricingScene plans={p.plans} locale={locale} />
-
-        {/* Comparison table */}
-        <section className="mx-auto max-w-5xl px-4 pb-16 sm:px-6">
-          <div className="overflow-x-auto rounded-2xl border border-[var(--border)]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-                  <th className="px-5 py-4 text-left font-semibold">&nbsp;</th>
-                  <th className="px-5 py-4 text-center font-semibold text-[var(--subtle)]">Fiverr</th>
-                  <th className="px-5 py-4 text-center font-semibold text-[var(--subtle)]">ComeUp</th>
-                  <th className="px-5 py-4 text-center font-bold text-[var(--brand-text-1)]">
-                    Toomny
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {p.rows.map((row, i) => (
-                  <tr
-                    key={row.label}
-                    className={`border-b border-[var(--border)] last:border-0 ${i % 2 === 0 ? "" : "bg-[var(--surface)]"}`}
-                  >
-                    <td className="px-5 py-4 font-medium">{row.label}</td>
-                    <td className="px-5 py-4 text-center text-[var(--subtle)]">{row.fiverr}</td>
-                    <td className="px-5 py-4 text-center text-[var(--subtle)]">{row.upwork}</td>
-                    <td className="px-5 py-4 text-center font-semibold text-[var(--brand-text-1)]">
-                      {row.toomny}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-3 text-xs text-[var(--subtle)]">
-            {p.sourcesPrefix}
-            <span className="italic">{p.sourceA}</span>
-            {p.sourcesMid}
-            <span className="italic">{p.sourceB}</span>
-            {p.sourcesSuffix}
-          </p>
-        </section>
+        {/* Tarifs complets : bandeau client, paliers, prestataires, commission, comparatif */}
+        <Pricing locale={locale} />
 
         {/* FAQ excerpt */}
         <section className="border-t border-[var(--border)] bg-[var(--surface)] py-16">
