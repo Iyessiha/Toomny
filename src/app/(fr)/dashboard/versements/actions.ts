@@ -21,6 +21,7 @@ export async function savePayoutSettings(formData: FormData) {
   if (!/^\+?[0-9]{8,15}$/.test(msisdn)) return { error: t.number };
 
   const supabase = await createClient();
+  const { data: updated, error } = await supabase
   const { data: current } = await supabase
     .from("provider_profiles")
     .select("payout_channel, payout_msisdn")
@@ -31,8 +32,25 @@ export async function savePayoutSettings(formData: FormData) {
   const { error } = await supabase
     .from("provider_profiles")
     .update({ payout_channel: channel, payout_msisdn: msisdn })
-    .eq("profile_id", user.id);
-  if (error) return { error: t.save };
+    .eq("profile_id", user.id)
+    .select("profile_id");
+  if (error) {
+    console.error("savePayoutSettings:", error.message);
+    return { error: t.save };
+  }
+
+  // Une mise à jour qui ne touche aucune ligne ne signale pas d'erreur : sans fiche
+  // (compte ancien), rien n'était enregistré. On crée la fiche, pour cet utilisateur seulement.
+  if (!updated?.length) {
+    const db = createAdminClient();
+    const { error: insertError } = await db
+      .from("provider_profiles")
+      .insert({ profile_id: user.id, payout_channel: channel, payout_msisdn: msisdn });
+    if (insertError) {
+      console.error("savePayoutSettings (insert):", insertError.message);
+      return { error: t.save };
+    }
+  }
 
   // Nouveau numéro : il doit être revérifié par l'admin. La colonne n'est pas
   // accessible au client (grant), on passe par le client admin, clé du compte.
