@@ -21,7 +21,6 @@ export async function savePayoutSettings(formData: FormData) {
   if (!/^\+?[0-9]{8,15}$/.test(msisdn)) return { error: t.number };
 
   const supabase = await createClient();
-  const { data: updated, error } = await supabase
   const { data: current } = await supabase
     .from("provider_profiles")
     .select("payout_channel, payout_msisdn")
@@ -29,7 +28,7 @@ export async function savePayoutSettings(formData: FormData) {
     .maybeSingle();
   const changed = current?.payout_channel !== channel || current?.payout_msisdn !== msisdn;
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("provider_profiles")
     .update({ payout_channel: channel, payout_msisdn: msisdn })
     .eq("profile_id", user.id)

@@ -46,25 +46,6 @@ export async function saveProviderProfile(formData: FormData) {
   if (!isValidHttpsUrl(twitterUrl)) return { error: e.twitterUrl };
 
   const supabase = await createClient();
-  const { error } = await supabase.from("provider_profiles").upsert(
-    {
-      profile_id: user.id,
-      headline: headline || null,
-      bio: bio || null,
-      city: city || null,
-      content_locale: locale,
-      avatar_url: avatarUrl,
-      skills: skills || null,
-      spoken_languages: spokenLanguages || null,
-      website_url: websiteUrl || null,
-      linkedin_url: linkedinUrl || null,
-      twitter_url: twitterUrl || null,
-    },
-    { onConflict: "profile_id" },
-  );
-  if (error) {
-    console.error("saveProviderProfile:", error.message);
-    return { error: e.save };
   const fields = {
     headline: headline || null,
     bio: bio || null,

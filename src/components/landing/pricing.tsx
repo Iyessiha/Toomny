@@ -1,5 +1,3 @@
-import { getLanding } from "@/content/landing";
-import type { Locale } from "@/i18n/dictionaries";
 import { TierStaircase } from "./tier-staircase";
 import Link from "next/link";
 import type { CSSProperties } from "react";
@@ -162,8 +160,6 @@ export function Pricing({ locale = "fr" }: { locale?: Locale }) {
                   <th className="px-6 py-4 font-medium text-[var(--subtle)]"></th>
                   <th className="px-6 py-4 font-display text-sm font-bold">Fiverr</th>
                   <th className="px-6 py-4 font-display text-sm font-bold">Upwork</th>
-                  <th className="bg-[var(--color-brand-500)] px-6 py-4 font-display text-sm font-bold text-white">
-                  <th className="px-6 py-4 font-display text-sm font-bold">ComeUp</th>
                   <th className="btn-fill px-6 py-4 font-display text-sm font-bold text-white">
                     Toomny
                   </th>
