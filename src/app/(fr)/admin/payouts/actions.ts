@@ -233,3 +233,44 @@ export async function requeuePayout(payoutId: string): Promise<Result> {
   revalidate();
   return { success: true };
 }
+
+/**
+ * Vérifier (ou retirer la vérification de) le numéro de versement d'un prestataire.
+ * Il n'existe pas d'envoi de code SMS : l'admin contrôle le numéro (identité du
+ * titulaire du compte mobile money) puis le marque vérifié. Écrit au journal.
+ */
+export async function setProviderPayoutVerified(providerId: string, verified: boolean): Promise<Result> {
+  const admin = await requireAdmin();
+  const fr = admin.preferredLocale !== "en";
+  const msg = (f: string, en: string) => (fr ? f : en);
+  if (!UUID_RE.test(providerId)) return { error: msg("Identifiant invalide.", "Invalid identifier.") };
+
+  const db = createAdminClient();
+  const { data: profile } = await db
+    .from("provider_profiles")
+    .select("profile_id, payout_msisdn")
+    .eq("profile_id", providerId)
+    .maybeSingle();
+  if (!profile) return { error: msg("Fiche prestataire introuvable.", "Provider profile not found.") };
+  if (verified && !profile.payout_msisdn) {
+    return { error: msg("Aucun numéro de versement à vérifier.", "No payout number to verify.") };
+  }
+
+  const { error } = await db
+    .from("provider_profiles")
+    .update({ payout_verified_at: verified ? new Date().toISOString() : null })
+    .eq("profile_id", providerId);
+  if (error) return { error: msg("Mise à jour impossible.", "Update failed.") };
+
+  await recordAdminAction(db, {
+    actorId: admin.id,
+    action: verified ? "payout_number.verify" : "payout_number.unverify",
+    targetType: "provider",
+    targetId: providerId,
+    details: { msisdn: profile.payout_msisdn },
+  });
+
+  revalidatePath("/admin/payouts");
+  revalidatePath("/dashboard/versements");
+  return { success: true };
+}

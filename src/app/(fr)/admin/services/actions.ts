@@ -1,13 +1,25 @@
 "use server";
 
+import { stripTitlePrefix, withTitlePrefix } from "@/lib/service-title";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordAdminAction } from "@/lib/admin-audit";
 import { notify } from "@/lib/notifications";
-import { sendServiceRejectedEmail, sendServicePublishedEmail } from "@/lib/email";
-import { isRejectionReason } from "@/i18n/listing-guide";
+import { sendServicePublishedEmail } from "@/lib/email";
+import { isRejectionReason, type RejectionReason } from "@/i18n/listing-guide";
+import { reviewServiceText } from "@/lib/ai/service-review";
+import {
+  deterministicPoints,
+  mergePoints,
+  parseAiPoints,
+  pointsAsNotes,
+  reasonMessage,
+  reviewVerdict,
+  type ReviewPoint,
+  type ReviewVerdict,
+} from "@/lib/service-review";
 
 const MODERATION_STATUSES = ["active", "paused", "removed", "draft"] as const;
 type ModerationStatus = (typeof MODERATION_STATUSES)[number];
@@ -103,7 +115,8 @@ export async function editService(formData: FormData): Promise<{ error?: string 
   const id = String(formData.get("serviceId") ?? "");
   if (!UUID_RE.test(id)) return { error: "invalid id" };
 
-  const title = String(formData.get("title") ?? "").trim();
+  const titleRest = stripTitlePrefix(String(formData.get("title") ?? ""));
+  const title = titleRest ? withTitlePrefix(titleRest) : "";
   const description = String(formData.get("description") ?? "").trim();
   const priceRaw = Number(formData.get("price_minor"));
   const deliveryRaw = Number(formData.get("delivery_days"));
@@ -152,34 +165,29 @@ export async function rejectService(formData: FormData): Promise<void> {
   const db = createAdminClient();
   const { data: service } = await db
     .from("services")
-    .select("provider_id, title, status, provider:profiles!services_provider_id_profiles_id_fk(display_name, email, preferred_locale)")
+    .select("provider_id, title, status")
     .eq("id", id)
     .maybeSingle();
 
   if (!service || service.status !== "draft") redirect(`/admin/services/${id}?error=status`);
 
-  const provider = Array.isArray(service.provider) ? service.provider[0] : service.provider;
-  if (!provider?.email) redirect(`/admin/services/${id}?error=email`);
-
-  const locale = provider.preferred_locale === "en" ? "en" : "fr";
-  const firstName = (provider.display_name ?? "").trim().split(" ")[0];
-
+  // Notification dans l'application uniquement : les points sont sur la prestation.
   await notify(db, {
     recipientId: service.provider_id,
-    type: "service_rejected",
+    type: "service_changes_requested",
     params: { service: service.title ?? undefined },
     link: "/dashboard/prestations",
     sendEmail: false,
   });
 
-  await sendServiceRejectedEmail({
-    to: provider.email,
-    firstName,
-    serviceTitle: service.title,
-    reasons,
-    message,
-    locale,
-  });
+  // Points enregistrés sur la prestation : le prestataire les retrouve pour corriger.
+  const notes = pointsAsNotes([
+    ...reasons.map((r) => ({ reason: r as RejectionReason, message: reasonMessage(r as RejectionReason) })),
+    ...(message ? [{ reason: "other" as RejectionReason, message }] : []),
+  ]);
+  await db.from("services").update({ review_notes: notes, review_requested_at: null }).eq("id", id);
+
+
 
   await recordAdminAction(db, {
     actorId: admin.id,
@@ -192,4 +200,55 @@ export async function rejectService(formData: FormData): Promise<void> {
   revalidatePath("/admin/services");
   revalidatePath(`/admin/services/${id}`);
   redirect(`/admin/services/${id}?refused=1`);
+}
+
+/**
+ * Analyse une prestation soumise : contrôles objectifs (couverture, description,
+ * coordonnées, titre, prix, catégorie) fusionnés avec la lecture de l'IA. Rien n'est
+ * modifié : l'équipe décide de valider ou de refuser avec ces points.
+ */
+export async function analyzeServiceListing(
+  serviceId: string,
+): Promise<ReviewVerdict | { error: string }> {
+  await requireAdmin();
+  if (!UUID_RE.test(serviceId)) return { error: "Prestation introuvable." };
+
+  const db = createAdminClient();
+  const { data: service } = await db
+    .from("services")
+    .select("title, description, price_minor, delivery_days, category_id, cover_url, gallery_urls, provider_id")
+    .eq("id", serviceId)
+    .maybeSingle();
+  if (!service) return { error: "Prestation introuvable." };
+
+  const [{ data: category }, { count: packagesCount }, { data: provider }] = await Promise.all([
+    service.category_id
+      ? db.from("categories").select("name_fr, name_en").eq("id", service.category_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    db.from("service_packages").select("id", { count: "exact", head: true }).eq("service_id", serviceId),
+    db.from("profiles").select("preferred_locale").eq("id", service.provider_id).maybeSingle(),
+  ]);
+  const locale = provider?.preferred_locale === "en" ? "en" : "fr";
+
+  const facts = {
+    title: service.title ?? "",
+    description: service.description ?? "",
+    priceMinor: Number(service.price_minor),
+    deliveryDays: Number(service.delivery_days),
+    categoryId: service.category_id ?? null,
+    coverUrl: service.cover_url ?? null,
+    galleryUrls: (service.gallery_urls ?? []) as string[],
+    packagesCount: packagesCount ?? 0,
+  };
+  const deterministic = deterministicPoints(facts);
+
+  const ai = await reviewServiceText({
+    ...facts,
+    categoryName: category ? (locale === "en" ? category.name_en : category.name_fr) : null,
+    locale,
+  });
+  if ("error" in ai) return { error: ai.error };
+
+  const points: ReviewPoint[] = mergePoints(deterministic, parseAiPoints(ai));
+  return reviewVerdict(points);
 }

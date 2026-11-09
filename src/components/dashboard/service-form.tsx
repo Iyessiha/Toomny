@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useRef, useState, type FormEvent, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -28,7 +29,7 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)]";
 
 const copy: Record<Locale, { removePhoto: string }> = {
   fr: { removePhoto: "Supprimer" },
@@ -230,7 +231,7 @@ export function ServiceForm({
             )}
           </div>
         ) : (
-          <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]">
+          <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
             </svg>
@@ -271,7 +272,7 @@ export function ServiceForm({
             </div>
           ))}
           {galleryUrls.length < 4 && (
-            <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] ${galleryUploading ? "pointer-events-none opacity-50" : ""}`}>
+            <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)] ${galleryUploading ? "pointer-events-none opacity-50" : ""}`}>
               {galleryUploading ? (
                 <span className="text-[10px] font-semibold">{t.form.galleryUploading}</span>
               ) : (
@@ -298,8 +299,7 @@ export function ServiceForm({
 
       {/* Titre */}
       <div>
-        <label htmlFor="title" className="text-sm font-medium">{t.form.title}</label>
-        <input id="title" name="title" required maxLength={120} placeholder={t.form.titlePlaceholder} className={inputClass} />
+        <TitleField id="title" label={t.form.title} placeholder={t.form.titlePlaceholder} inputClassName={inputClass} />
       </div>
 
       {/* Catégorie */}
@@ -348,7 +348,7 @@ export function ServiceForm({
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-700)]"
+              className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--brand-text-2)]"
             >
               {tag}
               <button
@@ -480,12 +480,12 @@ export function ServiceForm({
       </div>
 
       {error && <p role="alert" className="notice notice-danger">{error}</p>}
-      {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{t.draftSaved}</p>}
+      {done && <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{t.draftSaved}</p>}
 
       <button
         type="submit"
         disabled={pending || uploading}
-        className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        className="w-full rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
       >
         {pending ? t.creating : t.saveDraft}
       </button>

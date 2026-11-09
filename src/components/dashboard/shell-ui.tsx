@@ -5,7 +5,15 @@ import Link from "next/link";
 // de code serveur (next/headers, supabase/server…) : il est compilé aussi
 // pour le navigateur.
 
-export type NavItem = { href: string; label: string; current?: boolean };
+export type NavItem = {
+  href: string;
+  label: string;
+  current?: boolean;
+  /** Badge fixe (ex. compteur passé par la page). */
+  badge?: number;
+  /** Clé d'un compteur fourni par le layout du tableau de bord (voir nav-badges). */
+  badgeKey?: string;
+};
 export type NavSection = { title: string; items: NavItem[] };
 
 export function EmptyState({
@@ -21,7 +29,7 @@ export function EmptyState({
     <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background)] px-6 py-14 text-center">
       <span
         aria-hidden
-        className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--color-brand-600)]"
+        className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface)] text-[var(--brand-text-1)]"
       >
         <svg className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
           <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2H3V4z" />

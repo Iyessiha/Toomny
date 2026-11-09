@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Aperçus en développement : le serveur est ouvert dans une iframe servie
+  // depuis le bac à sable Arena (*.e2b.app), donc une origine différente de
+  // localhost. Sans cette liste, Next.js refuse les ressources de développement
+  // et les scripts d'hydratation ne se chargent pas. Sans effet en production.
+  allowedDevOrigins: ["*.e2b.app", "**.e2b.app"],
   // Mobile-first et réseau lent : on garde les images strictement optimisées.
   images: {
     formats: ["image/avif", "image/webp"],
@@ -29,16 +34,14 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    // En développement, les aperçus sont affichés dans une iframe (bac à sable
-    // distant) : on n'y interdit pas l'encadrement, sinon l'aperçu reste blanc.
-    // La production garde le refus, ici et dans la CSP (voir src/proxy.ts).
-    const devFrameAncestors = process.env.NODE_ENV !== "production";
     return [
       {
         source: "/:path*",
         headers: [
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-          ...(devFrameAncestors ? [] : [{ key: "X-Frame-Options", value: "DENY" }]),
+          // Note : X-Frame-Options n'est pas ici. Cette liste est évaluée au
+          // build, donc figée ; le refus d'encadrement est décidé par requête
+          // dans src/proxy.ts (en-tête + `frame-ancestors` de la CSP).
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },

@@ -265,20 +265,6 @@ html.lenis, html.lenis body { height: auto; }
 }
 .btn-landing-primary:active { transform: scale(0.97); }
 
-/* Animation pour le point "en ligne" */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.online-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.7);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
 
 /* Variables ombre premium. */
 :root {
@@ -647,6 +633,40 @@ html.lenis, html.lenis body { height: auto; }
 }
 /* Épaisseur physique : une plaque plus sombre derrière la face. */
 .tier-card::before {
+/* ── Pricing 3D cards ────────────────────────────────────────────────────── */
+/* Pricing staircase: four 3D plates, one colour per level, rising toward the viewer.
+   Each plate carries its own dark palette, so it reads the same in light and dark themes. */
+.tier-scene { perspective: 1600px; perspective-origin: 50% 20%; transform-style: preserve-3d; }
+.tier-slot {
+  transform-style: preserve-3d;
+  transform: translate3d(0, calc(var(--i) * -30px), calc(var(--i) * 70px));
+  animation: tier-climb 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 0.14s + 0.15s);
+}
+@keyframes tier-climb {
+  from { opacity: 0; transform: translate3d(0, 140px, -320px); }
+  to { opacity: 1; transform: translate3d(0, calc(var(--i) * -30px), calc(var(--i) * 70px)); }
+}
+@keyframes tier-rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+.tier-plate {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-radius: 22px;
+  padding: 28px 24px 24px;
+  color: #e5ebf5;
+  background: linear-gradient(170deg, var(--plate-top) 0%, var(--plate-bottom) 75%);
+  border: 1px solid var(--plate-edge);
+  box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.85), 0 0 60px -20px var(--plate-glow);
+}
+/* Physical thickness: a darker slab behind the face, visible when the plate tilts */
+.tier-plate::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -657,8 +677,57 @@ html.lenis, html.lenis body { height: auto; }
 }
 .tier-card:hover { box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95), 0 0 90px -10px var(--glow); }
 .tier-glare {
+  background: linear-gradient(180deg, var(--plate-depth-a), var(--plate-depth-b));
+  transform: translateZ(-18px);
+  filter: brightness(0.7);
+}
+.tier-plate:hover {
+  transform: rotateX(4deg) rotateY(-6deg) translateY(-6px);
+  box-shadow: 0 44px 80px -30px rgba(0, 0, 0, 0.95), 0 0 90px -10px var(--plate-glow);
+}
+.tier-layer { position: relative; display: flex; flex: 1; flex-direction: column; transform: translateZ(40px); }
+.tier-level { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--c1); }
+.tier-tag { margin: 10px 0 0; min-height: 3.9em; font-size: 14px; line-height: 1.45; color: #94a3b8; }
+.tier-fee { margin: 20px 0 0; padding-top: 14px; border-top: 1px dashed rgba(148, 163, 184, 0.2); font-size: 12px; line-height: 1.5; color: #64748b; }
+.tier-fee b { color: #94a3b8; font-weight: 600; }
+.tier-fee strong { color: #e2e8f0; font-variant-numeric: tabular-nums; }
+.tier-cta {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 12px 26px -10px var(--c2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tier-cta:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -10px var(--c2); }
+.tier-badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 4;
+  transform: translate(-50%, 0) translateZ(70px);
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: linear-gradient(90deg, var(--c1), var(--c2));
+  box-shadow: 0 8px 22px -6px var(--c2);
+}
+.tier-sheen {
   position: absolute;
   inset: 0;
+  z-index: 2;
   border-radius: inherit;
   pointer-events: none;
   z-index: 3;
@@ -777,3 +846,482 @@ html.lenis, html.lenis body { height: auto; }
   .tier-sheen { animation: none !important; }
 }
 @media (hover: none) { .tier-card { transform: none; } }
+/* Level 1: steel grey, the entry point */
+.tier-t1 { --c1: #cbd5e1; --c2: #475569; --ink: #0b1510; --plate-top: #12211a; --plate-bottom: #060f0b; --plate-edge: rgba(163, 219, 193, 0.28); --plate-glow: rgba(148, 163, 184, 0.12); --plate-depth-a: #3f4d46; --plate-depth-b: #12211a; }
+/* Level 2: emerald with a deep metallic finish, luxurious from the first paid plan */
+.tier-t2 { --c1: #6ee7b7; --c2: #059669; --ink: #052e21; --plate-top: #134e3a; --plate-bottom: #06150f; --plate-edge: rgba(110, 231, 183, 0.55); --plate-glow: rgba(52, 211, 153, 0.3); --plate-depth-a: #059669; --plate-depth-b: #064e3b; }
+.tier-t2 .tier-plate { box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.12), 0 30px 60px -28px rgba(0, 0, 0, 0.85), 0 0 60px -20px var(--plate-glow); }
+/* Level 3: sapphire-indigo, with a slow halo */
+.tier-t3 { --c1: #9ff2c2; --c2: #14a05a; --ink: #04110b; --plate-top: #0b3a25; --plate-bottom: #04150d; --plate-edge: rgba(139, 240, 182, 0.6); --plate-glow: rgba(51, 209, 122, 0.4); --plate-depth-a: #14a05a; --plate-depth-b: #062a18; }
+.tier-t3 .tier-plate { animation: tier-halo 3.2s ease-in-out infinite; }
+@keyframes tier-halo {
+  0%, 100% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 50px -18px var(--plate-glow); }
+  50% { box-shadow: 0 30px 60px -28px rgba(0, 0, 0, 0.9), 0 0 90px -8px var(--plate-glow); }
+}
+/* Level 4: gold on black, with a foil sheen */
+.tier-t4 { --c1: #fde68a; --c2: #b45309; --ink: #451a03; --plate-top: #2a1d05; --plate-bottom: #120c02; --plate-edge: rgba(251, 191, 36, 0.8); --plate-glow: rgba(251, 191, 36, 0.5); --plate-depth-a: #b45309; --plate-depth-b: #451a03; }
+.tier-t4 .tier-plate { box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.95), 0 0 120px -12px var(--plate-glow); }
+
+@media (max-width: 900px) {
+  .tier-slot { transform: none; animation-name: tier-rise; }
+  .tier-plate:hover { transform: none; }
+  .tier-layer { transform: none; }
+  .tier-plate::before { transform: translate(6px, 6px); }
+}
+@media (hover: none) {
+  .tier-plate:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tier-slot { animation: none; opacity: 1; }
+  .tier-t3 .tier-plate, .tier-sheen { animation: none; }
+  .tier-plate { transition: none; }
+}
+
+/* Entrée douce des blocs clés (suivi de commande, encouragements, alertes). */
+@keyframes toomny-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: toomny-rise 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
+  }
+}
+
+/* ===========================================================================
+   AURORA GLASS — identité appliquée à tout le SaaS.
+
+   La direction validée sur /design-glassy devient celle du produit entier.
+   Rien n'est repeint fichier par fichier : les espaces connectés, le
+   catalogue, les formulaires et les pages publiques lisent les mêmes jetons
+   (--background, --surface, --border, --foreground, --subtle, --tone-*,
+   .card, .btn-*, .input, .chip, .notice). On ne redéfinit donc que les
+   jetons et les primitives, et tout suit.
+
+   Deux règles tenues partout :
+   1. Le fond reste nocturne dans les deux thèmes. L'identité est sombre :
+      un SaaS à moitié clair ne serait plus la même marque.
+   2. Un seul `backdrop-filter` par surface. Pas de flou imbriqué, pour que
+      ça tienne sur un mobile d'entrée de gamme — c'est le parc réel.
+   =========================================================================== */
+
+/* ── 1. Jetons ─────────────────────────────────────────────────────────────── */
+
+:root {
+  color-scheme: dark;
+
+  /* Fond de page : la base presque noire de la proposition. */
+  --background: #04110b;
+  /* Creux de page (derrière les cartes) : un cran au-dessus, vert froid, et
+     légèrement translucide pour laisser respirer l'aurore de body::before. */
+  --surface: rgba(6, 24, 15, 0.72);
+  --surface-strong: #0a2417;
+
+  --foreground: #eaf4ef;
+  --subtle: #9cb5a8;
+
+  /* Les bordures sont du blanc translucide : elles se lisent sur le verre
+     comme sur le fond, sans jamais créer de trait gris. */
+  --border: rgba(255, 255, 255, 0.11);
+  --border-strong: rgba(255, 255, 255, 0.19);
+
+  /* La charte reste la charte : émeraude du logo, or de la charte. */
+  --accent: #9ff2c2;
+  --accent-soft: #8bf0b6;
+  --gold: #e0b566;
+  --gold-soft: #f4dca6;
+
+  /* Rampe « ink/line » de @theme, redéfinie pour le fond sombre. */
+  --color-ink: #eaf4ef;
+  --color-muted: #9cb5a8;
+  --color-line: rgba(255, 255, 255, 0.11);
+
+  /* Pastilles de statut : fonds teintés translucides, texte lumineux.
+     Elles se posent sur du verre sans perdre leur sens (succès, alerte…). */
+  --tone-success-bg: rgba(139, 240, 182, 0.12);
+  --tone-success-fg: #8bf0b6;
+  --tone-warning-bg: rgba(224, 181, 102, 0.14);
+  --tone-warning-fg: #e8c98c;
+  --tone-danger-bg: rgba(255, 138, 132, 0.13);
+  --tone-danger-fg: #ff9d97;
+  --tone-info-bg: rgba(120, 180, 255, 0.13);
+  --tone-info-fg: #9cc6ff;
+  --tone-neutral-bg: rgba(255, 255, 255, 0.07);
+  --tone-neutral-fg: #c3d3c9;
+  --tone-brand-bg: rgba(139, 240, 182, 0.14);
+  --tone-brand-fg: #9ff2c2;
+
+  /* Boutons d'engagement : le texte y est toujours clair ou très sombre,
+     donc lisible sur ces fonds pleins, y compris en plein soleil. */
+  --action-danger: #a02a1e;
+  --action-danger-hover: #b83325;
+  --action-success: #14a05a;
+  --action-success-hover: #0f8a4c;
+  --action-warning: #d29a38;
+  --action-warning-hover: #e0ac4e;
+
+  /* Ombres : sur fond noir, elles portent la profondeur. */
+  --shadow-sm: 0 2px 10px -4px rgba(0, 0, 0, 0.7);
+  --shadow-md: 0 10px 30px -14px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0 20px 50px -24px rgba(0, 0, 0, 0.9);
+  --shadow-xl: 0 36px 90px -34px rgba(0, 0, 0, 0.95);
+}
+
+/* Le SaaS est sombre par choix : on aligne le thème sombre système sur les
+   mêmes valeurs, pour qu'aucun media query ne vienne contredire la palette. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #04110b;
+    --surface: rgba(6, 24, 15, 0.72);
+    --surface-strong: #0a2417;
+    --foreground: #eaf4ef;
+    --subtle: #9cb5a8;
+    --border: rgba(255, 255, 255, 0.11);
+  }
+}
+
+/* ── 1 bis. Rampe « brand » relue pour un fond nocturne ──────────────────── */
+/* La rampe @theme est calibrée pour du blanc : 50/100 sont des fonds très
+   clairs, 600/700 les textes foncés. Sur du noir, ces deux familles
+   s'inversent. On garde donc les teintes pleines (500/600) telles quelles —
+   ce sont les fonds de boutons, avec du texte blanc dessus — et on
+   n'éclaircit que les extrémités de la rampe. */
+@theme {
+  /* Fonds teintés : voile translucide, pas un aplat laiteux. */
+  --color-brand-50: rgba(139, 240, 182, 0.08);
+  --color-brand-100: rgba(139, 240, 182, 0.15);
+  --color-brand-200: rgba(139, 240, 182, 0.26);
+  /* Bordures et accents : inchangés, ils se lisent déjà sur du sombre. */
+  --color-brand-300: #6cc39b;
+  --color-brand-400: #33a472;
+  /* Fonds pleins : le vert du logo, avec du texte blanc. */
+  --color-brand-500: #108043;
+  --color-brand-600: #0d6b38;
+  --color-brand-700: #0a552d;
+}
+
+:root {
+  /* Trois niveaux de texte d'accent, du plus discret au plus lumineux.
+     Les composants passent par ces jetons au lieu de la rampe de fond. */
+  --brand-text-1: #6fe0a5;
+  --brand-text-2: #9ff2c2;
+  --brand-text-3: #cdf8e0;
+}
+
+/* ── 2. Nappes d'aurore : elles vivent sous TOUTE l'application ───────────── */
+/* Fixes et derrière le contenu : les surfaces de verre ont ainsi quelque
+   chose à flouter, et l'identité se voit dès la première page du SaaS.
+   C'est une couche de fond, jamais au-dessus du texte. */
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 55% at 6% -8%, rgba(16, 128, 67, 0.55), transparent 62%),
+    radial-gradient(55% 45% at 102% 2%, rgba(210, 154, 56, 0.26), transparent 60%),
+    radial-gradient(70% 60% at 50% 118%, rgba(51, 164, 114, 0.30), transparent 62%),
+    var(--background);
+}
+
+/* ── 3. Surfaces ───────────────────────────────────────────────────────────── */
+
+/* .card : la surface de verre du SaaS (listes, résumés, formulaires). */
+.card {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.075),
+    rgba(255, 255, 255, 0.03) 55%,
+    rgba(255, 255, 255, 0.02)
+  );
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 18px 40px -30px rgba(0, 0, 0, 0.9);
+}
+
+/* Variante opaque : pour un panneau posé par-dessus du contenu (menus,
+   modales, feuilles d'impression) où le flou nuirait à la lecture. */
+.card-solid {
+  background: rgba(8, 24, 16, 0.92);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+}
+
+/* Bandeau d'en-tête des espaces connectés : aurore + grille, comme le hero. */
+.hero-band {
+  background:
+    radial-gradient(120% 170% at 88% -30%, rgba(210, 154, 56, 0.30), transparent 55%),
+    radial-gradient(110% 150% at 8% 130%, rgba(51, 164, 114, 0.34), transparent 60%),
+    linear-gradient(155deg, #0b3a25 0%, #062a18 55%, #04180f 100%);
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── 4. Boutons ────────────────────────────────────────────────────────────── */
+
+/* L'appel à l'action principal : la pastille menthe→émeraude de la proposition. */
+.btn-primary {
+  background: linear-gradient(135deg, #8bf0b6 0%, #33d17a 55%, #14a05a 100%);
+  color: #04110b;
+  font-weight: 700;
+  box-shadow: 0 8px 24px -12px rgba(51, 209, 122, 0.75);
+  border: 0;
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #a5f7c8 0%, #3fe089 55%, #1ab369 100%);
+  box-shadow: 0 12px 30px -12px rgba(51, 209, 122, 0.9);
+}
+
+/* Action secondaire : verre, pas de gris. */
+.btn-secondary {
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--foreground);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(163, 219, 193, 0.45);
+}
+
+.btn-ghost {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--subtle);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--foreground);
+}
+
+/* Or : même géométrie, la teinte de la charte. */
+.btn-gold {
+  background: linear-gradient(135deg, #f4dca6, #e0b566 60%, #d29a38);
+  color: #2a1d05;
+}
+.btn-gold:hover { background: linear-gradient(135deg, #f9e8bd, #e8c07a 60%, #dda846); }
+
+/* ── 5. Champs et puces ───────────────────────────────────────────────────── */
+
+.input {
+  border: 1px solid var(--border);
+  /* Creusé, pas surélevé : un champ se lit comme un trou dans le verre. */
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--foreground);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input:hover { border-color: var(--border-strong); }
+.input:focus {
+  border-color: rgba(139, 240, 182, 0.55);
+  background: rgba(0, 0, 0, 0.36);
+  box-shadow: 0 0 0 3px rgba(139, 240, 182, 0.14);
+}
+.input::placeholder { color: rgba(156, 181, 168, 0.75); }
+
+.chip {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--subtle);
+}
+.chip:hover {
+  border-color: rgba(163, 219, 193, 0.45);
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--foreground);
+}
+.chip-active,
+.chip-active:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #8bf0b6, #33d17a);
+  color: #04110b;
+}
+.chip-count { background: rgba(255, 255, 255, 0.08); color: var(--subtle); }
+.chip-active .chip-count { background: rgba(4, 17, 11, 0.22); color: #04110b; }
+
+/* ── 6. Bandeaux d'information ────────────────────────────────────────────── */
+
+.notice {
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.notice-warning { background: var(--tone-warning-bg); color: var(--tone-warning-fg); border-color: rgba(224, 181, 102, 0.28); }
+.notice-danger  { background: var(--tone-danger-bg);  color: var(--tone-danger-fg);  border-color: rgba(255, 138, 132, 0.28); }
+.notice-success { background: var(--tone-success-bg); color: var(--tone-success-fg); border-color: rgba(139, 240, 182, 0.26); }
+.notice-info    { background: var(--tone-info-bg);    color: var(--tone-info-fg);    border-color: rgba(120, 180, 255, 0.26); }
+
+/* ── 7. Détails ───────────────────────────────────────────────────────────── */
+
+/* Le focus doit se voir sur du verre sombre : émeraude clair, jamais le
+   vert 500 de la charte, trop sourd ici. */
+:focus-visible {
+  outline: 2px solid rgba(139, 240, 182, 0.85);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: rgba(139, 240, 182, 0.28);
+  color: #f2fff8;
+}
+
+/* Texte en dégradé : la signature émeraude→or des titres. */
+.gradient-text {
+  background: linear-gradient(120deg, #9ff2c2 0%, #33d17a 42%, #e0b566 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Panneau de verre historique (en-têtes publics) : aligné sur le nouveau verre. */
+.glass-panel {
+  background: rgba(6, 18, 13, 0.72);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+/* Les deux boutons de la landing publique reprennent la pastille du produit,
+   pour qu'on ne quitte jamais la marque en passant du marketing au SaaS. */
+.btn-landing-primary {
+  background: linear-gradient(135deg, #8bf0b6 0%, #33d17a 55%, #14a05a 100%);
+  color: #04110b;
+  font-weight: 700;
+  box-shadow: 0 10px 30px -12px rgba(51, 209, 122, 0.7);
+}
+.btn-landing-primary:hover {
+  box-shadow: 0 16px 40px -14px rgba(51, 209, 122, 0.9);
+}
+
+/* Bandeau du hero vidéo : il porte déjà son propre fond sombre. */
+.hero-video .glass-panel {
+  background: rgba(4, 17, 11, 0.68);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ── 8. Zone « papier » ────────────────────────────────────────────────────── */
+/* Le reçu de commande doit rester un document clair, à l'écran comme à
+   l'impression. Plutôt que de le repeindre, on rétablit ici les jetons de la
+   charte claire : tout ce qui est écrit à l'intérieur redevient lisible sur
+   blanc, y compris les accents (qui sont clairs ailleurs pour le fond noir). */
+.paper-sheet {
+  color-scheme: light;
+  --background: #ffffff;
+  --surface: #f6faf8;
+  --surface-strong: #ecf7f1;
+  --foreground: #0a1710;
+  --subtle: #55685e;
+  --border: #e2eae5;
+  --brand-text-1: #0a552d;
+  --brand-text-2: #0d6b38;
+  --brand-text-3: #084322;
+  background: #ffffff;
+  color: var(--foreground);
+}
+.paper-sheet .card { background: #ffffff; backdrop-filter: none; box-shadow: none; }
+
+/* ── 9. Marque du logo ────────────────────────────────────────────────────── */
+/* Le fichier de marque est un vert sombre dessiné pour un fond blanc : sur le
+   fond nocturne il disparaîtrait. On l'éclaircit sans le redessiner, pour que
+   les deux cercles et le trait restent exactement la marque déposée. */
+.logo-mark {
+  filter: brightness(2.9) saturate(1.05);
+}
+/* Sur une surface claire (reçu, impression), on rend sa teinte d'origine. */
+.paper-sheet .logo-mark {
+  filter: none;
+}
+
+/* ── 10. Remplissage des boutons ──────────────────────────────────────────── */
+/* Beaucoup de boutons du produit écrivent leur fond à la main
+   (`bg-[var(--color-brand-500)]`). Une classe unique leur donne le
+   dégradé menthe→émeraude de l'identité : le vert plat ne « clique » pas, le
+   dégradé si. Le texte passe en encre sombre, bien plus lisible dessus. */
+.btn-fill {
+  background: linear-gradient(135deg, #8bf0b6 0%, #33d17a 55%, #14a05a 100%);
+  color: #04110b;
+  box-shadow: 0 8px 22px -14px rgba(51, 209, 122, 0.9);
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-fill:hover {
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: 0 12px 28px -14px rgba(51, 209, 122, 1);
+}
+.btn-fill:disabled {
+  filter: grayscale(0.35) brightness(0.9);
+  box-shadow: none;
+}
+/* Le dégradé porte le contraste : le texte blanc des anciennes classes ne doit
+   plus gagner. On neutralise donc la couleur claire héritée. */
+.btn-fill.text-white {
+  color: #04110b;
+}
+
+/* ── 11. États d'alerte : les pastels clairs, relus pour le fond nocturne ─── */
+/* Les messages d'erreur, les files d'attente et les badges de plan utilisaient
+   les pastels de Tailwind (bg-red-50, bg-amber-50…), pensés pour du blanc.
+   Sur le fond nocturne, ce sont des taches opaques qui cassent l'ambiance et
+   noient leur propre texte. On garde le sens (rouge = erreur, ambre =
+   attention, vert = succès) mais en version translucide, avec le texte
+   éclairci pour rester lisible.
+
+   Ces règles vivent après l'import de Tailwind : à spécificité égale, elles
+   passent donc devant les utilitaires. Les états `hover:` sont réécrits
+   explicitement, car eux portent une spécificité supérieure. */
+
+/* Rouge / rose : erreur, refus, danger. */
+.bg-red-50, .bg-rose-50 { background-color: rgba(255, 138, 132, 0.12) !important; }
+.bg-red-50\/60, .bg-rose-50\/60 { background-color: rgba(255, 138, 132, 0.08) !important; }
+.bg-red-100, .bg-rose-100 { background-color: rgba(255, 138, 132, 0.18) !important; }
+.bg-red-950, .bg-red-950\/40, .bg-red-950\/20 { background-color: rgba(255, 138, 132, 0.14) !important; }
+.hover\:bg-red-50:hover { background-color: rgba(255, 138, 132, 0.18) !important; }
+.text-red-600, .text-red-700, .text-red-800, .text-red-900,
+.text-rose-700, .text-rose-900 { color: #ff9d97 !important; }
+.dark\:text-red-400:is(.dark *) { color: #ff9d97 !important; }
+.border-red-200, .border-red-300, .border-rose-300 { border-color: rgba(255, 138, 132, 0.35) !important; }
+.hover\:border-red-400:hover { border-color: rgba(255, 138, 132, 0.55) !important; }
+
+/* Ambre : attente, à valider, avertissement. */
+.bg-amber-50, .bg-amber-50\/50 { background-color: rgba(224, 181, 102, 0.12) !important; }
+.bg-amber-100 { background-color: rgba(224, 181, 102, 0.18) !important; }
+.hover\:bg-amber-100:hover { background-color: rgba(224, 181, 102, 0.22) !important; }
+.text-amber-800, .text-amber-900 { color: #e8c98c !important; }
+.border-amber-200, .border-amber-300 { border-color: rgba(224, 181, 102, 0.35) !important; }
+
+/* Vert : succès. */
+.bg-emerald-50, .bg-green-50 { background-color: rgba(139, 240, 182, 0.12) !important; }
+.bg-emerald-100, .bg-green-100 { background-color: rgba(139, 240, 182, 0.18) !important; }
+.text-emerald-700, .text-green-700, .text-emerald-800, .text-green-800 { color: #8bf0b6 !important; }
+.border-emerald-200, .border-green-200 { border-color: rgba(139, 240, 182, 0.32) !important; }
+/* Pastilles pleines de progression (force du mot de passe) : inchangées,
+   elles portent une information de couleur pure. */
+
+/* Violet : badges de plan. */
+.bg-violet-50 { background-color: rgba(167, 168, 255, 0.12) !important; }
+.bg-violet-100 { background-color: rgba(167, 168, 255, 0.18) !important; }
+.text-violet-700, .text-violet-900 { color: #b9baff !important; }
+
+/* Bleu : information. */
+.bg-blue-50, .bg-sky-50 { background-color: rgba(120, 180, 255, 0.12) !important; }
+.bg-blue-100 { background-color: rgba(120, 180, 255, 0.18) !important; }
+.text-blue-700, .text-blue-800, .text-sky-700 { color: #9cc6ff !important; }
+.dark\:text-blue-300:is(.dark *) { color: #9cc6ff !important; }

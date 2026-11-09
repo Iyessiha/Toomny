@@ -41,7 +41,7 @@ export function PayButton({ orderId, labels }: Props) {
       <button
         onClick={handlePay}
         disabled={loading}
-        className="w-full rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)] disabled:opacity-60"
+        className="w-full rounded-full btn-fill px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-brand-600)] disabled:opacity-60"
       >
         {loading ? labels.paying : labels.payNow}
       </button>

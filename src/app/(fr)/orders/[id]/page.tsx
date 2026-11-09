@@ -13,6 +13,13 @@ import { UUID_RE, availableActions } from "@/lib/orders";
 import { OrderControls } from "@/components/orders/order-controls";
 import { MessageSection } from "@/components/orders/message-section";
 import { PayButton } from "@/components/orders/pay-button";
+import { CheckPaymentButton } from "@/components/orders/check-payment-button";
+import { checkOrderPayment } from "../actions";
+import { ClientOrderSummary } from "@/components/orders/client-order-summary";
+import { getReceiptTexts } from "@/i18n/receipt";
+import { getAddonTexts } from "@/i18n/addons";
+import { formatReceiptDate } from "@/lib/receipt-format";
+import { resolveDisplayNames } from "@/lib/names";
 import { ReviewForm } from "@/components/orders/review-form";
 import { getMarketplaceTexts } from "@/i18n/marketplace";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
@@ -27,6 +34,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale).orders;
   const nav = getDashboardTexts(locale).nav;
+  const receiptText = getReceiptTexts(locale);
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
 
@@ -34,16 +42,26 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const supabase = await createClient();
   const { data: order } = await supabase
     .from("orders")
-    .select("id, reference, status, amount_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
+    .select("id, reference, status, amount_minor, collect_fee_minor, client_charge_minor, provider_net_minor, currency, requirements, due_at, client_id, provider_id, created_at, service:services(title)")
     .eq("id", id)
     .maybeSingle();
   if (!order) notFound();
+
+  const priceAmount = BigInt(order.amount_minor);
+  const feeMinor = order.collect_fee_minor != null ? BigInt(order.collect_fee_minor) : BigInt(0);
+  const totalMinor = order.client_charge_minor != null ? BigInt(order.client_charge_minor) : priceAmount + feeMinor;
+  const providerName = (await resolveDisplayNames([order.provider_id])).get(order.provider_id)?.short ?? "—";
 
   const { data: messages } = await supabase
     .from("messages")
     .select("id, body, sender_id, created_at")
     .eq("order_id", id)
     .order("created_at", { ascending: true });
+
+  const { data: orderAddons } = await supabase
+    .from("order_addons")
+    .select("title, price_minor, extra_delivery_days")
+    .eq("order_id", id);
 
   const isClient = order.client_id === user.id;
   const isProvider = order.provider_id === user.id;
@@ -69,6 +87,83 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     >
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <div className="space-y-8">
+          {isProvider && order.status === "funded" && (
+            <div className="animate-rise rounded-3xl border border-[var(--brand-text-2)] bg-gradient-to-br from-[var(--color-brand-600)] to-[var(--color-brand-500)] p-6 text-white shadow-lg">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-100">✓ {receiptText.steps.paid}</p>
+              <p className="mt-2 font-display text-xl font-bold">{receiptText.newOrderTitle}</p>
+              <p className="mt-1 text-sm text-emerald-50">{receiptText.newOrderBody}</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl bg-white/12 p-4">
+                  <p className="text-xs text-emerald-100">{receiptText.youReceive}</p>
+                  <p className="mt-1 font-display text-2xl font-extrabold">{formatMoney(BigInt(order.provider_net_minor), order.currency, locale)}</p>
+                </div>
+                {order.due_at && (
+                  <div className="rounded-2xl bg-white/12 p-4">
+                    <p className="text-xs text-emerald-100">{receiptText.deliverBy}</p>
+                    <p className="mt-1 font-display text-lg font-bold">{formatReceiptDate(new Date(order.due_at), locale)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {isClient && order.status === "pending_payment" && (
+            <div className="rounded-2xl border-2 border-[var(--brand-text-2)] bg-[var(--color-brand-50)] p-5">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-display text-base font-bold">{t.payBannerTitle}</p>
+                  <p className="mt-1 text-sm text-[var(--subtle)]">{t.payBannerBody}</p>
+                  <p className="mt-2 font-display text-lg font-bold">
+                    {t.payBannerAmount} : {formatMoney(BigInt(order.client_charge_minor ?? order.amount_minor), order.currency, locale)}
+                  </p>
+                </div>
+                <div className="w-full shrink-0 sm:w-56">
+                  <PayButton
+                    orderId={order.id}
+                    labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
+                  />
+                  <CheckPaymentButton
+                    orderId={order.id}
+                    action={checkOrderPayment}
+                    labels={{
+                      checkPayment: t.checkPayment,
+                      checkingPayment: t.checkingPayment,
+                      checkPending: t.checkPending,
+                      checkFailed: t.checkFailed,
+                      checkError: t.checkError,
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          {isClient && (
+            <ClientOrderSummary
+              locale={locale}
+              orderId={order.id}
+              reference={order.reference}
+              status={order.status}
+              serviceTitle={(order.service as unknown as { title: string } | null)?.title ?? ""}
+              providerName={providerName}
+              createdAt={new Date(order.created_at)}
+              dueAt={order.due_at ? new Date(order.due_at) : null}
+              currency={order.currency}
+              priceMinor={BigInt(order.amount_minor)}
+              feeMinor={feeMinor}
+              totalMinor={totalMinor}
+            />
+          )}
+          {(orderAddons ?? []).length > 0 && (
+            <Section title={getAddonTexts(locale).orderAddons}>
+              <ul className="divide-y divide-[var(--border)]">
+                {(orderAddons ?? []).map((a) => (
+                  <li key={a.title} className="flex items-center justify-between gap-4 py-2.5 text-sm">
+                    <span className="font-medium">{a.title}{a.extra_delivery_days > 0 ? ` · +${a.extra_delivery_days} j` : ""}</span>
+                    <span className="font-display font-bold">+{formatMoney(BigInt(a.price_minor), order.currency, locale)}</span>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
           <Section
             title={t.requirements}
             action={
@@ -116,16 +211,6 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               <p className="text-sm text-[var(--subtle)]">{t.noActions}</p>
             )}
           </Section>
-          {isClient && order.status === "pending_payment" && (
-            <Notice tone="warning" title={t.pendingPayment}>
-              <div className="mt-3">
-                <PayButton
-                  orderId={order.id}
-                  labels={{ payNow: t.payNow, paying: t.paying, payError: t.payError }}
-                />
-              </div>
-            </Notice>
-          )}
         </aside>
       </div>
     </DashboardShell>

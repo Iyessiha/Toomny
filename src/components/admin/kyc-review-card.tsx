@@ -7,7 +7,9 @@ import {
   rejectVerification,
   flagForManualReview,
   getKycSignedUrls,
+  analyzeKycDossier,
 } from "@/app/(fr)/admin/verifications/actions";
+import type { KycAiReview } from "@/lib/ai/kyc-review";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
 import { Pill, kycTone } from "@/components/dashboard/pro";
 import { getAdminTexts } from "@/i18n/admin";
@@ -44,6 +46,32 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [docs, setDocs] = useState<{ frontUrl?: string; selfieUrl?: string } | null>(null);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [aiReview, setAiReview] = useState<KycAiReview | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const fr = locale !== "en";
+
+  async function handleAiReview() {
+    setAiLoading(true);
+    setAiError(null);
+    const r = await analyzeKycDossier(verif.id);
+    setAiLoading(false);
+    if ("error" in r) {
+      setAiReview(null);
+      setAiError(r.error);
+      return;
+    }
+    setAiReview(r.review);
+  }
+
+  const verdictLabel: Record<KycAiReview["verdict"], string> = fr
+    ? { clear: "Dossier cohérent", review: "À vérifier à la main", unreadable: "Illisible" }
+    : { clear: "Consistent file", review: "Check manually", unreadable: "Unreadable" };
+  const verdictTone: Record<KycAiReview["verdict"], string> = {
+    clear: "text-[var(--tone-success-fg)]",
+    review: "text-[var(--tone-warning-fg,var(--tone-danger-fg))]",
+    unreadable: "text-[var(--tone-danger-fg)]",
+  };
 
   const docLabel =
     getKycTexts(locale).docTypes[verif.document_type] ??
@@ -147,7 +175,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
           type="button"
           onClick={handleViewDocs}
           disabled={loadingDocs}
-          className="text-sm font-medium text-[var(--color-brand-600)] hover:underline disabled:opacity-50"
+          className="text-sm font-medium text-[var(--brand-text-1)] hover:underline disabled:opacity-50"
         >
           {loadingDocs ? a.loading : docs ? a.hideDocs : a.viewDocs}
         </button>
@@ -168,7 +196,7 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
                       const el = e.currentTarget;
                       el.style.display = "none";
                       const p = document.createElement("p");
-                      p.className = "text-sm text-[var(--color-brand-600)] underline";
+                      p.className = "text-sm text-[var(--brand-text-1)] underline";
                       p.textContent = a.openPdf;
                       el.parentElement?.appendChild(p);
                     }}
@@ -192,6 +220,43 @@ export function KycReviewCard({ verif, locale = "fr" }: { verif: VerifRow; local
           </div>
         )}
       </div>
+
+      {/* Avis de l'IA : aide à la lecture, aucune décision */}
+      {!isDone && (
+        <div className="border-t border-[var(--border)] px-5 py-3 space-y-2">
+          <button
+            type="button"
+            onClick={handleAiReview}
+            disabled={aiLoading}
+            className="text-sm font-medium text-[var(--brand-text-1)] hover:underline disabled:opacity-50"
+          >
+            {aiLoading ? (fr ? "Analyse en cours…" : "Analyzing…") : fr ? "Analyser avec l'IA" : "Analyze with AI"}
+          </button>
+          {aiError && <p role="alert" className="text-sm text-[var(--tone-danger-fg)]">{aiError}</p>}
+          {aiReview && (
+            <div className="rounded-xl bg-[var(--surface)] p-3 text-sm space-y-2">
+              <p className={`font-semibold ${verdictTone[aiReview.verdict]}`}>
+                {verdictLabel[aiReview.verdict]}
+              </p>
+              {aiReview.summary && <p>{aiReview.summary}</p>}
+              {aiReview.findings.length > 0 && (
+                <ul className="list-disc space-y-1 pl-5">
+                  {aiReview.findings.map((f, i) => (
+                    <li key={i} className={f.severity === "blocking" ? "text-[var(--tone-danger-fg)]" : ""}>
+                      {f.message}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-xs text-[var(--subtle)]">
+                {fr
+                  ? "Avis indicatif : la décision reste la vôtre."
+                  : "Indicative opinion: the decision is yours."}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       {!isDone && (

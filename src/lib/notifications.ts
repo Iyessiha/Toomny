@@ -6,7 +6,12 @@ import { sendNotificationEmail } from "@/lib/email";
 export const NOTIFICATION_TYPES = [
   "inquiry_received",
   "inquiry_replied",
+  "support_replied",
+  "account_missing",
+  "service_changes_requested",
+  "order_payment_reminder",
   "order_funded",
+  "order_payment_confirmed",
   "order_payment_failed",
   "order_message",
   "order_started",
@@ -102,7 +107,7 @@ async function sendEmailForNotification(
   }
 }
 
-const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount", "plan"] as const;
+const PARAM_KEYS = ["from", "ref", "service", "outcome", "rating", "amount", "plan", "items"] as const;
 
 /**
  * Assainit les paramètres lus en base (jsonb non typé) : seules les clés

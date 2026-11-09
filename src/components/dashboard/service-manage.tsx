@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useState, useRef, useEffect, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -8,6 +9,7 @@ import {
   deleteService,
   toggleServiceStatus,
   resubmitService,
+  requestServiceReview,
   upsertPackages,
 } from "@/app/(fr)/dashboard/prestations/actions";
 import { getDashboardTexts } from "@/i18n/dashboard";
@@ -30,6 +32,8 @@ type Service = {
   cover_url: string | null;
   gallery_urls: string[] | null;
   tags: string[] | null;
+  review_notes: string | null;
+  review_requested_at: string | null;
 };
 
 type PackageRow = {
@@ -62,7 +66,7 @@ function defaultSlots(names: TierNames): [PackageSlot, PackageSlot, PackageSlot]
 }
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)]";
 
 const copy: Record<Locale, { close: string; cancel: string; removePhoto: string; priceLabel: string; delayLabel: string }> = {
   fr: {
@@ -94,6 +98,20 @@ export function ServiceManage({
 }) {
   const t = getDashboardTexts(locale).services;
   const statusLabels = getDashboardTexts(locale).service;
+  const reviewCopy =
+    locale === "en"
+      ? {
+          toFix: "Points to correct",
+          submit: "Submit for review",
+          resubmit: "Submit again",
+          waiting: "Submitted: waiting for the Toomny team.",
+        }
+      : {
+          toFix: "Points à corriger",
+          submit: "Soumettre pour validation",
+          resubmit: "Soumettre à nouveau",
+          waiting: "Soumise : en attente de l'équipe Toomny.",
+        };
   const c = copy[locale];
   const router = useRouter();
 
@@ -314,6 +332,19 @@ export function ServiceManage({
     }
   }
 
+  async function handleRequestReview(s: Service) {
+    setPending(true);
+    try {
+      const result = await requestServiceReview(s.id);
+      if ("error" in result && result.error) setError(result.error);
+      else router.refresh();
+    } catch {
+      setError(getDashboardTexts(locale).services.errors.network);
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function handleResubmit(s: Service) {
     setPending(true);
     try {
@@ -366,6 +397,31 @@ export function ServiceManage({
                   {statusLabels[s.status as keyof typeof statusLabels] ?? s.status}
                 </Pill>
               </p>
+              {s.status === "draft" && (s.review_notes || !s.review_requested_at) && (
+                <div className="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                  {s.review_notes && (
+                    <>
+                      <p className="font-semibold">{reviewCopy.toFix}</p>
+                      <ul className="mt-1 list-none space-y-0.5 whitespace-pre-line">
+                        {s.review_notes.split("\n").map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  {s.review_requested_at ? (
+                    <p className="mt-2 font-medium">{reviewCopy.waiting}</p>
+                  ) : (
+                    <button
+                      onClick={() => handleRequestReview(s)}
+                      disabled={pending}
+                      className="btn-primary btn-sm mt-2 disabled:opacity-50"
+                    >
+                      {s.review_notes ? reviewCopy.resubmit : reviewCopy.submit}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <p className="shrink-0 font-display font-bold">
               {(s.price_minor / 1).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA
@@ -465,7 +521,7 @@ export function ServiceManage({
                           />
                           <span className="text-sm font-semibold">{tierLabel}</span>
                           {slot.enabled && slot.price && (
-                            <span className="ml-auto text-xs font-semibold text-[var(--color-brand-600)]">
+                            <span className="ml-auto text-xs font-semibold text-[var(--brand-text-1)]">
                               {Number(slot.price).toLocaleString(locale === "en" ? "en-US" : "fr-FR")} FCFA
                             </span>
                           )}
@@ -546,7 +602,7 @@ export function ServiceManage({
                     )}
                   </div>
                 ) : (
-                  <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]">
+                  <label className="mt-1.5 flex aspect-[16/9] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-sm text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" stroke="currentColor" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                     </svg>
@@ -587,7 +643,7 @@ export function ServiceManage({
                     </div>
                   ))}
                   {galleryUrls.length < 4 && (
-                    <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)] ${galleryUploading ? "opacity-50 pointer-events-none" : ""}`}>
+                    <label className={`flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--surface)] text-[var(--subtle)] transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)] ${galleryUploading ? "opacity-50 pointer-events-none" : ""}`}>
                       {galleryUploading ? (
                         <span className="text-[10px] font-semibold">{t.form.galleryUploading}</span>
                       ) : (
@@ -620,7 +676,7 @@ export function ServiceManage({
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-brand-700)]"
+                      className="inline-flex items-center gap-1 rounded-full border border-[var(--color-brand-300)] bg-[var(--color-brand-50)] px-2.5 py-0.5 text-xs font-medium text-[var(--brand-text-2)]"
                     >
                       {tag}
                       <button
@@ -656,15 +712,7 @@ export function ServiceManage({
               </div>
 
               <div>
-                <label htmlFor="edit-title" className="text-sm font-medium">{t.form.title}</label>
-                <input
-                  id="edit-title"
-                  name="title"
-                  required
-                  maxLength={120}
-                  defaultValue={editing.title}
-                  className={inputClass}
-                />
+                <TitleField id="edit-title" label={t.form.title} defaultTitle={editing.title} inputClassName={inputClass} />
               </div>
 
               <div>
@@ -729,7 +777,7 @@ export function ServiceManage({
                 <p role="alert" className="notice notice-danger">{error}</p>
               )}
               {success && (
-                <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--color-brand-700)]">{success}</p>
+                <p role="status" className="rounded-xl bg-[var(--color-brand-50)] px-4 py-3 text-sm text-[var(--brand-text-2)]">{success}</p>
               )}
 
               <div className="flex gap-3">
@@ -743,7 +791,7 @@ export function ServiceManage({
                 <button
                   type="submit"
                   disabled={pending || uploading}
-                  className="flex-1 rounded-full bg-[var(--color-brand-500)] px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  className="flex-1 rounded-full btn-fill px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
                 >
                   {pending ? t.editing : t.editSave}
                 </button>

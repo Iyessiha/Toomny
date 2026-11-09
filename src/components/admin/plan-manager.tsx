@@ -89,7 +89,7 @@ function PlanRow({ provider, t }: { provider: Provider; t: ReturnType<typeof get
             <select
               value={tier}
               onChange={(e) => setTier(e.target.value as PlanTier)}
-              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-brand-500)]"
+              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs outline-none focus:border-[var(--brand-text-2)]"
             >
               {PLAN_TIERS.map((p) => (
                 <option key={p} value={p}>{p}</option>
@@ -103,13 +103,13 @@ function PlanRow({ provider, t }: { provider: Provider; t: ReturnType<typeof get
                 value={days}
                 onChange={(e) => setDays(e.target.value)}
                 placeholder={t.durationLabel}
-                className="w-20 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs outline-none focus:border-[var(--color-brand-500)]"
+                className="w-20 rounded-lg border border-[var(--border)] bg-[var(--background)] px-2 py-1.5 text-xs outline-none focus:border-[var(--brand-text-2)]"
               />
             )}
             <button
               onClick={onSave}
               disabled={pending}
-              className="rounded-full bg-[var(--color-brand-500)] px-3 py-1 text-xs font-semibold text-white transition-opacity disabled:opacity-60"
+              className="rounded-full btn-fill px-3 py-1 text-xs font-semibold text-white transition-opacity disabled:opacity-60"
             >
               {pending ? t.saving : t.save}
             </button>

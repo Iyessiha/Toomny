@@ -42,7 +42,7 @@ export function BoostCheckoutButton({
     "mt-6 w-full rounded-xl py-3 text-sm font-semibold transition-opacity disabled:opacity-50";
   const style = highlight
     ? `${base} bg-white text-[var(--color-brand-600)]`
-    : `${base} bg-[var(--color-brand-500)] text-white`;
+    : `${base} btn-fill text-white`;
 
   return (
     <div>

@@ -68,7 +68,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
       }`}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <Link href={home} className="text-[var(--color-brand-500)]" aria-label={t.home}>
+        <Link href={home} className="text-[var(--brand-text-2)]" aria-label={t.home}>
           <Logo size={30} />
         </Link>
 
@@ -102,11 +102,11 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
             <>
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+                className="flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1.5 text-sm font-medium transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
               >
                 <span
                   aria-hidden
-                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--color-brand-700)]"
+                  className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--brand-text-2)]"
                 >
                   {initials}
                 </span>
@@ -134,7 +134,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
               </Link>
               <Link
                 href={authPath}
-                className="rounded-full bg-[var(--color-brand-500)] px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+                className="rounded-full btn-fill px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
               >
                 {t.signup}
               </Link>
@@ -191,7 +191,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
                 >
                   <span
                     aria-hidden
-                    className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--color-brand-700)]"
+                    className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-[10px] font-bold text-[var(--brand-text-2)]"
                   >
                     {initials}
                   </span>
@@ -208,7 +208,7 @@ export function Header({ locale = "fr" }: { locale?: Locale }) {
               <Link
                 href={authPath}
                 onClick={() => setOpen(false)}
-                className="mt-2 rounded-full bg-[var(--color-brand-500)] px-5 py-3 text-center text-sm font-semibold text-white"
+                className="mt-2 rounded-full btn-fill px-5 py-3 text-center text-sm font-semibold text-white"
               >
                 {t.signup}
               </Link>

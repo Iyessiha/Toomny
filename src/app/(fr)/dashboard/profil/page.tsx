@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { Section } from "@/components/dashboard/pro";
-import { ProfileForm } from "@/components/dashboard/profile-form";
+import { ProfileWorkspace } from "@/components/dashboard/profile-workspace";
+import { hasAiAccess } from "@/lib/provider-assist";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
 
@@ -25,7 +26,7 @@ export default async function ProfilPage() {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from("provider_profiles")
-    .select("headline, bio, city, content_locale, avatar_url, skills, spoken_languages, website_url, linkedin_url, twitter_url")
+    .select("headline, bio, city, content_locale, avatar_url, skills, spoken_languages, website_url, linkedin_url, twitter_url, plan, plan_expires_at")
     .eq("profile_id", user.id)
     .maybeSingle();
 
@@ -41,7 +42,8 @@ export default async function ProfilPage() {
     >
       <div className="max-w-2xl">
         <Section title={t.profile.title} subtitle={t.profile.subtitle}>
-        <ProfileForm
+        <ProfileWorkspace
+          hasAiAccess={hasAiAccess(profile?.plan, profile?.plan_expires_at ?? null)}
           defaults={{
             headline: profile?.headline ?? "",
             bio: profile?.bio ?? "",

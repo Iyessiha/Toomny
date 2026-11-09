@@ -35,6 +35,18 @@ const TRACKING_BEACON_HOSTS = [
  * que nous posons nous-mêmes (voir root-layout.tsx) et ceux de Next.js, sans
  * ouvrir `'unsafe-inline'`.
  */
+/**
+ * L'encadrement de la page est-il autorisé ?
+ *
+ * Jamais en production réelle. Oui en développement (les aperçus sont montrés
+ * dans une iframe servie depuis un autre domaine) et, à la demande explicite,
+ * pour un serveur de production lancé dans un bac à sable d'aperçu
+ * (`PREVIEW_EMBED=1`). Voir aussi next.config.ts pour les autres en-têtes.
+ */
+export function embedPreviews(): boolean {
+  return process.env.NODE_ENV !== "production" || process.env.PREVIEW_EMBED === "1";
+}
+
 export function buildCsp(nonce: string, isDev: boolean): string {
   const scriptSrc = [
     "'self'",
@@ -58,8 +70,11 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     "base-uri 'self'",
     "form-action 'self'",
     // Les aperçus de développement sont encadrés par le bac à sable distant.
-    // En production, aucun cadre n'est autorisé.
-    isDev ? "frame-ancestors 'self' https://*.e2b.app" : "frame-ancestors 'none'",
+    // En production, aucun cadre n'est autorisé — sauf si le serveur tourne
+    // explicitement pour un aperçu (PREVIEW_EMBED=1), voir next.config.ts.
+    isDev || process.env.PREVIEW_EMBED === "1"
+      ? "frame-ancestors 'self' https://*.e2b.app"
+      : "frame-ancestors 'none'",
   ];
   if (!isDev) directives.push("upgrade-insecure-requests");
 
@@ -81,6 +96,14 @@ export async function proxy(request: NextRequest) {
 
   const response = await route(request, requestHeaders);
   response.headers.set("Content-Security-Policy", csp);
+  // X-Frame-Options est posé ici, et pas dans next.config.ts : les en-têtes de
+  // `headers()` sont évalués au build, donc figés. Ici, la décision suit
+  // NODE_ENV et PREVIEW_EMBED à chaque requête. La CSP ci-dessus porte déjà
+  // `frame-ancestors`, qui est la règle moderne ; cet en-tête reste pour les
+  // navigateurs qui ne la lisent pas.
+  if (!embedPreviews()) {
+    response.headers.set("X-Frame-Options", "DENY");
+  }
   return response;
 }
 

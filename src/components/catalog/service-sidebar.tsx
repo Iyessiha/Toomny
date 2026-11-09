@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createOrder } from "@/app/(fr)/orders/actions";
 import { getCatalogTexts } from "@/i18n/catalog";
 import { formatMoney } from "@/lib/money";
+import { getAddonTexts } from "@/i18n/addons";
 import type { Locale } from "@/i18n/dictionaries";
 
 type Pkg = {
@@ -18,6 +19,15 @@ type Pkg = {
   currency: string;
 };
 
+type AddonItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  price_minor: number;
+  currency: string;
+  extra_delivery_days: number;
+};
+
 type TrustItem = { icon: string; label: string };
 type ProviderService = { id: string; title: string; price_minor: number; currency: string };
 
@@ -26,6 +36,7 @@ export function ServiceSidebar({
   providerId,
   providerName,
   packages,
+  addons = [],
   basePrice,
   baseCurrency,
   baseDelivery,
@@ -39,6 +50,7 @@ export function ServiceSidebar({
   providerId: string;
   providerName?: string;
   packages: Pkg[];
+  addons?: AddonItem[];
   basePrice: number;
   baseCurrency: string;
   baseDelivery: number;
@@ -57,9 +69,18 @@ export function ServiceSidebar({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const displayPrice = selectedPkg ? selectedPkg.price_minor : basePrice;
+  const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
+  const chosenAddons = addons.filter((a) => selectedAddonIds.includes(a.id));
+  const addonsPrice = chosenAddons.reduce((sum, a) => sum + a.price_minor, 0);
+  const addonsDays = chosenAddons.reduce((sum, a) => sum + a.extra_delivery_days, 0);
+
+  const displayPrice = (selectedPkg ? selectedPkg.price_minor : basePrice) + addonsPrice;
   const displayCurrency = selectedPkg ? selectedPkg.currency : baseCurrency;
-  const displayDelivery = selectedPkg ? selectedPkg.delivery_days : baseDelivery;
+  const displayDelivery = (selectedPkg ? selectedPkg.delivery_days : baseDelivery) + addonsDays;
+
+  function toggleAddon(id: string) {
+    setSelectedAddonIds((list) => (list.includes(id) ? list.filter((x) => x !== id) : [...list, id]));
+  }
 
   const tierLabel = (tier: 1 | 2 | 3) =>
     tier === 1 ? t.pkgBasic : tier === 2 ? t.pkgStandard : t.pkgPremium;
@@ -72,6 +93,7 @@ export function ServiceSidebar({
       serviceId,
       requirements: "",
       packageId: selectedPkg?.id,
+      addonIds: selectedAddonIds,
     });
     if ("error" in result) {
       setPending(false);
@@ -96,7 +118,7 @@ export function ServiceSidebar({
                 onClick={() => setSelectedPkg(pkg)}
                 className={`flex-1 py-3 text-sm font-semibold transition-colors ${
                   selectedPkg?.id === pkg.id
-                    ? "border-b-2 border-[var(--color-brand-500)] text-[var(--color-brand-600)]"
+                    ? "border-b-2 border-[var(--brand-text-2)] text-[var(--brand-text-1)]"
                     : "text-[var(--subtle)] hover:text-[var(--foreground)]"
                 }`}
               >
@@ -111,7 +133,7 @@ export function ServiceSidebar({
           {selectedPkg && (
             <p className="mb-1 text-sm font-semibold">{selectedPkg.name}</p>
           )}
-          <p className="font-display text-3xl font-bold text-[var(--color-brand-600)]">
+          <p className="font-display text-3xl font-bold text-[var(--brand-text-1)]">
             {formatMoney(BigInt(displayPrice), displayCurrency, locale)}
           </p>
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-[var(--subtle)]">
@@ -130,12 +152,55 @@ export function ServiceSidebar({
           )}
         </div>
 
+        {/* Suppléments : options cochées, le total et le délai se mettent à jour */}
+        {addons.length > 0 && (
+          <div className="space-y-2 border-b border-[var(--border)] px-6 py-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--subtle)]">
+              {getAddonTexts(locale).clientTitle}
+            </p>
+            {addons.map((addon) => {
+              const checked = selectedAddonIds.includes(addon.id);
+              return (
+                <label
+                  key={addon.id}
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3.5 py-2.5 text-sm transition-colors ${
+                    checked
+                      ? "border-[var(--brand-text-2)] bg-[var(--color-brand-50)]"
+                      : "border-[var(--border)] hover:border-[var(--color-brand-300)]"
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleAddon(addon.id)}
+                    className="mt-0.5 h-4 w-4 accent-[var(--color-brand-500)]"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-semibold">{addon.title}</span>
+                    {addon.description && (
+                      <span className="mt-0.5 block text-xs text-[var(--subtle)]">{addon.description}</span>
+                    )}
+                    {addon.extra_delivery_days > 0 && (
+                      <span className="mt-0.5 block text-xs text-[var(--subtle)]">
+                        +{addon.extra_delivery_days} {addon.extra_delivery_days > 1 ? t.days : t.day}
+                      </span>
+                    )}
+                  </span>
+                  <span className="shrink-0 font-display text-sm font-bold text-[var(--brand-text-1)]">
+                    +{formatMoney(BigInt(addon.price_minor), addon.currency, locale)}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+
         {/* Action zone */}
         <div className="space-y-3 p-6">
           {isGuest ? (
             <Link
               href="/auth"
-              className="flex items-center justify-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
+              className="flex items-center justify-center gap-2 rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-600)]"
             >
               {t.loginToOrder}
             </Link>
@@ -151,7 +216,7 @@ export function ServiceSidebar({
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition-colors hover:bg-[var(--color-brand-600)]"
+                className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white disabled:opacity-60 transition-colors hover:bg-[var(--color-brand-600)]"
               >
                 {pending ? t.ordering : t.order}
               </button>
@@ -163,7 +228,7 @@ export function ServiceSidebar({
             <>
               <Link
                 href={`/services/${serviceId}/contact`}
-                className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--color-brand-600)] transition-colors hover:bg-[var(--color-brand-50)]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--color-brand-300)] px-6 py-3 text-sm font-semibold text-[var(--brand-text-1)] transition-colors hover:bg-[var(--color-brand-50)]"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -172,7 +237,7 @@ export function ServiceSidebar({
               </Link>
               <Link
                 href={`/prestataires/${providerId}`}
-                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--color-brand-600)]"
+                className="flex items-center justify-center gap-2 rounded-full border border-[var(--border)] px-6 py-3 text-sm font-semibold transition-colors hover:border-[var(--color-brand-400)] hover:text-[var(--brand-text-1)]"
               >
                 {locale === "en" ? "View profile" : "Voir le profil"}
               </Link>
@@ -211,7 +276,7 @@ export function ServiceSidebar({
                   <span className="line-clamp-1 flex-1 font-medium leading-snug">
                     {s.title}
                   </span>
-                  <span className="shrink-0 font-semibold text-[var(--color-brand-600)]">
+                  <span className="shrink-0 font-semibold text-[var(--brand-text-1)]">
                     {formatMoney(BigInt(s.price_minor), s.currency, locale)}
                   </span>
                 </Link>
@@ -220,7 +285,7 @@ export function ServiceSidebar({
           </ul>
           <Link
             href={`/prestataires/${providerId}`}
-            className="mt-3 block text-center text-xs font-semibold text-[var(--color-brand-600)] hover:underline"
+            className="mt-3 block text-center text-xs font-semibold text-[var(--brand-text-1)] hover:underline"
           >
             {locale === "en" ? "View all services →" : "Voir toutes les prestations →"}
           </Link>

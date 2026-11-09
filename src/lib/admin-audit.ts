@@ -7,24 +7,33 @@ export type AdminAction =
   | "service.reject"
   | "service.photos"
   | "kyc.flag"
+  | "kyc.ai_review"
   | "service.moderate"
   | "order.confirm_payment"
   | "order.force_in_progress"
   | "order.force_delivered"
   | "order.force_completed"
+  | "order.payment_emails"
   | "dispute.resolve"
   | "payout.process"
   | "payout.mark_paid"
   | "payout.mark_failed"
   | "payout.requeue"
+  | "payout_number.verify"
+  | "payout_number.unverify"
   | "plan.set"
   | "pixels.update"
+  | "support.reply"
+  | "support.reopen"
+  | "account.notify"
+  | "account.recovery_sent"
+  | "account.email_change"
   | "support.close";
 
 export type AdminAuditEntry = {
   actorId: string;
   action: AdminAction;
-  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider" | "site" | "support";
+  targetType: "verification" | "service" | "order" | "dispute" | "payout" | "provider" | "site" | "support" | "user";
   targetId: string;
   details?: Record<string, unknown>;
 };

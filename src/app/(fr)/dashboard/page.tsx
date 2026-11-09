@@ -10,6 +10,16 @@ import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { OnboardingModal } from "@/components/dashboard/onboarding-modal";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
+import { PlanNudgeCard } from "@/components/dashboard/plan-nudge-card";
+import { planNudge, type PlanNudge } from "@/lib/plan-nudge";
+import { createClient } from "@/lib/supabase/server";
+import { EncouragementCard } from "@/components/dashboard/encouragement-card";
+import { pickEncouragement } from "@/lib/encouragement";
+
+/** Adresse publique de Toomny, pour les liens de partage. */
+function siteBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com";
+}
 
 export const metadata: Metadata = { title: "Tableau de bord · Toomny" };
 export const dynamic = "force-dynamic";
@@ -18,6 +28,8 @@ export default async function DashboardPage() {
   const user = await requireAuth();
   const data = await getDashboardData(user);
   const provider = isProvider(user.role);
+  const nudge = provider ? await getProviderPlanNudge(user.id) : null;
+  const gaps = provider ? await showcaseGaps(user.id) : { photoMissing: false, portfolioMissing: false };
 
   return (
     <>
@@ -25,7 +37,7 @@ export default async function DashboardPage() {
         <OnboardingModal role={user.role} locale={user.preferredLocale} />
       )}
       {provider
-        ? <ProviderDashboard user={user} data={data} />
+        ? <ProviderDashboard user={user} data={data} nudge={nudge} gaps={gaps} />
         : <ClientDashboard user={user} data={data} />}
     </>
   );
@@ -33,12 +45,44 @@ export default async function DashboardPage() {
 
 // ─── Dashboard PRESTATAIRE ──────────────────────────────────────────────────
 
+/** Plan effectif et prestations actives du prestataire, pour le bandeau d'abonnement. */
+async function getProviderPlanNudge(userId: string): Promise<PlanNudge | null> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", userId).maybeSingle(),
+    supabase
+      .from("services")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", userId)
+      .not("status", "eq", "removed"),
+  ]);
+  return planNudge({
+    plan: profile?.plan,
+    expiresAt: profile?.plan_expires_at ?? null,
+    activeServices: count ?? 0,
+  });
+}
+
+/** Photo de profil et réalisations du prestataire : ce qui manque à sa vitrine. */
+async function showcaseGaps(userId: string): Promise<{ photoMissing: boolean; portfolioMissing: boolean }> {
+  const supabase = await createClient();
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("provider_profiles").select("avatar_url").eq("profile_id", userId).maybeSingle(),
+    supabase.from("portfolio_items").select("id", { count: "exact", head: true }).eq("provider_id", userId),
+  ]);
+  return { photoMissing: !profile?.avatar_url, portfolioMissing: (count ?? 0) === 0 };
+}
+
 function ProviderDashboard({
   user,
   data,
+  nudge,
+  gaps,
 }: {
   user: Awaited<ReturnType<typeof requireAuth>>;
   data: Awaited<ReturnType<typeof getDashboardData>>;
+  nudge: PlanNudge | null;
+  gaps: { photoMissing: boolean; portfolioMissing: boolean };
 }) {
   const locale = user.preferredLocale;
   const t = getDashboardTexts(locale);
@@ -54,6 +98,17 @@ function ProviderDashboard({
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   ).length;
+  const siteUrl = siteBaseUrl();
+  const encouragement = pickEncouragement({
+    isProvider: true,
+    toStart: data.orders.filter((o) => o.provider_id === user.id && o.status === "funded").length,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: completedOrders,
+    orders: receivedOrders.length,
+    activeServices: data.servicesCount,
+    photoMissing: gaps.photoMissing,
+    portfolioMissing: gaps.portfolioMissing,
+  });
 
   return (
     <DashboardShell
@@ -66,13 +121,23 @@ function ProviderDashboard({
       actions={
         <Link
           href="/dashboard/prestations"
-          className="flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-2 rounded-full btn-fill px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 4.5v15m7.5-7.5h-15" /></svg>
           {t.providerHome.publish}
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteUrl}
+          profileUrl={`${siteUrl}/prestataires/${user.id}`}
+        />
+      )}
+      {nudge && <PlanNudgeCard nudge={nudge} locale={locale} />}
+
       {/* ── KYC Banner ─────────────────────────────────────────────────── */}
       {!kycDone && !kycPending && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-amber-200/80 bg-gradient-to-r from-amber-50 to-orange-50">
@@ -124,7 +189,7 @@ function ProviderDashboard({
       )}
 
       {/* ── Stats ──────────────────────────────────────────────────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         <StatCard
           label={t.home.earned}
           value={formatMoney(data.earnedMinor, cur, locale)}
@@ -160,7 +225,7 @@ function ProviderDashboard({
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-base font-bold">{t.providerHome.receivedOrders}</h2>
             {receivedOrders.length > 0 && (
-              <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+              <Link href="/orders" className="flex items-center gap-1 text-sm font-medium text-[var(--brand-text-1)] transition-colors hover:text-[var(--brand-text-2)]">
                 Voir tout
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
@@ -236,7 +301,7 @@ function ProviderDashboard({
                 <ProfileRow label={t.home.profileCity} done={!!user.city} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
                 <ProfileRow label={t.home.profileKyc} done={kycDone} doneLabel={t.providerHome.done} toFillLabel={t.providerHome.toFill} />
               </div>
-              <Link href="/dashboard/profil" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+              <Link href="/dashboard/profil" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--brand-text-1)] transition-colors hover:text-[var(--brand-text-2)]">
                 {t.providerHome.completeProfile}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
@@ -284,7 +349,7 @@ function ProviderDashboard({
                   </div>
                 ))}
               </div>
-              <Link href="/dashboard/versements" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-brand-600)] transition-colors hover:text-[var(--color-brand-700)]">
+              <Link href="/dashboard/versements" className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--brand-text-1)] transition-colors hover:text-[var(--brand-text-2)]">
                 {t.providerHome.configureNumber}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </Link>
@@ -309,6 +374,14 @@ function ClientDashboard({
   const t = getDashboardTexts(locale);
   const cur = data.currency;
   const firstName = user.firstName ?? user.displayName?.split(" ")[0] ?? t.home.fallbackName;
+  const encouragement = pickEncouragement({
+    isProvider: false,
+    toStart: 0,
+    toValidate: data.orders.filter((o) => o.client_id === user.id && o.status === "delivered").length,
+    completed: 0,
+    orders: data.orders.length,
+    activeServices: 0,
+  });
   const activeOrders = data.orders.filter((o) =>
     ["funded", "in_progress", "delivered"].includes(o.status)
   );
@@ -325,13 +398,22 @@ function ClientDashboard({
       actions={
         <Link
           href="/services"
-          className="flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
+          className="flex items-center gap-2 rounded-full btn-fill px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-95"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           Explorer
         </Link>
       }
     >
+      {encouragement && (
+        <EncouragementCard
+          encouragement={encouragement}
+          locale={locale}
+          siteUrl={siteBaseUrl()}
+          profileUrl={`${siteBaseUrl()}/prestataires/${user.id}`}
+        />
+      )}
+
       {/* ── Litiges en cours ────────────────────────────────────────────── */}
       {disputedOrders.length > 0 && (
         <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -382,7 +464,7 @@ function ClientDashboard({
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-base font-bold">Mes commandes</h2>
             {data.orders.length > 0 && (
-              <Link href="/orders" className="text-sm font-medium text-[var(--color-brand-600)] hover:underline">
+              <Link href="/orders" className="text-sm font-medium text-[var(--brand-text-1)] hover:underline">
                 Voir tout →
               </Link>
             )}
@@ -399,7 +481,7 @@ function ClientDashboard({
                       {ORDER_STATUS_FR[o.status] ?? o.status}
                     </span>
                   </div>
-                  <p className="font-display font-bold text-[var(--color-brand-700)]">
+                  <p className="font-display font-bold text-[var(--brand-text-2)]">
                     {formatMoney(BigInt(o.amount_minor), o.currency, locale)}
                   </p>
                 </div>
@@ -458,7 +540,7 @@ function ClientDashboard({
             <p className="mt-1 text-sm text-white/80">Des prestataires vérifiés disponibles maintenant.</p>
             <Link
               href="/services"
-              className="mt-4 block rounded-full bg-white px-4 py-2.5 text-center text-sm font-bold text-[var(--color-brand-700)] hover:bg-white/90"
+              className="mt-4 block rounded-full bg-white px-4 py-2.5 text-center text-sm font-bold text-[var(--color-brand-600)] hover:bg-white/90"
             >
               Explorer le catalogue
             </Link>
@@ -474,7 +556,7 @@ function ClientDashboard({
                 ["Support 48 h", "Litige ? Nous intervenons"],
               ].map(([t, d]) => (
                 <li key={t} className="flex items-start gap-2.5">
-                  <svg className="mt-0.5 shrink-0 text-[var(--color-brand-500)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="mt-0.5 shrink-0 text-[var(--brand-text-2)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="m5 13 4 4L19 7" />
                   </svg>
                   <div>
@@ -510,7 +592,7 @@ function ProfileRow({ label, done, doneLabel, toFillLabel }: { label: string; do
     <div className="flex items-center justify-between text-xs">
       <span className="text-[var(--subtle)]">{label}</span>
       {done ? (
-        <span className="flex items-center gap-1 font-medium text-[var(--color-brand-600)]">
+        <span className="flex items-center gap-1 font-medium text-[var(--brand-text-1)]">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4 4L19 7"/></svg>
           {doneLabel}
         </span>

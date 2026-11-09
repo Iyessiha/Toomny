@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
+import { FeatureCards } from "@/components/features/feature-cards";
 import { getLanding } from "@/content/landing";
 import { visitorLocale } from "@/i18n/server-locale";
 import { getPublicPageTexts } from "@/i18n/public-pages";
@@ -30,7 +31,7 @@ export default async function HowItWorksPage() {
         {/* Hero */}
         <section className="border-b border-[var(--border)] bg-[var(--surface)] py-16 text-center">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-brand-500)]">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--brand-text-2)]">
               {h.eyebrow}
             </p>
             <h1 className="mt-3 font-display text-4xl font-bold leading-tight sm:text-5xl">
@@ -44,24 +45,17 @@ export default async function HowItWorksPage() {
           <h2 className="text-center font-display text-2xl font-bold sm:text-3xl">
             {h.tabs.client}
           </h2>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {h.client.map((step, i) => (
-              <div key={i} className="relative rounded-2xl border border-[var(--border)] bg-[var(--background)] p-6">
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-bold text-[var(--color-brand-700)]"
-                  aria-hidden
-                >
-                  {i + 1}
-                </span>
-                <h3 className="mt-4 font-display text-lg font-bold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">{step.body}</p>
-                {i < h.client.length - 1 && (
-                  <span className="absolute -right-4 top-10 hidden text-2xl text-[var(--border)] sm:block" aria-hidden>
-                    →
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className="mt-10">
+            <FeatureCards
+              cards={h.client.map((step, i) => ({
+                title: step.title,
+                body: step.body,
+                index: i,
+              }))}
+              columns={3}
+              showArrows
+              variant="default"
+            />
           </div>
         </section>
 
@@ -72,24 +66,17 @@ export default async function HowItWorksPage() {
           <h2 className="text-center font-display text-2xl font-bold sm:text-3xl">
             {h.tabs.provider}
           </h2>
-          <div className="mt-10 grid gap-8 sm:grid-cols-3">
-            {h.provider.map((step, i) => (
-              <div key={i} className="relative rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6">
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-sm font-bold text-white"
-                  aria-hidden
-                >
-                  {i + 1}
-                </span>
-                <h3 className="mt-4 font-display text-lg font-bold">{step.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">{step.body}</p>
-                {i < h.provider.length - 1 && (
-                  <span className="absolute -right-4 top-10 hidden text-2xl text-[var(--border)] sm:block" aria-hidden>
-                    →
-                  </span>
-                )}
-              </div>
-            ))}
+          <div className="mt-10">
+            <FeatureCards
+              cards={h.provider.map((step, i) => ({
+                title: step.title,
+                body: step.body,
+                index: i,
+              }))}
+              columns={3}
+              showArrows
+              variant="colorful"
+            />
           </div>
         </section>
 
@@ -101,7 +88,7 @@ export default async function HowItWorksPage() {
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Link
                 href="/auth"
-                className="rounded-full bg-[var(--color-brand-500)] px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
+                className="rounded-full btn-fill px-8 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03]"
               >
                 {t.cta.primary}
               </Link>

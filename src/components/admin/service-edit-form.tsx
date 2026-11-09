@@ -1,5 +1,6 @@
 "use client";
 
+import { TitleField } from "@/components/dashboard/title-field";
 import { useState, type FormEvent } from "react";
 import { editService } from "@/app/(fr)/admin/services/actions";
 import { getAdminTexts } from "@/i18n/admin";
@@ -41,7 +42,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
     setPending(false);
   }
 
-  const inputCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--color-brand-500)]";
+  const inputCls = "w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none focus:border-[var(--brand-text-2)]";
   const labelCls = "block text-sm font-medium mb-1";
 
   return (
@@ -49,8 +50,7 @@ export function ServiceEditForm({ service, categories, locale }: Props) {
       <input type="hidden" name="serviceId" value={service.id} />
 
       <div>
-        <label className={labelCls}>{t.fieldTitle}</label>
-        <input name="title" defaultValue={service.title} required className={inputCls} />
+        <TitleField id="admin-title" label={t.fieldTitle} defaultTitle={service.title} inputClassName={inputCls} />
       </div>
 
       <div>

@@ -132,3 +132,8 @@ export function nextPeriodEnd(from: Date = new Date()): Date {
 export function subscriptionReference(now: Date = new Date()): string {
   return `SUB-${now.getUTCFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
 }
+
+/** true si le prestataire a un plan payant en cours (Essentiel, Pro ou Expert). */
+export function hasPaidPlan(plan: unknown, expiresAt?: Date | string | null, now: Date = new Date()): boolean {
+  return effectivePlan(plan, expiresAt, now) !== DEFAULT_PLAN;
+}

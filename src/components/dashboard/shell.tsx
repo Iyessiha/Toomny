@@ -1,5 +1,8 @@
 "use client";
 
+import { PresenceHeartbeat } from "@/components/dashboard/presence-heartbeat";
+import { LiveAlerts } from "@/components/dashboard/live-alerts";
+import { useNavBadges } from "@/components/dashboard/nav-badges";
 import { useState } from "react";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import Link from "next/link";
@@ -13,6 +16,8 @@ export type NavItem = {
   label: string;
   icon?: React.ReactNode;
   badge?: number;
+  /** Clé d'un compteur fourni par le layout du tableau de bord (voir nav-badges). */
+  badgeKey?: string;
   current?: boolean;
 };
 
@@ -102,6 +107,8 @@ const HREF_ICONS: Record<string, React.ReactNode> = {
 function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string; onClose: () => void }) {
   const active = item.current ?? pathname === item.href;
   const icon = item.icon ?? HREF_ICONS[item.href];
+  const liveBadges = useNavBadges();
+  const badge = item.badge ?? (item.badgeKey ? liveBadges[item.badgeKey] : undefined);
   return (
     <li>
       <Link
@@ -109,26 +116,19 @@ function NavLink({ item, pathname, onClose }: { item: NavItem; pathname: string;
         onClick={onClose}
         className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150 ${
           active
-            ? "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]"
-            : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
+            ? "bg-[#8bf0b6]/12 font-semibold text-[var(--brand-text-2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]"
+            : "text-[var(--subtle)] hover:bg-white/5 hover:text-[var(--foreground)]"
         }`}
       >
-        {/* Left accent bar */}
-        {active && (
-          <span
-            aria-hidden
-            className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[var(--color-brand-500)]"
-          />
-        )}
         {icon && (
-          <span className={`shrink-0 transition-colors ${active ? "text-[var(--color-brand-500)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}`}>
+          <span className={`shrink-0 transition-colors ${active ? "text-[var(--brand-text-2)]" : "text-[var(--subtle)] group-hover:text-[var(--foreground)]"}`}>
             {icon}
           </span>
         )}
         <span className="flex-1 truncate">{item.label}</span>
-        {item.badge !== undefined && item.badge > 0 && (
-          <span className="rounded-full bg-[var(--color-brand-500)] px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
-            {item.badge}
+        {badge !== undefined && badge > 0 && (
+          <span aria-label={`${badge} nouveau(x)`} className="rounded-full btn-fill px-1.5 py-0.5 text-[10px] font-bold leading-none">
+            {badge}
           </span>
         )}
       </Link>
@@ -222,7 +222,7 @@ export function DashboardShell({
       <div className="flex h-full flex-col overflow-hidden">
         {/* Logo area + sign out top-right */}
         <div className="relative flex h-[60px] shrink-0 items-center justify-between px-4">
-          <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--color-brand-500)]">
+          <Link href="/" onClick={() => setSidebarOpen(false)} className="text-[var(--brand-text-2)]">
             <Logo size={26} />
           </Link>
           <div className="flex items-center gap-1">
@@ -251,13 +251,13 @@ export function DashboardShell({
             {/* Avatar with brand gradient */}
             <div className="relative shrink-0">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-xl font-display text-sm font-bold text-white shadow-md"
-                style={{ background: "linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%)" }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl font-display text-sm font-bold text-[#04110b] shadow-md"
+                style={{ background: "linear-gradient(135deg, #8bf0b6 0%, #33d17a 55%, #14a05a 100%)" }}
               >
                 {initials}
               </div>
               {kycVerified && (
-                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white ring-2 ring-[var(--background)]">
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full btn-fill ring-2 ring-[var(--background)]">
                   <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><path d="m5 13 4 4L19 7"/></svg>
                 </span>
               )}
@@ -270,12 +270,12 @@ export function DashboardShell({
 
           {/* Role + KYC pill */}
           <div className="mt-2.5 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-brand-700)]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-50)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--brand-text-2)]">
               {roleLabel[user.role] ?? user.role}
             </span>
             {(user.role === "provider" || user.role === "both") && (
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                kycVerified ? "bg-emerald-50 text-emerald-700" : kycPending ? "bg-sky-50 text-sky-700" : "bg-amber-50 text-amber-700"
+                kycVerified ? "bg-[var(--tone-success-bg)] text-[var(--tone-success-fg)]" : kycPending ? "bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]" : "bg-[var(--tone-warning-bg)] text-[var(--tone-warning-fg)]"
               }`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${kycVerified ? "bg-emerald-500" : kycPending ? "bg-sky-500 animate-pulse" : "bg-amber-400"}`} />
                 {kycVerified ? ph.kycVerified : kycPending ? ph.kycPending : ph.kycUnverified}
@@ -334,9 +334,15 @@ export function DashboardShell({
 
   return (
     <div className="flex min-h-dvh bg-[var(--surface)]">
+      <PresenceHeartbeat />
+      <LiveAlerts locale={locale === "en" ? "en" : "fr"} />
       {/* Sidebar desktop */}
-      <aside className="hidden w-[220px] shrink-0 border-r border-[var(--border)] bg-[var(--background)] lg:fixed lg:inset-y-0 lg:flex lg:flex-col">
-        <SidebarContent />
+      {/* Rail flottant : le verre se détache de l'aurore, alors qu'une
+          colonne bordée à bord touchait le vide et faisait « panneau admin ». */}
+      <aside className="hidden w-[248px] shrink-0 p-3 lg:fixed lg:inset-y-0 lg:flex lg:flex-col">
+        <div className="card card-solid flex h-full flex-col overflow-hidden rounded-[22px]">
+          <SidebarContent />
+        </div>
       </aside>
 
       {/* Mobile overlay */}
@@ -345,18 +351,20 @@ export function DashboardShell({
       )}
 
       {/* Mobile drawer */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-[220px] border-r border-[var(--border)] bg-[var(--background)] shadow-2xl transition-transform duration-300 lg:hidden ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <SidebarContent />
+      <aside className={`fixed inset-y-0 left-0 z-50 w-[264px] p-2.5 transition-transform duration-300 lg:hidden ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="card card-solid h-full overflow-hidden rounded-[22px] shadow-2xl">
+          <SidebarContent />
+        </div>
       </aside>
 
       {/* Main */}
-      <div className="flex min-h-dvh w-full flex-col lg:pl-[220px]">
+      <div className="flex min-h-dvh w-full flex-col lg:pl-[248px]">
         {/* Mobile topbar */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--background)] px-4 lg:hidden">
+        <div className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-[var(--border)] bg-[var(--background)]/80 px-4 backdrop-blur-xl lg:hidden">
           <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-2 text-[var(--subtle)] hover:bg-[var(--surface)]" aria-label="Menu">
             {sidebarOpen ? <IcX /> : <IcMenu />}
           </button>
-          <Link href="/" className="text-[var(--color-brand-500)]"><Logo size={22} /></Link>
+          <Link href="/" className="text-[var(--brand-text-2)]"><Logo size={22} /></Link>
           <div className="flex items-center gap-2">
             {bell}
             <button
@@ -369,8 +377,8 @@ export function DashboardShell({
               <span className="uppercase tracking-wide">{otherLocale}</span>
             </button>
             <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-xs font-bold text-white shadow"
-              style={{ background: "linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-700) 100%)" }}
+              className="flex h-8 w-8 items-center justify-center rounded-lg font-display text-xs font-bold text-[#04110b] shadow"
+              style={{ background: "linear-gradient(135deg, #8bf0b6 0%, #33d17a 55%, #14a05a 100%)" }}
             >
               {initials}
             </div>
@@ -383,11 +391,11 @@ export function DashboardShell({
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
               {kicker && (
-                <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--color-brand-600)]">
+                <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--brand-text-1)]">
                   {kicker}
                 </p>
               )}
-              <h1 className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
+              <h1 className="font-display text-[26px] font-extrabold leading-tight tracking-tight sm:text-[32px]">{title}</h1>
               {subtitle && <p className="mt-1 text-sm text-[var(--subtle)]">{subtitle}</p>}
             </div>
             {actions && <div className="flex items-center gap-3">{actions}</div>}
@@ -418,12 +426,17 @@ export function StatCard({
 }) {
   if (accent) {
     return (
-      <div className="relative overflow-hidden rounded-2xl p-5 text-white shadow-lg shadow-[var(--color-brand-500)]/20"
-        style={{ background: "linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-brand-800) 100%)" }}
-      >
-        {/* Decorative circle */}
-        <div aria-hidden className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-white/10" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-8 -right-2 h-24 w-24 rounded-full bg-white/5" />
+      <div className="card relative overflow-hidden p-5 text-white">
+        {/* Halo de la maquette : une nappe d'émeraude, pas un aplat. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 140% at 100% 0%, rgba(210,154,56,0.20), transparent 58%), radial-gradient(130% 150% at 0% 120%, rgba(51,164,114,0.38), transparent 62%), linear-gradient(150deg, rgba(139,240,182,0.16), rgba(6,24,15,0.35))",
+          }}
+        />
+        <div aria-hidden className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full bg-[#8bf0b6]/12 blur-2xl" />
         <div className="relative flex items-start justify-between">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-white/70">{label}</p>
           {icon && <span className="text-white/60">{icon}</span>}
@@ -445,7 +458,7 @@ export function StatCard({
   }
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-[var(--background)] p-5 shadow-sm">
+    <div className="card p-5">
       <div className="flex items-start justify-between">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--subtle)]">{label}</p>
         {icon && <span className="text-[var(--subtle)]">{icon}</span>}
@@ -454,7 +467,7 @@ export function StatCard({
       <div className="mt-1.5 flex items-center justify-between gap-2">
         {hint && <p className="text-xs text-[var(--subtle)]">{hint}</p>}
         {trend && (
-          <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend.up ? "text-[var(--color-brand-600)]" : "text-red-500"}`}>
+          <span className={`flex items-center gap-0.5 text-xs font-semibold ${trend.up ? "text-[var(--brand-text-1)]" : "text-red-500"}`}>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
               {trend.up ? <path d="M12 5l7 7H5l7-7Z" /> : <path d="M12 19l7-7H5l7 7Z" />}
             </svg>
@@ -480,9 +493,9 @@ export function EmptyState({
   icon?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--background)] px-6 py-14 text-center">
+    <div className="card flex flex-col items-center border-dashed px-6 py-14 text-center">
       {icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--subtle)]">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/6 text-[var(--brand-text-1)]">
           {icon}
         </div>
       )}
@@ -491,7 +504,7 @@ export function EmptyState({
       {action && (
         <Link
           href={action.href}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-[var(--color-brand-500)]/30 transition-all hover:scale-[1.03] hover:bg-[var(--color-brand-600)] active:scale-95"
+          className="btn-fill mt-6 inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-transform hover:scale-[1.03] active:scale-95"
         >
           {action.label}
         </Link>

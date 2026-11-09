@@ -6,6 +6,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { PayoutRowActions } from "@/components/admin/payout-row-actions";
+import { PayoutNumberVerify } from "@/components/admin/payout-number-verify";
 import { FilterTabs, MiniStat, Pill, TableCard, payoutTone } from "@/components/dashboard/pro";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
@@ -82,6 +83,10 @@ export default async function AdminPayoutsPage({
       : Promise.resolve({ data: [] }),
   ]);
   const orderRef = new Map((orderRows ?? []).map((o) => [o.id as string, o.reference as string]));
+  const { data: verifyRows } = providerIds.length
+    ? await db.from("provider_profiles").select("profile_id, payout_verified_at").in("profile_id", providerIds)
+    : { data: [] as { profile_id: string; payout_verified_at: string | null }[] };
+  const verifiedAt = new Map((verifyRows ?? []).map((r) => [r.profile_id as string, r.payout_verified_at as string | null]));
   const providerName = new Map(
     (providerRows ?? []).map((p) => [p.id as string, ((p.display_name ?? p.email ?? "—") as string)]),
   );
@@ -157,7 +162,7 @@ export default async function AdminPayoutsPage({
                 <td>
                   <Link
                     href={`/orders/${p.order_id}`}
-                    className="font-semibold text-[var(--color-brand-600)] underline-offset-2 hover:underline"
+                    className="font-semibold text-[var(--brand-text-1)] underline-offset-2 hover:underline"
                   >
                     {orderRef.get(p.order_id) ?? p.order_id.slice(0, 8)}
                   </Link>
@@ -170,6 +175,11 @@ export default async function AdminPayoutsPage({
                 <td>
                   <p className="font-semibold">{providerName.get(p.provider_id) ?? "—"}</p>
                   <p className="font-mono text-xs text-[var(--subtle)]">{p.msisdn}</p>
+                  <PayoutNumberVerify
+                    providerId={p.provider_id}
+                    verified={!!verifiedAt.get(p.provider_id)}
+                    locale={locale}
+                  />
                 </td>
                 <td className="text-[var(--subtle)]">{pt.channels[p.channel] ?? p.channel}</td>
                 <td className="text-right font-display font-bold">

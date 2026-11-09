@@ -6,9 +6,15 @@ import { redirect } from "next/navigation";
 import { requireAuth, isProvider } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/catalog";
+import { hasAiAccess } from "@/lib/provider-assist";
+import { hasPaidPlan } from "@/lib/plans";
+import { getAddonTexts } from "@/i18n/addons";
+import { AiServicesPanel, AiUpsell } from "@/components/dashboard/ai-assist";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { ServiceManage } from "@/components/dashboard/service-manage";
+import { ShareServices } from "@/components/dashboard/share-services";
+import { formatMoney } from "@/lib/money";
 import { Notice } from "@/components/dashboard/pro";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
@@ -41,14 +47,18 @@ export default async function PrestationsPage() {
   const c = copy[locale];
 
   const supabase = await createClient();
-  const [{ data: services, error: servicesError }, categories] = await Promise.all([
+  const [{ data: services, error: servicesError }, categories, { data: planRow }] = await Promise.all([
     supabase
       .from("services")
-      .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, gallery_urls, tags, created_at")
+      .select("id, title, description, price_minor, currency, delivery_days, status, category_id, cover_url, gallery_urls, tags, created_at, review_notes, review_requested_at")
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false }),
     getCategories(),
+    supabase.from("provider_profiles").select("plan, plan_expires_at").eq("profile_id", user.id).maybeSingle(),
   ]);
+  const aiAccess = hasAiAccess(planRow?.plan, planRow?.plan_expires_at ?? null);
+  const addonsUnlocked = hasPaidPlan(planRow?.plan, planRow?.plan_expires_at ?? null);
+  const ao = getAddonTexts(locale);
 
   const list = services ?? [];
 
@@ -102,6 +112,38 @@ export default async function PrestationsPage() {
           {t.newTitle}
         </Link>
       </div>
+      {aiAccess ? <AiServicesPanel locale={locale} /> : <div className="mb-6"><AiUpsell locale={locale} /></div>}
+      <ShareServices
+        locale={locale}
+        siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://toomny.com"}
+        services={list
+          .filter((s) => s.status === "active")
+          .map((s) => ({
+            id: s.id,
+            title: s.title,
+            priceLabel: formatMoney(BigInt(s.price_minor), s.currency, locale),
+          }))}
+      />
+      <section className="mb-8 rounded-3xl border border-[var(--border)] bg-white p-6">
+        <h2 className="font-display text-lg font-bold">{ao.entryTitle}</h2>
+        <p className="mt-1 text-sm text-[var(--subtle)]">{ao.entryLead}</p>
+        {!addonsUnlocked ? (
+          <Link href="/dashboard/plan" className="mt-4 inline-block text-sm font-semibold text-[var(--brand-text-1)] hover:underline">
+            {ao.locked} {ao.upgrade} →
+          </Link>
+        ) : list.filter((s) => s.status !== "removed").length === 0 ? null : (
+          <ul className="mt-4 divide-y divide-[var(--border)]">
+            {list.filter((s) => s.status !== "removed").map((s) => (
+              <li key={s.id} className="flex items-center justify-between gap-3 py-3">
+                <p className="min-w-0 truncate text-sm font-semibold">{s.title}</p>
+                <Link href={`/dashboard/prestations/${s.id}/supplements`} className="btn-ghost btn-sm whitespace-nowrap">
+                  {ao.entryManage}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <ServiceManage
         services={list}
         categories={categories.map((c) => ({ id: c.id, name: locale === "en" ? c.name_en : c.name_fr }))}

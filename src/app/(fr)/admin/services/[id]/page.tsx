@@ -14,6 +14,7 @@ import { Avatar, Notice, Pill, Section, serviceTone } from "@/components/dashboa
 import { formatMoney } from "@/lib/money";
 import { checkListing } from "@/lib/listing-checks";
 import { moderateService, rejectService } from "../actions";
+import { ServiceAiReview } from "@/components/admin/service-ai-review";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getAdminTexts(await visitorLocale()).serviceReviewPage.metaTitle };
@@ -190,6 +191,13 @@ export default async function AdminServiceReviewPage({
             </div>
           )}
         </Section>
+
+        {/* Analyse IA : valider ou refuser avec les points relevés */}
+        {isDraft && (
+          <Section title="Analyse de la prestation">
+            <ServiceAiReview serviceId={service.id} locale={locale} refuseAction={rejectService} />
+          </Section>
+        )}
 
         {/* Refus */}
         {isDraft && (

@@ -227,7 +227,7 @@ export default async function BoostPage({
               key={tier}
               className={`relative flex flex-col rounded-2xl border p-6 ${
                 highlight
-                  ? "border-[var(--color-brand-500)] bg-[var(--color-brand-500)]"
+                  ? "border-[var(--brand-text-2)] bg-[var(--color-brand-500)]"
                   : "border-[var(--border)] bg-[var(--background)]"
               }`}
             >
@@ -236,7 +236,7 @@ export default async function BoostPage({
                   className={`absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1 text-xs font-semibold ${
                     highlight
                       ? "bg-white text-[var(--color-brand-600)]"
-                      : "bg-[var(--color-brand-500)] text-white"
+                      : "btn-fill text-white"
                   }`}
                 >
                   {isCurrent ? c.current : c.popular}
@@ -261,7 +261,7 @@ export default async function BoostPage({
               <ul className="mt-5 flex-1 space-y-2.5">
                 {spec.placements.map((p) => (
                   <li key={p} className="flex items-start gap-2.5 text-sm">
-                    <span className={`mt-0.5 shrink-0 ${highlight ? "text-white/80" : "text-[var(--color-brand-500)]"}`}>
+                    <span className={`mt-0.5 shrink-0 ${highlight ? "text-white/80" : "text-[var(--brand-text-2)]"}`}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                         <polyline points="20 6 9 17 4 12" />
                       </svg>

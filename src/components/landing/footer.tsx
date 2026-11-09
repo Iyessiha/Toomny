@@ -13,7 +13,7 @@ export function Footer({ locale = "fr" }: { locale?: Locale }) {
       <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
-            <span className="inline-flex text-[var(--color-brand-500)]">
+            <span className="inline-flex text-[var(--brand-text-2)]">
               <Logo size={28} />
             </span>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-[var(--subtle)]">{t.blurb}</p>
@@ -24,7 +24,7 @@ export function Footer({ locale = "fr" }: { locale?: Locale }) {
                     href={s.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-[var(--subtle)] transition-colors hover:text-[var(--color-brand-600)]"
+                    className="font-medium text-[var(--subtle)] transition-colors hover:text-[var(--brand-text-1)]"
                   >
                     {s.label}
                   </a>

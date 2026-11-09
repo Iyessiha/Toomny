@@ -65,6 +65,35 @@ export async function saveProviderProfile(formData: FormData) {
   if (error) {
     console.error("saveProviderProfile:", error.message);
     return { error: e.save };
+  const fields = {
+    headline: headline || null,
+    bio: bio || null,
+    city: city || null,
+    content_locale: locale,
+    avatar_url: avatarUrl,
+    skills: skills || null,
+    spoken_languages: spokenLanguages || null,
+    website_url: websiteUrl || null,
+    linkedin_url: linkedinUrl || null,
+    twitter_url: twitterUrl || null,
+  };
+
+  // Mise à jour de la fiche existante (créée à l'inscription par le trigger 0004).
+  // Un upsert réécrit aussi profile_id dans la clause ON CONFLICT : le rôle
+  // authenticated n'a pas le droit UPDATE sur cette colonne, donc il échoue.
+  const { data: updated, error: updateError } = await supabase
+    .from("provider_profiles")
+    .update(fields)
+    .eq("profile_id", user.id)
+    .select("id");
+  if (updateError) return { error: e.save };
+
+  // Repli : fiche absente (compte antérieur au trigger), on l'insère.
+  if (!updated || updated.length === 0) {
+    const { error: insertError } = await supabase
+      .from("provider_profiles")
+      .insert({ profile_id: user.id, ...fields });
+    if (insertError) return { error: e.save };
   }
 
   revalidatePath(`/prestataires/${user.id}`);

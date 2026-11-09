@@ -13,6 +13,9 @@ import { renderKycRejectedEmail } from "./templates/kyc-rejected";
 import { renderServicePublishedEmail, type BoostOffer } from "./templates/service-published";
 import { htmlToText } from "./text";
 import { renderBoostReminderEmail } from "./templates/boost-reminder";
+import { renderPaymentReceiptEmail } from "./templates/payment-receipt";
+import { getReceiptTexts } from "@/i18n/receipt";
+import type { Receipt } from "@/lib/receipt";
 import { BOOSTS, BOOST_TIERS } from "@/lib/boost";
 import { formatMoney } from "@/lib/money";
 
@@ -69,6 +72,37 @@ export async function sendNotificationEmail(opts: {
     await resend.emails.send({ from: FROM, to: opts.to, subject: title, html, text: htmlToText(html) });
   } catch (err) {
     console.error("[email:notification]", opts.type, (err as Error).message);
+  }
+}
+
+/** Paiement confirmé : reçu détaillé pour le client, commande payée pour le prestataire. */
+export async function sendPaymentReceiptEmail(opts: {
+  to: string;
+  audience: "client" | "provider";
+  firstName: string;
+  receipt: Receipt;
+  locale: Locale;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend) return;
+  try {
+    const t = getReceiptTexts(opts.locale);
+    const html = renderPaymentReceiptEmail({
+      audience: opts.audience,
+      firstName: opts.firstName,
+      receipt: opts.receipt,
+      orderUrl: `${SITE_URL}/orders/${opts.receipt.orderId}`,
+      receiptUrl: `${SITE_URL}/orders/${opts.receipt.orderId}/recu`,
+      locale: opts.locale,
+      siteUrl: SITE_URL,
+    });
+    const subject =
+      opts.audience === "client"
+        ? t.clientSubject(opts.receipt.reference)
+        : t.providerSubject(opts.receipt.reference);
+    await resend.emails.send({ from: FROM, to: opts.to, subject, html, text: htmlToText(html) });
+  } catch (err) {
+    console.error("[email:payment-receipt]", opts.audience, (err as Error).message);
   }
 }
 

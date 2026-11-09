@@ -66,7 +66,7 @@ export function WishlistGrid({
         <p className="max-w-xs text-sm text-[var(--subtle)]">{texts.emptyHint}</p>
         <Link
           href="/services"
-          className="mt-2 rounded-full bg-[var(--color-brand-500)] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-brand-600)] transition-colors"
+          className="mt-2 rounded-full btn-fill px-6 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-brand-600)] transition-colors"
         >
           {texts.browseCta}
         </Link>

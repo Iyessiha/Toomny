@@ -103,7 +103,7 @@ export default async function VerificationPage() {
               <div className="mt-2 grid gap-4 sm:grid-cols-3">
                 {t.steps.map((s, i) => (
                   <div key={s.title} className="flex gap-3 rounded-xl border border-[var(--border)] bg-[var(--background)] p-4">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--color-brand-700)]">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-xs font-bold text-[var(--brand-text-2)]">
                       {i + 1}
                     </span>
                     <div>

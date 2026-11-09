@@ -37,7 +37,7 @@ const PROVIDER_ICONS = [
 ];
 
 const STEP_COLORS = [
-  { bg: "bg-[var(--color-brand-50)]", text: "text-[var(--color-brand-600)]", num: "text-[var(--color-brand-100)]", numHover: "group-hover:text-[var(--color-brand-200)]", border: "hover:border-[var(--color-brand-300)]" },
+  { bg: "bg-[var(--color-brand-50)]", text: "text-[var(--brand-text-1)]", num: "text-[var(--color-brand-200)]", numHover: "group-hover:text-[var(--color-brand-300)]", border: "hover:border-[var(--color-brand-300)]" },
   { bg: "bg-violet-50", text: "text-violet-600", num: "text-violet-100", numHover: "group-hover:text-violet-200", border: "hover:border-violet-300" },
   { bg: "bg-emerald-50", text: "text-emerald-600", num: "text-emerald-100", numHover: "group-hover:text-emerald-200", border: "hover:border-emerald-300" },
 ];
@@ -65,7 +65,7 @@ export function HowItWorks({ locale = "fr" }: { locale?: Locale }) {
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div data-reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-600)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--brand-text-1)]">
               {t.eyebrow}
             </p>
             <h2 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{t.title}</h2>
@@ -78,7 +78,7 @@ export function HowItWorks({ locale = "fr" }: { locale?: Locale }) {
                 onClick={() => setKey(k)}
                 aria-pressed={key === k}
                 className={`rounded-full px-5 py-2 font-medium transition-colors duration-200 ${
-                  key === k ? "bg-[var(--color-brand-500)] text-white" : "text-[var(--subtle)] hover:text-[var(--foreground)]"
+                  key === k ? "btn-fill text-white" : "text-[var(--subtle)] hover:text-[var(--foreground)]"
                 }`}
               >
                 {t.tabs[k]}

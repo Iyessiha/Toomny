@@ -8,12 +8,19 @@ export type NavBadge = { count: number; attention: boolean };
 export type AdminCounts = {
   newUsers7d: number;
   pendingKyc: number;
-  draftServices: number;
+  /** Prestations à valider : nouvelles ou resoumises après correction. */
+  servicesToValidate: number;
+  /** Prestations resoumises après correction (priorité haute). */
+  servicesResubmitted: number;
+  /** Prestations refusées, en attente de correction par le prestataire. */
+  servicesRejected: number;
   openDisputes: number;
   staleDisputes: number;
   overdueOrders: number;
   queuedPayouts: number;
   failedPayouts: number;
+  /** Demandes de contact ouvertes dont le dernier message attend l'équipe. */
+  awaitingSupport: number;
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -26,27 +33,33 @@ export const getAdminCounts = cache(async (): Promise<AdminCounts> => {
   const since48h = new Date(now - 48 * HOUR_MS).toISOString();
   const nowIso = new Date(now).toISOString();
 
-  const [newUsers, pendingKyc, draftServices, openDisputes, staleDisputes, overdueOrders, queuedPayouts, failedPayouts] =
+  const [newUsers, pendingKyc, servicesNew, servicesResubmitted, servicesRejected, openDisputes, staleDisputes, overdueOrders, queuedPayouts, failedPayouts, awaitingSupport] =
     await Promise.all([
       db.from("profiles").select("id", head).gte("created_at", since7d),
       db.from("verifications").select("id", head).eq("status", "pending"),
-      db.from("services").select("id", head).eq("status", "draft"),
+      db.from("services").select("id", head).eq("status", "draft").is("review_notes", null).is("review_requested_at", null),
+      db.from("services").select("id", head).eq("status", "draft").not("review_requested_at", "is", null),
+      db.from("services").select("id", head).eq("status", "draft").not("review_notes", "is", null).is("review_requested_at", null),
       db.from("disputes").select("id", head).eq("status", "open"),
       db.from("disputes").select("id", head).eq("status", "open").lt("created_at", since48h),
       db.from("orders").select("id", head).in("status", ["funded", "in_progress"]).lt("due_at", nowIso),
       db.from("payouts").select("id", head).in("status", ["queued", "processing"]),
       db.from("payouts").select("id", head).eq("status", "failed"),
+      db.from("support_requests").select("id", head).eq("status", "open").eq("awaiting_admin", true),
     ]);
 
   return {
     newUsers7d: newUsers.count ?? 0,
     pendingKyc: pendingKyc.count ?? 0,
-    draftServices: draftServices.count ?? 0,
+    servicesToValidate: (servicesNew.count ?? 0) + (servicesResubmitted.count ?? 0),
+    servicesResubmitted: servicesResubmitted.count ?? 0,
+    servicesRejected: servicesRejected.count ?? 0,
     openDisputes: openDisputes.count ?? 0,
     staleDisputes: staleDisputes.count ?? 0,
     overdueOrders: overdueOrders.count ?? 0,
     queuedPayouts: queuedPayouts.count ?? 0,
     failedPayouts: failedPayouts.count ?? 0,
+    awaitingSupport: awaitingSupport.count ?? 0,
   };
 });
 
@@ -56,9 +69,10 @@ export async function getAdminNavCounts(): Promise<Record<string, NavBadge>> {
   return {
     "/admin/users": { count: c.newUsers7d, attention: false },
     "/admin/verifications": { count: c.pendingKyc, attention: true },
-    "/admin/services": { count: c.draftServices, attention: true },
+    "/admin/services": { count: c.servicesToValidate, attention: true },
     "/admin/disputes": { count: c.openDisputes, attention: true },
     "/admin/orders": { count: c.overdueOrders, attention: true },
     "/admin/payouts": { count: c.queuedPayouts + c.failedPayouts, attention: true },
+    "/admin/support": { count: c.awaitingSupport, attention: true },
   };
 }

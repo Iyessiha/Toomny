@@ -19,7 +19,7 @@ const MAX_DOB = new Date(Date.UTC(new Date().getUTCFullYear() - 18, new Date().g
   .split("T")[0];
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)]";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)]";
 
 function Field({ label, hint, htmlFor, children }: { label: string; hint?: string; htmlFor: string; children: React.ReactNode }) {
   return (
@@ -74,7 +74,7 @@ function FileInput({
         )}
         <span className={`text-left text-sm ${fileName ? "text-[var(--foreground)]" : "text-[var(--subtle)]"}`}>
           {fileName ?? texts.chooseFile}
-          {fileName && <span className="block text-xs text-[var(--color-brand-600)]">{texts.fileSelected}</span>}
+          {fileName && <span className="block text-xs text-[var(--brand-text-1)]">{texts.fileSelected}</span>}
         </span>
       </button>
       <input
@@ -324,7 +324,7 @@ export function KycForm({
       <button
         type="submit"
         disabled={loading || !frontFile || !backFile || !selfieFile}
-        className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-brand-600)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? t.submitting : t.submit}
       </button>

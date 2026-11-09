@@ -12,7 +12,12 @@ export function SignOutButton({ label, compact }: { label: string; compact?: boo
     <button
       onClick={async () => {
         setPending(true);
-        await createClient().auth.signOut();
+        const supabase = createClient();
+        await supabase.rpc("mark_user_offline").then(
+          () => undefined,
+          () => undefined,
+        );
+        await supabase.auth.signOut();
         router.push("/");
         router.refresh();
       }}

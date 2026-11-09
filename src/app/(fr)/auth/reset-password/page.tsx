@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/ui/logo";
+import { LEAKED_PASSWORD_MESSAGE } from "@/lib/password-leak";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--color-brand-500)] focus:ring-2 focus:ring-[var(--color-brand-500)]/20";
+  "mt-1.5 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm outline-none transition-colors focus:border-[var(--brand-text-2)] focus:ring-2 focus:ring-[var(--brand-text-2)]/20";
 
 const t = {
   title: "Nouveau mot de passe",
@@ -72,6 +73,16 @@ export default function ResetPasswordPage() {
     if (pw.length < 8) { setError(t.errors.minLength); return; }
     setPending(true);
     setError(null);
+    const check = await fetch("/api/auth/password-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: pw }),
+    }).then((r) => (r.ok ? r.json() : { leaked: false })).catch(() => ({ leaked: false }));
+    if (check.leaked) {
+      setError(LEAKED_PASSWORD_MESSAGE.fr);
+      setPending(false);
+      return;
+    }
     const { error } = await supabase.auth.updateUser({ password: pw });
     if (error) {
       setError(t.errors.generic);
@@ -84,14 +95,14 @@ export default function ResetPasswordPage() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center bg-[var(--background)] px-4 py-12">
       <div className="w-full max-w-md">
-        <Link href={t.home} className="inline-flex text-[var(--color-brand-500)] mb-10">
+        <Link href={t.home} className="inline-flex text-[var(--brand-text-2)] mb-10">
           <Logo size={28} />
         </Link>
 
         {invalid && (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center dark:border-red-900/50 dark:bg-red-950/40">
             <p className="text-sm leading-relaxed text-red-700 dark:text-red-400">{t.errors.invalid}</p>
-            <Link href={t.loginHref} className="mt-4 inline-block text-sm text-[var(--color-brand-500)] hover:underline underline-offset-2">
+            <Link href={t.loginHref} className="mt-4 inline-block text-sm text-[var(--brand-text-2)] hover:underline underline-offset-2">
               ← Retour à la connexion
             </Link>
           </div>
@@ -99,7 +110,7 @@ export default function ResetPasswordPage() {
 
         {success && (
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-brand-500)] text-white">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full btn-fill text-white">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m5 13 4 4L19 7" />
               </svg>
@@ -108,7 +119,7 @@ export default function ResetPasswordPage() {
             <p className="mt-2 text-sm leading-relaxed text-[var(--subtle)]">{t.success.body}</p>
             <button
               onClick={() => router.push(t.loginHref)}
-              className="mt-6 w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95"
+              className="mt-6 w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95"
             >
               {t.success.cta}
             </button>
@@ -167,7 +178,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={pending}
-                  className="w-full rounded-full bg-[var(--color-brand-500)] px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
+                  className="w-full rounded-full btn-fill px-6 py-3.5 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.01] active:scale-95 disabled:opacity-60"
                 >
                   {pending ? t.pending : t.submit}
                 </button>
