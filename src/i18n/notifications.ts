@@ -46,6 +46,13 @@ const fr = {
           ? `La commande ${p.ref} n'est pas encore lancée. Payez-la pour que le prestataire démarre.`
           : "Une de vos commandes n'est pas encore lancée. Payez-la pour que le prestataire démarre.",
     },
+    order_payment_reminder_final: {
+      title: "Dernier rappel : votre commande sera annulée",
+      body: (p) =>
+        p.ref
+          ? `Sans paiement sous 24 h, la commande ${p.ref} sera annulée. Terminez le paiement pour que le prestataire démarre.`
+          : "Sans paiement sous 24 h, une de vos commandes sera annulée. Terminez le paiement pour que le prestataire démarre.",
+    },
     service_changes_requested: {
       title: "Prestation à corriger",
       body: (p) =>
@@ -221,6 +228,13 @@ const en: typeof fr = {
         p.ref
           ? `Order ${p.ref} has not started yet. Pay it so the provider can start.`
           : "One of your orders has not started yet. Pay it so the provider can start.",
+    },
+    order_payment_reminder_final: {
+      title: "Last reminder: your order will be cancelled",
+      body: (p) =>
+        p.ref
+          ? `If it is not paid within 24 hours, order ${p.ref} will be cancelled. Finish the payment so the provider can start.`
+          : "If it is not paid within 24 hours, one of your orders will be cancelled. Finish the payment so the provider can start.",
     },
     service_changes_requested: {
       title: "Service to correct",
