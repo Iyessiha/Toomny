@@ -5,7 +5,7 @@ import { getPublicPageTexts } from "@/i18n/public-pages";
 import { visitorLocale } from "@/i18n/server-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: getLegalTexts(await visitorLocale()).legalNotice.metaTitle };
+  return { title: getLegalTexts(await visitorLocale()).legalNotice.metaTitle, alternates: { canonical: "/mentions-legales" } };
 }
 
 export default async function LegalNoticePage() {

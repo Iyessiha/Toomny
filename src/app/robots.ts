@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/services", "/prestataires"],
+        allow: ["/"],
         disallow: [
           "/dashboard/",
           "/orders/",
@@ -19,6 +19,11 @@ export default function robots(): MetadataRoute.Robots {
           "/api/",
           "/auth/",
           "/en/auth/",
+          // Formulaires de contact — aucun intérêt SEO, évite le crawl inutile
+          "/prestataires/*/contact",
+          "/services/*/contact",
+          // Page de démo interne (404 en production)
+          "/charte",
         ],
       },
     ],

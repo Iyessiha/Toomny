@@ -11,7 +11,7 @@ import { CATALOG_PAGE_SIZE } from "@/lib/catalog";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getCatalogTexts(await visitorLocale());
-  return { title: t.listMetaTitle, description: t.listMetaDescription };
+  return { title: t.listMetaTitle, description: t.listMetaDescription, alternates: { canonical: "/services" } };
 }
 
 export const dynamic = "force-dynamic";

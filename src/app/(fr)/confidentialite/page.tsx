@@ -5,7 +5,7 @@ import { getPublicPageTexts } from "@/i18n/public-pages";
 import { visitorLocale } from "@/i18n/server-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: getLegalTexts(await visitorLocale()).privacy.metaTitle };
+  return { title: getLegalTexts(await visitorLocale()).privacy.metaTitle, alternates: { canonical: "/confidentialite" } };
 }
 
 export default async function PrivacyPage() {

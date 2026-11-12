@@ -11,7 +11,7 @@ import { FaqJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
-  return { title: t.pricing, description: t.pricingDescription };
+  return { title: t.pricing, description: t.pricingDescription, alternates: { canonical: "/tarifs" } };
 }
 
 export default async function PricingPage() {

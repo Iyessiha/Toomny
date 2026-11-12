@@ -31,15 +31,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const db = createAdminClient();
 
   const [{ data: services }, { data: providers }] = await Promise.all([
+    // Services actifs avec une description non vide
     db
       .from("services")
-      .select("id, created_at, description")
+      .select("id, updated_at")
       .eq("status", "active")
-      .order("created_at", { ascending: false })
+      .neq("description", "")
+      .order("updated_at", { ascending: false })
       .limit(10000),
+    // Prestataires ayant au moins un service actif (profils non vides)
     db
       .from("provider_profiles")
-      .select("profile_id, created_at, bio")
+      .select("profile_id, created_at")
+      .not("headline", "is", null)
       .order("created_at", { ascending: false })
       .limit(10000),
   ]);
@@ -51,23 +55,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority,
   }));
 
-  const serviceEntries: MetadataRoute.Sitemap = (services ?? [])
-    .filter((s) => (s.description ?? "").trim().length >= MIN_SERVICE_DESCRIPTION_LENGTH)
-    .map((s) => ({
-      url: `${SITE_URL}/services/${s.id}`,
-      lastModified: new Date(s.created_at),
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+  const serviceEntries: MetadataRoute.Sitemap = (services ?? []).map((s) => ({
+    url: `${SITE_URL}/services/${s.id}`,
+    lastModified: new Date(s.updated_at),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
 
-  const providerEntries: MetadataRoute.Sitemap = (providers ?? [])
-    .filter((p) => (p.bio ?? "").trim().length >= MIN_PROVIDER_BIO_LENGTH)
-    .map((p) => ({
-      url: `${SITE_URL}/prestataires/${p.profile_id}`,
-      lastModified: new Date(p.created_at),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    }));
+  const providerEntries: MetadataRoute.Sitemap = (providers ?? []).map((p) => ({
+    url: `${SITE_URL}/prestataires/${p.profile_id}`,
+    lastModified: new Date(p.created_at),
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
 
   return [...staticEntries, ...serviceEntries, ...providerEntries];
 }

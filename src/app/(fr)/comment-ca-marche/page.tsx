@@ -10,7 +10,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
-  return { title: t.howItWorks, description: t.howItWorksDescription };
+  return { title: t.howItWorks, description: t.howItWorksDescription, alternates: { canonical: "/comment-ca-marche" } };
 }
 
 export default async function HowItWorksPage() {

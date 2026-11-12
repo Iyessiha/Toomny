@@ -10,7 +10,7 @@ import { BreadcrumbJsonLd } from "@/components/seo/json-ld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getPublicPageTexts(await visitorLocale()).titles;
-  return { title: t.security, description: t.securityDescription };
+  return { title: t.security, description: t.securityDescription, alternates: { canonical: "/securite" } };
 }
 
 export default async function SecurityPage() {
