@@ -10,18 +10,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.title,
     description: t.description,
-    alternates: { canonical: "/" },
+    alternates: {
+      canonical: "/",
+      languages: { "fr-FR": "/", "en-US": "/en", "x-default": "/" },
+    },
   };
 }
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  alternates: {
-    canonical: "/",
-    languages: { "fr-FR": "/", "en-US": "/en", "x-default": "/" },
-  },
-};
 
 export default async function Home() {
   const locale = await visitorLocale();
