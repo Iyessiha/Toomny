@@ -185,6 +185,10 @@ const fr = {
           ? `« ${p.service} » n'est pas encore boostée. Un boost la met en avant pendant 30 jours.`
           : "Votre prestation n'est pas encore boostée. Un boost la met en avant pendant 30 jours.",
     },
+    support_message: {
+      title: "Nouveau message support",
+      body: (p) => `${p.from ?? "L'équipe Toomny"} vous a envoyé un message.`,
+    },
   } as Record<string, NotificationCopy>,
 };
 
@@ -205,7 +209,7 @@ const en: typeof fr = {
     inquiry_received: {
       title: "New contact inquiry",
       body: (p) =>
-        `${p.from ?? "A member"} wrote to you${p.service ? ` about “${p.service}”` : ""}.`,
+        `${p.from ?? "A member"} wrote to you${p.service ? ` about "${p.service}"` : ""}.`,
     },
     inquiry_replied: {
       title: "New reply",
@@ -354,8 +358,12 @@ const en: typeof fr = {
       title: "Boost your service",
       body: (p) =>
         p.service
-          ? `“${p.service}” is not boosted yet. A boost puts it in front of clients for 30 days.`
+          ? `"${p.service}" is not boosted yet. A boost puts it in front of clients for 30 days.`
           : "Your service is not boosted yet. A boost puts it in front of clients for 30 days.",
+    },
+    support_message: {
+      title: "New support message",
+      body: (p) => `${p.from ?? "The Toomny team"} sent you a message.`,
     },
   } as Record<string, NotificationCopy>,
 };

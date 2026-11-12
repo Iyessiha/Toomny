@@ -33,6 +33,7 @@ export const NOTIFICATION_TYPES = [
   "boost_activated",
   "boost_failed",
   "boost_reminder",
+  "support_message",
 ] as const;
 
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];

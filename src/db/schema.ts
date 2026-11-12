@@ -488,6 +488,44 @@ export const reviews = pgTable(
   (t) => [index("reviews_target_idx").on(t.targetId)],
 );
 
+// Messagerie directe prestataire ↔ admin (0032).
+export const supportThreads = pgTable(
+  "support_threads",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    providerId: uuid("provider_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    subject: text("subject").notNull().default("Support"),
+    status: text("status").notNull().default("open"), // open | closed
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index("support_threads_provider_idx").on(t.providerId),
+    index("support_threads_status_idx").on(t.status, t.lastMessageAt),
+  ],
+);
+
+export const supportMessages = pgTable(
+  "support_messages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    threadId: uuid("thread_id")
+      .notNull()
+      .references(() => supportThreads.id, { onDelete: "cascade" }),
+    senderId: uuid("sender_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "restrict" }),
+    body: text("body").notNull(),
+    attachmentPath: text("attachment_path"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("support_messages_thread_idx").on(t.threadId, t.createdAt)],
+);
+
 // Abonnements mensuels aux plans prestataire (0022).
 export const subscriptions = pgTable(
   "subscriptions",

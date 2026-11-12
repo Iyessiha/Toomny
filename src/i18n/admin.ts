@@ -13,7 +13,7 @@ const fr = {
     payouts: "Versements",
     plans: "Abonnements",
     disputes: "Litiges",
-    support: "Demandes de contact",
+    support: "Messages support",
     myDashboard: "Mon tableau de bord",
     sections: {
       finance: "Finance",
@@ -437,7 +437,7 @@ const en: typeof fr = {
     payouts: "Payouts",
     plans: "Subscriptions",
     disputes: "Disputes",
-    support: "Contact requests",
+    support: "Support inbox",
     myDashboard: "My dashboard",
     sections: {
       finance: "Finance",
