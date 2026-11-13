@@ -10,7 +10,7 @@ import { getListingGuideTexts, REJECTION_REASONS } from "@/i18n/listing-guide";
 import { visitorLocale } from "@/i18n/server-locale";
 import { ServiceEditForm } from "@/components/admin/service-edit-form";
 import { ServicePhotosForm } from "@/components/admin/service-photos-form";
-import { Avatar, Notice, Pill, Section, serviceTone } from "@/components/dashboard/pro";
+import { Avatar, Notice, Pill, Section, serviceTone } from "@/components/admin/glass";
 import { formatMoney } from "@/lib/money";
 import { checkListing } from "@/lib/listing-checks";
 import { moderateService, rejectService } from "../actions";

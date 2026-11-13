@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
-import { FilterTabs, Pill, TableCard, orderTone } from "@/components/dashboard/pro";
+import { FilterTabs, Pill, TableCard, orderTone } from "@/components/admin/glass";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { formatMoney } from "@/lib/money";
 import { confirmPaymentReceived, forceOrderTransition } from "./actions";

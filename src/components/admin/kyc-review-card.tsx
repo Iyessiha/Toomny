@@ -11,7 +11,7 @@ import {
 } from "@/app/(fr)/admin/verifications/actions";
 import type { KycAiReview } from "@/lib/ai/kyc-review";
 import { DOCUMENT_TYPES } from "@/lib/kyc";
-import { Pill, kycTone } from "@/components/dashboard/pro";
+import { Pill, kycTone } from "@/components/admin/glass";
 import { getAdminTexts } from "@/i18n/admin";
 import { getKycTexts } from "@/i18n/kyc";
 import type { Locale } from "@/i18n/dictionaries";

@@ -5,7 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { KycReviewCard } from "@/components/admin/kyc-review-card";
-import { FilterTabs, Notice } from "@/components/dashboard/pro";
+import { FilterTabs, Notice } from "@/components/admin/glass";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 

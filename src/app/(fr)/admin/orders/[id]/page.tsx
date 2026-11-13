@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
-import { Avatar, Notice, Pill, Section, orderTone } from "@/components/dashboard/pro";
+import { Avatar, Notice, Pill, Section, orderTone } from "@/components/admin/glass";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getAdminTexts } from "@/i18n/admin";
 import { getMarketplaceTexts } from "@/i18n/marketplace";

@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
-import { Section, Pill } from "@/components/dashboard/pro";
+import { Section, Pill } from "@/components/admin/glass";
 import type { Locale } from "@/i18n/dictionaries";
 
 export const metadata: Metadata = { title: "Recherche · Administration Toomny", robots: { index: false } };

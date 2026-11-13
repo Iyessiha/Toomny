@@ -7,7 +7,7 @@ import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
 import { PayoutRowActions } from "@/components/admin/payout-row-actions";
 import { PayoutNumberVerify } from "@/components/admin/payout-number-verify";
-import { FilterTabs, MiniStat, Pill, TableCard, payoutTone } from "@/components/dashboard/pro";
+import { FilterTabs, MiniStat, Pill, TableCard, payoutTone } from "@/components/admin/glass";
 import { formatMoney } from "@/lib/money";
 import { getAdminTexts } from "@/i18n/admin";
 import { getPayoutTexts } from "@/i18n/payouts";
