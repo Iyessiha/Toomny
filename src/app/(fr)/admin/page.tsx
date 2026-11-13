@@ -17,7 +17,7 @@ import {
   TableCard,
   orderTone,
   type Tone,
-} from "@/components/dashboard/pro";
+} from "@/components/admin/glass";
 import { formatMoney } from "@/lib/money";
 import { countryLabel } from "@/i18n/auth";
 import { getAdminTexts } from "@/i18n/admin";
@@ -88,20 +88,10 @@ export default async function AdminPage() {
       }
       nav={getAdminNavGroups(locale, "/admin")}
     >
-      <form action="/admin/recherche" method="get" className="mb-6 flex gap-2">
-        <input
-          name="q"
-          placeholder="Rechercher un compte, une commande, une prestation…"
-          className="input flex-1"
-          aria-label="Rechercher"
-        />
-        <button type="submit" className="btn-primary">Rechercher</button>
-      </form>
-
       {/* ── Volume : argent réellement acquis séparé de l'argent en séquestre ── */}
-      <section className="mt-10">
-        <h2 className="font-display text-sm font-bold uppercase tracking-wide text-[var(--subtle)]">{t.volumeTitle}</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section>
+        <h2 className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--subtle)]">{t.volumeTitle}</h2>
+        <div className="adm-stagger mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ProStat
             tone="gold"
             icon={
@@ -151,8 +141,8 @@ export default async function AdminPage() {
 
       {/* ── Offre et demande ── */}
       <section className="mt-10">
-        <h2 className="font-display text-sm font-bold uppercase tracking-wide text-[var(--subtle)]">{t.offerTitle}</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="font-display text-xs font-extrabold uppercase tracking-[0.18em] text-[var(--subtle)]">{t.offerTitle}</h2>
+        <div className="adm-stagger mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <ProStat
             icon={
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden>

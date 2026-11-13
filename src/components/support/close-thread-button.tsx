@@ -26,15 +26,15 @@ export function CloseThreadButton({
   }
 
   return (
-    <div>
+    <div className="flex-none">
       <button
         onClick={handleClose}
         disabled={pending}
-        className="rounded-full border border-[var(--border)] px-4 py-2 text-xs font-medium text-[var(--subtle)] transition-colors hover:border-red-400 hover:text-red-600 disabled:opacity-50"
+        className="chat-qr hover:!border-[rgba(255,138,132,0.5)] hover:!bg-[var(--tone-danger-bg)] hover:!text-[var(--tone-danger-fg)] disabled:opacity-50"
       >
         {pending ? t.closingThread : t.closeThread}
       </button>
-      {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p role="alert" className="mt-1 text-xs text-[var(--tone-danger-fg)]">{error}</p>}
     </div>
   );
 }

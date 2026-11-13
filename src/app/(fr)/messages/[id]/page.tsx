@@ -44,7 +44,7 @@ export default async function SupportThreadPage({
 
   const { data: messages } = await supabase
     .from("support_messages")
-    .select("id, body, sender_id, created_at")
+    .select("id, body, sender_id, created_at, read_at")
     .eq("thread_id", id)
     .order("created_at", { ascending: true });
 
@@ -59,14 +59,19 @@ export default async function SupportThreadPage({
       subtitle={ts.subtitle}
       navSections={dashboardNavSections(nav, user.role, "/messages")}
     >
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <ThreadSection
+          className="h-[calc(100dvh-13rem)] min-h-[460px]"
           threadId={thread.id}
           userId={user.id}
           isAdmin={false}
           isClosed={thread.status === "closed"}
           initialMessages={messages ?? []}
           locale={locale}
+          peerName={locale === "en" ? "Toomny team" : "Équipe Toomny"}
+          subject={thread.subject}
+          statusLabel={thread.status === "open" ? ts.open : ts.closed}
+          backHref="/messages"
         />
       </div>
     </DashboardShell>

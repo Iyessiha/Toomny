@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { getAdminNavGroups } from "@/lib/admin-nav";
 import { EmptyState } from "@/components/dashboard/shell";
-import { Avatar, FilterTabs, Pill, TableCard, roleTone } from "@/components/dashboard/pro";
+import { Avatar, FilterTabs, Pill, TableCard, roleTone } from "@/components/admin/glass";
 import { getAdminTexts } from "@/i18n/admin";
 import { visitorLocale } from "@/i18n/server-locale";
 import { UserRoleManager } from "@/components/admin/user-role-manager";

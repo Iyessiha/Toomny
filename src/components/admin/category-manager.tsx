@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createCategory, updateCategory, toggleCategoryActive, deleteCategory } from "@/app/(fr)/admin/categories/actions";
 import { getAdminTexts } from "@/i18n/admin";
-import { Pill, Section, TableCard } from "@/components/dashboard/pro";
+import { Pill, Section, TableCard } from "@/components/admin/glass";
 import type { Locale } from "@/i18n/dictionaries";
 
 type Category = {

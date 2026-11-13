@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 import { SignOutButton } from "@/components/dashboard/sign-out";
 import { NotificationBell } from "@/components/dashboard/notification-bell";
-import { Avatar } from "@/components/dashboard/pro";
+import { Avatar } from "@/components/admin/glass";
 import { getDashboardTexts } from "@/i18n/dashboard";
 import { getAdminTexts } from "@/i18n/admin";
 import type { Locale } from "@/i18n/dictionaries";
@@ -42,149 +42,155 @@ export async function AdminShell({
   }));
   const flatNav = flattenNavGroups(nav);
 
+  const searchPlaceholder =
+    locale === "en" ? "Search an account, an order, a service…" : "Rechercher un compte, une commande, une prestation…";
+
   return (
-    <div className="min-h-dvh bg-[var(--surface)]">
-      {/* ── Mobile top bar ── */}
-      <header className="flex h-14 items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--background)] px-4 sm:hidden">
+    <div className="adm-root">
+      <div className="adm-aurora" aria-hidden>
+        <i />
+        <i />
+        <i />
+      </div>
+
+      {/* ── Mobile : barre du haut en verre ── */}
+      <header className="glass glass-dense sticky top-2 z-40 mx-2 mt-2 flex h-14 items-center justify-between gap-3 px-4 sm:hidden" style={{ borderRadius: 18 }}>
         <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
           <Logo size={24} withWordmark={false} />
         </Link>
         <span className="truncate font-display text-sm font-bold">{title}</span>
         <div className="flex flex-none items-center gap-1">
-          <NotificationBell locale={locale} />
-          <Link href="/dashboard/profil" aria-label={displayName}>
-            <Avatar name={displayName} size="sm" />
+          <Link href="/admin/recherche" aria-label={searchPlaceholder} className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--subtle)] hover:bg-white/10 hover:text-[var(--foreground)]">
+            <SearchIcon />
           </Link>
+          <NotificationBell locale={locale} />
         </div>
       </header>
 
-      {/* ── Mobile pill nav ── */}
+      {/* ── Mobile : navigation en pastilles de verre ── */}
       {flatNav.length > 0 && (
-        <nav className="flex gap-2 overflow-x-auto border-b border-[var(--border)] bg-[var(--background)] px-4 py-2.5 sm:hidden">
+        <nav className="mx-2 mt-2 flex gap-2 overflow-x-auto px-1 py-1 sm:hidden" aria-label="Admin">
           {flatNav.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                n.current
-                  ? "bg-[var(--color-gold-500)] text-white"
-                  : "bg-[var(--surface)] text-[var(--subtle)] hover:text-[var(--foreground)]"
-              }`}
+              aria-current={n.current ? "page" : undefined}
+              className={`chip ${n.current ? "chip-active" : ""}`}
             >
               {n.label}
+              {n.badge && n.badge.count > 0 && <span className="chip-count">{n.badge.count}</span>}
             </Link>
           ))}
         </nav>
       )}
 
       <div className="flex">
-        {/* ── Sidebar ── */}
-        <aside className="hidden sm:flex sm:w-[268px] sm:shrink-0 sm:flex-col sm:min-h-dvh sm:sticky sm:top-0 sm:max-h-dvh">
-          <div className="card card-solid m-3 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[22px]">
-          {/* Brand */}
-          <div className="flex h-16 flex-none items-center gap-2.5 border-b border-[var(--border)] px-5">
-            <Link href="/" className="text-[var(--brand-text-2)]" aria-label="Toomny">
-              <Logo size={26} withWordmark={false} />
-            </Link>
-            <div className="leading-none">
-              <span className="font-display text-base font-bold tracking-tight">
-                Toomny<span className="text-[var(--color-gold-500)]">.</span>
-              </span>
-              <span className="mt-1 block w-fit rounded bg-[var(--tone-warning-bg)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[var(--tone-warning-fg)]">
-                Admin
-              </span>
-            </div>
-            <div className="ml-auto">
-              <NotificationBell locale={locale} />
-            </div>
-          </div>
-
-          {/* Nav grouped */}
-          <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
-            {nav.map((group, gi) => (
-              <div key={gi} className={gi > 0 ? "mt-5" : ""}>
-                {group.label && (
-                  <p className="mb-1.5 px-2 text-[10px] font-bold uppercase tracking-widest text-[var(--subtle)]">
-                    {group.label}
-                  </p>
-                )}
-                <ul className="space-y-0.5">
-                  {group.items.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                          item.current
-                            ? "bg-[color-mix(in_srgb,var(--color-gold-500)_14%,transparent)] font-semibold text-[var(--foreground)] shadow-[inset_3px_0_0_var(--color-gold-500)]"
-                            : "text-[var(--subtle)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-                        }`}
-                      >
-                        <NavIcon href={item.href} />
-                        {item.label}
-                        {item.badge && item.badge.count > 0 && (
-                          <span
-                            className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums ${
-                              item.badge.attention
-                                ? "bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)]"
-                                : "bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]"
-                            }`}
-                          >
-                            {item.badge.count}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            {/* Back to dashboard — always at bottom */}
-            <div className="mt-6 border-t border-[var(--border)] pt-4">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[var(--subtle)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
-              >
-                <svg className="h-[18px] w-[18px] shrink-0 text-[var(--color-gold-500)]" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2 11l8-8 8 8v7a1 1 0 01-1 1H3a1 1 0 01-1-1v-7z" />
-                </svg>
-                {adminNav.myDashboard}
+        {/* ── Barre latérale flottante ── */}
+        <aside className="hidden sm:sticky sm:top-0 sm:flex sm:max-h-dvh sm:min-h-dvh sm:w-[276px] sm:shrink-0 sm:flex-col">
+          <div className="glass glass-dense m-3 flex min-h-0 flex-1 flex-col overflow-hidden">
+            {/* Marque */}
+            <div className="flex h-[68px] flex-none items-center gap-3 border-b border-[var(--border)] px-5">
+              <Link href="/" className="text-[var(--brand-text-2)] drop-shadow-[0_0_10px_rgba(139,240,182,0.55)]" aria-label="Toomny">
+                <Logo size={28} withWordmark={false} />
               </Link>
-            </div>
-          </nav>
-
-          {/* User footer */}
-          <div className="flex-none border-t border-[var(--border)] p-3">
-            <div className="flex items-center gap-3 rounded-xl bg-[var(--surface)] p-3">
-              <Avatar name={displayName} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{displayName}</p>
-                <p className="truncate text-xs text-[var(--subtle)]">
-                  {tAdmin.roles[user.role] ?? user.role}
-                </p>
+              <div className="leading-none">
+                <span className="font-display text-base font-extrabold tracking-tight">
+                  Toomny<span className="text-[var(--gold)]">.</span>
+                </span>
+                <span className="mt-1.5 block w-fit rounded-full border border-[rgba(224,181,102,0.35)] bg-[var(--tone-warning-bg)] px-2 py-px text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--tone-warning-fg)]">
+                  Admin
+                </span>
+              </div>
+              <div className="ml-auto">
+                <NotificationBell locale={locale} />
               </div>
             </div>
-            <div className="mt-2 px-1">
-              <SignOutButton label={tDash.shell.signOut} />
+
+            {/* Navigation groupée */}
+            <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4" aria-label="Admin">
+              {nav.map((group, gi) => (
+                <div key={gi} className={gi > 0 ? "mt-5" : ""}>
+                  {group.label && (
+                    <p className="mb-1.5 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[var(--subtle)]/80">
+                      {group.label}
+                    </p>
+                  )}
+                  <ul className="space-y-1">
+                    {group.items.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href} aria-current={item.current ? "page" : undefined} className="adm-nav-item">
+                          <NavIcon href={item.href} />
+                          {item.label}
+                          {item.badge && item.badge.count > 0 && (
+                            <span
+                              className={`ml-auto rounded-full border px-2 py-px text-[11px] font-bold tabular-nums ${
+                                item.badge.attention
+                                  ? "border-[rgba(255,138,132,0.35)] bg-[var(--tone-danger-bg)] text-[var(--tone-danger-fg)] shadow-[0_0_12px_-2px_rgba(255,138,132,0.6)]"
+                                  : "border-[rgba(120,180,255,0.3)] bg-[var(--tone-info-bg)] text-[var(--tone-info-fg)]"
+                              }`}
+                            >
+                              {item.badge.count}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
+              {/* Retour au tableau de bord : toujours en bas */}
+              <div className="mt-6 border-t border-[var(--border)] pt-4">
+                <Link href="/dashboard" className="adm-nav-item">
+                  <svg className="adm-nav-icon h-[18px] w-[18px] shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+                    <path d="M2 11l8-8 8 8v7a1 1 0 01-1 1H3a1 1 0 01-1-1v-7z" />
+                  </svg>
+                  {adminNav.myDashboard}
+                </Link>
+              </div>
+            </nav>
+
+            {/* Profil */}
+            <div className="flex-none border-t border-[var(--border)] p-3">
+              <div className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/[0.04] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                <Avatar name={displayName} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{displayName}</p>
+                  <p className="truncate text-xs text-[var(--subtle)]">{tAdmin.roles[user.role] ?? user.role}</p>
+                </div>
+              </div>
+              <div className="mt-2 px-1">
+                <SignOutButton label={tDash.shell.signOut} />
+              </div>
             </div>
-          </div>
           </div>
         </aside>
 
-        {/* ── Main content ── */}
+        {/* ── Contenu ── */}
         <main className="min-w-0 flex-1">
-          <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div className="mx-auto max-w-6xl px-4 pb-12 pt-3 sm:px-6 sm:pt-3">
+            {/* Barre de commande collée en haut (écran large) */}
+            <div className="adm-topbar glass glass-dense hidden items-center gap-3 px-3 py-2 sm:flex" style={{ borderRadius: 9999 }}>
+              <form action="/admin/recherche" method="get" role="search" className="adm-search min-w-0 flex-1">
+                <SearchIcon />
+                <input name="q" placeholder={searchPlaceholder} aria-label={locale === "en" ? "Search" : "Rechercher"} />
+                <kbd className="hidden rounded-md border border-[var(--border)] bg-white/5 px-1.5 py-px text-[10px] font-semibold text-[var(--subtle)] lg:block">↵</kbd>
+              </form>
+              <Avatar name={displayName} size="sm" />
+            </div>
+
+            <div className="mb-7 mt-8 flex flex-wrap items-end justify-between gap-4">
               <div className="min-w-0">
                 {kicker && (
-                  <p className="mb-1 text-xs font-bold uppercase tracking-widest text-[var(--color-gold-600)]">
+                  <p className="mb-1.5 inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--gold)]">
+                    <span aria-hidden className="h-px w-6 bg-gradient-to-r from-[var(--gold)] to-transparent" />
                     {kicker}
                   </p>
                 )}
-                <h1 className="font-display text-[26px] font-extrabold leading-tight tracking-tight sm:text-[32px]">
+                <h1 className="gradient-text font-display text-[28px] font-extrabold leading-tight tracking-tight sm:text-[36px]">
                   {title}
                 </h1>
-                {subtitle && <p className="mt-1 text-sm text-[var(--subtle)]">{subtitle}</p>}
+                {subtitle && <p className="mt-1.5 text-sm text-[var(--subtle)]">{subtitle}</p>}
               </div>
               {actions && <div className="flex flex-none items-center gap-2">{actions}</div>}
             </div>
@@ -196,8 +202,17 @@ export async function AdminShell({
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg className="h-4 w-4 flex-none text-[var(--subtle)]" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <circle cx="9" cy="9" r="5.5" />
+      <path d="M13.5 13.5L17 17" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function NavIcon({ href }: { href: string }) {
-  const cls = "h-[18px] w-[18px] shrink-0 text-[var(--color-gold-500)]";
+  const cls = "adm-nav-icon h-[18px] w-[18px] shrink-0";
 
   if (href === "/admin" || href === "/dashboard")
     return (
@@ -254,6 +269,12 @@ function NavIcon({ href }: { href: string }) {
     return (
       <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
         <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zm-5.447.894A1 1 0 004 17v-5.764a1 1 0 01.553-.894l4-2A1 1 0 0110 9.236V15a1 1 0 01-.553.894l-4 2zM15 5a3 3 0 11-6 0 3 3 0 016 0zM7 8a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    );
+  if (href === "/admin/messages")
+    return (
+      <svg className={cls} viewBox="0 0 20 20" fill="currentColor">
+        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.84 8.84 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
       </svg>
     );
   // fallback
